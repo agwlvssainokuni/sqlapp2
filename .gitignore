@@ -44,6 +44,7 @@ Thumbs.db
 # Frontend build artifacts
 frontend/dist/
 frontend/node_modules/
+src/main/resources/static/
 
 # Application logs
 app.log
