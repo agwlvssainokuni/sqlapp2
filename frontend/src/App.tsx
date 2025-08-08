@@ -18,6 +18,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import Login from './components/Login'
 import Dashboard from './components/Dashboard'
 import Register from './components/Register'
+import SqlExecution from './components/SqlExecution'
 import { AuthProvider } from './context/AuthContext'
 import ProtectedRoute from './components/ProtectedRoute'
 import './App.css'
@@ -35,6 +36,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <Dashboard />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/sql" 
+              element={
+                <ProtectedRoute>
+                  <SqlExecution />
                 </ProtectedRoute>
               } 
             />

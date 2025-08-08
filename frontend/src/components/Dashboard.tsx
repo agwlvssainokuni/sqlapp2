@@ -36,8 +36,19 @@ const Dashboard: React.FC = () => {
         </div>
       </header>
       <main className="dashboard-content">
-        <h2>SQL Query Interface</h2>
-        <p>Dashboard content will be implemented in future phases.</p>
+        <h2>SqlApp2 Features</h2>
+        <div className="feature-cards">
+          <div className="feature-card">
+            <h3>SQL Query Execution</h3>
+            <p>Execute SQL queries with parameterized support against your configured databases.</p>
+            <a href="/sql" className="feature-link">Go to SQL Execution</a>
+          </div>
+          <div className="feature-card">
+            <h3>Database Connections</h3>
+            <p>Manage your database connections for MySQL, PostgreSQL, and MariaDB.</p>
+            <span className="feature-link disabled">Coming Soon</span>
+          </div>
+        </div>
       </main>
     </div>
   )
