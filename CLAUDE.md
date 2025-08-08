@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-SQLapp2 is a web-based SQL execution tool that provides a user interface for executing SQL queries against various RDBMSs.
+SqlApp2 is a web-based SQL execution tool that provides a user interface for executing SQL queries against various RDBMSs.
 
 ### Technology Stack
 - **Frontend**: React (SPA - Single Page Application)
