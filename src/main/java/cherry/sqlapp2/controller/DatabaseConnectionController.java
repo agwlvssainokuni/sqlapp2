@@ -21,6 +21,7 @@ import cherry.sqlapp2.dto.DatabaseConnectionResponse;
 import cherry.sqlapp2.entity.User;
 import cherry.sqlapp2.enums.DatabaseType;
 import cherry.sqlapp2.service.DatabaseConnectionService;
+import cherry.sqlapp2.service.DynamicDataSourceService;
 import cherry.sqlapp2.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,11 +42,15 @@ import java.util.stream.Collectors;
 public class DatabaseConnectionController {
 
     private final DatabaseConnectionService connectionService;
+    private final DynamicDataSourceService dynamicDataSourceService;
     private final UserService userService;
 
     @Autowired
-    public DatabaseConnectionController(DatabaseConnectionService connectionService, UserService userService) {
+    public DatabaseConnectionController(DatabaseConnectionService connectionService, 
+                                      DynamicDataSourceService dynamicDataSourceService,
+                                      UserService userService) {
         this.connectionService = connectionService;
+        this.dynamicDataSourceService = dynamicDataSourceService;
         this.userService = userService;
     }
 
@@ -209,6 +214,43 @@ public class DatabaseConnectionController {
         } catch (Exception e) {
             ConnectionTestResult failureResult = ConnectionTestResult.failure("Error testing connection: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(failureResult);
+        }
+    }
+
+    @GetMapping("/{id}/info")
+    public ResponseEntity<?> getConnectionInfo(@PathVariable Long id) {
+        try {
+            User currentUser = getCurrentUser();
+            Map<String, Object> info = dynamicDataSourceService.getConnectionInfo(currentUser, id);
+            return ResponseEntity.ok(info);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body("Connection info retrieval failed: " + e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Connection info retrieval failed: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/{id}/status")
+    public ResponseEntity<Map<String, Object>> getConnectionStatus(@PathVariable Long id) {
+        try {
+            User currentUser = getCurrentUser();
+            boolean available = dynamicDataSourceService.isConnectionAvailable(currentUser, id);
+            
+            Map<String, Object> result = new LinkedHashMap<>();
+            result.put("connectionId", id);
+            result.put("available", available);
+            result.put("checkedAt", java.time.LocalDateTime.now());
+            
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            Map<String, Object> result = new LinkedHashMap<>();
+            result.put("connectionId", id);
+            result.put("available", false);
+            result.put("error", e.getMessage());
+            result.put("checkedAt", java.time.LocalDateTime.now());
+            
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(result);
         }
     }
 }
