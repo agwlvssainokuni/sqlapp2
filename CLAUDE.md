@@ -7,15 +7,21 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 SqlApp2 is a web-based SQL execution tool that provides a user interface for executing SQL queries against various RDBMSs.
 
 ### Technology Stack
-- **Frontend**: React (SPA - Single Page Application)
-- **Backend**: Java (Spring Boot)
-- **Architecture**: Client-Server with REST APIs
+- **Frontend**: React 18 + TypeScript (SPA - Single Page Application)
+  - **Build Tool**: Vite 7.1.1
+  - **Routing**: React Router DOM
+  - **Styling**: CSS3 with component-based approach
+- **Backend**: Java 21 + Spring Boot 3.5.4
+  - **Build Tool**: Gradle 9.0.0
+  - **Web**: Spring Web MVC
+  - **Security**: Spring Security with BCrypt
+- **Architecture**: Client-Server with REST APIs, integrated SPA deployment
 - **Internal Database**: H2 Database (with JPA/Hibernate)
 - **Data Access**: Spring Data JPA
-- **Authentication**: Spring Security
+- **Authentication**: Spring Security + JWT (planned)
 - **Password Security**: BCrypt hashing
 - **Target RDBMS**: MySQL, PostgreSQL, MariaDB (via JDBC)
-- **Deployment**: Executable WAR, Container-ready (Docker)
+- **Deployment**: Executable WAR, Container-ready (Docker + Docker Compose)
 
 ### Core Features
 
@@ -81,11 +87,13 @@ SqlApp2 is a web-based SQL execution tool that provides a user interface for exe
   - Query management and re-execution data with sharing scope
   - Query execution history (timestamp, user, record count, duration)
 - **Access Layer**: Spring Data JPA with Hibernate
+- **Current Implementation**: In-memory database for development
 - **Deployment Options**:
-  - In-memory mode (for testing/development)
-  - Local file storage (for standalone deployment)  
-  - Server mode (for multi-user environments)
-- **Configuration**: Configurable via Spring profiles
+  - In-memory mode (for testing/development) ✅ **Implemented**
+  - Local file storage (for standalone deployment) ✅ **Docker Ready**
+  - Server mode (for multi-user environments) 🔄 **Planned**
+- **Configuration**: Configurable via Spring profiles and environment variables
+- **Development Access**: H2 Console available at `/h2-console` (development only)
 
 ## Deployment Architecture
 
@@ -111,10 +119,21 @@ SqlApp2 is a web-based SQL execution tool that provides a user interface for exe
 
 2. **Container Deployment**
    ```dockerfile
-   FROM openjdk:17-jre-slim
-   COPY sqlapp2.war /app.war
+   FROM openjdk:21-jre-slim
+   COPY build/libs/sqlapp2.war app.war
    EXPOSE 8080
-   ENTRYPOINT ["java", "-jar", "/app.war"]
+   ENTRYPOINT ["java", "-jar", "app.war"]
+   ```
+
+   ```yaml
+   # docker-compose.yml
+   services:
+     sqlapp2:
+       build: .
+       ports:
+         - "8080:8080"
+       volumes:
+         - sqlapp2_data:/app/data
    ```
 
 3. **Environment Configuration**
@@ -125,8 +144,125 @@ SqlApp2 is a web-based SQL execution tool that provides a user interface for exe
 
 ## Development Setup
 
-*To be established once project structure is created*
+### Prerequisites
+- Java 21 (OpenJDK)
+- Node.js 18+
+- Git
+- Docker (optional)
+
+### Quick Start
+
+1. **Backend Development**:
+   ```bash
+   ./gradlew bootRun
+   # Runs on http://localhost:8080
+   ```
+
+2. **Frontend Development**:
+   ```bash
+   cd frontend
+   npm install
+   npm run dev
+   # Runs on http://localhost:5173 with proxy to backend
+   ```
+
+3. **Integrated Build**:
+   ```bash
+   ./gradlew build
+   java -jar build/libs/sqlapp2-1.0.0.war
+   ```
+
+4. **Docker Deployment**:
+   ```bash
+   docker-compose up -d
+   ```
+
+See `DEVELOPMENT.md` for detailed setup instructions.
 
 ## Project Structure
 
-*To be established based on Spring Boot + React architecture*
+```
+sqlapp2/
+├── src/main/java/cherry/sqlapp2/    # Spring Boot application
+│   ├── SqlApp2Application.java      # Main application class
+│   ├── config/                      # Configuration classes
+│   │   └── SecurityConfig.java      # Spring Security config
+│   ├── controller/                  # REST controllers
+│   │   ├── AuthController.java      # Authentication endpoints
+│   │   ├── HealthController.java    # Health check endpoint
+│   │   └── SpaController.java       # SPA routing controller
+│   ├── dto/                         # Data Transfer Objects
+│   ├── entity/                      # JPA entities
+│   ├── repository/                  # Spring Data repositories
+│   └── service/                     # Business logic services
+├── src/main/resources/
+│   ├── application.properties       # Application configuration
+│   └── static/                      # Built frontend assets (auto-generated)
+├── frontend/                        # React application
+│   ├── src/
+│   │   ├── components/              # React components
+│   │   │   ├── Login.tsx           # Login component
+│   │   │   ├── Register.tsx        # Registration component
+│   │   │   ├── Dashboard.tsx       # Main dashboard
+│   │   │   └── ProtectedRoute.tsx  # Authentication guard
+│   │   ├── context/
+│   │   │   └── AuthContext.tsx     # Authentication context
+│   │   ├── App.tsx                 # Main React app
+│   │   └── main.tsx               # React entry point
+│   ├── package.json               # Frontend dependencies
+│   └── vite.config.ts            # Vite configuration
+├── build.gradle                   # Gradle build configuration
+├── Dockerfile                     # Docker image definition
+├── docker-compose.yml            # Docker Compose configuration
+├── DEVELOPMENT.md                # Development guide
+├── ROADMAP.md                   # Project roadmap and progress
+└── CLAUDE.md                    # This file
+```
+
+## Current Implementation Status
+
+### ✅ Completed (Phase 1 - 100%)
+
+1. **Backend Infrastructure**:
+   - Spring Boot 3.5.4 + Java 21 setup
+   - H2 database with JPA/Hibernate
+   - Spring Security with BCrypt password encoding
+   - REST API endpoints for authentication and health checks
+   - User entity and repository layer
+
+2. **Frontend Infrastructure**:
+   - Vite + React 18 + TypeScript project
+   - React Router for client-side routing
+   - Authentication context and protected routes
+   - Login, Register, and Dashboard components
+   - API integration with proxy configuration
+
+3. **Deployment Infrastructure**:
+   - Integrated build process (frontend → backend static resources)
+   - WAR packaging for standalone deployment
+   - Docker containerization with multi-stage build
+   - Docker Compose for development and production
+   - Development environment documentation
+
+### 🔄 Next Phase (Phase 2)
+
+The next development phase will focus on core SQL execution functionality:
+- Enhanced user management with profile features
+- Database connection management
+- SQL query execution engine
+- Schema information retrieval
+
+## Code Style Guidelines
+
+### Java
+- Package structure: `cherry.sqlapp2.*`
+- Apache License header required on all files
+- Spring Boot conventions and best practices
+- Comprehensive validation and error handling
+
+### TypeScript/React
+- Functional components with React Hooks
+- TypeScript strict mode with proper type definitions
+- Semicolon-omitted style (following Vite defaults)
+- Apache License header required on all files
+- CSS-in-JS or modular CSS approach
