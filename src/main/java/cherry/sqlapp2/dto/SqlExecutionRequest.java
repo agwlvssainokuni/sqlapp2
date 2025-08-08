@@ -20,6 +20,9 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
+import java.util.List;
+import java.util.Map;
+
 public class SqlExecutionRequest {
 
     @JsonProperty("connectionId")
@@ -36,6 +39,12 @@ public class SqlExecutionRequest {
 
     @JsonProperty("maxRows")
     private Integer maxRows;
+
+    @JsonProperty("parameters")
+    private Map<String, Object> parameters;
+
+    @JsonProperty("parameterTypes")
+    private Map<String, String> parameterTypes;
 
     // Default constructor
     public SqlExecutionRequest() {}
@@ -76,5 +85,21 @@ public class SqlExecutionRequest {
 
     public void setMaxRows(Integer maxRows) {
         this.maxRows = maxRows;
+    }
+
+    public Map<String, Object> getParameters() {
+        return parameters;
+    }
+
+    public void setParameters(Map<String, Object> parameters) {
+        this.parameters = parameters;
+    }
+
+    public Map<String, String> getParameterTypes() {
+        return parameterTypes;
+    }
+
+    public void setParameterTypes(Map<String, String> parameterTypes) {
+        this.parameterTypes = parameterTypes;
     }
 }

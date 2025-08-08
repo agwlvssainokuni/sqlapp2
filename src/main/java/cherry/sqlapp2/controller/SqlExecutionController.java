@@ -74,11 +74,24 @@ public class SqlExecutionController {
             }
             
             // Execute the query
-            Map<String, Object> result = sqlExecutionService.executeQuery(
-                currentUser, 
-                request.getConnectionId(), 
-                request.getSql()
-            );
+            Map<String, Object> result;
+            
+            // Check if this is a parameterized query
+            if (request.getParameters() != null && !request.getParameters().isEmpty()) {
+                result = sqlExecutionService.executeParameterizedQuery(
+                    currentUser, 
+                    request.getConnectionId(), 
+                    request.getSql(),
+                    request.getParameters(),
+                    request.getParameterTypes()
+                );
+            } else {
+                result = sqlExecutionService.executeQuery(
+                    currentUser, 
+                    request.getConnectionId(), 
+                    request.getSql()
+                );
+            }
             
             return ResponseEntity.ok(result);
             
