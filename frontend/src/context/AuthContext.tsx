@@ -15,6 +15,7 @@
  */
 
 import React, { createContext, useContext, useState, useEffect, type ReactNode } from 'react'
+import { apiRequest } from '../utils/api'
 
 interface User {
   id: number
@@ -28,6 +29,7 @@ interface AuthContextType {
   login: (username: string, password: string) => Promise<void>
   logout: () => void
   isLoading: boolean
+  checkAuthStatus: () => Promise<boolean>
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -41,18 +43,29 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    const token = localStorage.getItem('token')
-    const storedUser = localStorage.getItem('user')
-    
-    if (token && storedUser) {
-      try {
-        setUser(JSON.parse(storedUser))
-      } catch (error) {
-        localStorage.removeItem('token')
-        localStorage.removeItem('user')
+    const initAuth = async () => {
+      const token = localStorage.getItem('token')
+      const storedUser = localStorage.getItem('user')
+      
+      if (token && storedUser) {
+        try {
+          const userData = JSON.parse(storedUser)
+          const isValid = await checkAuthStatus()
+          if (isValid) {
+            setUser(userData)
+          } else {
+            localStorage.removeItem('token')
+            localStorage.removeItem('user')
+          }
+        } catch (error) {
+          localStorage.removeItem('token')
+          localStorage.removeItem('user')
+        }
       }
+      setIsLoading(false)
     }
-    setIsLoading(false)
+    
+    initAuth()
   }, [])
 
   const login = async (username: string, password: string): Promise<void> => {
@@ -70,8 +83,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     const data = await response.json()
     setUser(data.user)
-    localStorage.setItem('token', data.token)
+    localStorage.setItem('token', data.access_token)
     localStorage.setItem('user', JSON.stringify(data.user))
+  }
+
+  const checkAuthStatus = async (): Promise<boolean> => {
+    try {
+      const response = await apiRequest('/api/auth/me')
+      return response.ok
+    } catch (error) {
+      return false
+    }
   }
 
   const logout = () => {
@@ -86,6 +108,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     login,
     logout,
     isLoading,
+    checkAuthStatus,
   }
 
   return (
