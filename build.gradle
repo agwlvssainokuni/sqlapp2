@@ -55,6 +55,20 @@ tasks.named('test') {
     useJUnitPlatform()
 }
 
+// Frontend build integration
+task buildFrontend(type: Exec) {
+    workingDir 'frontend'
+    commandLine 'npm', 'run', 'build'
+}
+
+task copyFrontendBuild(type: Copy) {
+    dependsOn buildFrontend
+    from 'frontend/dist'
+    into 'src/main/resources/static'
+}
+
+processResources.dependsOn copyFrontendBuild
+
 war {
     archiveFileName = 'sqlapp2.war'
 }

@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  sqlapp2:
+    build: .
+    container_name: sqlapp2
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=production
+      - SPRING_DATASOURCE_URL=jdbc:h2:file:/app/data/sqlapp2db;DB_CLOSE_ON_EXIT=FALSE;AUTO_RECONNECT=TRUE
+      - LOGGING_LEVEL_CHERRY_SQLAPP2=INFO
+      - LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_SECURITY=WARN
+    volumes:
+      - sqlapp2_data:/app/data
+      - sqlapp2_logs:/app/logs
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+volumes:
+  sqlapp2_data:
+    name: sqlapp2_data
+  sqlapp2_logs:
+    name: sqlapp2_logs
