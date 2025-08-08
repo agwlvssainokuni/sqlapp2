@@ -46,7 +46,7 @@ const Dashboard: React.FC = () => {
           <div className="feature-card">
             <h3>Database Connections</h3>
             <p>Manage your database connections for MySQL, PostgreSQL, and MariaDB.</p>
-            <span className="feature-link disabled">Coming Soon</span>
+            <a href="/connections" className="feature-link">Manage Connections</a>
           </div>
         </div>
       </main>

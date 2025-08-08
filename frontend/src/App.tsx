@@ -19,6 +19,7 @@ import Login from './components/Login'
 import Dashboard from './components/Dashboard'
 import Register from './components/Register'
 import SqlExecution from './components/SqlExecution'
+import ConnectionManagement from './components/ConnectionManagement'
 import { AuthProvider } from './context/AuthContext'
 import ProtectedRoute from './components/ProtectedRoute'
 import './App.css'
@@ -44,6 +45,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <SqlExecution />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/connections" 
+              element={
+                <ProtectedRoute>
+                  <ConnectionManagement />
                 </ProtectedRoute>
               } 
             />
