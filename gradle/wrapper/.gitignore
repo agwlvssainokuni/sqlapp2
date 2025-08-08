@@ -1,0 +1,2 @@
+# Keep gradle-wrapper.jar in version control
+!gradle-wrapper.jar
