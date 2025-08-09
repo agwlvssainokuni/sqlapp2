@@ -53,6 +53,7 @@ const SqlExecution: React.FC = () => {
   const [result, setResult] = useState<SqlExecutionResult | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [currentQueryId, setCurrentQueryId] = useState<number | null>(null)
 
   useEffect(() => {
     loadConnections()
@@ -73,6 +74,7 @@ const SqlExecution: React.FC = () => {
         
         if (response.ok) {
           setSql(savedQuery.sqlContent || '')
+          setCurrentQueryId(Number(queryId))
         }
       } catch (error) {
         console.error('Failed to load saved query:', error)
@@ -227,6 +229,16 @@ const SqlExecution: React.FC = () => {
       const data = await response.json()
       if (response.ok) {
         setResult(data)
+        
+        // Record execution for saved query if applicable
+        if (currentQueryId) {
+          try {
+            await apiRequest(`/api/queries/saved/${currentQueryId}/execute`, { method: 'POST' })
+          } catch (err) {
+            // Don't fail the main execution if recording fails
+            console.warn('Failed to record query execution:', err)
+          }
+        }
       } else {
         setError(data.error || 'SQL execution failed')
       }
