@@ -455,6 +455,17 @@ const HistoryCard: React.FC<HistoryCardProps> = ({ item, onReExecute }) => {
   return (
     <div className={`history-card ${item.isSuccessful ? 'successful' : 'failed'}`}>
       <div className="card-header">
+        <div className="query-type-info">
+          {item.savedQueryId ? (
+            <span className="query-type-badge saved-query">
+              🔖 保存済みクエリ{item.savedQueryName ? `: ${item.savedQueryName}` : ''}
+            </span>
+          ) : (
+            <span className="query-type-badge direct-query">
+              📝 直接入力クエリ
+            </span>
+          )}
+        </div>
         <div className="status-info">
           <span className={`status-badge ${item.isSuccessful ? 'success' : 'error'}`}>
             {item.isSuccessful ? '成功' : '失敗'}
@@ -467,12 +478,11 @@ const HistoryCard: React.FC<HistoryCardProps> = ({ item, onReExecute }) => {
               {item.resultCount}件
             </span>
           )}
-        </div>
-        
-        <div className="card-actions">
-          <button className="btn-rerun" onClick={() => onReExecute(item)}>
-            再実行
-          </button>
+          <div className="card-actions">
+            <button className="btn-rerun" onClick={() => onReExecute(item)}>
+              再実行
+            </button>
+          </div>
         </div>
       </div>
 
@@ -529,13 +539,39 @@ const HistoryCard: React.FC<HistoryCardProps> = ({ item, onReExecute }) => {
         
         .card-header {
           display: flex;
-          justify-content: space-between;
-          align-items: center;
+          flex-direction: column;
+          gap: 10px;
           margin-bottom: 15px;
+        }
+        
+        .query-type-info {
+          display: flex;
+          align-items: center;
+        }
+        
+        .query-type-badge {
+          padding: 6px 12px;
+          border-radius: 16px;
+          font-size: 13px;
+          font-weight: 600;
+          display: inline-block;
+        }
+        
+        .query-type-badge.saved-query {
+          background-color: #e7f3ff;
+          color: #0066cc;
+          border: 1px solid #b3d9ff;
+        }
+        
+        .query-type-badge.direct-query {
+          background-color: #f0f8f0;
+          color: #2d5d2d;
+          border: 1px solid #a5d6a5;
         }
         
         .status-info {
           display: flex;
+          justify-content: space-between;
           align-items: center;
           gap: 15px;
         }
