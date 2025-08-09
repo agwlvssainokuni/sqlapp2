@@ -36,6 +36,14 @@ SqlApp2 is a secure, modern web application that provides an intuitive interface
 - **Re-execution**: One-click re-run of previous queries with parameter restoration
 - **Performance Analytics**: Execution time tracking, success rates, and usage statistics
 
+### 🎨 Visual SQL Query Builder
+- **Drag-and-Drop Interface**: Build SQL queries visually with intuitive components
+- **Schema-Aware Selection**: Automatic table and column suggestions from database schema
+- **Real-time SQL Generation**: Live preview of generated SQL as you build
+- **Comprehensive Clause Support**: SELECT, FROM, WHERE, JOIN, GROUP BY, HAVING, ORDER BY, LIMIT
+- **Advanced Functions**: Aggregate functions, conditional operators, aliases, and DISTINCT
+- **Parameter Integration**: Seamless parameter detection and value input
+
 ### 🎨 Modern User Interface
 - **Responsive Design**: Mobile-first approach with CSS Grid/Flexbox
 - **React + TypeScript**: Type-safe component architecture
@@ -336,7 +344,8 @@ This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENS
 - [x] Modern React frontend
 - [x] Docker deployment support
 
-### ✅ Phase 3.1: Query Management (Completed)
+### ✅ Phase 3: Advanced Features (Completed)
+#### Phase 3.1: Query Management
 - [x] Save and manage SQL queries with parameter templates
 - [x] Public/private query sharing with access control
 - [x] Automatic execution history tracking with performance metrics
@@ -344,16 +353,27 @@ This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENS
 - [x] One-click query re-execution with parameter restoration
 - [x] Complete UI/UX implementation with responsive design
 
-### 🔄 Phase 3.2+: Advanced Features (Optional)
-- [ ] Visual SQL query builder interface
-- [ ] Advanced result export (CSV, JSON, Excel)
-- [ ] Query performance analytics
+#### Phase 3.2: Visual SQL Query Builder
+- [x] Comprehensive QueryStructure backend implementation
+- [x] SQL generation service with validation and formatting
+- [x] REST API endpoints for query building and suggestions
+- [x] Visual query builder frontend interface
+- [x] Schema-aware table and column selection
+- [x] Real-time SQL generation and validation
+- [x] Support for all SQL clauses and advanced functions
+- [x] Responsive design with mobile support
 
-### 🚀 Phase 4: Enterprise Features (Optional)
-- [ ] User role management
-- [ ] Audit logging and compliance
-- [ ] Performance analytics dashboard
-- [ ] Query optimization suggestions
+### 🔄 Phase 4+: Enterprise Features (Optional)
+- [ ] Advanced JOIN clause builder with visual relationship mapping
+- [ ] Query performance optimization suggestions
+- [ ] Advanced result export (CSV, JSON, Excel)
+- [ ] Query templates and snippet management
+
+### 🚀 Phase 5: Enterprise Features (Optional)
+- [ ] User role management and permissions
+- [ ] Audit logging and compliance features
+- [ ] Advanced performance analytics dashboard
+- [ ] AI-powered query optimization suggestions
 
 ---
 
