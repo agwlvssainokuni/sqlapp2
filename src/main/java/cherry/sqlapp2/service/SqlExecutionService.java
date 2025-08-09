@@ -111,17 +111,23 @@ public class SqlExecutionService {
         ResultSetMetaData metaData = resultSet.getMetaData();
         int columnCount = metaData.getColumnCount();
         
-        List<Map<String, Object>> columns = new ArrayList<>();
+        // Get column names for frontend (string array)
+        // TODO: 将来的にはカラムの詳細情報（type, nullable, precision等）も返却する
+        List<String> columns = new ArrayList<>();
+        List<Map<String, Object>> columnDetails = new ArrayList<>();
         for (int i = 1; i <= columnCount; i++) {
-            Map<String, Object> column = new LinkedHashMap<>();
-            column.put("name", metaData.getColumnName(i));
-            column.put("label", metaData.getColumnLabel(i));
-            column.put("type", metaData.getColumnTypeName(i));
-            column.put("className", metaData.getColumnClassName(i));
-            column.put("nullable", metaData.isNullable(i) == ResultSetMetaData.columnNullable);
-            column.put("precision", metaData.getPrecision(i));
-            column.put("scale", metaData.getScale(i));
-            columns.add(column);
+            columns.add(metaData.getColumnName(i));
+            
+            // 詳細情報は将来の拡張用に保持
+            Map<String, Object> columnDetail = new LinkedHashMap<>();
+            columnDetail.put("name", metaData.getColumnName(i));
+            columnDetail.put("label", metaData.getColumnLabel(i));
+            columnDetail.put("type", metaData.getColumnTypeName(i));
+            columnDetail.put("className", metaData.getColumnClassName(i));
+            columnDetail.put("nullable", metaData.isNullable(i) == ResultSetMetaData.columnNullable);
+            columnDetail.put("precision", metaData.getPrecision(i));
+            columnDetail.put("scale", metaData.getScale(i));
+            columnDetails.add(columnDetail);
         }
         
         // Process rows
