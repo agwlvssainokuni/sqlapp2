@@ -93,10 +93,6 @@ const SavedQueries: React.FC = () => {
       const savedQueriesRes = await savedQueriesResp.json()
       const publicQueriesRes = await publicQueriesResp.json()
       const connectionsRes = await connectionsResp.json()
-
-      console.log('API Response - savedQueries:', savedQueriesRes)
-      console.log('API Response - publicQueries:', publicQueriesRes)
-      console.log('API Response - connections:', connectionsRes)
       
       setSavedQueries(Array.isArray(savedQueriesRes) ? savedQueriesRes : [])
       setPublicQueries(Array.isArray(publicQueriesRes) ? publicQueriesRes : [])
@@ -199,14 +195,6 @@ const SavedQueries: React.FC = () => {
     query.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     query.description?.toLowerCase().includes(searchTerm.toLowerCase())
   ) : []
-
-  // Debug logs
-  console.log('State - savedQueries:', savedQueries, 'Array?', Array.isArray(savedQueries))
-  console.log('State - publicQueries:', publicQueries, 'Array?', Array.isArray(publicQueries))
-  console.log('Filtered - My queries:', filteredMyQueries, 'Length:', filteredMyQueries.length)
-  console.log('Filtered - Public queries:', filteredPublicQueries, 'Length:', filteredPublicQueries.length)
-  console.log('Active tab:', activeTab)
-  console.log('Search term:', searchTerm)
 
   if (loading) {
     return (
