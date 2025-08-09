@@ -29,10 +29,13 @@ interface DatabaseConnection {
 interface SqlExecutionResult {
   success: boolean
   rowCount: number
-  executionTime: number
+  executionTimeMs: number
   columns: string[]
-  data: Array<Record<string, any>>
+  rows: Array<Record<string, any>>
   message?: string
+  resultType?: string
+  hasMoreRows?: boolean
+  note?: string
 }
 
 interface ParameterDefinition {
@@ -287,13 +290,19 @@ const SqlExecution: React.FC = () => {
             <h3>Query Result</h3>
             <div className="result-meta">
               <span>Rows: {result.rowCount}</span>
-              <span>Execution Time: {result.executionTime}ms</span>
+              <span>Execution Time: {result.executionTimeMs}ms</span>
             </div>
           </div>
 
           {result.message && (
             <div className="result-message">
               {result.message}
+            </div>
+          )}
+
+          {result.hasMoreRows && result.note && (
+            <div className="result-warning">
+              ⚠️ {result.note}
             </div>
           )}
 
@@ -308,7 +317,7 @@ const SqlExecution: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {result.data.map((row, rowIndex) => (
+                  {result.rows.map((row, rowIndex) => (
                     <tr key={rowIndex}>
                       {result.columns.map((column, colIndex) => (
                         <td key={colIndex}>

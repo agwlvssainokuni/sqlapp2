@@ -31,7 +31,16 @@ gradle-app.setting
 !gradle-wrapper.properties
 
 # IDE
-.idea/
+.idea/*
+!.idea/runConfigurations/
+!.idea/codeStyles/
+!.idea/inspectionProfiles/
+!.idea/.gitignore
+!.idea/modules.xml
+!.idea/misc.xml
+!.idea/vcs.xml
+!.idea/compiler.xml
+!.idea/encodings.xml
 *.iml
 *.ipr
 *.iws

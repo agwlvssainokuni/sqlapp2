@@ -348,6 +348,14 @@ button:disabled {
   border-bottom: 1px solid #c3e6cb;
 }
 
+.result-warning {
+  padding: 1rem 1.5rem;
+  background: #fff3cd;
+  color: #856404;
+  border-bottom: 1px solid #ffeaa7;
+  font-weight: 500;
+}
+
 .result-table-container {
   max-height: 500px;
   overflow: auto;
