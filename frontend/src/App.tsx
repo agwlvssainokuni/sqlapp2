@@ -23,6 +23,7 @@ import ConnectionManagement from './components/ConnectionManagement'
 import SchemaViewer from './components/SchemaViewer'
 import SavedQueries from './components/SavedQueries'
 import QueryHistory from './components/QueryHistory'
+import QueryBuilder from './components/QueryBuilder'
 import { AuthProvider } from './context/AuthContext'
 import ProtectedRoute from './components/ProtectedRoute'
 import './App.css'
@@ -80,6 +81,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <QueryHistory />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/builder" 
+              element={
+                <ProtectedRoute>
+                  <QueryBuilder />
                 </ProtectedRoute>
               } 
             />

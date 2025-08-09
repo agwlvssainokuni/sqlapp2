@@ -63,6 +63,11 @@ const Dashboard: React.FC = () => {
             <p>Track and analyze your SQL execution history with performance metrics.</p>
             <a href="/history" className="feature-link">View History</a>
           </div>
+          <div className="feature-card">
+            <h3>SQL Query Builder</h3>
+            <p>Build SQL queries visually with drag-and-drop interface and schema assistance.</p>
+            <a href="/builder" className="feature-link">Use Query Builder</a>
+          </div>
         </div>
       </main>
     </div>
