@@ -325,14 +325,15 @@ This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENS
 - [x] User authentication with JWT
 - [x] Multi-database connection management
 - [x] SQL execution with parameterized queries
+- [x] Schema information retrieval and browsing
 - [x] Modern React frontend
 - [x] Docker deployment support
 
 ### 🔄 Phase 3: Advanced Features (Optional)
-- [ ] Schema information retrieval
 - [ ] Query history and favorites
 - [ ] SQL query builder interface
 - [ ] Advanced result export (CSV, JSON, Excel)
+- [ ] Query performance analytics
 
 ### 🚀 Phase 4: Enterprise Features (Optional)
 - [ ] User role management
