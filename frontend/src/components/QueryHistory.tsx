@@ -121,9 +121,17 @@ const QueryHistory: React.FC = () => {
   }
 
   const handleReExecute = (item: QueryHistoryItem) => {
-    // Navigate to SQL execution with history ID
-    const sqlExecutionUrl = `/sql?historyId=${item.id}&connectionId=${item.connectionId || ''}`
-    window.location.href = sqlExecutionUrl
+    // If this history item originated from a saved query, re-execute the saved query
+    // Otherwise, re-execute as history
+    if (item.savedQueryId) {
+      // Re-execute saved query - this will increment execution count
+      const sqlExecutionUrl = `/sql?queryId=${item.savedQueryId}&connectionId=${item.connectionId || ''}`
+      window.location.href = sqlExecutionUrl
+    } else {
+      // Re-execute as history - allows SQL editing
+      const sqlExecutionUrl = `/sql?historyId=${item.id}&connectionId=${item.connectionId || ''}`
+      window.location.href = sqlExecutionUrl
+    }
   }
 
   const formatExecutionTime = (timeMs: number) => {
