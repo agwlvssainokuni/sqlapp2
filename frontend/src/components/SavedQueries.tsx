@@ -34,7 +34,7 @@ interface SavedQuery {
   createdAt: string
   updatedAt: string
   lastExecutedAt?: string
-  executionCount: number
+  executionCount?: number
 }
 
 interface DatabaseConnection {
@@ -90,6 +90,10 @@ const SavedQueries: React.FC = () => {
         apiRequest('/api/connections')
       ])
 
+      console.log('API Response - savedQueries:', savedQueriesRes)
+      console.log('API Response - publicQueries:', publicQueriesRes)
+      console.log('API Response - connections:', connectionsRes)
+      
       setSavedQueries(Array.isArray(savedQueriesRes) ? savedQueriesRes : [])
       setPublicQueries(Array.isArray(publicQueriesRes) ? publicQueriesRes : [])
       setConnections(Array.isArray(connectionsRes) ? connectionsRes : [])
@@ -175,14 +179,22 @@ const SavedQueries: React.FC = () => {
   }
 
   const filteredMyQueries = Array.isArray(savedQueries) ? savedQueries.filter(query =>
-    query.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    query.description.toLowerCase().includes(searchTerm.toLowerCase())
+    query.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    query.description?.toLowerCase().includes(searchTerm.toLowerCase())
   ) : []
 
   const filteredPublicQueries = Array.isArray(publicQueries) ? publicQueries.filter(query =>
-    query.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    query.description.toLowerCase().includes(searchTerm.toLowerCase())
+    query.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    query.description?.toLowerCase().includes(searchTerm.toLowerCase())
   ) : []
+
+  // Debug logs
+  console.log('State - savedQueries:', savedQueries, 'Array?', Array.isArray(savedQueries))
+  console.log('State - publicQueries:', publicQueries, 'Array?', Array.isArray(publicQueries))
+  console.log('Filtered - My queries:', filteredMyQueries, 'Length:', filteredMyQueries.length)
+  console.log('Filtered - Public queries:', filteredPublicQueries, 'Length:', filteredPublicQueries.length)
+  console.log('Active tab:', activeTab)
+  console.log('Search term:', searchTerm)
 
   if (loading) {
     return (
@@ -554,7 +566,7 @@ const QueryCard: React.FC<QueryCardProps> = ({ query, isOwner, onEdit, onDelete,
       <div className="query-header">
         <div className="query-title">
           <h3>{query.name}</h3>
-          <span className={`scope-badge ${query.sharingScope.toLowerCase()}`}>
+          <span className={`scope-badge ${query.sharingScope?.toLowerCase() || 'private'}`}>
             {query.sharingScope === 'PUBLIC' ? '公開' : 'プライベート'}
           </span>
         </div>
@@ -580,7 +592,7 @@ const QueryCard: React.FC<QueryCardProps> = ({ query, isOwner, onEdit, onDelete,
       )}
 
       <div className="query-sql">
-        <pre>{query.sqlContent.substring(0, 200)}{query.sqlContent.length > 200 ? '...' : ''}</pre>
+        <pre>{query.sqlContent?.substring(0, 200)}{(query.sqlContent?.length || 0) > 200 ? '...' : ''}</pre>
       </div>
 
       <div className="query-meta">
@@ -592,7 +604,7 @@ const QueryCard: React.FC<QueryCardProps> = ({ query, isOwner, onEdit, onDelete,
         </div>
         <div className="meta-row">
           <span>作成日: {formatDate(query.createdAt)}</span>
-          <span>実行回数: {query.executionCount}回</span>
+          <span>実行回数: {query.executionCount || 0}回</span>
         </div>
         {query.lastExecutedAt && (
           <div className="meta-row">
