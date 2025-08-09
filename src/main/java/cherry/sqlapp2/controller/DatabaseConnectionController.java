@@ -99,6 +99,12 @@ public class DatabaseConnectionController {
     @PostMapping
     public ResponseEntity<?> createConnection(@Valid @RequestBody DatabaseConnectionRequest request) {
         try {
+            // 新規作成時はパスワードが必須
+            if (request.getPassword() == null || request.getPassword().trim().isEmpty()) {
+                return ResponseEntity.badRequest()
+                    .body("Connection creation failed: Password is required");
+            }
+            
             User currentUser = getCurrentUser();
             DatabaseConnectionResponse response = connectionService.createConnection(currentUser, request);
             return ResponseEntity.status(HttpStatus.CREATED).body(response);

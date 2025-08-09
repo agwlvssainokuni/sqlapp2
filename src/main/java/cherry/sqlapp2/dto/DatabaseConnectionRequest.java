@@ -47,7 +47,7 @@ public class DatabaseConnectionRequest {
     @Size(min = 1, max = 100, message = "Username must be between 1 and 100 characters")
     private String username;
 
-    @NotBlank(message = "Password is required")
+    // パスワードは新規作成時のみ必須。更新時は空の場合は既存パスワードを保持
     private String password;
 
     @Size(max = 1000, message = "Additional parameters must be less than 1000 characters")
