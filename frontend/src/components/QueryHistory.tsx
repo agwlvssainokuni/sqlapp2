@@ -74,10 +74,13 @@ const QueryHistory: React.FC = () => {
         size: pageSize.toString()
       })
       
-      const [historyRes, statsRes] = await Promise.all([
+      const [historyResp, statsResp] = await Promise.all([
         apiRequest(`${endpoint}?${params}`),
         apiRequest('/api/queries/stats')
       ])
+
+      const historyRes = await historyResp.json()
+      const statsRes = await statsResp.json()
 
       setHistory(historyRes.content || [])
       setStatistics(statsRes)
@@ -105,7 +108,8 @@ const QueryHistory: React.FC = () => {
         size: pageSize.toString()
       })
       
-      const historyRes = await apiRequest(`/api/queries/history/search?${params}`)
+      const historyResp = await apiRequest(`/api/queries/history/search?${params}`)
+      const historyRes = await historyResp.json()
       setHistory(historyRes.content || [])
     } catch (err) {
       console.error('Failed to search query history:', err)
