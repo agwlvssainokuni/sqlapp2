@@ -48,6 +48,11 @@ const Dashboard: React.FC = () => {
             <p>Manage your database connections for MySQL, PostgreSQL, and MariaDB.</p>
             <a href="/connections" className="feature-link">Manage Connections</a>
           </div>
+          <div className="feature-card">
+            <h3>Schema Viewer</h3>
+            <p>Browse database schemas, tables, columns, and their relationships.</p>
+            <a href="/schema" className="feature-link">View Schema</a>
+          </div>
         </div>
       </main>
     </div>

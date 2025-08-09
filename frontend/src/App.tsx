@@ -20,6 +20,7 @@ import Dashboard from './components/Dashboard'
 import Register from './components/Register'
 import SqlExecution from './components/SqlExecution'
 import ConnectionManagement from './components/ConnectionManagement'
+import SchemaViewer from './components/SchemaViewer'
 import { AuthProvider } from './context/AuthContext'
 import ProtectedRoute from './components/ProtectedRoute'
 import './App.css'
@@ -53,6 +54,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <ConnectionManagement />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/schema" 
+              element={
+                <ProtectedRoute>
+                  <SchemaViewer />
                 </ProtectedRoute>
               } 
             />
