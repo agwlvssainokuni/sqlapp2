@@ -90,9 +90,9 @@ const SavedQueries: React.FC = () => {
         apiRequest('/api/connections')
       ])
 
-      setSavedQueries(savedQueriesRes)
-      setPublicQueries(publicQueriesRes)
-      setConnections(connectionsRes)
+      setSavedQueries(Array.isArray(savedQueriesRes) ? savedQueriesRes : [])
+      setPublicQueries(Array.isArray(publicQueriesRes) ? publicQueriesRes : [])
+      setConnections(Array.isArray(connectionsRes) ? connectionsRes : [])
     } catch (err) {
       console.error('Failed to load data:', err)
       setError('データの読み込みに失敗しました')
@@ -174,15 +174,15 @@ const SavedQueries: React.FC = () => {
     })
   }
 
-  const filteredMyQueries = savedQueries.filter(query =>
+  const filteredMyQueries = Array.isArray(savedQueries) ? savedQueries.filter(query =>
     query.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     query.description.toLowerCase().includes(searchTerm.toLowerCase())
-  )
+  ) : []
 
-  const filteredPublicQueries = publicQueries.filter(query =>
+  const filteredPublicQueries = Array.isArray(publicQueries) ? publicQueries.filter(query =>
     query.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     query.description.toLowerCase().includes(searchTerm.toLowerCase())
-  )
+  ) : []
 
   if (loading) {
     return (
@@ -216,13 +216,13 @@ const SavedQueries: React.FC = () => {
           className={`tab ${activeTab === 'my-queries' ? 'active' : ''}`}
           onClick={() => setActiveTab('my-queries')}
         >
-          マイクエリ ({savedQueries.length})
+          マイクエリ ({Array.isArray(savedQueries) ? savedQueries.length : 0})
         </button>
         <button 
           className={`tab ${activeTab === 'public-queries' ? 'active' : ''}`}
           onClick={() => setActiveTab('public-queries')}
         >
-          公開クエリ ({publicQueries.length})
+          公開クエリ ({Array.isArray(publicQueries) ? publicQueries.length : 0})
         </button>
       </div>
 
