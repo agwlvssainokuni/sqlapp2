@@ -170,8 +170,8 @@ const SavedQueries: React.FC = () => {
   }
 
   const handleExecute = (query: SavedQuery) => {
-    // Navigate to SQL execution with pre-filled query
-    const sqlExecutionUrl = `/sql?query=${encodeURIComponent(query.sqlContent)}&connection=${query.defaultConnection?.id || ''}`
+    // Navigate to SQL execution with query ID
+    const sqlExecutionUrl = `/sql?queryId=${query.id}&connectionId=${query.defaultConnection?.id || ''}`
     window.location.href = sqlExecutionUrl
   }
 

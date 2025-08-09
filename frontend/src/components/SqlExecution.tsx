@@ -45,7 +45,7 @@ interface ParameterDefinition {
 }
 
 const SqlExecution: React.FC = () => {
-  const { } = useAuth()
+  const { apiRequest } = useAuth()
   const [connections, setConnections] = useState<DatabaseConnection[]>([])
   const [selectedConnectionId, setSelectedConnectionId] = useState<number | null>(null)
   const [sql, setSql] = useState('')
@@ -56,7 +56,31 @@ const SqlExecution: React.FC = () => {
 
   useEffect(() => {
     loadConnections()
+    loadFromUrl()
   }, [])
+  
+  const loadFromUrl = async () => {
+    const urlParams = new URLSearchParams(window.location.search)
+    const queryId = urlParams.get('queryId')
+    const connectionId = urlParams.get('connectionId')
+    
+    if (queryId && !isNaN(Number(queryId))) {
+      try {
+        const response = await apiRequest(`/api/queries/saved/${queryId}`)
+        const savedQuery = await response.json()
+        
+        if (response.ok) {
+          setSql(savedQuery.sqlContent || '')
+        }
+      } catch (error) {
+        console.error('Failed to load saved query:', error)
+      }
+    }
+    
+    if (connectionId && !isNaN(Number(connectionId))) {
+      setSelectedConnectionId(Number(connectionId))
+    }
+  }
 
   useEffect(() => {
     extractParameters()
