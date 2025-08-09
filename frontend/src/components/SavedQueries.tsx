@@ -84,11 +84,15 @@ const SavedQueries: React.FC = () => {
       setLoading(true)
       setError(null)
       
-      const [savedQueriesRes, publicQueriesRes, connectionsRes] = await Promise.all([
+      const [savedQueriesResp, publicQueriesResp, connectionsResp] = await Promise.all([
         apiRequest('/api/queries/saved'),
         apiRequest('/api/queries/public'),
         apiRequest('/api/connections')
       ])
+
+      const savedQueriesRes = await savedQueriesResp.json()
+      const publicQueriesRes = await publicQueriesResp.json()
+      const connectionsRes = await connectionsResp.json()
 
       console.log('API Response - savedQueries:', savedQueriesRes)
       console.log('API Response - publicQueries:', publicQueriesRes)
@@ -120,11 +124,15 @@ const SavedQueries: React.FC = () => {
       
       const method = editingQuery ? 'PUT' : 'POST'
 
-      await apiRequest(endpoint, {
+      const response = await apiRequest(endpoint, {
         method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)
       })
+
+      if (!response.ok) {
+        throw new Error(`API request failed: ${response.status}`)
+      }
 
       await loadData()
       resetForm()
@@ -153,7 +161,11 @@ const SavedQueries: React.FC = () => {
 
     try {
       setError(null)
-      await apiRequest(`/api/queries/saved/${queryId}`, { method: 'DELETE' })
+      const response = await apiRequest(`/api/queries/saved/${queryId}`, { method: 'DELETE' })
+      
+      if (!response.ok) {
+        throw new Error(`Delete failed: ${response.status}`)
+      }
       await loadData()
     } catch (err) {
       console.error('Failed to delete query:', err)
