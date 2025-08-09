@@ -30,6 +30,7 @@ public class DatabaseConnectionResponse {
     private int port;
     private String databaseName;
     private String username;
+    private String additionalParams;
     private boolean isActive;
 
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
@@ -48,6 +49,7 @@ public class DatabaseConnectionResponse {
         this.port = connection.getPort();
         this.databaseName = connection.getDatabaseName();
         this.username = connection.getUsername();
+        this.additionalParams = connection.getAdditionalParams();
         this.isActive = connection.isActive();
         this.createdAt = connection.getCreatedAt();
         this.updatedAt = connection.getUpdatedAt();
@@ -131,5 +133,13 @@ public class DatabaseConnectionResponse {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public String getAdditionalParams() {
+        return additionalParams;
+    }
+
+    public void setAdditionalParams(String additionalParams) {
+        this.additionalParams = additionalParams;
     }
 }

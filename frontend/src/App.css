@@ -469,6 +469,18 @@ button:disabled {
   box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
 }
 
+.form-group.full-width {
+  grid-column: 1 / -1;
+}
+
+.form-help {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 0.875rem;
+  color: #666;
+  font-style: italic;
+}
+
 .form-actions {
   display: flex;
   gap: 1rem;

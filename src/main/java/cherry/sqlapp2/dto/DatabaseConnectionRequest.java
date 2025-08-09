@@ -50,6 +50,9 @@ public class DatabaseConnectionRequest {
     @NotBlank(message = "Password is required")
     private String password;
 
+    @Size(max = 1000, message = "Additional parameters must be less than 1000 characters")
+    private String additionalParams;
+
     private boolean isActive = true;
 
     public DatabaseConnectionRequest() {}
@@ -127,5 +130,13 @@ public class DatabaseConnectionRequest {
 
     public void setActive(boolean active) {
         isActive = active;
+    }
+
+    public String getAdditionalParams() {
+        return additionalParams;
+    }
+
+    public void setAdditionalParams(String additionalParams) {
+        this.additionalParams = additionalParams;
     }
 }

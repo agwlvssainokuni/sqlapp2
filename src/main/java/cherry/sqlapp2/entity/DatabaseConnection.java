@@ -72,6 +72,9 @@ public class DatabaseConnection {
     @NotBlank(message = "Password is required")
     private String encryptedPassword;
 
+    @Column(name = "additional_params", length = 1000)
+    private String additionalParams;
+
     @Column(name = "is_active", nullable = false)
     private boolean isActive = true;
 
@@ -202,8 +205,25 @@ public class DatabaseConnection {
         this.updatedAt = updatedAt;
     }
 
+    public String getAdditionalParams() {
+        return additionalParams;
+    }
+
+    public void setAdditionalParams(String additionalParams) {
+        this.additionalParams = additionalParams;
+    }
+
     public String buildJdbcUrl() {
-        return databaseType.buildUrl(host, port, databaseName);
+        String baseUrl = databaseType.buildUrl(host, port, databaseName);
+        if (additionalParams != null && !additionalParams.trim().isEmpty()) {
+            // additionalParamsが?から始まっていない場合は?を追加
+            String params = additionalParams.trim();
+            if (!params.startsWith("?")) {
+                params = "?" + params;
+            }
+            return baseUrl + params;
+        }
+        return baseUrl;
     }
 
     @Override

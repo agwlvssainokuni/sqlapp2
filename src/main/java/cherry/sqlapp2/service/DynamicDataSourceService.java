@@ -73,11 +73,7 @@ public class DynamicDataSourceService {
      */
     private Connection createConnection(DatabaseConnection dbConfig) throws SQLException {
         String decryptedPassword = encryptionService.decrypt(dbConfig.getEncryptedPassword());
-        String connectionUrl = dbConfig.getDatabaseType().buildUrl(
-                dbConfig.getHost(), 
-                dbConfig.getPort(), 
-                dbConfig.getDatabaseName()
-        );
+        String connectionUrl = dbConfig.buildJdbcUrl();
         
         try {
             return java.sql.DriverManager.getConnection(
@@ -135,11 +131,7 @@ public class DynamicDataSourceService {
             info.put("databaseProductVersion", metaData.getDatabaseProductVersion());
             info.put("driverName", metaData.getDriverName());
             info.put("driverVersion", metaData.getDriverVersion());
-            info.put("jdbcUrl", dbConfig.getDatabaseType().buildUrl(
-                    dbConfig.getHost(), 
-                    dbConfig.getPort(), 
-                    dbConfig.getDatabaseName()
-            ));
+            info.put("jdbcUrl", dbConfig.buildJdbcUrl());
             info.put("connected", conn.isValid(5));
             
         } catch (SQLException e) {

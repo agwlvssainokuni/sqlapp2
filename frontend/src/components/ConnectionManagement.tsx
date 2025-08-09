@@ -25,6 +25,7 @@ interface DatabaseConnection {
   port: number
   databaseName: string
   username: string
+  additionalParams?: string
   isActive: boolean
   createdAt: string
   updatedAt: string
@@ -38,6 +39,7 @@ interface NewConnection {
   databaseName: string
   username: string
   password: string
+  additionalParams?: string
 }
 
 interface ConnectionTestResult {
@@ -58,7 +60,8 @@ const ConnectionManagement: React.FC = () => {
     port: 3306,
     databaseName: '',
     username: '',
-    password: ''
+    password: '',
+    additionalParams: ''
   })
   const [testing, setTesting] = useState<{ [key: number]: boolean }>({})
   const [testResults, setTestResults] = useState<{ [key: number]: ConnectionTestResult }>({})
@@ -230,7 +233,8 @@ const ConnectionManagement: React.FC = () => {
       port: 3306,
       databaseName: '',
       username: '',
-      password: ''
+      password: '',
+      additionalParams: ''
     })
   }
 
@@ -243,7 +247,8 @@ const ConnectionManagement: React.FC = () => {
       port: connection.port,
       databaseName: connection.databaseName,
       username: connection.username,
-      password: '' // Don't populate password for security
+      password: '', // Don't populate password for security
+      additionalParams: connection.additionalParams || ''
     })
     setShowCreateForm(true)
   }
@@ -358,6 +363,19 @@ const ConnectionManagement: React.FC = () => {
                 onChange={(e) => setNewConnection(prev => ({ ...prev, password: e.target.value }))}
                 placeholder={editingConnection ? "Leave empty to keep current password" : "Enter password"}
               />
+            </div>
+
+            <div className="form-group full-width">
+              <label>Additional Parameters</label>
+              <input
+                type="text"
+                value={newConnection.additionalParams}
+                onChange={(e) => setNewConnection(prev => ({ ...prev, additionalParams: e.target.value }))}
+                placeholder="e.g., useSSL=true&allowPublicKeyRetrieval=true&serverTimezone=UTC"
+              />
+              <small className="form-help">
+                Optional JDBC URL parameters. For MySQL SSL error, use: useSSL=true&allowPublicKeyRetrieval=true
+              </small>
             </div>
           </div>
 

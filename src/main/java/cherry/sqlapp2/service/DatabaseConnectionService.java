@@ -105,6 +105,7 @@ public class DatabaseConnectionService {
         // Encrypt and set password
         String encryptedPassword = encryptionService.encrypt(request.getPassword());
         connection.setEncryptedPassword(encryptedPassword);
+        connection.setAdditionalParams(request.getAdditionalParams());
         connection.setActive(request.isActive());
 
         // Save and return response
@@ -136,6 +137,7 @@ public class DatabaseConnectionService {
         existingConnection.setPort(port);
         existingConnection.setDatabaseName(request.getDatabaseName());
         existingConnection.setUsername(request.getUsername());
+        existingConnection.setAdditionalParams(request.getAdditionalParams());
         existingConnection.setActive(request.isActive());
 
         // Update password if provided
@@ -203,11 +205,21 @@ public class DatabaseConnectionService {
                 port = request.getDatabaseType().getDefaultPort();
             }
 
-            String connectionUrl = request.getDatabaseType().buildUrl(
+            String baseUrl = request.getDatabaseType().buildUrl(
                     request.getHost(), 
                     port, 
                     request.getDatabaseName()
             );
+            
+            // Add additional parameters if provided
+            String connectionUrl = baseUrl;
+            if (request.getAdditionalParams() != null && !request.getAdditionalParams().trim().isEmpty()) {
+                String params = request.getAdditionalParams().trim();
+                if (!params.startsWith("?")) {
+                    params = "?" + params;
+                }
+                connectionUrl = baseUrl + params;
+            }
 
             try (Connection conn = DriverManager.getConnection(
                     connectionUrl, 
@@ -232,11 +244,7 @@ public class DatabaseConnectionService {
     private ConnectionTestResult testConnection(DatabaseConnection connection) {
         try {
             String decryptedPassword = encryptionService.decrypt(connection.getEncryptedPassword());
-            String connectionUrl = connection.getDatabaseType().buildUrl(
-                    connection.getHost(), 
-                    connection.getPort(), 
-                    connection.getDatabaseName()
-            );
+            String connectionUrl = connection.buildJdbcUrl();
 
             try (Connection conn = DriverManager.getConnection(
                     connectionUrl, 
