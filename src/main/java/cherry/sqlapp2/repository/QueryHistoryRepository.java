@@ -27,6 +27,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface QueryHistoryRepository extends JpaRepository<QueryHistory, Long> {
@@ -34,6 +35,8 @@ public interface QueryHistoryRepository extends JpaRepository<QueryHistory, Long
     Page<QueryHistory> findByUserOrderByExecutedAtDesc(User user, Pageable pageable);
 
     List<QueryHistory> findTop10ByUserOrderByExecutedAtDesc(User user);
+
+    Optional<QueryHistory> findByIdAndUser(Long id, User user);
 
     @Query("SELECT qh FROM QueryHistory qh WHERE qh.user = :user AND qh.executedAt >= :fromDate ORDER BY qh.executedAt DESC")
     Page<QueryHistory> findByUserAndExecutedAtAfter(@Param("user") User user, 

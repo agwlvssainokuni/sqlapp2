@@ -62,8 +62,10 @@ const SqlExecution: React.FC = () => {
   const loadFromUrl = async () => {
     const urlParams = new URLSearchParams(window.location.search)
     const queryId = urlParams.get('queryId')
+    const historyId = urlParams.get('historyId')
     const connectionId = urlParams.get('connectionId')
     
+    // Load from saved query
     if (queryId && !isNaN(Number(queryId))) {
       try {
         const response = await apiRequest(`/api/queries/saved/${queryId}`)
@@ -74,6 +76,29 @@ const SqlExecution: React.FC = () => {
         }
       } catch (error) {
         console.error('Failed to load saved query:', error)
+      }
+    }
+    
+    // Load from query history
+    if (historyId && !isNaN(Number(historyId))) {
+      try {
+        const response = await apiRequest(`/api/queries/history/${historyId}`)
+        const historyItem = await response.json()
+        
+        if (response.ok) {
+          setSql(historyItem.sqlContent || '')
+          // Load parameter values if available
+          if (historyItem.parameterValues) {
+            const paramDefs = Object.entries(historyItem.parameterValues).map(([name, value]) => ({
+              name,
+              type: 'string', // Default type, could be improved by storing types in history
+              value: String(value)
+            }))
+            setParameters(paramDefs)
+          }
+        }
+      } catch (error) {
+        console.error('Failed to load query history:', error)
       }
     }
     

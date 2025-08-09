@@ -27,6 +27,7 @@ interface QueryHistoryItem {
   errorMessage?: string
   connectionName: string
   databaseType: string
+  connectionId?: number
   savedQueryId?: number
   savedQueryName?: string
   executedAt: string
@@ -120,21 +121,9 @@ const QueryHistory: React.FC = () => {
   }
 
   const handleReExecute = (item: QueryHistoryItem) => {
-    // Navigate to SQL execution with pre-filled query
-    const params = new URLSearchParams()
-    params.set('query', item.sqlContent)
-    
-    if (item.parameterValues) {
-      // Convert parameter values to a format the SQL execution page can understand
-      const paramString = Object.entries(item.parameterValues)
-        .map(([key, value]) => `${key}=${encodeURIComponent(String(value))}`)
-        .join('&')
-      if (paramString) {
-        params.set('params', paramString)
-      }
-    }
-    
-    window.location.href = `/sql?${params}`
+    // Navigate to SQL execution with history ID
+    const sqlExecutionUrl = `/sql?historyId=${item.id}&connectionId=${item.connectionId || ''}`
+    window.location.href = sqlExecutionUrl
   }
 
   const formatExecutionTime = (timeMs: number) => {

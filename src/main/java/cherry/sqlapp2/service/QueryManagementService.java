@@ -229,6 +229,11 @@ public class QueryManagementService {
     }
 
     @Transactional(readOnly = true)
+    public Optional<QueryHistory> getQueryHistoryById(Long historyId, User user) {
+        return queryHistoryRepository.findByIdAndUser(historyId, user);
+    }
+
+    @Transactional(readOnly = true)
     public Page<QueryHistory> getSuccessfulQueries(User user, Pageable pageable) {
         return queryHistoryRepository.findByUserAndIsSuccessful(user, true, pageable);
     }

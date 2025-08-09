@@ -32,6 +32,7 @@ public class QueryHistoryResponse {
     private String errorMessage;
     private String connectionName;
     private String databaseType;
+    private Long connectionId;
     private Long savedQueryId;
     private String savedQueryName;
     private LocalDateTime executedAt;
@@ -49,6 +50,10 @@ public class QueryHistoryResponse {
         this.connectionName = queryHistory.getConnectionName();
         this.databaseType = queryHistory.getDatabaseType();
         this.executedAt = queryHistory.getExecutedAt();
+
+        if (queryHistory.getConnection() != null) {
+            this.connectionId = queryHistory.getConnection().getId();
+        }
 
         if (queryHistory.getSavedQuery() != null) {
             this.savedQueryId = queryHistory.getSavedQuery().getId();
@@ -127,6 +132,14 @@ public class QueryHistoryResponse {
 
     public void setDatabaseType(String databaseType) {
         this.databaseType = databaseType;
+    }
+
+    public Long getConnectionId() {
+        return connectionId;
+    }
+
+    public void setConnectionId(Long connectionId) {
+        this.connectionId = connectionId;
     }
 
     public Long getSavedQueryId() {

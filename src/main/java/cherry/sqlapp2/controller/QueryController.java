@@ -247,6 +247,19 @@ public class QueryController {
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping("/history/{historyId}")
+    public ResponseEntity<QueryHistoryResponse> getQueryHistoryById(
+            @PathVariable Long historyId,
+            Authentication authentication) {
+        
+        User user = getCurrentUser(authentication);
+        QueryHistory queryHistory = queryManagementService.getQueryHistoryById(historyId, user)
+            .orElseThrow(() -> new RuntimeException("Query history not found or not accessible"));
+            
+        QueryHistoryResponse response = createQueryHistoryResponse(queryHistory);
+        return ResponseEntity.ok(response);
+    }
+
     @GetMapping("/history/search")
     public ResponseEntity<Page<QueryHistoryResponse>> searchQueryHistory(
             @RequestParam String searchTerm,
