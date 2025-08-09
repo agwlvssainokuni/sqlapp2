@@ -63,7 +63,13 @@ tasks.named('test') {
 // Frontend build integration
 task buildFrontend(type: Exec) {
     workingDir 'frontend'
-    commandLine 'npm', 'run', 'build'
+    
+    // Use shell to properly resolve npm from PATH (handles Volta/nvm/etc)
+    if (System.getProperty('os.name').toLowerCase().contains('windows')) {
+        commandLine 'cmd', '/c', 'npm', 'run', 'build'
+    } else {
+        commandLine 'sh', '-c', 'npm run build'
+    }
 }
 
 task copyFrontendBuild(type: Copy) {
