@@ -292,12 +292,21 @@ sqlapp2/
    - Complete UI/UX implementation with responsive design
    - Real-time statistics dashboard and re-execution functionality
 
-### 🔄 Next Phase (Phase 3.2 - SQL Builder)
+10. **SQL Query Builder System (Phase 3.2 - Backend Complete)**:
+   - Comprehensive QueryStructure DTO for representing SQL query components
+   - QueryBuilderService for generating SQL from structured data
+   - REST API endpoints for query building, validation, and suggestions
+   - Support for all SQL clauses: SELECT, FROM, JOIN, WHERE, GROUP BY, HAVING, ORDER BY, LIMIT
+   - Parameter detection and SQL formatting capabilities
+   - Schema-aware suggestions framework (ready for integration)
 
-Advanced SQL builder interface:
-- Visual query construction with drag-and-drop
-- Component-based SQL clause building
+### 🔄 Next Phase (Phase 3.2 - Frontend Implementation)
+
+SQL builder frontend components:
+- Visual query construction interface
+- Component-based SQL clause building UI
 - Schema-aware table and column selection
+- Drag-and-drop query building functionality
 
 ## Code Style Guidelines
 

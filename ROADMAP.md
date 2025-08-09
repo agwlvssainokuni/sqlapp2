@@ -113,10 +113,14 @@ SqlApp2は、複数のRDBMSに対応したWebベースのSQL実行ツールで�
 **進捗**: 100% | **状態**: ✅ 完了
 
 #### 📋 マイルストーン 3.2: SQL ビルダー (2週間)
-- [ ] コンポーネントベースSQL構築
-- [ ] SELECT, FROM, WHERE, GROUP BY, HAVING, ORDER BY句対応
+- [x] QueryStructure DTO実装 (完全なSQL要素表現)
+- [x] QueryBuilderService実装 (SQL生成エンジン)
+- [x] QueryBuilderController実装 (REST API)
+- [x] バックエンド統合テスト完了
+- [ ] QueryBuilder.tsx フロントエンド実装
+- [ ] SELECT, FROM, WHERE, GROUP BY, HAVING, ORDER BY句UI対応
 
-**進捗**: 0% | **状態**: ⏸️ 未開始
+**進捗**: 50% | **状態**: 🔄 進行中
 
 ### Phase 4: エンタープライズ機能 (4-6週間)
 **目標**: 実行履歴とパフォーマンス管理
@@ -327,7 +331,13 @@ SqlApp2は、複数のRDBMSに対応したWebベースのSQL実行ツールで�
   - App.tsx・Dashboard.tsx: ナビゲーション統合・UI連携
   - 統合ビルド成功・完全デプロイ準備完了
   - 8ファイル変更、1,446行のフロントエンドコード追加
-- 📋 次のアクション: マイルストーン 3.2 SQL ビルダー実装検討
+- ✅ **マイルストーン 3.2 バックエンド完了** - SQLクエリビルダー基盤実装
+  - QueryStructure.java: 包括的SQL構造表現DTO (SELECT/FROM/JOIN/WHERE/GROUP BY/HAVING/ORDER BY/LIMIT)
+  - QueryBuilderService.java: SQL生成エンジン (構造化データ→SQL変換、パラメータ検出、フォーマット機能)
+  - QueryBuilderController.java: REST API (/build, /validate, /suggestions)
+  - QueryBuilderRequest/Response DTOセット完成
+  - バックエンド統合テスト・コンパイル確認完了
+- 📋 次のアクション: マイルストーン 3.2 フロントエンド実装
 
 ---
 
