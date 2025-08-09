@@ -70,7 +70,7 @@ public class QueryHistory {
     protected void onCreate() {
         executedAt = LocalDateTime.now();
         if (connection != null) {
-            connectionName = connection.getName();
+            connectionName = connection.getConnectionName();
             databaseType = connection.getDatabaseType().name();
         }
     }

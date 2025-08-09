@@ -70,7 +70,7 @@ public class QueryController {
         DatabaseConnection defaultConnection = null;
 
         if (request.getDefaultConnectionId() != null) {
-            defaultConnection = connectionRepository.findByIdAndUser(request.getDefaultConnectionId(), user)
+            defaultConnection = connectionRepository.findByUserAndId(user, request.getDefaultConnectionId())
                 .orElseThrow(() -> new RuntimeException("Database connection not found"));
         }
 
@@ -98,7 +98,7 @@ public class QueryController {
         DatabaseConnection defaultConnection = null;
 
         if (request.getDefaultConnectionId() != null) {
-            defaultConnection = connectionRepository.findByIdAndUser(request.getDefaultConnectionId(), user)
+            defaultConnection = connectionRepository.findByUserAndId(user, request.getDefaultConnectionId())
                 .orElseThrow(() -> new RuntimeException("Database connection not found"));
         }
 

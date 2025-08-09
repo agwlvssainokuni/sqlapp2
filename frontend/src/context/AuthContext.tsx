@@ -30,6 +30,7 @@ interface AuthContextType {
   logout: () => void
   isLoading: boolean
   checkAuthStatus: () => Promise<boolean>
+  apiRequest: (url: string, options?: RequestInit) => Promise<any>
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -109,6 +110,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     logout,
     isLoading,
     checkAuthStatus,
+    apiRequest,
   }
 
   return (

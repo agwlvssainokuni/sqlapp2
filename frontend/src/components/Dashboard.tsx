@@ -53,6 +53,16 @@ const Dashboard: React.FC = () => {
             <p>Browse database schemas, tables, columns, and their relationships.</p>
             <a href="/schema" className="feature-link">View Schema</a>
           </div>
+          <div className="feature-card">
+            <h3>Saved Queries</h3>
+            <p>Save, organize, and share your SQL queries with parameter templates.</p>
+            <a href="/queries" className="feature-link">Manage Queries</a>
+          </div>
+          <div className="feature-card">
+            <h3>Query History</h3>
+            <p>Track and analyze your SQL execution history with performance metrics.</p>
+            <a href="/history" className="feature-link">View History</a>
+          </div>
         </div>
       </main>
     </div>

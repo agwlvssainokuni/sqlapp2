@@ -472,7 +472,7 @@ public class SqlExecutionService {
                                     Integer resultCount, boolean isSuccessful, String errorMessage,
                                     SavedQuery savedQuery) {
         try {
-            DatabaseConnection connection = connectionRepository.findByIdAndUser(connectionId, user)
+            DatabaseConnection connection = connectionRepository.findByUserAndId(user, connectionId)
                 .orElse(null);
             
             if (connection != null) {
