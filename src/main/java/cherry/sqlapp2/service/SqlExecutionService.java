@@ -15,7 +15,10 @@
  */
 package cherry.sqlapp2.service;
 
+import cherry.sqlapp2.entity.DatabaseConnection;
+import cherry.sqlapp2.entity.SavedQuery;
 import cherry.sqlapp2.entity.User;
+import cherry.sqlapp2.repository.DatabaseConnectionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -35,10 +38,16 @@ import java.util.regex.Pattern;
 public class SqlExecutionService {
 
     private final DynamicDataSourceService dataSourceService;
+    private final QueryManagementService queryManagementService;
+    private final DatabaseConnectionRepository connectionRepository;
 
     @Autowired
-    public SqlExecutionService(DynamicDataSourceService dataSourceService) {
+    public SqlExecutionService(DynamicDataSourceService dataSourceService, 
+                             QueryManagementService queryManagementService,
+                             DatabaseConnectionRepository connectionRepository) {
         this.dataSourceService = dataSourceService;
+        this.queryManagementService = queryManagementService;
+        this.connectionRepository = connectionRepository;
     }
 
     /**
@@ -83,10 +92,18 @@ public class SqlExecutionService {
             result.put("sql", sql);
             result.put("success", true);
             
+            // Record query execution in history
+            recordQueryExecution(user, connectionId, sql, null, executionTime, 
+                               getResultCount(result), true, null, null);
+            
             return result;
             
         } catch (SQLException e) {
             long executionTime = System.currentTimeMillis() - startTime;
+            
+            // Record failed query execution in history
+            recordQueryExecution(user, connectionId, sql, null, executionTime, 
+                               null, false, e.getMessage(), null);
             
             Map<String, Object> errorResult = new LinkedHashMap<>();
             errorResult.put("success", false);
@@ -270,11 +287,19 @@ public class SqlExecutionService {
                 result.put("parameters", parameters);
                 result.put("success", true);
                 
+                // Record query execution in history
+                recordQueryExecution(user, connectionId, sql, parameters, executionTime, 
+                                   getResultCount(result), true, null, null);
+                
                 return result;
             }
             
         } catch (SQLException e) {
             long executionTime = System.currentTimeMillis() - startTime;
+            
+            // Record failed query execution in history
+            recordQueryExecution(user, connectionId, sql, parameters, executionTime, 
+                               null, false, e.getMessage(), null);
             
             Map<String, Object> errorResult = new LinkedHashMap<>();
             errorResult.put("success", false);
@@ -438,5 +463,42 @@ public class SqlExecutionService {
         public String getSql() { return sql; }
         public List<Object> getParameters() { return parameters; }
         public List<String> getParameterTypes() { return parameterTypes; }
+    }
+
+    // ==================== Query History Helper Methods ====================
+
+    private void recordQueryExecution(User user, Long connectionId, String sql, 
+                                    Map<String, Object> parameterValues, long executionTimeMs,
+                                    Integer resultCount, boolean isSuccessful, String errorMessage,
+                                    SavedQuery savedQuery) {
+        try {
+            DatabaseConnection connection = connectionRepository.findByIdAndUser(connectionId, user)
+                .orElse(null);
+            
+            if (connection != null) {
+                queryManagementService.recordExecution(sql, parameterValues, executionTimeMs, 
+                                                     resultCount, isSuccessful, errorMessage, 
+                                                     user, connection, savedQuery);
+            }
+        } catch (Exception e) {
+            // Don't fail the main query execution if history recording fails
+            System.err.println("Failed to record query execution in history: " + e.getMessage());
+        }
+    }
+
+    private Integer getResultCount(Map<String, Object> result) {
+        if (result.containsKey("data")) {
+            Object data = result.get("data");
+            if (data instanceof List) {
+                return ((List<?>) data).size();
+            }
+        }
+        if (result.containsKey("affectedRows")) {
+            Object affectedRows = result.get("affectedRows");
+            if (affectedRows instanceof Number) {
+                return ((Number) affectedRows).intValue();
+            }
+        }
+        return null;
     }
 }
