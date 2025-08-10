@@ -19,6 +19,7 @@ package cherry.sqlapp2.controller;
 import cherry.sqlapp2.dto.QueryHistoryResponse;
 import cherry.sqlapp2.dto.SavedQueryRequest;
 import cherry.sqlapp2.dto.SavedQueryResponse;
+import cherry.sqlapp2.dto.UserStatisticsResponse;
 import cherry.sqlapp2.entity.DatabaseConnection;
 import cherry.sqlapp2.entity.QueryHistory;
 import cherry.sqlapp2.entity.SavedQuery;
@@ -306,16 +307,17 @@ public class QueryController {
     // ==================== Statistics Endpoints ====================
 
     @GetMapping("/stats")
-    public ResponseEntity<Map<String, Object>> getUserStatistics(Authentication authentication) {
+    public ResponseEntity<UserStatisticsResponse> getUserStatistics(Authentication authentication) {
         User user = getCurrentUser(authentication);
         
-        Map<String, Object> stats = new HashMap<>();
-        stats.put("savedQueryCount", queryManagementService.getUserQueryCount(user));
-        stats.put("executionCount", queryManagementService.getUserExecutionCount(user));
-        stats.put("averageExecutionTime", queryManagementService.getUserAverageExecutionTime(user));
-        stats.put("failedQueryCount", queryManagementService.getUserFailedQueryCount(user));
+        UserStatisticsResponse response = new UserStatisticsResponse(
+                queryManagementService.getUserQueryCount(user),
+                queryManagementService.getUserExecutionCount(user),
+                queryManagementService.getUserAverageExecutionTime(user),
+                queryManagementService.getUserFailedQueryCount(user)
+        );
         
-        return ResponseEntity.ok(stats);
+        return ResponseEntity.ok(response);
     }
 
     // ==================== Helper Methods ====================

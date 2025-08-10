@@ -15,9 +15,12 @@
  */
 package cherry.sqlapp2.controller;
 
+import cherry.sqlapp2.dto.ConnectionCountResponse;
+import cherry.sqlapp2.dto.ConnectionStatusResponse;
 import cherry.sqlapp2.dto.ConnectionTestResult;
 import cherry.sqlapp2.dto.DatabaseConnectionRequest;
 import cherry.sqlapp2.dto.DatabaseConnectionResponse;
+import cherry.sqlapp2.dto.DatabaseTypeResponse;
 import cherry.sqlapp2.entity.User;
 import cherry.sqlapp2.enums.DatabaseType;
 import cherry.sqlapp2.service.DatabaseConnectionService;
@@ -31,8 +34,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.Arrays;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -159,24 +162,26 @@ public class DatabaseConnectionController {
     }
 
     @GetMapping("/count")
-    public ResponseEntity<Map<String, Long>> getConnectionCount() {
+    public ResponseEntity<ConnectionCountResponse> getConnectionCount() {
         try {
             User currentUser = getCurrentUser();
             long activeCount = connectionService.getActiveConnectionCount(currentUser);
             
-            Map<String, Long> result = new LinkedHashMap<>();
-            result.put("activeConnections", activeCount);
-            return ResponseEntity.ok(result);
+            ConnectionCountResponse response = new ConnectionCountResponse(activeCount);
+            return ResponseEntity.ok(response);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
     @GetMapping("/types")
-    public ResponseEntity<List<Map<String, Object>>> getDatabaseTypes() {
+    public ResponseEntity<List<DatabaseTypeResponse>> getDatabaseTypes() {
         try {
-            List<Map<String, Object>> types = Arrays.stream(DatabaseType.values())
-                    .map(DatabaseType::toMap)
+            List<DatabaseTypeResponse> types = Arrays.stream(DatabaseType.values())
+                    .map(type -> new DatabaseTypeResponse(
+                            type.name(),
+                            type.getDisplayName(),
+                            type.getDefaultPort()))
                     .collect(Collectors.toList());
             return ResponseEntity.ok(types);
         } catch (Exception e) {
@@ -238,25 +243,20 @@ public class DatabaseConnectionController {
     }
 
     @GetMapping("/{id}/status")
-    public ResponseEntity<Map<String, Object>> getConnectionStatus(@PathVariable Long id) {
+    public ResponseEntity<ConnectionStatusResponse> getConnectionStatus(@PathVariable Long id) {
         try {
             User currentUser = getCurrentUser();
             boolean available = dynamicDataSourceService.isConnectionAvailable(currentUser, id);
             
-            Map<String, Object> result = new LinkedHashMap<>();
-            result.put("connectionId", id);
-            result.put("available", available);
-            result.put("checkedAt", java.time.LocalDateTime.now());
+            ConnectionStatusResponse response = new ConnectionStatusResponse(
+                    id, available, LocalDateTime.now());
             
-            return ResponseEntity.ok(result);
+            return ResponseEntity.ok(response);
         } catch (Exception e) {
-            Map<String, Object> result = new LinkedHashMap<>();
-            result.put("connectionId", id);
-            result.put("available", false);
-            result.put("error", e.getMessage());
-            result.put("checkedAt", java.time.LocalDateTime.now());
+            ConnectionStatusResponse response = new ConnectionStatusResponse(
+                    id, false, e.getMessage(), LocalDateTime.now());
             
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(result);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
 }

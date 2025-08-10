@@ -16,25 +16,25 @@
 
 package cherry.sqlapp2.controller;
 
+import cherry.sqlapp2.dto.HealthResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDateTime;
-import java.util.LinkedHashMap;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api")
 public class HealthController {
 
     @GetMapping("/health")
-    public ResponseEntity<Map<String, Object>> health() {
-        Map<String, Object> status = new LinkedHashMap<>();
-        status.put("status", "UP");
-        status.put("timestamp", LocalDateTime.now());
-        status.put("application", "SqlApp2");
-        return ResponseEntity.ok(status);
+    public ResponseEntity<HealthResponse> health() {
+        HealthResponse response = new HealthResponse(
+                "UP",
+                LocalDateTime.now(),
+                "SqlApp2"
+        );
+        return ResponseEntity.ok(response);
     }
 }

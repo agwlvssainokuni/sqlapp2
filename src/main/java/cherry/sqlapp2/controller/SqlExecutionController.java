@@ -15,6 +15,9 @@
  */
 package cherry.sqlapp2.controller;
 
+import cherry.sqlapp2.dto.QueryExecutionErrorResponse;
+import cherry.sqlapp2.dto.QueryExecutionValidationResponse;
+import cherry.sqlapp2.dto.QueryValidationResponse;
 import cherry.sqlapp2.dto.SqlExecutionRequest;
 import cherry.sqlapp2.entity.SavedQuery;
 import cherry.sqlapp2.entity.User;
@@ -62,7 +65,7 @@ public class SqlExecutionController {
     }
 
     @PostMapping("/execute")
-    public ResponseEntity<Map<String, Object>> executeQuery(@Valid @RequestBody SqlExecutionRequest request) {
+    public ResponseEntity<?> executeQuery(@Valid @RequestBody SqlExecutionRequest request) {
         try {
             User currentUser = getCurrentUser();
             
@@ -71,11 +74,9 @@ public class SqlExecutionController {
             
             // If validation only, return success without execution
             if (request.isValidateOnly()) {
-                Map<String, Object> result = new LinkedHashMap<>();
-                result.put("valid", true);
-                result.put("message", "SQL query is valid");
-                result.put("validatedAt", LocalDateTime.now());
-                return ResponseEntity.ok(result);
+                QueryExecutionValidationResponse response = new QueryExecutionValidationResponse(
+                        true, "SQL query is valid", LocalDateTime.now());
+                return ResponseEntity.ok(response);
             }
             
             // Execute the query
@@ -110,58 +111,41 @@ public class SqlExecutionController {
             return ResponseEntity.ok(result);
             
         } catch (IllegalArgumentException e) {
-            Map<String, Object> errorResult = new LinkedHashMap<>();
-            errorResult.put("success", false);
-            errorResult.put("error", e.getMessage());
-            errorResult.put("errorType", "ValidationError");
-            errorResult.put("executedAt", LocalDateTime.now());
+            QueryExecutionErrorResponse errorResponse = new QueryExecutionErrorResponse(
+                    false, e.getMessage(), "ValidationError", LocalDateTime.now());
             
-            return ResponseEntity.badRequest().body(errorResult);
+            return ResponseEntity.badRequest().body(errorResponse);
             
         } catch (SQLException e) {
-            Map<String, Object> errorResult = new LinkedHashMap<>();
-            errorResult.put("success", false);
-            errorResult.put("error", e.getMessage());
-            errorResult.put("errorType", "SQLException");
-            errorResult.put("sqlState", e.getSQLState());
-            errorResult.put("errorCode", e.getErrorCode());
-            errorResult.put("executedAt", LocalDateTime.now());
+            QueryExecutionErrorResponse errorResponse = new QueryExecutionErrorResponse(
+                    false, e.getMessage(), "SQLException", LocalDateTime.now(),
+                    request.getSql(), e.getErrorCode(), e.getSQLState());
             
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResult);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
             
         } catch (Exception e) {
-            Map<String, Object> errorResult = new LinkedHashMap<>();
-            errorResult.put("success", false);
-            errorResult.put("error", "Unexpected error: " + e.getMessage());
-            errorResult.put("errorType", "SystemError");
-            errorResult.put("executedAt", LocalDateTime.now());
+            QueryExecutionErrorResponse errorResponse = new QueryExecutionErrorResponse(
+                    false, "Unexpected error: " + e.getMessage(), "SystemError", LocalDateTime.now());
             
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResult);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
         }
     }
 
     @PostMapping("/validate")
-    public ResponseEntity<Map<String, Object>> validateQuery(@Valid @RequestBody SqlExecutionRequest request) {
+    public ResponseEntity<QueryValidationResponse> validateQuery(@Valid @RequestBody SqlExecutionRequest request) {
         try {
             sqlExecutionService.validateQuery(request.getSql());
             
-            Map<String, Object> result = new LinkedHashMap<>();
-            result.put("valid", true);
-            result.put("message", "SQL query is valid");
-            result.put("validatedAt", LocalDateTime.now());
-            result.put("sql", request.getSql());
+            QueryValidationResponse response = new QueryValidationResponse(
+                    true, "SQL query is valid", LocalDateTime.now(), request.getSql());
             
-            return ResponseEntity.ok(result);
+            return ResponseEntity.ok(response);
             
         } catch (IllegalArgumentException e) {
-            Map<String, Object> errorResult = new LinkedHashMap<>();
-            errorResult.put("valid", false);
-            errorResult.put("error", e.getMessage());
-            errorResult.put("errorType", "ValidationError");
-            errorResult.put("validatedAt", LocalDateTime.now());
-            errorResult.put("sql", request.getSql());
+            QueryValidationResponse errorResponse = new QueryValidationResponse(
+                    false, e.getMessage(), "ValidationError", LocalDateTime.now(), request.getSql());
             
-            return ResponseEntity.badRequest().body(errorResult);
+            return ResponseEntity.badRequest().body(errorResponse);
         }
     }
 }
