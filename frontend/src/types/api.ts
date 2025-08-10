@@ -80,6 +80,21 @@ export interface QueryExecutionErrorResponse {
   sqlState?: string
 }
 
+// DatabaseConnection型定義（統一型）
+export interface DatabaseConnection {
+  id: number
+  connectionName: string
+  databaseType: 'MYSQL' | 'POSTGRESQL' | 'MARIADB'
+  host: string
+  port: number
+  databaseName: string
+  username: string
+  additionalParams?: string
+  isActive: boolean
+  createdAt: string
+  updatedAt: string
+}
+
 // 既存のレスポンス型（互換性維持）
 export interface SqlExecutionResult {
   success: boolean

@@ -17,17 +17,9 @@
 import React, {useState, useEffect} from 'react'
 import {useTranslation} from 'react-i18next'
 import {useAuth} from '../context/AuthContext'
-import type {QueryValidationResponse, QueryExecutionErrorResponse} from '../types/api'
+import type {QueryValidationResponse, QueryExecutionErrorResponse, DatabaseConnection} from '../types/api'
 import Layout from './Layout'
 
-interface DatabaseConnection {
-  id: number
-  connectionName: string
-  databaseType: string
-  host: string
-  port: number
-  databaseName: string
-}
 
 interface SqlExecutionResult {
   success: boolean

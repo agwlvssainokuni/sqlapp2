@@ -17,21 +17,9 @@
 import React, {useState, useEffect} from 'react'
 import {useTranslation} from 'react-i18next'
 import {useAuth} from '../context/AuthContext'
+import type {DatabaseConnection} from '../types/api'
 import Layout from './Layout'
 
-interface DatabaseConnection {
-  id: number
-  connectionName: string
-  databaseType: 'MYSQL' | 'POSTGRESQL' | 'MARIADB'
-  host: string
-  port: number
-  databaseName: string
-  username: string
-  additionalParams?: string
-  isActive: boolean
-  createdAt: string
-  updatedAt: string
-}
 
 interface NewConnection {
   connectionName: string
