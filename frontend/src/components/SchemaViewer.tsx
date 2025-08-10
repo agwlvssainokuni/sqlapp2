@@ -113,10 +113,10 @@ const SchemaViewer: React.FC = () => {
         const data = await response.json()
         setConnections(data)
       } else {
-        setError('Failed to load connections') // TODO: Add translation
+        setError(t('schemaViewer.loadFailed'))
       }
     } catch (err) {
-      setError('Error loading connections: ' + (err as Error).message) // TODO: Add translation
+      setError(t('common.error') + ': ' + (err as Error).message)
     }
   }
 
@@ -140,7 +140,7 @@ const SchemaViewer: React.FC = () => {
         setError(typeof errorData === 'string' ? errorData : t('schemaViewer.loadFailed'))
       }
     } catch (err) {
-      setError('Error loading schema info: ' + (err as Error).message) // TODO: Add translation
+      setError(t('common.error') + ': ' + (err as Error).message)
     } finally {
       setLoading(false)
     }
@@ -167,10 +167,10 @@ const SchemaViewer: React.FC = () => {
         setTables(data)
       } else {
         const errorData = await response.json()
-        setError(typeof errorData === 'string' ? errorData : 'Failed to load tables')
+        setError(typeof errorData === 'string' ? errorData : t('schemaViewer.loadFailed'))
       }
     } catch (err) {
-      setError('Error loading tables: ' + (err as Error).message)
+      setError(t('common.error') + ': ' + (err as Error).message)
     } finally {
       setLoading(false)
     }
@@ -198,10 +198,10 @@ const SchemaViewer: React.FC = () => {
         setSelectedTable(tableName)
       } else {
         const errorData = await response.json()
-        setError(typeof errorData === 'string' ? errorData : 'Failed to load table details') // TODO: Add translation
+        setError(typeof errorData === 'string' ? errorData : t('schemaViewer.loadFailed'))
       }
     } catch (err) {
-      setError('Error loading table details: ' + (err as Error).message) // TODO: Add translation
+      setError(t('common.error') + ': ' + (err as Error).message)
     } finally {
       setLoading(false)
     }
@@ -234,7 +234,7 @@ const SchemaViewer: React.FC = () => {
         <h2>{t('schemaViewer.title')}</h2>
         
         <div className="connection-selector">
-          <label>Select Connection:</label> {/* TODO: Add translation */}
+          <label>{t('schemaViewer.selectConnectionLabel')}</label>
           <select 
             value={selectedConnectionId || ''} 
             onChange={(e) => handleConnectionChange(e.target.value)}
@@ -257,19 +257,19 @@ const SchemaViewer: React.FC = () => {
 
       {schemaInfo && (
         <div className="schema-info">
-          <h3>Database Information</h3> {/* TODO: Add translation */}
+          <h3>{t('schemaViewer.databaseInformation')}</h3>
           <div className="info-grid">
-            <div><strong>Database:</strong> {schemaInfo.databaseProductName} {schemaInfo.databaseProductVersion}</div> {/* TODO: Add translation */}
-            <div><strong>Driver:</strong> {schemaInfo.driverName} {schemaInfo.driverVersion}</div> {/* TODO: Add translation */}
+            <div><strong>{t('schemaViewer.database')}</strong> {schemaInfo.databaseProductName} {schemaInfo.databaseProductVersion}</div>
+            <div><strong>{t('schemaViewer.driver')}</strong> {schemaInfo.driverName} {schemaInfo.driverVersion}</div>
           </div>
 
           {(schemaInfo.catalogs.length > 0 || schemaInfo.schemas.length > 0) && (
             <div className="schema-filters">
               {schemaInfo.catalogs.length > 0 && (
                 <div>
-                  <label>Catalog:</label> {/* TODO: Add translation */}
+                  <label>{t('schemaViewer.catalog')}</label>
                   <select value={selectedCatalog} onChange={(e) => setSelectedCatalog(e.target.value)}>
-                    <option value="">All Catalogs</option> {/* TODO: Add translation */}
+                    <option value="">{t('schemaViewer.allCatalogs')}</option>
                     {schemaInfo.catalogs.map(catalog => (
                       <option key={catalog} value={catalog}>{catalog}</option>
                     ))}
@@ -279,9 +279,9 @@ const SchemaViewer: React.FC = () => {
 
               {schemaInfo.schemas.length > 0 && (
                 <div>
-                  <label>Schema:</label> {/* TODO: Add translation */}
+                  <label>{t('schemaViewer.schema')}</label>
                   <select value={selectedSchema} onChange={(e) => setSelectedSchema(e.target.value)}>
-                    <option value="">All Schemas</option> {/* TODO: Add translation */}
+                    <option value="">{t('schemaViewer.allSchemas')}</option>
                     {schemaInfo.schemas.map(schema => (
                       <option key={schema.name} value={schema.name}>{schema.name}</option>
                     ))}
@@ -316,7 +316,7 @@ const SchemaViewer: React.FC = () => {
 
       {tableDetails && (
         <div className="table-details">
-          <h3>Table Details: {tableDetails.tableName}</h3> {/* TODO: Add translation */}
+          <h3>{t('schemaViewer.tableDetails')} {tableDetails.tableName}</h3>
           
           <div className="details-tabs">
             <div className="tab-content">
@@ -325,12 +325,12 @@ const SchemaViewer: React.FC = () => {
                 <table>
                   <thead>
                     <tr>
-                      <th>Name</th> {/* TODO: Add translation */}
-                      <th>Type</th> {/* TODO: Add translation */}
-                      <th>Size</th> {/* TODO: Add translation */}
+                      <th>{t('schemaViewer.name')}</th>
+                      <th>{t('schemaViewer.type')}</th>
+                      <th>{t('schemaViewer.size')}</th>
                       <th>{t('schemaViewer.nullable')}</th>
-                      <th>Default</th> {/* TODO: Add translation */}
-                      <th>Remarks</th> {/* TODO: Add translation */}
+                      <th>{t('schemaViewer.default')}</th>
+                      <th>{t('schemaViewer.remarks')}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -350,7 +350,7 @@ const SchemaViewer: React.FC = () => {
 
               {tableDetails.primaryKeys.length > 0 && (
                 <div className="primary-keys">
-                  <h4>Primary Keys</h4>
+                  <h4>{t('schemaViewer.primaryKeys')}</h4>
                   <ul>
                     {tableDetails.primaryKeys.map(pk => (
                       <li key={pk.columnName}>{pk.columnName} (PK: {pk.pkName})</li>
@@ -361,7 +361,7 @@ const SchemaViewer: React.FC = () => {
 
               {tableDetails.foreignKeys.length > 0 && (
                 <div className="foreign-keys">
-                  <h4>Foreign Keys</h4>
+                  <h4>{t('schemaViewer.foreignKeys')}</h4>
                   <ul>
                     {tableDetails.foreignKeys.map((fk, index) => (
                       <li key={index}>
@@ -374,7 +374,7 @@ const SchemaViewer: React.FC = () => {
 
               {tableDetails.indexes.length > 0 && (
                 <div className="indexes">
-                  <h4>Indexes</h4>
+                  <h4>{t('schemaViewer.indexes')}</h4>
                   <ul>
                     {tableDetails.indexes.map((index, i) => (
                       <li key={i}>
