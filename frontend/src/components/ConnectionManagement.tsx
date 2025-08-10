@@ -40,7 +40,7 @@ interface ConnectionTestResult {
 
 const ConnectionManagement: React.FC = () => {
   const {t} = useTranslation()
-  const {} = useAuth()
+  const {apiRequest} = useAuth()
   const [connections, setConnections] = useState<DatabaseConnection[]>([])
   const [showCreateForm, setShowCreateForm] = useState(false)
   const [editingConnection, setEditingConnection] = useState<DatabaseConnection | null>(null)
@@ -66,12 +66,7 @@ const ConnectionManagement: React.FC = () => {
   const loadConnections = async () => {
     try {
       setLoading(true)
-      const token = localStorage.getItem('token')
-      const response = await fetch('/api/connections', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      })
+      const response = await apiRequest('/api/connections')
 
       if (response.ok) {
         const data = await response.json()
@@ -105,13 +100,8 @@ const ConnectionManagement: React.FC = () => {
       setLoading(true)
       setError(null)
 
-      const token = localStorage.getItem('token')
-      const response = await fetch('/api/connections', {
+      const response = await apiRequest('/api/connections', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
         body: JSON.stringify(newConnection)
       })
 
@@ -137,13 +127,8 @@ const ConnectionManagement: React.FC = () => {
       setLoading(true)
       setError(null)
 
-      const token = localStorage.getItem('token')
-      const response = await fetch(`/api/connections/${editingConnection.id}`, {
+      const response = await apiRequest(`/api/connections/${editingConnection.id}`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
         body: JSON.stringify(newConnection)
       })
 
@@ -167,12 +152,8 @@ const ConnectionManagement: React.FC = () => {
 
     try {
       setLoading(true)
-      const token = localStorage.getItem('token')
-      const response = await fetch(`/api/connections/${id}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
+      const response = await apiRequest(`/api/connections/${id}`, {
+        method: 'DELETE'
       })
 
       if (response.ok) {
@@ -193,12 +174,8 @@ const ConnectionManagement: React.FC = () => {
       setTesting(prev => ({...prev, [connection.id]: true}))
       setTestResults(prev => ({...prev, [connection.id]: {success: false, message: t('connections.testing')}}))
 
-      const token = localStorage.getItem('token')
-      const response = await fetch(`/api/connections/${connection.id}/test`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
+      const response = await apiRequest(`/api/connections/${connection.id}/test`, {
+        method: 'POST'
       })
 
       const result = await response.json()

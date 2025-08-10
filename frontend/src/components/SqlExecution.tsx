@@ -205,7 +205,6 @@ const SqlExecution: React.FC = () => {
       const isValid = await validateSql()
       if (!isValid) return
 
-      const token = localStorage.getItem('token')
       const hasParameters = parameters.length > 0
 
       const requestBody: any = {
@@ -228,12 +227,8 @@ const SqlExecution: React.FC = () => {
         })
       }
 
-      const response = await fetch('/api/sql/execute', {
+      const response = await apiRequest('/api/sql/execute', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
         body: JSON.stringify(requestBody)
       })
 

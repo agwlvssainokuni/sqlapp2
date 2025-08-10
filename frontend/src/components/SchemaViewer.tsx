@@ -74,7 +74,7 @@ interface TableDetails {
 
 const SchemaViewer: React.FC = () => {
   const {t} = useTranslation()
-  const {} = useAuth()
+  const {apiRequest} = useAuth()
   const [connections, setConnections] = useState<DatabaseConnection[]>([])
   const [selectedConnectionId, setSelectedConnectionId] = useState<number | null>(null)
   const [schemaInfo, setSchemaInfo] = useState<SchemaInfo | null>(null)
@@ -99,12 +99,7 @@ const SchemaViewer: React.FC = () => {
 
   const loadConnections = async () => {
     try {
-      const token = localStorage.getItem('token')
-      const response = await fetch('/api/connections?activeOnly=true', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      })
+      const response = await apiRequest('/api/connections?activeOnly=true')
 
       if (response.ok) {
         const data = await response.json()
@@ -122,12 +117,7 @@ const SchemaViewer: React.FC = () => {
 
     try {
       setLoading(true)
-      const token = localStorage.getItem('token')
-      const response = await fetch(`/api/schema/connections/${selectedConnectionId}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      })
+      const response = await apiRequest(`/api/schema/connections/${selectedConnectionId}`)
 
       if (response.ok) {
         const data = await response.json()
@@ -148,16 +138,11 @@ const SchemaViewer: React.FC = () => {
 
     try {
       setLoading(true)
-      const token = localStorage.getItem('token')
       const params = new URLSearchParams()
       if (selectedCatalog) params.append('catalog', selectedCatalog)
       if (selectedSchema) params.append('schema', selectedSchema)
 
-      const response = await fetch(`/api/schema/connections/${selectedConnectionId}/tables?${params}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      })
+      const response = await apiRequest(`/api/schema/connections/${selectedConnectionId}/tables?${params}`)
 
       if (response.ok) {
         const data = await response.json()
@@ -178,16 +163,11 @@ const SchemaViewer: React.FC = () => {
 
     try {
       setLoading(true)
-      const token = localStorage.getItem('token')
       const params = new URLSearchParams()
       if (selectedCatalog) params.append('catalog', selectedCatalog)
       if (selectedSchema) params.append('schema', selectedSchema)
 
-      const response = await fetch(`/api/schema/connections/${selectedConnectionId}/tables/${tableName}?${params}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      })
+      const response = await apiRequest(`/api/schema/connections/${selectedConnectionId}/tables/${tableName}?${params}`)
 
       if (response.ok) {
         const data = await response.json()
