@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import React, { useState, useEffect } from 'react'
-import { useTranslation } from 'react-i18next'
-import { useAuth } from '../context/AuthContext'
+import React, {useState, useEffect} from 'react'
+import {useTranslation} from 'react-i18next'
+import {useAuth} from '../context/AuthContext'
 
 interface DatabaseConnection {
   id: number
@@ -46,8 +46,8 @@ interface ParameterDefinition {
 }
 
 const SqlExecution: React.FC = () => {
-  const { t } = useTranslation()
-  const { apiRequest } = useAuth()
+  const {t} = useTranslation()
+  const {apiRequest} = useAuth()
   const [connections, setConnections] = useState<DatabaseConnection[]>([])
   const [selectedConnectionId, setSelectedConnectionId] = useState<number | null>(null)
   const [sql, setSql] = useState('')
@@ -63,19 +63,19 @@ const SqlExecution: React.FC = () => {
     loadConnections()
     loadFromUrl()
   }, [])
-  
+
   const loadFromUrl = async () => {
     const urlParams = new URLSearchParams(window.location.search)
     const queryId = urlParams.get('queryId')
     const historyId = urlParams.get('historyId')
     const connectionId = urlParams.get('connectionId')
-    
+
     // Load from saved query
     if (queryId && !isNaN(Number(queryId))) {
       try {
         const response = await apiRequest(`/api/queries/saved/${queryId}`)
         const savedQuery = await response.json()
-        
+
         if (response.ok) {
           setSql(savedQuery.sqlContent || '')
           setCurrentQueryId(Number(queryId))
@@ -86,13 +86,13 @@ const SqlExecution: React.FC = () => {
         console.error('Failed to load saved query:', error)
       }
     }
-    
+
     // Load from query history
     if (historyId && !isNaN(Number(historyId))) {
       try {
         const response = await apiRequest(`/api/queries/history/${historyId}`)
         const historyItem = await response.json()
-        
+
         if (response.ok) {
           setSql(historyItem.sqlContent || '')
           setExecutionMode('history')
@@ -110,12 +110,12 @@ const SqlExecution: React.FC = () => {
         console.error('Failed to load query history:', error)
       }
     }
-    
+
     // If no queryId or historyId, this is a new query
     if (!queryId && !historyId) {
       setExecutionMode('new')
     }
-    
+
     if (connectionId && !isNaN(Number(connectionId))) {
       setSelectedConnectionId(Number(connectionId))
     }
@@ -155,7 +155,7 @@ const SqlExecution: React.FC = () => {
       const paramNames = [...new Set(matches.map(m => m.substring(1)))]
       const newParams = paramNames.map(name => {
         const existing = parameters.find(p => p.name === name)
-        return existing || { name, type: 'string', value: '' }
+        return existing || {name, type: 'string', value: ''}
       })
       setParameters(newParams)
     } else {
@@ -227,7 +227,7 @@ const SqlExecution: React.FC = () => {
       if (hasParameters) {
         requestBody.parameters = {}
         requestBody.parameterTypes = {}
-        
+
         parameters.forEach(param => {
           requestBody.parameters[param.name] = param.value
           requestBody.parameterTypes[param.name] = param.type
@@ -259,7 +259,7 @@ const SqlExecution: React.FC = () => {
 
   const handleParameterChange = (index: number, field: keyof ParameterDefinition, value: string) => {
     const newParams = [...parameters]
-    newParams[index] = { ...newParams[index], [field]: value }
+    newParams[index] = {...newParams[index], [field]: value}
     setParameters(newParams)
   }
 
@@ -269,7 +269,7 @@ const SqlExecution: React.FC = () => {
         <h2>{t('sqlExecution.title')}</h2>
         <div className="connection-selector">
           <label htmlFor="connection-select">{t('sqlExecution.databaseConnection')}:</label>
-          <select 
+          <select
             id="connection-select"
             value={selectedConnectionId || ''}
             onChange={(e) => setSelectedConnectionId(Number(e.target.value))}
@@ -347,11 +347,11 @@ const SqlExecution: React.FC = () => {
                 value={param.type === 'boolean' ? undefined : param.value}
                 checked={param.type === 'boolean' ? param.value === 'true' : undefined}
                 onChange={(e) => handleParameterChange(
-                  index, 
-                  'value', 
+                  index,
+                  'value',
                   param.type === 'boolean' ? e.target.checked.toString() : e.target.value
                 )}
-                placeholder={t('sqlExecution.enterValue', { type: param.type })}
+                placeholder={t('sqlExecution.enterValue', {type: param.type})}
               />
             </div>
           ))}
@@ -359,14 +359,14 @@ const SqlExecution: React.FC = () => {
       )}
 
       <div className="execution-controls">
-        <button 
-          onClick={executeSql} 
+        <button
+          onClick={executeSql}
           disabled={loading || !selectedConnectionId || !sql.trim()}
           className="execute-btn"
         >
           {loading ? t('sqlExecution.executing') : t('sqlExecution.executeQuery')}
         </button>
-        <button 
+        <button
           onClick={validateSql}
           disabled={loading || !selectedConnectionId || !sql.trim()}
           className="validate-btn"
@@ -407,24 +407,24 @@ const SqlExecution: React.FC = () => {
             <div className="result-table-container">
               <table className="result-table">
                 <thead>
-                  <tr>
-                    {result.columns.map((column, index) => (
-                      <th key={index}>{column}</th>
-                    ))}
-                  </tr>
+                <tr>
+                  {result.columns.map((column, index) => (
+                    <th key={index}>{column}</th>
+                  ))}
+                </tr>
                 </thead>
                 <tbody>
-                  {result.rows.map((row, rowIndex) => (
-                    <tr key={rowIndex}>
-                      {result.columns.map((column, colIndex) => (
-                        <td key={colIndex}>
-                          {row[column] !== null && row[column] !== undefined 
-                            ? String(row[column]) 
-                            : 'NULL'}
-                        </td>
-                      ))}
-                    </tr>
-                  ))}
+                {result.rows.map((row, rowIndex) => (
+                  <tr key={rowIndex}>
+                    {result.columns.map((column, colIndex) => (
+                      <td key={colIndex}>
+                        {row[column] !== null && row[column] !== undefined
+                          ? String(row[column])
+                          : 'NULL'}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
                 </tbody>
               </table>
             </div>

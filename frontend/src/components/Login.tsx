@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-import React, { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { useTranslation } from 'react-i18next'
-import { useAuth } from '../context/AuthContext'
+import React, {useState} from 'react'
+import {Link, useNavigate} from 'react-router-dom'
+import {useTranslation} from 'react-i18next'
+import {useAuth} from '../context/AuthContext'
 import LanguageSwitcher from './LanguageSwitcher'
 
 const Login: React.FC = () => {
-  const { t } = useTranslation()
+  const {t} = useTranslation()
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
-  const { login } = useAuth()
+  const {login} = useAuth()
   const navigate = useNavigate()
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -49,7 +49,7 @@ const Login: React.FC = () => {
       <div className="login-form">
         <div className="login-header">
           <h2>SqlApp2 {t('auth.login')}</h2>
-          <LanguageSwitcher />
+          <LanguageSwitcher/>
         </div>
         <form onSubmit={handleSubmit}>
           <div className="form-group">

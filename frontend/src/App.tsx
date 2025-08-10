@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
+import {BrowserRouter as Router, Routes, Route, Navigate} from 'react-router-dom'
 import Login from './components/Login'
 import Dashboard from './components/Dashboard'
 import Register from './components/Register'
@@ -24,7 +24,7 @@ import SchemaViewer from './components/SchemaViewer'
 import SavedQueries from './components/SavedQueries'
 import QueryHistory from './components/QueryHistory'
 import QueryBuilder from './components/QueryBuilder'
-import { AuthProvider } from './context/AuthContext'
+import {AuthProvider} from './context/AuthContext'
 import ProtectedRoute from './components/ProtectedRoute'
 import './App.css'
 
@@ -34,65 +34,65 @@ function App() {
       <Router>
         <div className="App">
           <Routes>
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route 
-              path="/dashboard" 
+            <Route path="/login" element={<Login/>}/>
+            <Route path="/register" element={<Register/>}/>
+            <Route
+              path="/dashboard"
               element={
                 <ProtectedRoute>
-                  <Dashboard />
+                  <Dashboard/>
                 </ProtectedRoute>
-              } 
+              }
             />
-            <Route 
-              path="/sql" 
+            <Route
+              path="/sql"
               element={
                 <ProtectedRoute>
-                  <SqlExecution />
+                  <SqlExecution/>
                 </ProtectedRoute>
-              } 
+              }
             />
-            <Route 
-              path="/connections" 
+            <Route
+              path="/connections"
               element={
                 <ProtectedRoute>
-                  <ConnectionManagement />
+                  <ConnectionManagement/>
                 </ProtectedRoute>
-              } 
+              }
             />
-            <Route 
-              path="/schema" 
+            <Route
+              path="/schema"
               element={
                 <ProtectedRoute>
-                  <SchemaViewer />
+                  <SchemaViewer/>
                 </ProtectedRoute>
-              } 
+              }
             />
-            <Route 
-              path="/queries" 
+            <Route
+              path="/queries"
               element={
                 <ProtectedRoute>
-                  <SavedQueries />
+                  <SavedQueries/>
                 </ProtectedRoute>
-              } 
+              }
             />
-            <Route 
-              path="/history" 
+            <Route
+              path="/history"
               element={
                 <ProtectedRoute>
-                  <QueryHistory />
+                  <QueryHistory/>
                 </ProtectedRoute>
-              } 
+              }
             />
-            <Route 
-              path="/builder" 
+            <Route
+              path="/builder"
               element={
                 <ProtectedRoute>
-                  <QueryBuilder />
+                  <QueryBuilder/>
                 </ProtectedRoute>
-              } 
+              }
             />
-            <Route path="/" element={<Navigate to="/dashboard" replace />} />
+            <Route path="/" element={<Navigate to="/dashboard" replace/>}/>
           </Routes>
         </div>
       </Router>

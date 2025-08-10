@@ -1012,8 +1012,8 @@ a:hover {
   border: 1px solid #eee;
 }
 
-.query-builder .clause-item select, 
-.query-builder .clause-item input[type="text"], 
+.query-builder .clause-item select,
+.query-builder .clause-item input[type="text"],
 .query-builder .clause-item input[type="number"] {
   padding: 8px;
   border: 1px solid #ddd;
@@ -1123,7 +1123,7 @@ a:hover {
     flex-wrap: wrap;
     gap: 5px;
   }
-  
+
   .query-builder .clause-item select,
   .query-builder .clause-item input {
     min-width: 120px;
@@ -1430,35 +1430,35 @@ a:hover {
     flex-direction: column;
     align-items: stretch;
   }
-  
+
   .query-history .search-group {
     flex-direction: column;
   }
-  
+
   .query-history .search-input {
     width: 100%;
   }
-  
+
   .query-history .stats-container {
     grid-template-columns: repeat(2, 1fr);
   }
-  
+
   .query-history .card-header {
     flex-direction: column;
     align-items: flex-start;
     gap: 15px;
   }
-  
+
   .query-history .card-actions {
     width: 100%;
     justify-content: flex-end;
   }
-  
+
   .query-history .meta-row {
     flex-direction: column;
     gap: 5px;
   }
-  
+
   .query-history .param-list {
     flex-direction: column;
     gap: 5px;
@@ -1753,21 +1753,21 @@ a:hover {
     flex-direction: column;
     gap: 15px;
   }
-  
+
   .saved-queries .form-row {
     grid-template-columns: 1fr;
   }
-  
+
   .saved-queries .query-header {
     flex-direction: column;
     gap: 15px;
   }
-  
+
   .saved-queries .query-actions {
     width: 100%;
     justify-content: flex-end;
   }
-  
+
   .saved-queries .meta-row {
     flex-direction: column;
     gap: 5px;

@@ -16,11 +16,11 @@
 
 export const apiRequest = async (url: string, options: RequestInit = {}): Promise<Response> => {
   const token = localStorage.getItem('token')
-  
+
   const defaultOptions: RequestInit = {
     headers: {
       'Content-Type': 'application/json',
-      ...(token && { Authorization: `Bearer ${token}` }),
+      ...(token && {Authorization: `Bearer ${token}`}),
       ...options.headers,
     },
   }

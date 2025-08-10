@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import React, { useState, useEffect } from 'react'
-import { useTranslation } from 'react-i18next'
-import { useAuth } from '../context/AuthContext'
+import React, {useState, useEffect} from 'react'
+import {useTranslation} from 'react-i18next'
+import {useAuth} from '../context/AuthContext'
 
 interface QueryHistoryItem {
   id: number
@@ -42,13 +42,13 @@ interface Statistics {
 }
 
 const QueryHistory: React.FC = () => {
-  const { t } = useTranslation()
-  const { apiRequest } = useAuth()
+  const {t} = useTranslation()
+  const {apiRequest} = useAuth()
   const [history, setHistory] = useState<QueryHistoryItem[]>([])
   const [statistics, setStatistics] = useState<Statistics | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  
+
   // Filter state
   const [filterType, setFilterType] = useState<'all' | 'successful' | 'failed'>('all')
   const [searchTerm, setSearchTerm] = useState('')
@@ -63,20 +63,20 @@ const QueryHistory: React.FC = () => {
     try {
       setLoading(true)
       setError(null)
-      
+
       let endpoint = '/api/queries/history'
-      
+
       if (filterType === 'successful') {
         endpoint = '/api/queries/history/successful'
       } else if (filterType === 'failed') {
         endpoint = '/api/queries/history/failed'
       }
-      
+
       const params = new URLSearchParams({
         page: currentPage.toString(),
         size: pageSize.toString()
       })
-      
+
       const [historyResp, statsResp] = await Promise.all([
         apiRequest(`${endpoint}?${params}`),
         apiRequest('/api/queries/stats')
@@ -104,13 +104,13 @@ const QueryHistory: React.FC = () => {
     try {
       setLoading(true)
       setError(null)
-      
+
       const params = new URLSearchParams({
         searchTerm,
         page: currentPage.toString(),
         size: pageSize.toString()
       })
-      
+
       const historyResp = await apiRequest(`/api/queries/history/search?${params}`)
       const historyRes = await historyResp.json()
       setHistory(historyRes.content || [])
@@ -145,10 +145,10 @@ const QueryHistory: React.FC = () => {
 
   const filteredHistory = searchTerm
     ? history.filter(item =>
-        item.sqlContent.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.connectionName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (item.savedQueryName && item.savedQueryName.toLowerCase().includes(searchTerm.toLowerCase()))
-      )
+      item.sqlContent.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.connectionName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (item.savedQueryName && item.savedQueryName.toLowerCase().includes(searchTerm.toLowerCase()))
+    )
     : history
 
   if (loading && history.length === 0) {
@@ -184,7 +184,7 @@ const QueryHistory: React.FC = () => {
           </div>
           <div className="stat-card">
             <div className="stat-value">
-              {statistics.averageExecutionTime 
+              {statistics.averageExecutionTime
                 ? formatExecutionTime(Math.round(statistics.averageExecutionTime))
                 : 'N/A'
               }
@@ -214,7 +214,7 @@ const QueryHistory: React.FC = () => {
             <option value="failed">{t('queryHistory.failedOnly')}</option>
           </select>
         </div>
-        
+
         <div className="search-group">
           <input
             type="text"
@@ -275,8 +275,8 @@ interface HistoryCardProps {
   onReExecute: (item: QueryHistoryItem) => void
 }
 
-const HistoryCard: React.FC<HistoryCardProps> = ({ item, onReExecute }) => {
-  const { t } = useTranslation()
+const HistoryCard: React.FC<HistoryCardProps> = ({item, onReExecute}) => {
+  const {t} = useTranslation()
   const formatExecutionTime = (timeMs: number) => {
     if (timeMs < 1000) {
       return `${timeMs}ms`

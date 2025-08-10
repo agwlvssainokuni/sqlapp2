@@ -15,10 +15,10 @@
  */
 
 import React from 'react'
-import { useTranslation } from 'react-i18next'
+import {useTranslation} from 'react-i18next'
 
 const LanguageSwitcher: React.FC = () => {
-  const { i18n } = useTranslation()
+  const {i18n} = useTranslation()
 
   const handleLanguageChange = (language: string) => {
     i18n.changeLanguage(language)
@@ -28,8 +28,8 @@ const LanguageSwitcher: React.FC = () => {
 
   return (
     <div className="language-switcher">
-      <select 
-        value={currentLanguage} 
+      <select
+        value={currentLanguage}
         onChange={(e) => handleLanguageChange(e.target.value)}
         className="language-select"
       >

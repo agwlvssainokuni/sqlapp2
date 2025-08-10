@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import React, { useState, useEffect } from 'react'
-import { useTranslation } from 'react-i18next'
-import { useAuth } from '../context/AuthContext'
+import React, {useState, useEffect} from 'react'
+import {useTranslation} from 'react-i18next'
+import {useAuth} from '../context/AuthContext'
 
 interface DatabaseConnection {
   id: number
@@ -50,8 +50,8 @@ interface ConnectionTestResult {
 }
 
 const ConnectionManagement: React.FC = () => {
-  const { t } = useTranslation()
-  const { } = useAuth()
+  const {t} = useTranslation()
+  const {} = useAuth()
   const [connections, setConnections] = useState<DatabaseConnection[]>([])
   const [showCreateForm, setShowCreateForm] = useState(false)
   const [editingConnection, setEditingConnection] = useState<DatabaseConnection | null>(null)
@@ -103,7 +103,7 @@ const ConnectionManagement: React.FC = () => {
       POSTGRESQL: 5432,
       MARIADB: 3306
     }
-    
+
     setNewConnection(prev => ({
       ...prev,
       databaseType: type,
@@ -115,7 +115,7 @@ const ConnectionManagement: React.FC = () => {
     try {
       setLoading(true)
       setError(null)
-      
+
       const token = localStorage.getItem('token')
       const response = await fetch('/api/connections', {
         method: 'POST',
@@ -143,11 +143,11 @@ const ConnectionManagement: React.FC = () => {
 
   const updateConnection = async () => {
     if (!editingConnection) return
-    
+
     try {
       setLoading(true)
       setError(null)
-      
+
       const token = localStorage.getItem('token')
       const response = await fetch(`/api/connections/${editingConnection.id}`, {
         method: 'PUT',
@@ -175,7 +175,7 @@ const ConnectionManagement: React.FC = () => {
 
   const deleteConnection = async (id: number) => {
     if (!confirm(t('connections.confirmDelete'))) return
-    
+
     try {
       setLoading(true)
       const token = localStorage.getItem('token')
@@ -201,9 +201,9 @@ const ConnectionManagement: React.FC = () => {
 
   const testConnection = async (connection: DatabaseConnection) => {
     try {
-      setTesting(prev => ({ ...prev, [connection.id]: true }))
-      setTestResults(prev => ({ ...prev, [connection.id]: { success: false, message: t('connections.testing') } }))
-      
+      setTesting(prev => ({...prev, [connection.id]: true}))
+      setTestResults(prev => ({...prev, [connection.id]: {success: false, message: t('connections.testing')}}))
+
       const token = localStorage.getItem('token')
       const response = await fetch(`/api/connections/${connection.id}/test`, {
         method: 'POST',
@@ -213,17 +213,17 @@ const ConnectionManagement: React.FC = () => {
       })
 
       const result = await response.json()
-      setTestResults(prev => ({ ...prev, [connection.id]: result }))
+      setTestResults(prev => ({...prev, [connection.id]: result}))
     } catch (err) {
-      setTestResults(prev => ({ 
-        ...prev, 
-        [connection.id]: { 
-          success: false, 
-          message: t('connections.connectionFailed') + ': ' + (err as Error).message 
-        } 
+      setTestResults(prev => ({
+        ...prev,
+        [connection.id]: {
+          success: false,
+          message: t('connections.connectionFailed') + ': ' + (err as Error).message
+        }
       }))
     } finally {
-      setTesting(prev => ({ ...prev, [connection.id]: false }))
+      setTesting(prev => ({...prev, [connection.id]: false}))
     }
   }
 
@@ -274,7 +274,7 @@ const ConnectionManagement: React.FC = () => {
     <div className="connection-management">
       <div className="connection-header">
         <h2>{t('connections.title')}</h2>
-        <button 
+        <button
           onClick={() => setShowCreateForm(true)}
           disabled={loading}
           className="create-btn"
@@ -292,14 +292,14 @@ const ConnectionManagement: React.FC = () => {
       {showCreateForm && (
         <div className="connection-form">
           <h3>{editingConnection ? t('connections.editConnection') : t('connections.addConnection')}</h3>
-          
+
           <div className="form-grid">
             <div className="form-group">
               <label>{t('connections.connectionName')} *</label>
               <input
                 type="text"
                 value={newConnection.connectionName}
-                onChange={(e) => setNewConnection(prev => ({ ...prev, connectionName: e.target.value }))}
+                onChange={(e) => setNewConnection(prev => ({...prev, connectionName: e.target.value}))}
                 placeholder={t('connections.connectionName')}
               />
             </div>
@@ -321,7 +321,7 @@ const ConnectionManagement: React.FC = () => {
               <input
                 type="text"
                 value={newConnection.host}
-                onChange={(e) => setNewConnection(prev => ({ ...prev, host: e.target.value }))}
+                onChange={(e) => setNewConnection(prev => ({...prev, host: e.target.value}))}
                 placeholder="localhost"
               />
             </div>
@@ -331,7 +331,10 @@ const ConnectionManagement: React.FC = () => {
               <input
                 type="number"
                 value={newConnection.port}
-                onChange={(e) => setNewConnection(prev => ({ ...prev, port: parseInt(e.target.value) || 3306 }))}
+                onChange={(e) => setNewConnection(prev => ({
+                  ...prev,
+                  port: parseInt(e.target.value) || 3306
+                }))}
                 min="1"
                 max="65535"
               />
@@ -342,7 +345,7 @@ const ConnectionManagement: React.FC = () => {
               <input
                 type="text"
                 value={newConnection.databaseName}
-                onChange={(e) => setNewConnection(prev => ({ ...prev, databaseName: e.target.value }))}
+                onChange={(e) => setNewConnection(prev => ({...prev, databaseName: e.target.value}))}
                 placeholder="myapp"
               />
             </div>
@@ -352,7 +355,7 @@ const ConnectionManagement: React.FC = () => {
               <input
                 type="text"
                 value={newConnection.username}
-                onChange={(e) => setNewConnection(prev => ({ ...prev, username: e.target.value }))}
+                onChange={(e) => setNewConnection(prev => ({...prev, username: e.target.value}))}
                 placeholder="dbuser"
               />
             </div>
@@ -362,7 +365,7 @@ const ConnectionManagement: React.FC = () => {
               <input
                 type="password"
                 value={newConnection.password}
-                onChange={(e) => setNewConnection(prev => ({ ...prev, password: e.target.value }))}
+                onChange={(e) => setNewConnection(prev => ({...prev, password: e.target.value}))}
                 placeholder={editingConnection ? "Leave empty to keep current password" : t('connections.password')} // TODO: Add translation
               />
             </div>
@@ -372,24 +375,28 @@ const ConnectionManagement: React.FC = () => {
               <input
                 type="text"
                 value={newConnection.additionalParams}
-                onChange={(e) => setNewConnection(prev => ({ ...prev, additionalParams: e.target.value }))}
+                onChange={(e) => setNewConnection(prev => ({
+                  ...prev,
+                  additionalParams: e.target.value
+                }))}
                 placeholder="e.g., useSSL=true&allowPublicKeyRetrieval=true&serverTimezone=UTC"
               />
               <small className="form-help">
-                Optional JDBC URL parameters. For MySQL SSL error, use: useSSL=true&allowPublicKeyRetrieval=true
+                Optional JDBC URL parameters. For MySQL SSL error, use:
+                useSSL=true&allowPublicKeyRetrieval=true
               </small>
             </div>
           </div>
 
           <div className="form-actions">
-            <button 
+            <button
               onClick={editingConnection ? updateConnection : createConnection}
               disabled={loading || !newConnection.connectionName || !newConnection.host || !newConnection.username}
               className="save-btn"
             >
               {loading ? `${t('connections.save')}...` : editingConnection ? t('connections.editConnection') : t('connections.addConnection')}
             </button>
-            <button 
+            <button
               onClick={cancelEdit}
               disabled={loading}
               className="cancel-btn"
@@ -402,7 +409,7 @@ const ConnectionManagement: React.FC = () => {
 
       <div className="connections-list">
         <h3>{t('connections.title')}</h3>
-        
+
         {loading && !showCreateForm && (
           <div className="loading">{t('common.loading')}</div>
         )}
@@ -410,7 +417,8 @@ const ConnectionManagement: React.FC = () => {
         {connections.length === 0 && !loading ? (
           <div className="no-connections">
             <p>{t('connections.noConnections')}</p>
-            <p>Click "{t('connections.addConnection')}" to get started.</p> {/* TODO: Improve translation */}
+            <p>Click "{t('connections.addConnection')}" to get
+              started.</p> {/* TODO: Improve translation */}
           </div>
         ) : (
           <div className="connections-grid">
@@ -422,7 +430,7 @@ const ConnectionManagement: React.FC = () => {
                     {getDatabaseTypeLabel(connection.databaseType)}
                   </div>
                 </div>
-                
+
                 <div className="connection-details">
                   <div className="detail-row">
                     <span className="label">{t('connections.host')}:</span>
@@ -445,30 +453,32 @@ const ConnectionManagement: React.FC = () => {
                 </div>
 
                 {testResults[connection.id] && (
-                  <div className={`test-result ${testResults[connection.id].success ? 'success' : 'error'}`}>
+                  <div
+                    className={`test-result ${testResults[connection.id].success ? 'success' : 'error'}`}>
                     {testResults[connection.id].message}
                     {testResults[connection.id].responseTimeMs && (
-                      <span className="response-time"> ({testResults[connection.id].responseTimeMs}ms)</span>
+                      <span
+                        className="response-time"> ({testResults[connection.id].responseTimeMs}ms)</span>
                     )}
                   </div>
                 )}
 
                 <div className="connection-actions">
-                  <button 
+                  <button
                     onClick={() => testConnection(connection)}
                     disabled={testing[connection.id]}
                     className="test-btn"
                   >
                     {testing[connection.id] ? t('connections.testing') : t('connections.testConnection')}
                   </button>
-                  <button 
+                  <button
                     onClick={() => startEdit(connection)}
                     disabled={loading}
                     className="edit-btn"
                   >
                     {t('connections.edit')}
                   </button>
-                  <button 
+                  <button
                     onClick={() => deleteConnection(connection.id)}
                     disabled={loading}
                     className="delete-btn"

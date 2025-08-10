@@ -15,13 +15,13 @@
  */
 
 import React from 'react'
-import { useTranslation } from 'react-i18next'
-import { useAuth } from '../context/AuthContext'
+import {useTranslation} from 'react-i18next'
+import {useAuth} from '../context/AuthContext'
 import LanguageSwitcher from './LanguageSwitcher'
 
 const Dashboard: React.FC = () => {
-  const { t } = useTranslation()
-  const { user, logout } = useAuth()
+  const {t} = useTranslation()
+  const {user, logout} = useAuth()
 
   const handleLogout = () => {
     logout()
@@ -32,7 +32,7 @@ const Dashboard: React.FC = () => {
       <header className="dashboard-header">
         <h1>{t('dashboard.title')}</h1>
         <div className="user-info">
-          <LanguageSwitcher />
+          <LanguageSwitcher/>
           <span>{t('dashboard.welcome')}, {user?.username}</span>
           <button onClick={handleLogout} className="logout-btn">
             {t('auth.logout')}

@@ -15,7 +15,7 @@
  */
 
 import i18n from 'i18next'
-import { initReactI18next } from 'react-i18next'
+import {initReactI18next} from 'react-i18next'
 import LanguageDetector from 'i18next-browser-languagedetector'
 
 // Import translation resources
@@ -38,11 +38,11 @@ i18n
     resources,
     fallbackLng: 'en', // Default language
     debug: false, // Set to true for development debugging
-    
+
     interpolation: {
       escapeValue: false // React already escapes values
     },
-    
+
     detection: {
       // Language detection options
       order: ['localStorage', 'navigator', 'htmlTag'],

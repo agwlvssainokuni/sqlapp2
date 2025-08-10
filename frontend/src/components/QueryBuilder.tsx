@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import React, { useState, useEffect } from 'react'
-import { useTranslation } from 'react-i18next'
-import { useAuth } from '../context/AuthContext'
+import React, {useState, useEffect} from 'react'
+import {useTranslation} from 'react-i18next'
+import {useAuth} from '../context/AuthContext'
 
 interface DatabaseConnection {
   id: number
@@ -115,15 +115,15 @@ interface QueryBuilderResponse {
 }
 
 const QueryBuilder: React.FC = () => {
-  const { t } = useTranslation()
-  const { apiRequest } = useAuth()
+  const {t} = useTranslation()
+  const {apiRequest} = useAuth()
   const [connections, setConnections] = useState<DatabaseConnection[]>([])
   const [selectedConnectionId, setSelectedConnectionId] = useState<number | null>(null)
   const [schemaInfo, setSchemaInfo] = useState<SchemaInfo | null>(null)
-  
+
   // Query structure state
   const [queryStructure, setQueryStructure] = useState<QueryStructure>({
-    selectColumns: [{ tableName: '', columnName: '*', distinct: false }],
+    selectColumns: [{tableName: '', columnName: '*', distinct: false}],
     fromTables: [],
     joins: [],
     whereConditions: [],
@@ -131,7 +131,7 @@ const QueryBuilder: React.FC = () => {
     havingConditions: [],
     orderByColumns: [],
   })
-  
+
   const [generatedSql, setGeneratedSql] = useState('')
   const [validationErrors, setValidationErrors] = useState<string[]>([])
   const [isBuilding, setIsBuilding] = useState(false)
@@ -182,7 +182,7 @@ const QueryBuilder: React.FC = () => {
 
       const response: QueryBuilderResponse = await apiRequest('/api/query-builder/build', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {'Content-Type': 'application/json'},
         body: JSON.stringify(request)
       })
 
@@ -203,15 +203,15 @@ const QueryBuilder: React.FC = () => {
   const addSelectColumn = () => {
     setQueryStructure(prev => ({
       ...prev,
-      selectColumns: [...prev.selectColumns, { tableName: '', columnName: '', distinct: false }]
+      selectColumns: [...prev.selectColumns, {tableName: '', columnName: '', distinct: false}]
     }))
   }
 
   const updateSelectColumn = (index: number, field: keyof SelectColumn, value: any) => {
     setQueryStructure(prev => ({
       ...prev,
-      selectColumns: prev.selectColumns.map((col, i) => 
-        i === index ? { ...col, [field]: value || undefined } : col
+      selectColumns: prev.selectColumns.map((col, i) =>
+        i === index ? {...col, [field]: value || undefined} : col
       )
     }))
   }
@@ -226,15 +226,15 @@ const QueryBuilder: React.FC = () => {
   const addFromTable = () => {
     setQueryStructure(prev => ({
       ...prev,
-      fromTables: [...prev.fromTables, { tableName: '' }]
+      fromTables: [...prev.fromTables, {tableName: ''}]
     }))
   }
 
   const updateFromTable = (index: number, field: keyof FromTable, value: string) => {
     setQueryStructure(prev => ({
       ...prev,
-      fromTables: prev.fromTables.map((table, i) => 
-        i === index ? { ...table, [field]: value || undefined } : table
+      fromTables: prev.fromTables.map((table, i) =>
+        i === index ? {...table, [field]: value || undefined} : table
       )
     }))
   }
@@ -249,11 +249,11 @@ const QueryBuilder: React.FC = () => {
   const addWhereCondition = () => {
     setQueryStructure(prev => ({
       ...prev,
-      whereConditions: [...prev.whereConditions, { 
-        columnName: '', 
-        operator: '=', 
-        value: '', 
-        negated: false 
+      whereConditions: [...prev.whereConditions, {
+        columnName: '',
+        operator: '=',
+        value: '',
+        negated: false
       }]
     }))
   }
@@ -261,8 +261,8 @@ const QueryBuilder: React.FC = () => {
   const updateWhereCondition = (index: number, field: keyof WhereCondition, value: any) => {
     setQueryStructure(prev => ({
       ...prev,
-      whereConditions: prev.whereConditions.map((condition, i) => 
-        i === index ? { ...condition, [field]: value } : condition
+      whereConditions: prev.whereConditions.map((condition, i) =>
+        i === index ? {...condition, [field]: value} : condition
       )
     }))
   }
@@ -277,15 +277,15 @@ const QueryBuilder: React.FC = () => {
   const addOrderByColumn = () => {
     setQueryStructure(prev => ({
       ...prev,
-      orderByColumns: [...prev.orderByColumns, { columnName: '', direction: 'ASC' }]
+      orderByColumns: [...prev.orderByColumns, {columnName: '', direction: 'ASC'}]
     }))
   }
 
   const updateOrderByColumn = (index: number, field: keyof OrderByColumn, value: string) => {
     setQueryStructure(prev => ({
       ...prev,
-      orderByColumns: prev.orderByColumns.map((col, i) => 
-        i === index ? { ...col, [field]: value || undefined } : col
+      orderByColumns: prev.orderByColumns.map((col, i) =>
+        i === index ? {...col, [field]: value || undefined} : col
       )
     }))
   }
@@ -300,12 +300,12 @@ const QueryBuilder: React.FC = () => {
   return (
     <div className="query-builder">
       <h1>{t('queryBuilder.title')}</h1>
-      
+
       {/* Connection Selection */}
       <div className="section">
         <h2>{t('queryBuilder.databaseConnection')}</h2>
-        <select 
-          value={selectedConnectionId || ''} 
+        <select
+          value={selectedConnectionId || ''}
           onChange={(e) => setSelectedConnectionId(Number(e.target.value) || null)}
           className="connection-select"
         >
@@ -323,8 +323,8 @@ const QueryBuilder: React.FC = () => {
         <h2>{t('queryBuilder.selectClause')}</h2>
         {queryStructure.selectColumns.map((column, index) => (
           <div key={index} className="clause-item">
-            <select 
-              value={column.tableName} 
+            <select
+              value={column.tableName}
               onChange={(e) => updateSelectColumn(index, 'tableName', e.target.value)}
             >
               <option value="">{t('queryBuilder.selectTable')}</option>
@@ -334,9 +334,9 @@ const QueryBuilder: React.FC = () => {
                 </option>
               ))}
             </select>
-            
-            <select 
-              value={column.columnName} 
+
+            <select
+              value={column.columnName}
               onChange={(e) => updateSelectColumn(index, 'columnName', e.target.value)}
             >
               <option value="">{t('queryBuilder.selectColumn')}</option>
@@ -350,8 +350,8 @@ const QueryBuilder: React.FC = () => {
                 ))}
             </select>
 
-            <select 
-              value={column.aggregateFunction || ''} 
+            <select
+              value={column.aggregateFunction || ''}
               onChange={(e) => updateSelectColumn(index, 'aggregateFunction', e.target.value || undefined)}
             >
               <option value="">{t('queryBuilder.noFunction')}</option>
@@ -362,23 +362,24 @@ const QueryBuilder: React.FC = () => {
               <option value="MIN">MIN</option>
             </select>
 
-            <input 
-              type="text" 
-              placeholder={t('queryBuilder.aliasOptional')} 
-              value={column.alias || ''} 
+            <input
+              type="text"
+              placeholder={t('queryBuilder.aliasOptional')}
+              value={column.alias || ''}
               onChange={(e) => updateSelectColumn(index, 'alias', e.target.value || '')}
             />
 
             <label>
-              <input 
-                type="checkbox" 
-                checked={column.distinct} 
+              <input
+                type="checkbox"
+                checked={column.distinct}
                 onChange={(e) => updateSelectColumn(index, 'distinct', e.target.checked)}
               />
               {t('queryBuilder.distinct')}
             </label>
 
-            <button onClick={() => removeSelectColumn(index)} className="remove-btn">{t('queryBuilder.remove')}</button>
+            <button onClick={() => removeSelectColumn(index)}
+                    className="remove-btn">{t('queryBuilder.remove')}</button>
           </div>
         ))}
         <button onClick={addSelectColumn} className="add-btn">{t('queryBuilder.addColumn')}</button>
@@ -389,8 +390,8 @@ const QueryBuilder: React.FC = () => {
         <h2>{t('queryBuilder.fromClause')}</h2>
         {queryStructure.fromTables.map((table, index) => (
           <div key={index} className="clause-item">
-            <select 
-              value={table.tableName} 
+            <select
+              value={table.tableName}
               onChange={(e) => updateFromTable(index, 'tableName', e.target.value)}
             >
               <option value="">{t('queryBuilder.selectTable')}</option>
@@ -400,15 +401,16 @@ const QueryBuilder: React.FC = () => {
                 </option>
               ))}
             </select>
-            
-            <input 
-              type="text" 
-              placeholder={t('queryBuilder.aliasOptional')} 
-              value={table.alias || ''} 
+
+            <input
+              type="text"
+              placeholder={t('queryBuilder.aliasOptional')}
+              value={table.alias || ''}
               onChange={(e) => updateFromTable(index, 'alias', e.target.value || '')}
             />
 
-            <button onClick={() => removeFromTable(index)} className="remove-btn">{t('queryBuilder.remove')}</button>
+            <button onClick={() => removeFromTable(index)}
+                    className="remove-btn">{t('queryBuilder.remove')}</button>
           </div>
         ))}
         <button onClick={addFromTable} className="add-btn">{t('queryBuilder.addTable')}</button>
@@ -419,8 +421,8 @@ const QueryBuilder: React.FC = () => {
         <h2>{t('queryBuilder.whereClause')}</h2>
         {queryStructure.whereConditions.map((condition, index) => (
           <div key={index} className="clause-item">
-            <select 
-              value={condition.tableName || ''} 
+            <select
+              value={condition.tableName || ''}
               onChange={(e) => updateWhereCondition(index, 'tableName', e.target.value || undefined)}
             >
               <option value="">{t('queryBuilder.selectTable')}</option>
@@ -431,8 +433,8 @@ const QueryBuilder: React.FC = () => {
               ))}
             </select>
 
-            <select 
-              value={condition.columnName} 
+            <select
+              value={condition.columnName}
               onChange={(e) => updateWhereCondition(index, 'columnName', e.target.value)}
             >
               <option value="">{t('queryBuilder.selectColumn')}</option>
@@ -445,8 +447,8 @@ const QueryBuilder: React.FC = () => {
                 ))}
             </select>
 
-            <select 
-              value={condition.operator} 
+            <select
+              value={condition.operator}
               onChange={(e) => updateWhereCondition(index, 'operator', e.target.value)}
             >
               <option value="=">=</option>
@@ -463,17 +465,17 @@ const QueryBuilder: React.FC = () => {
             </select>
 
             {!['IS NULL', 'IS NOT NULL'].includes(condition.operator) && (
-              <input 
-                type="text" 
-                placeholder={t('queryBuilder.value')} 
-                value={condition.value || ''} 
+              <input
+                type="text"
+                placeholder={t('queryBuilder.value')}
+                value={condition.value || ''}
                 onChange={(e) => updateWhereCondition(index, 'value', e.target.value)}
               />
             )}
 
             {index > 0 && (
-              <select 
-                value={condition.logicalOperator || 'AND'} 
+              <select
+                value={condition.logicalOperator || 'AND'}
                 onChange={(e) => updateWhereCondition(index, 'logicalOperator', e.target.value)}
               >
                 <option value="AND">AND</option>
@@ -482,15 +484,16 @@ const QueryBuilder: React.FC = () => {
             )}
 
             <label>
-              <input 
-                type="checkbox" 
-                checked={condition.negated} 
+              <input
+                type="checkbox"
+                checked={condition.negated}
                 onChange={(e) => updateWhereCondition(index, 'negated', e.target.checked)}
               />
               {t('queryBuilder.not')}
             </label>
 
-            <button onClick={() => removeWhereCondition(index)} className="remove-btn">{t('queryBuilder.remove')}</button>
+            <button onClick={() => removeWhereCondition(index)}
+                    className="remove-btn">{t('queryBuilder.remove')}</button>
           </div>
         ))}
         <button onClick={addWhereCondition} className="add-btn">{t('queryBuilder.addCondition')}</button>
@@ -501,8 +504,8 @@ const QueryBuilder: React.FC = () => {
         <h2>{t('queryBuilder.orderByClause')}</h2>
         {queryStructure.orderByColumns.map((column, index) => (
           <div key={index} className="clause-item">
-            <select 
-              value={column.tableName || ''} 
+            <select
+              value={column.tableName || ''}
               onChange={(e) => updateOrderByColumn(index, 'tableName', e.target.value || '')}
             >
               <option value="">{t('queryBuilder.selectTable')}</option>
@@ -513,8 +516,8 @@ const QueryBuilder: React.FC = () => {
               ))}
             </select>
 
-            <select 
-              value={column.columnName} 
+            <select
+              value={column.columnName}
               onChange={(e) => updateOrderByColumn(index, 'columnName', e.target.value)}
             >
               <option value="">{t('queryBuilder.selectColumn')}</option>
@@ -527,15 +530,16 @@ const QueryBuilder: React.FC = () => {
                 ))}
             </select>
 
-            <select 
-              value={column.direction} 
+            <select
+              value={column.direction}
               onChange={(e) => updateOrderByColumn(index, 'direction', e.target.value)}
             >
               <option value="ASC">ASC</option>
               <option value="DESC">DESC</option>
             </select>
 
-            <button onClick={() => removeOrderByColumn(index)} className="remove-btn">{t('queryBuilder.remove')}</button>
+            <button onClick={() => removeOrderByColumn(index)}
+                    className="remove-btn">{t('queryBuilder.remove')}</button>
           </div>
         ))}
         <button onClick={addOrderByColumn} className="add-btn">{t('queryBuilder.addOrderBy')}</button>
@@ -544,31 +548,31 @@ const QueryBuilder: React.FC = () => {
       {/* LIMIT */}
       <div className="section">
         <h2>{t('queryBuilder.limitClause')}</h2>
-        <input 
-          type="number" 
-          placeholder={t('queryBuilder.limitOptional')} 
-          value={queryStructure.limit || ''} 
-          onChange={(e) => setQueryStructure(prev => ({ 
-            ...prev, 
-            limit: e.target.value ? parseInt(e.target.value) : undefined 
+        <input
+          type="number"
+          placeholder={t('queryBuilder.limitOptional')}
+          value={queryStructure.limit || ''}
+          onChange={(e) => setQueryStructure(prev => ({
+            ...prev,
+            limit: e.target.value ? parseInt(e.target.value) : undefined
           }))}
         />
-        <input 
-          type="number" 
-          placeholder={t('queryBuilder.offsetOptional')} 
-          value={queryStructure.offset || ''} 
-          onChange={(e) => setQueryStructure(prev => ({ 
-            ...prev, 
-            offset: e.target.value ? parseInt(e.target.value) : undefined 
+        <input
+          type="number"
+          placeholder={t('queryBuilder.offsetOptional')}
+          value={queryStructure.offset || ''}
+          onChange={(e) => setQueryStructure(prev => ({
+            ...prev,
+            offset: e.target.value ? parseInt(e.target.value) : undefined
           }))}
         />
       </div>
 
       {/* Build Button */}
       <div className="section">
-        <button 
-          onClick={buildQuery} 
-          disabled={isBuilding} 
+        <button
+          onClick={buildQuery}
+          disabled={isBuilding}
           className="build-btn"
         >
           {isBuilding ? t('queryBuilder.building') : t('queryBuilder.generateSQL')}

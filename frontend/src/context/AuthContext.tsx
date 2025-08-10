@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import React, { createContext, useContext, useState, useEffect, type ReactNode } from 'react'
-import { apiRequest } from '../utils/api'
+import React, {createContext, useContext, useState, useEffect, type ReactNode} from 'react'
+import {apiRequest} from '../utils/api'
 
 interface User {
   id: number
@@ -39,7 +39,7 @@ interface AuthProviderProps {
   children: ReactNode
 }
 
-export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
+export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
   const [user, setUser] = useState<User | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
@@ -47,7 +47,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const initAuth = async () => {
       const token = localStorage.getItem('token')
       const storedUser = localStorage.getItem('user')
-      
+
       if (token && storedUser) {
         try {
           const userData = JSON.parse(storedUser)
@@ -65,7 +65,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
       setIsLoading(false)
     }
-    
+
     initAuth()
   }, [])
 
@@ -75,7 +75,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ username, password }),
+      body: JSON.stringify({username, password}),
     })
 
     if (!response.ok) {

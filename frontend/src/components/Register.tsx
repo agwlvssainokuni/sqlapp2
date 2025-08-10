@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import React, { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { useTranslation } from 'react-i18next'
+import React, {useState} from 'react'
+import {Link, useNavigate} from 'react-router-dom'
+import {useTranslation} from 'react-i18next'
 import LanguageSwitcher from './LanguageSwitcher'
 
 const Register: React.FC = () => {
-  const { t } = useTranslation()
+  const {t} = useTranslation()
   const [username, setUsername] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -46,7 +46,7 @@ const Register: React.FC = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ username, email, password }),
+        body: JSON.stringify({username, email, password}),
       })
 
       if (!response.ok) {
@@ -54,7 +54,7 @@ const Register: React.FC = () => {
         throw new Error(errorData)
       }
 
-      navigate('/login', { state: { message: 'Registration successful! Please login.' } }) // TODO: Add to translation
+      navigate('/login', {state: {message: 'Registration successful! Please login.'}}) // TODO: Add to translation
     } catch (error) {
       setError(error instanceof Error ? error.message : t('auth.registrationFailed'))
     } finally {
@@ -67,7 +67,7 @@ const Register: React.FC = () => {
       <div className="register-form">
         <div className="register-header">
           <h2>SqlApp2 {t('auth.register')}</h2>
-          <LanguageSwitcher />
+          <LanguageSwitcher/>
         </div>
         <form onSubmit={handleSubmit}>
           <div className="form-group">

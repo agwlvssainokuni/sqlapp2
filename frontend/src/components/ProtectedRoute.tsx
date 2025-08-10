@@ -14,22 +14,22 @@
  * limitations under the License.
  */
 
-import React, { type ReactNode } from 'react'
-import { Navigate } from 'react-router-dom'
-import { useAuth } from '../context/AuthContext'
+import React, {type ReactNode} from 'react'
+import {Navigate} from 'react-router-dom'
+import {useAuth} from '../context/AuthContext'
 
 interface ProtectedRouteProps {
   children: ReactNode
 }
 
-const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
-  const { isAuthenticated, isLoading } = useAuth()
+const ProtectedRoute: React.FC<ProtectedRouteProps> = ({children}) => {
+  const {isAuthenticated, isLoading} = useAuth()
 
   if (isLoading) {
     return <div>Loading...</div>
   }
 
-  return isAuthenticated ? <>{children}</> : <Navigate to="/login" replace />
+  return isAuthenticated ? <>{children}</> : <Navigate to="/login" replace/>
 }
 
 export default ProtectedRoute

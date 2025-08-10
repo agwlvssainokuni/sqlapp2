@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import React, { useState, useEffect } from 'react'
-import { useTranslation } from 'react-i18next'
-import { useAuth } from '../context/AuthContext'
+import React, {useState, useEffect} from 'react'
+import {useTranslation} from 'react-i18next'
+import {useAuth} from '../context/AuthContext'
 
 interface DatabaseConnection {
   id: number
@@ -76,8 +76,8 @@ interface TableDetails {
 }
 
 const SchemaViewer: React.FC = () => {
-  const { t } = useTranslation()
-  const { } = useAuth()
+  const {t} = useTranslation()
+  const {} = useAuth()
   const [connections, setConnections] = useState<DatabaseConnection[]>([])
   const [selectedConnectionId, setSelectedConnectionId] = useState<number | null>(null)
   const [schemaInfo, setSchemaInfo] = useState<SchemaInfo | null>(null)
@@ -155,7 +155,7 @@ const SchemaViewer: React.FC = () => {
       const params = new URLSearchParams()
       if (selectedCatalog) params.append('catalog', selectedCatalog)
       if (selectedSchema) params.append('schema', selectedSchema)
-      
+
       const response = await fetch(`/api/schema/connections/${selectedConnectionId}/tables?${params}`, {
         headers: {
           'Authorization': `Bearer ${token}`
@@ -185,7 +185,7 @@ const SchemaViewer: React.FC = () => {
       const params = new URLSearchParams()
       if (selectedCatalog) params.append('catalog', selectedCatalog)
       if (selectedSchema) params.append('schema', selectedSchema)
-      
+
       const response = await fetch(`/api/schema/connections/${selectedConnectionId}/tables/${tableName}?${params}`, {
         headers: {
           'Authorization': `Bearer ${token}`
@@ -232,11 +232,11 @@ const SchemaViewer: React.FC = () => {
     <div className="schema-viewer">
       <div className="schema-header">
         <h2>{t('schemaViewer.title')}</h2>
-        
+
         <div className="connection-selector">
           <label>{t('schemaViewer.selectConnectionLabel')}</label>
-          <select 
-            value={selectedConnectionId || ''} 
+          <select
+            value={selectedConnectionId || ''}
             onChange={(e) => handleConnectionChange(e.target.value)}
           >
             <option value="">{t('schemaViewer.selectConnection')}</option>
@@ -259,8 +259,12 @@ const SchemaViewer: React.FC = () => {
         <div className="schema-info">
           <h3>{t('schemaViewer.databaseInformation')}</h3>
           <div className="info-grid">
-            <div><strong>{t('schemaViewer.database')}</strong> {schemaInfo.databaseProductName} {schemaInfo.databaseProductVersion}</div>
-            <div><strong>{t('schemaViewer.driver')}</strong> {schemaInfo.driverName} {schemaInfo.driverVersion}</div>
+            <div>
+              <strong>{t('schemaViewer.database')}</strong> {schemaInfo.databaseProductName} {schemaInfo.databaseProductVersion}
+            </div>
+            <div>
+              <strong>{t('schemaViewer.driver')}</strong> {schemaInfo.driverName} {schemaInfo.driverVersion}
+            </div>
           </div>
 
           {(schemaInfo.catalogs.length > 0 || schemaInfo.schemas.length > 0) && (
@@ -268,7 +272,8 @@ const SchemaViewer: React.FC = () => {
               {schemaInfo.catalogs.length > 0 && (
                 <div>
                   <label>{t('schemaViewer.catalog')}</label>
-                  <select value={selectedCatalog} onChange={(e) => setSelectedCatalog(e.target.value)}>
+                  <select value={selectedCatalog}
+                          onChange={(e) => setSelectedCatalog(e.target.value)}>
                     <option value="">{t('schemaViewer.allCatalogs')}</option>
                     {schemaInfo.catalogs.map(catalog => (
                       <option key={catalog} value={catalog}>{catalog}</option>
@@ -300,7 +305,7 @@ const SchemaViewer: React.FC = () => {
           <h3>{t('schemaViewer.tables')}</h3>
           <div className="tables-list">
             {tables.map(table => (
-              <div 
+              <div
                 key={`${table.catalog || ''}.${table.schema || ''}.${table.name}`}
                 className={`table-item ${selectedTable === table.name ? 'selected' : ''}`}
                 onClick={() => handleTableClick(table.name)}
@@ -317,33 +322,33 @@ const SchemaViewer: React.FC = () => {
       {tableDetails && (
         <div className="table-details">
           <h3>{t('schemaViewer.tableDetails')} {tableDetails.tableName}</h3>
-          
+
           <div className="details-tabs">
             <div className="tab-content">
               <h4>{t('schemaViewer.columns')}</h4>
               <div className="columns-table">
                 <table>
                   <thead>
-                    <tr>
-                      <th>{t('schemaViewer.name')}</th>
-                      <th>{t('schemaViewer.type')}</th>
-                      <th>{t('schemaViewer.size')}</th>
-                      <th>{t('schemaViewer.nullable')}</th>
-                      <th>{t('schemaViewer.default')}</th>
-                      <th>{t('schemaViewer.remarks')}</th>
-                    </tr>
+                  <tr>
+                    <th>{t('schemaViewer.name')}</th>
+                    <th>{t('schemaViewer.type')}</th>
+                    <th>{t('schemaViewer.size')}</th>
+                    <th>{t('schemaViewer.nullable')}</th>
+                    <th>{t('schemaViewer.default')}</th>
+                    <th>{t('schemaViewer.remarks')}</th>
+                  </tr>
                   </thead>
                   <tbody>
-                    {tableDetails.columns.map(column => (
-                      <tr key={column.name}>
-                        <td>{column.name}</td>
-                        <td>{column.typeName}</td>
-                        <td>{column.columnSize}{column.decimalDigits > 0 && `,${column.decimalDigits}`}</td>
-                        <td>{column.nullable ? t('common.yes') : t('common.no')}</td>
-                        <td>{column.defaultValue || '-'}</td>
-                        <td>{column.remarks || '-'}</td>
-                      </tr>
-                    ))}
+                  {tableDetails.columns.map(column => (
+                    <tr key={column.name}>
+                      <td>{column.name}</td>
+                      <td>{column.typeName}</td>
+                      <td>{column.columnSize}{column.decimalDigits > 0 && `,${column.decimalDigits}`}</td>
+                      <td>{column.nullable ? t('common.yes') : t('common.no')}</td>
+                      <td>{column.defaultValue || '-'}</td>
+                      <td>{column.remarks || '-'}</td>
+                    </tr>
+                  ))}
                   </tbody>
                 </table>
               </div>
