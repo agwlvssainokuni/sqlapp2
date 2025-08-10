@@ -15,8 +15,6 @@
  */
 package cherry.sqlapp2.enums;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
 
 public enum DatabaseType {
     MYSQL("MySQL", "com.mysql.cj.jdbc.Driver", "jdbc:mysql://{host}:{port}/{database}?useInformationSchema=false", 3306),
@@ -56,14 +54,6 @@ public enum DatabaseType {
                 .replace("{host}", host)
                 .replace("{port}", String.valueOf(port))
                 .replace("{database}", database);
-    }
-
-    public Map<String, Object> toMap() {
-        Map<String, Object> map = new LinkedHashMap<>();
-        map.put("name", name());
-        map.put("displayName", displayName);
-        map.put("defaultPort", defaultPort);
-        return map;
     }
 
     public static DatabaseType fromString(String value) {
