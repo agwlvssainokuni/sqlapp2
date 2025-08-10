@@ -276,221 +276,222 @@ const ConnectionManagement: React.FC = () => {
       <div className="connection-management">
         <div className="connection-header">
           <button
-          onClick={() => setShowCreateForm(true)}
-          disabled={loading}
-          className="create-btn"
-        >
-          {t('connections.addConnection')}
-        </button>
-      </div>
-
-      {error && (
-        <div className="error-message">
-          <strong>{t('common.error')}:</strong> {error}
+            onClick={() => setShowCreateForm(true)}
+            disabled={loading}
+            className="create-btn"
+          >
+            {t('connections.addConnection')}
+          </button>
         </div>
-      )}
 
-      {showCreateForm && (
-        <div className="connection-form">
-          <h3>{editingConnection ? t('connections.editConnection') : t('connections.addConnection')}</h3>
-
-          <div className="form-grid">
-            <div className="form-group">
-              <label>{t('connections.connectionName')} *</label>
-              <input
-                type="text"
-                value={newConnection.connectionName}
-                onChange={(e) => setNewConnection(prev => ({...prev, connectionName: e.target.value}))}
-                placeholder={t('connections.connectionName')}
-              />
-            </div>
-
-            <div className="form-group">
-              <label>{t('connections.databaseType')} *</label>
-              <select
-                value={newConnection.databaseType}
-                onChange={(e) => handleDatabaseTypeChange(e.target.value as 'MYSQL' | 'POSTGRESQL' | 'MARIADB')}
-              >
-                <option value="MYSQL">MySQL</option>
-                <option value="POSTGRESQL">PostgreSQL</option>
-                <option value="MARIADB">MariaDB</option>
-              </select>
-            </div>
-
-            <div className="form-group">
-              <label>{t('connections.host')} *</label>
-              <input
-                type="text"
-                value={newConnection.host}
-                onChange={(e) => setNewConnection(prev => ({...prev, host: e.target.value}))}
-                placeholder="localhost"
-              />
-            </div>
-
-            <div className="form-group">
-              <label>{t('connections.port')} *</label>
-              <input
-                type="number"
-                value={newConnection.port}
-                onChange={(e) => setNewConnection(prev => ({
-                  ...prev,
-                  port: parseInt(e.target.value) || 3306
-                }))}
-                min="1"
-                max="65535"
-              />
-            </div>
-
-            <div className="form-group">
-              <label>{t('connections.databaseName')} *</label>
-              <input
-                type="text"
-                value={newConnection.databaseName}
-                onChange={(e) => setNewConnection(prev => ({...prev, databaseName: e.target.value}))}
-                placeholder="myapp"
-              />
-            </div>
-
-            <div className="form-group">
-              <label>{t('connections.username')} *</label>
-              <input
-                type="text"
-                value={newConnection.username}
-                onChange={(e) => setNewConnection(prev => ({...prev, username: e.target.value}))}
-                placeholder="dbuser"
-              />
-            </div>
-
-            <div className="form-group">
-              <label>{t('connections.password')} *</label>
-              <input
-                type="password"
-                value={newConnection.password}
-                onChange={(e) => setNewConnection(prev => ({...prev, password: e.target.value}))}
-                placeholder={editingConnection ? "Leave empty to keep current password" : t('connections.password')} // TODO: Add translation
-              />
-            </div>
-
-            <div className="form-group full-width">
-              <label>Additional Parameters</label> {/* TODO: Add translation */}
-              <input
-                type="text"
-                value={newConnection.additionalParams}
-                onChange={(e) => setNewConnection(prev => ({
-                  ...prev,
-                  additionalParams: e.target.value
-                }))}
-                placeholder="e.g., useSSL=true&allowPublicKeyRetrieval=true&serverTimezone=UTC"
-              />
-              <small className="form-help">
-                Optional JDBC URL parameters. For MySQL SSL error, use:
-                useSSL=true&allowPublicKeyRetrieval=true
-              </small>
-            </div>
+        {error && (
+          <div className="error-message">
+            <strong>{t('common.error')}:</strong> {error}
           </div>
-
-          <div className="form-actions">
-            <button
-              onClick={editingConnection ? updateConnection : createConnection}
-              disabled={loading || !newConnection.connectionName || !newConnection.host || !newConnection.username}
-              className="save-btn"
-            >
-              {loading ? `${t('connections.save')}...` : editingConnection ? t('connections.editConnection') : t('connections.addConnection')}
-            </button>
-            <button
-              onClick={cancelEdit}
-              disabled={loading}
-              className="cancel-btn"
-            >
-              {t('connections.cancel')}
-            </button>
-          </div>
-        </div>
-      )}
-
-      <div className="connections-list">
-        <h3>{t('connections.title')}</h3>
-
-        {loading && !showCreateForm && (
-          <div className="loading">{t('common.loading')}</div>
         )}
 
-        {connections.length === 0 && !loading ? (
-          <div className="no-connections">
-            <p>{t('connections.noConnections')}</p>
-            <p>Click "{t('connections.addConnection')}" to get
-              started.</p> {/* TODO: Improve translation */}
-          </div>
-        ) : (
-          <div className="connections-grid">
-            {connections.map(connection => (
-              <div key={connection.id} className="connection-card">
-                <div className="connection-header">
-                  <h4>{connection.connectionName}</h4>
-                  <div className="connection-type">
-                    {getDatabaseTypeLabel(connection.databaseType)}
-                  </div>
-                </div>
+        {showCreateForm && (
+          <div className="connection-form">
+            <h3>{editingConnection ? t('connections.editConnection') : t('connections.addConnection')}</h3>
 
-                <div className="connection-details">
-                  <div className="detail-row">
-                    <span className="label">{t('connections.host')}:</span>
-                    <span>{connection.host}:{connection.port}</span>
+            <div className="form-grid">
+              <div className="form-group">
+                <label>{t('connections.connectionName')} *</label>
+                <input
+                  type="text"
+                  value={newConnection.connectionName}
+                  onChange={(e) => setNewConnection(prev => ({...prev, connectionName: e.target.value}))}
+                  placeholder={t('connections.connectionName')}
+                />
+              </div>
+
+              <div className="form-group">
+                <label>{t('connections.databaseType')} *</label>
+                <select
+                  value={newConnection.databaseType}
+                  onChange={(e) => handleDatabaseTypeChange(e.target.value as 'MYSQL' | 'POSTGRESQL' | 'MARIADB')}
+                >
+                  <option value="MYSQL">MySQL</option>
+                  <option value="POSTGRESQL">PostgreSQL</option>
+                  <option value="MARIADB">MariaDB</option>
+                </select>
+              </div>
+
+              <div className="form-group">
+                <label>{t('connections.host')} *</label>
+                <input
+                  type="text"
+                  value={newConnection.host}
+                  onChange={(e) => setNewConnection(prev => ({...prev, host: e.target.value}))}
+                  placeholder="localhost"
+                />
+              </div>
+
+              <div className="form-group">
+                <label>{t('connections.port')} *</label>
+                <input
+                  type="number"
+                  value={newConnection.port}
+                  onChange={(e) => setNewConnection(prev => ({
+                    ...prev,
+                    port: parseInt(e.target.value) || 3306
+                  }))}
+                  min="1"
+                  max="65535"
+                />
+              </div>
+
+              <div className="form-group">
+                <label>{t('connections.databaseName')} *</label>
+                <input
+                  type="text"
+                  value={newConnection.databaseName}
+                  onChange={(e) => setNewConnection(prev => ({...prev, databaseName: e.target.value}))}
+                  placeholder="myapp"
+                />
+              </div>
+
+              <div className="form-group">
+                <label>{t('connections.username')} *</label>
+                <input
+                  type="text"
+                  value={newConnection.username}
+                  onChange={(e) => setNewConnection(prev => ({...prev, username: e.target.value}))}
+                  placeholder="dbuser"
+                />
+              </div>
+
+              <div className="form-group">
+                <label>{t('connections.password')} *</label>
+                <input
+                  type="password"
+                  value={newConnection.password}
+                  onChange={(e) => setNewConnection(prev => ({...prev, password: e.target.value}))}
+                  placeholder={editingConnection ? "Leave empty to keep current password" : t('connections.password')} // TODO: Add translation
+                />
+              </div>
+
+              <div className="form-group full-width">
+                <label>Additional Parameters</label> {/* TODO: Add translation */}
+                <input
+                  type="text"
+                  value={newConnection.additionalParams}
+                  onChange={(e) => setNewConnection(prev => ({
+                    ...prev,
+                    additionalParams: e.target.value
+                  }))}
+                  placeholder="e.g., useSSL=true&allowPublicKeyRetrieval=true&serverTimezone=UTC"
+                />
+                <small className="form-help">
+                  Optional JDBC URL parameters. For MySQL SSL error, use:
+                  useSSL=true&allowPublicKeyRetrieval=true
+                </small>
+              </div>
+            </div>
+
+            <div className="form-actions">
+              <button
+                onClick={editingConnection ? updateConnection : createConnection}
+                disabled={loading || !newConnection.connectionName || !newConnection.host || !newConnection.username}
+                className="save-btn"
+              >
+                {loading ? `${t('connections.save')}...` : editingConnection ? t('connections.editConnection') : t('connections.addConnection')}
+              </button>
+              <button
+                onClick={cancelEdit}
+                disabled={loading}
+                className="cancel-btn"
+              >
+                {t('connections.cancel')}
+              </button>
+            </div>
+          </div>
+        )}
+
+        <div className="connections-list">
+          <h3>{t('connections.title')}</h3>
+
+          {loading && !showCreateForm && (
+            <div className="loading">{t('common.loading')}</div>
+          )}
+
+          {connections.length === 0 && !loading ? (
+            <div className="no-connections">
+              <p>{t('connections.noConnections')}</p>
+              <p>Click "{t('connections.addConnection')}" to get
+                started.</p> {/* TODO: Improve translation */}
+            </div>
+          ) : (
+            <div className="connections-grid">
+              {connections.map(connection => (
+                <div key={connection.id} className="connection-card">
+                  <div className="connection-header">
+                    <h4>{connection.connectionName}</h4>
+                    <div className="connection-type">
+                      {getDatabaseTypeLabel(connection.databaseType)}
+                    </div>
                   </div>
-                  <div className="detail-row">
-                    <span className="label">{t('connections.databaseName')}:</span>
-                    <span>{connection.databaseName}</span>
-                  </div>
-                  <div className="detail-row">
-                    <span className="label">{t('connections.username')}:</span>
-                    <span>{connection.username}</span>
-                  </div>
-                  <div className="detail-row">
-                    <span className="label">Status:</span> {/* TODO: Add translation */}
-                    <span className={connection.isActive ? 'status-active' : 'status-inactive'}>
+
+                  <div className="connection-details">
+                    <div className="detail-row">
+                      <span className="label">{t('connections.host')}:</span>
+                      <span>{connection.host}:{connection.port}</span>
+                    </div>
+                    <div className="detail-row">
+                      <span className="label">{t('connections.databaseName')}:</span>
+                      <span>{connection.databaseName}</span>
+                    </div>
+                    <div className="detail-row">
+                      <span className="label">{t('connections.username')}:</span>
+                      <span>{connection.username}</span>
+                    </div>
+                    <div className="detail-row">
+                      <span className="label">Status:</span> {/* TODO: Add translation */}
+                      <span className={connection.isActive ? 'status-active' : 'status-inactive'}>
                       {connection.isActive ? 'Active' : 'Inactive'} {/* TODO: Add translation */}
                     </span>
+                    </div>
+                  </div>
+
+                  {testResults[connection.id] && (
+                    <div
+                      className={`test-result ${testResults[connection.id].success ? 'success' : 'error'}`}>
+                      {testResults[connection.id].message}
+                      {testResults[connection.id].responseTimeMs && (
+                        <span
+                          className="response-time"> ({testResults[connection.id].responseTimeMs}ms)</span>
+                      )}
+                    </div>
+                  )}
+
+                  <div className="connection-actions">
+                    <button
+                      onClick={() => testConnection(connection)}
+                      disabled={testing[connection.id]}
+                      className="test-btn"
+                    >
+                      {testing[connection.id] ? t('connections.testing') : t('connections.testConnection')}
+                    </button>
+                    <button
+                      onClick={() => startEdit(connection)}
+                      disabled={loading}
+                      className="edit-btn"
+                    >
+                      {t('connections.edit')}
+                    </button>
+                    <button
+                      onClick={() => deleteConnection(connection.id)}
+                      disabled={loading}
+                      className="delete-btn"
+                    >
+                      {t('connections.delete')}
+                    </button>
                   </div>
                 </div>
-
-                {testResults[connection.id] && (
-                  <div
-                    className={`test-result ${testResults[connection.id].success ? 'success' : 'error'}`}>
-                    {testResults[connection.id].message}
-                    {testResults[connection.id].responseTimeMs && (
-                      <span
-                        className="response-time"> ({testResults[connection.id].responseTimeMs}ms)</span>
-                    )}
-                  </div>
-                )}
-
-                <div className="connection-actions">
-                  <button
-                    onClick={() => testConnection(connection)}
-                    disabled={testing[connection.id]}
-                    className="test-btn"
-                  >
-                    {testing[connection.id] ? t('connections.testing') : t('connections.testConnection')}
-                  </button>
-                  <button
-                    onClick={() => startEdit(connection)}
-                    disabled={loading}
-                    className="edit-btn"
-                  >
-                    {t('connections.edit')}
-                  </button>
-                  <button
-                    onClick={() => deleteConnection(connection.id)}
-                    disabled={loading}
-                    className="delete-btn"
-                  >
-                    {t('connections.delete')}
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </Layout>
   )

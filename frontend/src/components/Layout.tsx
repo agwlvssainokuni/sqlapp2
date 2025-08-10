@@ -26,7 +26,7 @@ interface LayoutProps {
 const Layout: React.FC<LayoutProps> = ({children, title}) => {
   return (
     <div className="app-layout">
-      <Header />
+      <Header/>
       <main className="main-content">
         <div className="content-container">
           {title && (
@@ -37,7 +37,7 @@ const Layout: React.FC<LayoutProps> = ({children, title}) => {
           {children}
         </div>
       </main>
-      <Footer />
+      <Footer/>
     </div>
   )
 }

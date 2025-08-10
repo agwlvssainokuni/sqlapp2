@@ -282,155 +282,154 @@ const SqlExecution: React.FC = () => {
             ))}
           </select>
         </div>
-      </div>
 
-      {/* Execution Mode Indicator */}
-      {executionMode && executionMode !== 'new' && (
-        <div className="execution-mode-indicator">
-          {executionMode === 'saved_query' ? (
-            <div className="mode-badge saved-query-mode">
-              <span className="mode-icon">🔖</span>
-              <span className="mode-text">
+        {/* Execution Mode Indicator */}
+        {executionMode && executionMode !== 'new' && (
+          <div className="execution-mode-indicator">
+            {executionMode === 'saved_query' ? (
+              <div className="mode-badge saved-query-mode">
+                <span className="mode-icon">🔖</span>
+                <span className="mode-text">
                 {t('sqlExecution.executingQuery')}: <strong>{currentQueryName}</strong>
               </span>
-              <span className="mode-note">({t('sqlExecution.sqlReadOnly')})</span>
-            </div>
-          ) : executionMode === 'history' ? (
-            <div className="mode-badge history-mode">
-              <span className="mode-icon">🕒</span>
-              <span className="mode-text">
+                <span className="mode-note">({t('sqlExecution.sqlReadOnly')})</span>
+              </div>
+            ) : executionMode === 'history' ? (
+              <div className="mode-badge history-mode">
+                <span className="mode-icon">🕒</span>
+                <span className="mode-text">
                 {t('sqlExecution.reExecutingHistory')}
               </span>
-              <span className="mode-note">({t('sqlExecution.sqlEditable')})</span>
-            </div>
-          ) : null}
-        </div>
-      )}
-
-      <div className="sql-input-section">
-        <label htmlFor="sql-textarea">{t('sqlExecution.sqlQuery')}:</label>
-        <textarea
-          id="sql-textarea"
-          value={sql}
-          onChange={(e) => setSql(e.target.value)}
-          placeholder={t('sqlExecution.enterQuery')}
-          rows={8}
-          readOnly={executionMode === 'saved_query'}
-          style={{
-            backgroundColor: executionMode === 'saved_query' ? '#f8f9fa' : 'white',
-            cursor: executionMode === 'saved_query' ? 'not-allowed' : 'text'
-          }}
-        />
-      </div>
-
-      {parameters.length > 0 && (
-        <div className="parameters-section">
-          <h3>{t('sqlExecution.queryParameters')}</h3>
-          {parameters.map((param, index) => (
-            <div key={param.name} className="parameter-row">
-              <label>:{param.name}</label>
-              <select
-                value={param.type}
-                onChange={(e) => handleParameterChange(index, 'type', e.target.value)}
-              >
-                <option value="string">String</option>
-                <option value="int">Integer</option>
-                <option value="long">Long</option>
-                <option value="double">Double</option>
-                <option value="boolean">Boolean</option>
-                <option value="date">Date</option>
-                <option value="time">Time</option>
-                <option value="datetime">DateTime</option>
-              </select>
-              <input
-                type={param.type === 'boolean' ? 'checkbox' : 'text'}
-                value={param.type === 'boolean' ? undefined : param.value}
-                checked={param.type === 'boolean' ? param.value === 'true' : undefined}
-                onChange={(e) => handleParameterChange(
-                  index,
-                  'value',
-                  param.type === 'boolean' ? e.target.checked.toString() : e.target.value
-                )}
-                placeholder={t('sqlExecution.enterValue', {type: param.type})}
-              />
-            </div>
-          ))}
-        </div>
-      )}
-
-      <div className="execution-controls">
-        <button
-          onClick={executeSql}
-          disabled={loading || !selectedConnectionId || !sql.trim()}
-          className="execute-btn"
-        >
-          {loading ? t('sqlExecution.executing') : t('sqlExecution.executeQuery')}
-        </button>
-        <button
-          onClick={validateSql}
-          disabled={loading || !selectedConnectionId || !sql.trim()}
-          className="validate-btn"
-        >
-          {t('sqlExecution.validateSQL')}
-        </button>
-      </div>
-
-      {error && (
-        <div className="error-message">
-          <strong>{t('common.error')}:</strong> {error}
-        </div>
-      )}
-
-      {result && (
-        <div className="result-section">
-          <div className="result-header">
-            <h3>{t('sqlExecution.queryResult')}</h3>
-            <div className="result-meta">
-              <span>{t('sqlExecution.rows')}: {result.rowCount}</span>
-              <span>{t('sqlExecution.executionTime')}: {result.executionTimeMs}{t('sqlExecution.ms')}</span>
-            </div>
+                <span className="mode-note">({t('sqlExecution.sqlEditable')})</span>
+              </div>
+            ) : null}
           </div>
+        )}
 
-          {result.message && (
-            <div className="result-message">
-              {result.message}
+        <div className="sql-input-section">
+          <label htmlFor="sql-textarea">{t('sqlExecution.sqlQuery')}:</label>
+          <textarea
+            id="sql-textarea"
+            value={sql}
+            onChange={(e) => setSql(e.target.value)}
+            placeholder={t('sqlExecution.enterQuery')}
+            rows={8}
+            readOnly={executionMode === 'saved_query'}
+            style={{
+              backgroundColor: executionMode === 'saved_query' ? '#f8f9fa' : 'white',
+              cursor: executionMode === 'saved_query' ? 'not-allowed' : 'text'
+            }}
+          />
+        </div>
+
+        {parameters.length > 0 && (
+          <div className="parameters-section">
+            <h3>{t('sqlExecution.queryParameters')}</h3>
+            {parameters.map((param, index) => (
+              <div key={param.name} className="parameter-row">
+                <label>:{param.name}</label>
+                <select
+                  value={param.type}
+                  onChange={(e) => handleParameterChange(index, 'type', e.target.value)}
+                >
+                  <option value="string">String</option>
+                  <option value="int">Integer</option>
+                  <option value="long">Long</option>
+                  <option value="double">Double</option>
+                  <option value="boolean">Boolean</option>
+                  <option value="date">Date</option>
+                  <option value="time">Time</option>
+                  <option value="datetime">DateTime</option>
+                </select>
+                <input
+                  type={param.type === 'boolean' ? 'checkbox' : 'text'}
+                  value={param.type === 'boolean' ? undefined : param.value}
+                  checked={param.type === 'boolean' ? param.value === 'true' : undefined}
+                  onChange={(e) => handleParameterChange(
+                    index,
+                    'value',
+                    param.type === 'boolean' ? e.target.checked.toString() : e.target.value
+                  )}
+                  placeholder={t('sqlExecution.enterValue', {type: param.type})}
+                />
+              </div>
+            ))}
+          </div>
+        )}
+
+        <div className="execution-controls">
+          <button
+            onClick={executeSql}
+            disabled={loading || !selectedConnectionId || !sql.trim()}
+            className="execute-btn"
+          >
+            {loading ? t('sqlExecution.executing') : t('sqlExecution.executeQuery')}
+          </button>
+          <button
+            onClick={validateSql}
+            disabled={loading || !selectedConnectionId || !sql.trim()}
+            className="validate-btn"
+          >
+            {t('sqlExecution.validateSQL')}
+          </button>
+        </div>
+
+        {error && (
+          <div className="error-message">
+            <strong>{t('common.error')}:</strong> {error}
+          </div>
+        )}
+
+        {result && (
+          <div className="result-section">
+            <div className="result-header">
+              <h3>{t('sqlExecution.queryResult')}</h3>
+              <div className="result-meta">
+                <span>{t('sqlExecution.rows')}: {result.rowCount}</span>
+                <span>{t('sqlExecution.executionTime')}: {result.executionTimeMs}{t('sqlExecution.ms')}</span>
+              </div>
             </div>
-          )}
 
-          {result.hasMoreRows && result.note && (
-            <div className="result-warning">
-              ⚠️ {result.note}
-            </div>
-          )}
+            {result.message && (
+              <div className="result-message">
+                {result.message}
+              </div>
+            )}
 
-          {result.columns && result.columns.length > 0 && (
-            <div className="result-table-container">
-              <table className="result-table">
-                <thead>
-                <tr>
-                  {result.columns.map((column, index) => (
-                    <th key={index}>{column}</th>
-                  ))}
-                </tr>
-                </thead>
-                <tbody>
-                {result.rows.map((row, rowIndex) => (
-                  <tr key={rowIndex}>
-                    {result.columns.map((column, colIndex) => (
-                      <td key={colIndex}>
-                        {row[column] !== null && row[column] !== undefined
-                          ? String(row[column])
-                          : 'NULL'}
-                      </td>
+            {result.hasMoreRows && result.note && (
+              <div className="result-warning">
+                ⚠️ {result.note}
+              </div>
+            )}
+
+            {result.columns && result.columns.length > 0 && (
+              <div className="result-table-container">
+                <table className="result-table">
+                  <thead>
+                  <tr>
+                    {result.columns.map((column, index) => (
+                      <th key={index}>{column}</th>
                     ))}
                   </tr>
-                ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
-      )}
+                  </thead>
+                  <tbody>
+                  {result.rows.map((row, rowIndex) => (
+                    <tr key={rowIndex}>
+                      {result.columns.map((column, colIndex) => (
+                        <td key={colIndex}>
+                          {row[column] !== null && row[column] !== undefined
+                            ? String(row[column])
+                            : 'NULL'}
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </Layout>
   )

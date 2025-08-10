@@ -20,7 +20,7 @@
 .header-content {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 1rem 2rem;
+  padding: 16px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -35,7 +35,7 @@
 
 .header-nav {
   display: flex;
-  gap: 1rem;
+  gap: 16px;
   align-items: center;
 }
 
@@ -44,10 +44,10 @@
   background: none;
   border: 1px solid rgba(255, 255, 255, 0.3);
   color: white;
-  padding: 0.5rem 1rem;
+  padding: 8px 16px;
   border-radius: 4px;
   cursor: pointer;
-  font-size: 0.9rem;
+  font-size: 14px;
   transition: all 0.2s ease;
 }
 
@@ -67,15 +67,15 @@
 .content-container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 2rem;
+  padding: 16px;
   width: 100%;
   box-sizing: border-box;
 }
 
 /* Page Header */
 .page-header {
-  margin-bottom: 2rem;
-  padding-bottom: 1rem;
+  margin-bottom: 16px;
+  padding-bottom: 16px;
   border-bottom: 2px solid #e9ecef;
 }
 
@@ -98,7 +98,7 @@
 .footer-content {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 2rem;
+  padding: 0 16px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -138,31 +138,42 @@
 /* Responsive Design */
 @media (max-width: 768px) {
   .header-content {
-    padding: 1rem;
+    padding: 16px;
     flex-direction: column;
-    gap: 1rem;
+    gap: 16px;
     text-align: center;
   }
 
   .header-nav {
     flex-wrap: wrap;
     justify-content: center;
+    gap: 8px;
   }
 
   .content-container {
-    padding: 1rem;
+    padding: 16px;
   }
 
   .page-title {
-    font-size: 1.5rem;
+    font-size: 24px;
     text-align: center;
   }
 
   .footer-content {
-    padding: 0 1rem;
+    padding: 0 16px;
     flex-direction: column;
-    gap: 1rem;
+    gap: 16px;
     text-align: center;
+  }
+}
+
+@media (min-width: 769px) {
+  .content-container {
+    padding: 16px;
+  }
+  
+  .page-title {
+    font-size: 32px;
   }
 }
 
@@ -177,7 +188,7 @@
 
 .login-form, .register-form {
   background: white;
-  padding: 2rem;
+  padding: 16px;
   border-radius: 8px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   width: 100%;
@@ -186,27 +197,27 @@
 
 .login-form h2, .register-form h2 {
   text-align: center;
-  margin-bottom: 1.5rem;
+  margin-bottom: 16px;
   color: #333;
 }
 
 .form-group {
-  margin-bottom: 1rem;
+  margin-bottom: 16px;
 }
 
 .form-group label {
   display: block;
-  margin-bottom: 0.5rem;
+  margin-bottom: 8px;
   color: #555;
   font-weight: 500;
 }
 
 .form-group input {
   width: 100%;
-  padding: 0.75rem;
+  padding: 12px;
   border: 1px solid #ddd;
   border-radius: 4px;
-  font-size: 1rem;
+  font-size: 16px;
   box-sizing: border-box;
 }
 
@@ -218,12 +229,12 @@
 
 button {
   width: 100%;
-  padding: 0.75rem;
+  padding: 12px;
   background-color: #007bff;
   color: white;
   border: none;
   border-radius: 4px;
-  font-size: 1rem;
+  font-size: 16px;
   cursor: pointer;
   transition: background-color 0.2s;
 }
@@ -239,12 +250,12 @@ button:disabled {
 
 .error-message {
   color: #dc3545;
-  margin: 1rem 0;
-  padding: 0.75rem;
+  margin: 16px 0;
+  padding: 12px;
   background-color: #f8d7da;
   border: 1px solid #f5c6cb;
   border-radius: 4px;
-  font-size: 0.875rem;
+  font-size: 14px;
 }
 
 /* Dashboard */
@@ -252,31 +263,17 @@ button:disabled {
   min-height: 100vh;
 }
 
-.dashboard-header {
-  background-color: #343a40;
-  color: white;
-  padding: 1rem 2rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.dashboard-header h1 {
-  margin: 0;
-  font-size: 1.5rem;
-}
-
 .user-info {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 16px;
 }
 
 .logout-btn {
   width: auto;
-  padding: 0.5rem 1rem;
+  padding: 8px 16px;
   background-color: #dc3545;
-  font-size: 0.875rem;
+  font-size: 14px;
 }
 
 .logout-btn:hover {
@@ -284,50 +281,50 @@ button:disabled {
 }
 
 .dashboard-content {
-  padding: 2rem;
 }
 
 .dashboard-content h2 {
   color: #333;
-  margin-bottom: 1rem;
+  margin-top: 16px;
+  margin-bottom: 16px;
 }
 
 /* Feature Cards */
 .feature-cards {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 1.5rem;
-  margin-top: 2rem;
+  gap: 16px;
+  margin-top: 16px;
 }
 
 .feature-card {
   background: white;
-  padding: 1.5rem;
+  padding: 16px;
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   border: 1px solid #e9ecef;
 }
 
 .feature-card h3 {
-  margin: 0 0 0.75rem 0;
+  margin: 0 0 12px 0;
   color: #333;
-  font-size: 1.25rem;
+  font-size: 20px;
 }
 
 .feature-card p {
-  margin: 0 0 1rem 0;
+  margin: 0 0 16px 0;
   color: #666;
   line-height: 1.5;
 }
 
 .feature-link {
   display: inline-block;
-  padding: 0.5rem 1rem;
+  padding: 8px 16px;
   background-color: #007bff;
   color: white;
   text-decoration: none;
   border-radius: 4px;
-  font-size: 0.875rem;
+  font-size: 14px;
   transition: background-color 0.2s;
 }
 
@@ -343,9 +340,7 @@ button:disabled {
 
 /* SQL Execution */
 .sql-execution {
-  min-height: 100vh;
   background-color: #f8f9fa;
-  padding: 2rem;
 }
 
 .sql-header {
@@ -364,7 +359,7 @@ button:disabled {
 .connection-selector {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 16px;
 }
 
 .connection-selector label {
@@ -373,7 +368,7 @@ button:disabled {
 }
 
 .connection-selector select {
-  padding: 0.5rem;
+  padding: 8px;
   border: 1px solid #ddd;
   border-radius: 4px;
   background: white;
@@ -382,16 +377,16 @@ button:disabled {
 
 /* Execution Mode Indicator */
 .execution-mode-indicator {
-  margin-bottom: 1.5rem;
+  margin-bottom: 16px;
 }
 
 .mode-badge {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  padding: 1rem 1.5rem;
+  gap: 12px;
+  padding: 16px;
   border-radius: 8px;
-  font-size: 0.95rem;
+  font-size: 15px;
   line-height: 1.4;
 }
 
@@ -422,34 +417,34 @@ button:disabled {
 }
 
 .mode-note {
-  font-size: 0.85em;
+  font-size: 13px;
   opacity: 0.8;
   font-style: italic;
-  margin-left: 0.5rem;
+  margin-left: 8px;
 }
 
 .sql-input-section {
   background: white;
-  padding: 1.5rem;
+  padding: 16px;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  margin-bottom: 1.5rem;
+  margin-bottom: 16px;
 }
 
 .sql-input-section label {
   display: block;
-  margin-bottom: 0.5rem;
+  margin-bottom: 8px;
   font-weight: 500;
   color: #555;
 }
 
 .sql-input-section textarea {
   width: 100%;
-  padding: 0.75rem;
+  padding: 12px;
   border: 1px solid #ddd;
   border-radius: 4px;
   font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
-  font-size: 0.875rem;
+  font-size: 14px;
   line-height: 1.4;
   resize: vertical;
   box-sizing: border-box;
@@ -463,24 +458,24 @@ button:disabled {
 
 .parameters-section {
   background: white;
-  padding: 1.5rem;
+  padding: 16px;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  margin-bottom: 1.5rem;
+  margin-bottom: 16px;
 }
 
 .parameters-section h3 {
-  margin: 0 0 1rem 0;
+  margin: 0 0 16px 0;
   color: #333;
 }
 
 .parameter-row {
   display: grid;
   grid-template-columns: 120px 150px 1fr;
-  gap: 1rem;
+  gap: 16px;
   align-items: center;
-  margin-bottom: 0.75rem;
-  padding: 0.75rem;
+  margin-bottom: 12px;
+  padding: 12px;
   background: #f8f9fa;
   border-radius: 4px;
 }
@@ -493,7 +488,7 @@ button:disabled {
 
 .parameter-row select,
 .parameter-row input {
-  padding: 0.5rem;
+  padding: 8px;
   border: 1px solid #ddd;
   border-radius: 4px;
   background: white;
@@ -501,18 +496,18 @@ button:disabled {
 
 .execution-controls {
   background: white;
-  padding: 1.5rem;
+  padding: 16px;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  margin-bottom: 1.5rem;
+  margin-bottom: 16px;
   display: flex;
-  gap: 1rem;
+  gap: 16px;
 }
 
 .execute-btn {
   background-color: #28a745;
   width: auto;
-  padding: 0.75rem 1.5rem;
+  padding: 12px 24px;
 }
 
 .execute-btn:hover {
@@ -522,7 +517,7 @@ button:disabled {
 .validate-btn {
   background-color: #17a2b8;
   width: auto;
-  padding: 0.75rem 1.5rem;
+  padding: 12px 24px;
 }
 
 .validate-btn:hover {
@@ -538,7 +533,7 @@ button:disabled {
 
 .result-header {
   background: #f8f9fa;
-  padding: 1rem 1.5rem;
+  padding: 16px;
   border-bottom: 1px solid #e9ecef;
   display: flex;
   justify-content: space-between;
@@ -552,20 +547,20 @@ button:disabled {
 
 .result-meta {
   display: flex;
-  gap: 1.5rem;
-  font-size: 0.875rem;
+  gap: 16px;
+  font-size: 14px;
   color: #666;
 }
 
 .result-message {
-  padding: 1rem 1.5rem;
+  padding: 16px;
   background: #d4edda;
   color: #155724;
   border-bottom: 1px solid #c3e6cb;
 }
 
 .result-warning {
-  padding: 1rem 1.5rem;
+  padding: 16px;
   background: #fff3cd;
   color: #856404;
   border-bottom: 1px solid #ffeaa7;
@@ -580,13 +575,13 @@ button:disabled {
 .result-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.875rem;
+  font-size: 14px;
 }
 
 .result-table th {
   background: #343a40;
   color: white;
-  padding: 0.75rem;
+  padding: 12px;
   text-align: left;
   font-weight: 500;
   position: sticky;
@@ -595,7 +590,7 @@ button:disabled {
 }
 
 .result-table td {
-  padding: 0.5rem 0.75rem;
+  padding: 8px 12px;
   border-bottom: 1px solid #e9ecef;
   vertical-align: top;
 }
@@ -606,9 +601,7 @@ button:disabled {
 
 /* Connection Management */
 .connection-management {
-  min-height: 100vh;
   background-color: #f8f9fa;
-  padding: 2rem;
 }
 
 .connection-header {
@@ -616,22 +609,16 @@ button:disabled {
   justify-content: space-between;
   align-items: center;
   background: white;
-  padding: 1.5rem;
+  padding: 8px;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  margin-bottom: 1.5rem;
-}
-
-.connection-header h2 {
-  margin: 0;
-  color: #333;
 }
 
 .create-btn {
   background-color: #28a745;
   width: auto;
-  padding: 0.75rem 1.5rem;
-  font-size: 0.875rem;
+  padding: 12px 24px;
+  font-size: 14px;
 }
 
 .create-btn:hover {
@@ -640,22 +627,22 @@ button:disabled {
 
 .connection-form {
   background: white;
-  padding: 2rem;
+  padding: 16px;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  margin-bottom: 2rem;
+  margin-bottom: 16px;
 }
 
 .connection-form h3 {
-  margin: 0 0 1.5rem 0;
+  margin: 0 0 16px 0;
   color: #333;
 }
 
 .form-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 1.5rem;
-  margin-bottom: 2rem;
+  gap: 16px;
+  margin-bottom: 16px;
 }
 
 .form-group {
@@ -664,17 +651,17 @@ button:disabled {
 }
 
 .form-group label {
-  margin-bottom: 0.5rem;
+  margin-bottom: 8px;
   font-weight: 500;
   color: #555;
 }
 
 .form-group input,
 .form-group select {
-  padding: 0.75rem;
+  padding: 12px;
   border: 1px solid #ddd;
   border-radius: 4px;
-  font-size: 1rem;
+  font-size: 16px;
   background: white;
 }
 
@@ -691,22 +678,22 @@ button:disabled {
 
 .form-help {
   display: block;
-  margin-top: 0.25rem;
-  font-size: 0.875rem;
+  margin-top: 4px;
+  font-size: 14px;
   color: #666;
   font-style: italic;
 }
 
 .form-actions {
   display: flex;
-  gap: 1rem;
+  gap: 16px;
   justify-content: flex-end;
 }
 
 .save-btn {
   background-color: #007bff;
   width: auto;
-  padding: 0.75rem 1.5rem;
+  padding: 12px 24px;
 }
 
 .save-btn:hover {
@@ -716,7 +703,7 @@ button:disabled {
 .cancel-btn {
   background-color: #6c757d;
   width: auto;
-  padding: 0.75rem 1.5rem;
+  padding: 12px 24px;
 }
 
 .cancel-btn:hover {
@@ -725,42 +712,40 @@ button:disabled {
 
 .connections-list {
   background: white;
-  padding: 1.5rem;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .connections-list h3 {
-  margin: 0 0 1.5rem 0;
+  margin: 0 0 8px 0;
   color: #333;
 }
 
 .loading {
   text-align: center;
-  padding: 2rem;
+  padding: 16px;
   color: #666;
 }
 
 .no-connections {
   text-align: center;
-  padding: 2rem;
+  padding: 16px;
   color: #666;
 }
 
 .no-connections p {
-  margin: 0.5rem 0;
+  margin: 8px 0;
 }
 
 .connections-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px;
 }
 
 .connection-card {
   border: 1px solid #e9ecef;
   border-radius: 8px;
-  padding: 1.5rem;
   background: #f8f9fa;
 }
 
@@ -768,7 +753,7 @@ button:disabled {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1rem;
+  margin-bottom: 16px;
   background: none;
   padding: 0;
   box-shadow: none;
@@ -777,27 +762,27 @@ button:disabled {
 .connection-card .connection-header h4 {
   margin: 0;
   color: #333;
-  font-size: 1.1rem;
+  font-size: 18px;
 }
 
 .connection-type {
   background-color: #007bff;
   color: white;
-  padding: 0.25rem 0.75rem;
+  padding: 4px 12px;
   border-radius: 12px;
-  font-size: 0.75rem;
+  font-size: 12px;
   font-weight: 500;
 }
 
 .connection-details {
-  margin-bottom: 1rem;
+  margin-bottom: 16px;
 }
 
 .detail-row {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 0.5rem;
-  font-size: 0.875rem;
+  margin-bottom: 8px;
+  font-size: 14px;
 }
 
 .detail-row .label {
@@ -816,10 +801,10 @@ button:disabled {
 }
 
 .test-result {
-  padding: 0.75rem;
+  padding: 12px;
   border-radius: 4px;
-  margin-bottom: 1rem;
-  font-size: 0.875rem;
+  margin-bottom: 16px;
+  font-size: 14px;
 }
 
 .test-result.success {
@@ -840,15 +825,15 @@ button:disabled {
 
 .connection-actions {
   display: flex;
-  gap: 0.5rem;
+  gap: 8px;
   flex-wrap: wrap;
 }
 
 .test-btn {
   background-color: #17a2b8;
   width: auto;
-  padding: 0.5rem 1rem;
-  font-size: 0.8rem;
+  padding: 8px 16px;
+  font-size: 13px;
 }
 
 .test-btn:hover {
@@ -859,8 +844,8 @@ button:disabled {
   background-color: #ffc107;
   color: #212529;
   width: auto;
-  padding: 0.5rem 1rem;
-  font-size: 0.8rem;
+  padding: 8px 16px;
+  font-size: 13px;
 }
 
 .edit-btn:hover {
@@ -870,8 +855,8 @@ button:disabled {
 .delete-btn {
   background-color: #dc3545;
   width: auto;
-  padding: 0.5rem 1rem;
-  font-size: 0.8rem;
+  padding: 8px 16px;
+  font-size: 13px;
 }
 
 .delete-btn:hover {
@@ -1040,11 +1025,11 @@ a:hover {
 }
 
 .table-details h4 {
-  margin-top: 1.5rem;
-  margin-bottom: 1rem;
+  margin-top: 16px;
+  margin-bottom: 16px;
   color: #555;
   border-bottom: 2px solid #f0f0f0;
-  padding-bottom: 0.5rem;
+  padding-bottom: 8px;
 }
 
 .table-details h4:first-child {
@@ -1053,18 +1038,18 @@ a:hover {
 
 .columns-table {
   overflow-x: auto;
-  margin-bottom: 2rem;
+  margin-bottom: 16px;
 }
 
 .columns-table table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.9rem;
+  font-size: 14px;
 }
 
 .columns-table th,
 .columns-table td {
-  padding: 0.75rem;
+  padding: 12px;
   text-align: left;
   border-bottom: 1px solid #e1e5e9;
 }
@@ -1084,7 +1069,7 @@ a:hover {
 .primary-keys,
 .foreign-keys,
 .indexes {
-  margin-bottom: 1.5rem;
+  margin-bottom: 16px;
 }
 
 .primary-keys ul,
@@ -1098,12 +1083,12 @@ a:hover {
 .primary-keys li,
 .foreign-keys li,
 .indexes li {
-  padding: 0.5rem;
-  margin-bottom: 0.25rem;
+  padding: 8px;
+  margin-bottom: 4px;
   background: #f8f9fa;
   border-radius: 4px;
   font-family: monospace;
-  font-size: 0.9rem;
+  font-size: 14px;
 }
 
 .primary-keys li {
@@ -1957,7 +1942,7 @@ a:hover {
   background: white;
   padding: 1rem;
   border-radius: 8px;
-  margin-bottom: 2rem;
+  margin-bottom: 1rem;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
@@ -1997,7 +1982,7 @@ a:hover {
 .saved-queries .header {
   display: flex;
   justify-content: flex-end;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
 }
 
 /* Component content containers */

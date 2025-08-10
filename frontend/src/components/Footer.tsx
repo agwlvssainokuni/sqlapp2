@@ -27,7 +27,7 @@ const Footer: React.FC = () => {
           </p>
         </div>
         <div className="footer-right">
-          <LanguageSwitcher />
+          <LanguageSwitcher/>
         </div>
       </div>
     </footer>

@@ -247,152 +247,151 @@ const SchemaViewer: React.FC = () => {
             ))}
           </select>
         </div>
-      </div>
 
-      {error && (
-        <div className="error-message">
-          <strong>{t('common.error')}:</strong> {error}
-        </div>
-      )}
-
-      {schemaInfo && (
-        <div className="schema-info">
-          <h3>{t('schemaViewer.databaseInformation')}</h3>
-          <div className="info-grid">
-            <div>
-              <strong>{t('schemaViewer.database')}</strong> {schemaInfo.databaseProductName} {schemaInfo.databaseProductVersion}
-            </div>
-            <div>
-              <strong>{t('schemaViewer.driver')}</strong> {schemaInfo.driverName} {schemaInfo.driverVersion}
-            </div>
+        {error && (
+          <div className="error-message">
+            <strong>{t('common.error')}:</strong> {error}
           </div>
+        )}
 
-          {(schemaInfo.catalogs.length > 0 || schemaInfo.schemas.length > 0) && (
-            <div className="schema-filters">
-              {schemaInfo.catalogs.length > 0 && (
-                <div>
-                  <label>{t('schemaViewer.catalog')}</label>
-                  <select value={selectedCatalog}
-                          onChange={(e) => setSelectedCatalog(e.target.value)}>
-                    <option value="">{t('schemaViewer.allCatalogs')}</option>
-                    {schemaInfo.catalogs.map(catalog => (
-                      <option key={catalog} value={catalog}>{catalog}</option>
-                    ))}
-                  </select>
-                </div>
-              )}
-
-              {schemaInfo.schemas.length > 0 && (
-                <div>
-                  <label>{t('schemaViewer.schema')}</label>
-                  <select value={selectedSchema} onChange={(e) => setSelectedSchema(e.target.value)}>
-                    <option value="">{t('schemaViewer.allSchemas')}</option>
-                    {schemaInfo.schemas.map(schema => (
-                      <option key={schema.name} value={schema.name}>{schema.name}</option>
-                    ))}
-                  </select>
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-      )}
-
-      {loading && <div className="loading">{t('common.loading')}</div>}
-
-      {tables.length > 0 && (
-        <div className="tables-section">
-          <h3>{t('schemaViewer.tables')}</h3>
-          <div className="tables-list">
-            {tables.map(table => (
-              <div
-                key={`${table.catalog || ''}.${table.schema || ''}.${table.name}`}
-                className={`table-item ${selectedTable === table.name ? 'selected' : ''}`}
-                onClick={() => handleTableClick(table.name)}
-              >
-                <div className="table-name">{table.name}</div>
-                <div className="table-type">{table.type}</div>
-                {table.remarks && <div className="table-remarks">{table.remarks}</div>}
+        {schemaInfo && (
+          <div className="schema-info">
+            <h3>{t('schemaViewer.databaseInformation')}</h3>
+            <div className="info-grid">
+              <div>
+                <strong>{t('schemaViewer.database')}</strong> {schemaInfo.databaseProductName} {schemaInfo.databaseProductVersion}
               </div>
-            ))}
+              <div>
+                <strong>{t('schemaViewer.driver')}</strong> {schemaInfo.driverName} {schemaInfo.driverVersion}
+              </div>
+            </div>
+
+            {(schemaInfo.catalogs.length > 0 || schemaInfo.schemas.length > 0) && (
+              <div className="schema-filters">
+                {schemaInfo.catalogs.length > 0 && (
+                  <div>
+                    <label>{t('schemaViewer.catalog')}</label>
+                    <select value={selectedCatalog}
+                            onChange={(e) => setSelectedCatalog(e.target.value)}>
+                      <option value="">{t('schemaViewer.allCatalogs')}</option>
+                      {schemaInfo.catalogs.map(catalog => (
+                        <option key={catalog} value={catalog}>{catalog}</option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+
+                {schemaInfo.schemas.length > 0 && (
+                  <div>
+                    <label>{t('schemaViewer.schema')}</label>
+                    <select value={selectedSchema} onChange={(e) => setSelectedSchema(e.target.value)}>
+                      <option value="">{t('schemaViewer.allSchemas')}</option>
+                      {schemaInfo.schemas.map(schema => (
+                        <option key={schema.name} value={schema.name}>{schema.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
-        </div>
-      )}
+        )}
 
-      {tableDetails && (
-        <div className="table-details">
-          <h3>{t('schemaViewer.tableDetails')} {tableDetails.tableName}</h3>
+        {loading && <div className="loading">{t('common.loading')}</div>}
 
-          <div className="details-tabs">
-            <div className="tab-content">
-              <h4>{t('schemaViewer.columns')}</h4>
-              <div className="columns-table">
-                <table>
-                  <thead>
-                  <tr>
-                    <th>{t('schemaViewer.name')}</th>
-                    <th>{t('schemaViewer.type')}</th>
-                    <th>{t('schemaViewer.size')}</th>
-                    <th>{t('schemaViewer.nullable')}</th>
-                    <th>{t('schemaViewer.default')}</th>
-                    <th>{t('schemaViewer.remarks')}</th>
-                  </tr>
-                  </thead>
-                  <tbody>
-                  {tableDetails.columns.map(column => (
-                    <tr key={column.name}>
-                      <td>{column.name}</td>
-                      <td>{column.typeName}</td>
-                      <td>{column.columnSize}{column.decimalDigits > 0 && `,${column.decimalDigits}`}</td>
-                      <td>{column.nullable ? t('common.yes') : t('common.no')}</td>
-                      <td>{column.defaultValue || '-'}</td>
-                      <td>{column.remarks || '-'}</td>
+        {tables.length > 0 && (
+          <div className="tables-section">
+            <h3>{t('schemaViewer.tables')}</h3>
+            <div className="tables-list">
+              {tables.map(table => (
+                <div
+                  key={`${table.catalog || ''}.${table.schema || ''}.${table.name}`}
+                  className={`table-item ${selectedTable === table.name ? 'selected' : ''}`}
+                  onClick={() => handleTableClick(table.name)}
+                >
+                  <div className="table-name">{table.name}</div>
+                  <div className="table-type">{table.type}</div>
+                  {table.remarks && <div className="table-remarks">{table.remarks}</div>}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {tableDetails && (
+          <div className="table-details">
+            <h3>{t('schemaViewer.tableDetails')} {tableDetails.tableName}</h3>
+
+            <div className="details-tabs">
+              <div className="tab-content">
+                <h4>{t('schemaViewer.columns')}</h4>
+                <div className="columns-table">
+                  <table>
+                    <thead>
+                    <tr>
+                      <th>{t('schemaViewer.name')}</th>
+                      <th>{t('schemaViewer.type')}</th>
+                      <th>{t('schemaViewer.size')}</th>
+                      <th>{t('schemaViewer.nullable')}</th>
+                      <th>{t('schemaViewer.default')}</th>
+                      <th>{t('schemaViewer.remarks')}</th>
                     </tr>
-                  ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                    {tableDetails.columns.map(column => (
+                      <tr key={column.name}>
+                        <td>{column.name}</td>
+                        <td>{column.typeName}</td>
+                        <td>{column.columnSize}{column.decimalDigits > 0 && `,${column.decimalDigits}`}</td>
+                        <td>{column.nullable ? t('common.yes') : t('common.no')}</td>
+                        <td>{column.defaultValue || '-'}</td>
+                        <td>{column.remarks || '-'}</td>
+                      </tr>
+                    ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                {tableDetails.primaryKeys.length > 0 && (
+                  <div className="primary-keys">
+                    <h4>{t('schemaViewer.primaryKeys')}</h4>
+                    <ul>
+                      {tableDetails.primaryKeys.map(pk => (
+                        <li key={pk.columnName}>{pk.columnName} (PK: {pk.pkName})</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {tableDetails.foreignKeys.length > 0 && (
+                  <div className="foreign-keys">
+                    <h4>{t('schemaViewer.foreignKeys')}</h4>
+                    <ul>
+                      {tableDetails.foreignKeys.map((fk, index) => (
+                        <li key={index}>
+                          {fk.fkColumnName} → {fk.pkTableName}.{fk.pkColumnName} (FK: {fk.fkName})
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {tableDetails.indexes.length > 0 && (
+                  <div className="indexes">
+                    <h4>{t('schemaViewer.indexes')}</h4>
+                    <ul>
+                      {tableDetails.indexes.map((index, i) => (
+                        <li key={i}>
+                          {index.indexName} ({index.columnName}) {index.unique ? '[UNIQUE]' : ''}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
               </div>
-
-              {tableDetails.primaryKeys.length > 0 && (
-                <div className="primary-keys">
-                  <h4>{t('schemaViewer.primaryKeys')}</h4>
-                  <ul>
-                    {tableDetails.primaryKeys.map(pk => (
-                      <li key={pk.columnName}>{pk.columnName} (PK: {pk.pkName})</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-
-              {tableDetails.foreignKeys.length > 0 && (
-                <div className="foreign-keys">
-                  <h4>{t('schemaViewer.foreignKeys')}</h4>
-                  <ul>
-                    {tableDetails.foreignKeys.map((fk, index) => (
-                      <li key={index}>
-                        {fk.fkColumnName} → {fk.pkTableName}.{fk.pkColumnName} (FK: {fk.fkName})
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-
-              {tableDetails.indexes.length > 0 && (
-                <div className="indexes">
-                  <h4>{t('schemaViewer.indexes')}</h4>
-                  <ul>
-                    {tableDetails.indexes.map((index, i) => (
-                      <li key={i}>
-                        {index.indexName} ({index.columnName}) {index.unique ? '[UNIQUE]' : ''}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
             </div>
           </div>
-        </div>
-      )}
+        )}
       </div>
     </Layout>
   )
