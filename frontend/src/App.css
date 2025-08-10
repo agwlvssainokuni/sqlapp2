@@ -1156,13 +1156,26 @@ a:hover {
 
 .query-builder .clause-item {
   display: flex;
-  gap: 10px;
-  margin-bottom: 10px;
+  gap: 8px;
+  margin-bottom: 8px;
   align-items: center;
-  padding: 10px;
+  padding: 12px;
   background: white;
   border-radius: 5px;
   border: 1px solid #eee;
+}
+
+.query-builder .clause-item-content {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex: 1;
+}
+
+.query-builder .clause-item-actions {
+  display: flex;
+  align-items: center;
+  margin-left: auto;
 }
 
 .query-builder .clause-item select,
@@ -1205,17 +1218,23 @@ a:hover {
 }
 
 .query-builder .remove-btn {
-  background: #dc3545;
+  background: #6c757d;
   color: white;
   border: none;
-  padding: 5px 10px;
-  border-radius: 4px;
+  padding: 4px 8px;
+  border-radius: 3px;
   cursor: pointer;
-  font-size: 12px;
+  font-size: 11px;
+  min-width: auto;
+  width: auto;
+  opacity: 0.7;
+  transition: all 0.2s ease;
 }
 
 .query-builder .remove-btn:hover {
-  background: #c82333;
+  background: #dc3545;
+  opacity: 1;
+  transform: scale(1.05);
 }
 
 .query-builder .build-btn {
