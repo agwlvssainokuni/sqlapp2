@@ -54,6 +54,13 @@ public class SqlExecutionService {
      * Execute SQL query and return results
      */
     public Map<String, Object> executeQuery(User user, Long connectionId, String sql) throws SQLException {
+        return executeQuery(user, connectionId, sql, null);
+    }
+
+    /**
+     * Execute SQL query and return results with optional SavedQuery association
+     */
+    public Map<String, Object> executeQuery(User user, Long connectionId, String sql, SavedQuery savedQuery) throws SQLException {
         if (sql == null || sql.trim().isEmpty()) {
             throw new IllegalArgumentException("SQL query cannot be empty");
         }
@@ -94,7 +101,7 @@ public class SqlExecutionService {
             
             // Record query execution in history
             recordQueryExecution(user, connectionId, sql, null, executionTime, 
-                               getResultCount(result), true, null, null);
+                               getResultCount(result), true, null, savedQuery);
             
             return result;
             
@@ -103,7 +110,7 @@ public class SqlExecutionService {
             
             // Record failed query execution in history
             recordQueryExecution(user, connectionId, sql, null, executionTime, 
-                               null, false, e.getMessage(), null);
+                               null, false, e.getMessage(), savedQuery);
             
             Map<String, Object> errorResult = new LinkedHashMap<>();
             errorResult.put("success", false);
@@ -241,6 +248,16 @@ public class SqlExecutionService {
     public Map<String, Object> executeParameterizedQuery(User user, Long connectionId, String sql, 
                                                         Map<String, Object> parameters, 
                                                         Map<String, String> parameterTypes) throws SQLException {
+        return executeParameterizedQuery(user, connectionId, sql, parameters, parameterTypes, null);
+    }
+
+    /**
+     * Execute parameterized SQL query and return results with optional SavedQuery association
+     */
+    public Map<String, Object> executeParameterizedQuery(User user, Long connectionId, String sql, 
+                                                        Map<String, Object> parameters, 
+                                                        Map<String, String> parameterTypes, 
+                                                        SavedQuery savedQuery) throws SQLException {
         if (sql == null || sql.trim().isEmpty()) {
             throw new IllegalArgumentException("SQL query cannot be empty");
         }
@@ -289,7 +306,7 @@ public class SqlExecutionService {
                 
                 // Record query execution in history
                 recordQueryExecution(user, connectionId, sql, parameters, executionTime, 
-                                   getResultCount(result), true, null, null);
+                                   getResultCount(result), true, null, savedQuery);
                 
                 return result;
             }
@@ -299,7 +316,7 @@ public class SqlExecutionService {
             
             // Record failed query execution in history
             recordQueryExecution(user, connectionId, sql, parameters, executionTime, 
-                               null, false, e.getMessage(), null);
+                               null, false, e.getMessage(), savedQuery);
             
             Map<String, Object> errorResult = new LinkedHashMap<>();
             errorResult.put("success", false);

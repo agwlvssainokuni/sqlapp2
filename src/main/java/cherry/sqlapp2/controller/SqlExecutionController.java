@@ -16,7 +16,9 @@
 package cherry.sqlapp2.controller;
 
 import cherry.sqlapp2.dto.SqlExecutionRequest;
+import cherry.sqlapp2.entity.SavedQuery;
 import cherry.sqlapp2.entity.User;
+import cherry.sqlapp2.service.QueryManagementService;
 import cherry.sqlapp2.service.SqlExecutionService;
 import cherry.sqlapp2.service.UserService;
 import jakarta.validation.Valid;
@@ -38,11 +40,14 @@ public class SqlExecutionController {
 
     private final SqlExecutionService sqlExecutionService;
     private final UserService userService;
+    private final QueryManagementService queryManagementService;
 
     @Autowired
-    public SqlExecutionController(SqlExecutionService sqlExecutionService, UserService userService) {
+    public SqlExecutionController(SqlExecutionService sqlExecutionService, UserService userService, 
+                                QueryManagementService queryManagementService) {
         this.sqlExecutionService = sqlExecutionService;
         this.userService = userService;
+        this.queryManagementService = queryManagementService;
     }
 
     private User getCurrentUser() {
@@ -76,6 +81,13 @@ public class SqlExecutionController {
             // Execute the query
             Map<String, Object> result;
             
+            // Get SavedQuery if savedQueryId is provided
+            SavedQuery savedQuery = null;
+            if (request.getSavedQueryId() != null) {
+                savedQuery = queryManagementService.getAccessibleQuery(request.getSavedQueryId(), currentUser)
+                    .orElse(null);
+            }
+            
             // Check if this is a parameterized query
             if (request.getParameters() != null && !request.getParameters().isEmpty()) {
                 result = sqlExecutionService.executeParameterizedQuery(
@@ -83,13 +95,15 @@ public class SqlExecutionController {
                     request.getConnectionId(), 
                     request.getSql(),
                     request.getParameters(),
-                    request.getParameterTypes()
+                    request.getParameterTypes(),
+                    savedQuery
                 );
             } else {
                 result = sqlExecutionService.executeQuery(
                     currentUser, 
                     request.getConnectionId(), 
-                    request.getSql()
+                    request.getSql(),
+                    savedQuery
                 );
             }
             

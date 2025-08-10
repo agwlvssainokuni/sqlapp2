@@ -217,6 +217,11 @@ const SqlExecution: React.FC = () => {
         connectionId: selectedConnectionId
       }
 
+      // Include saved query ID if this is a saved query execution
+      if (currentQueryId) {
+        requestBody.savedQueryId = currentQueryId
+      }
+
       if (hasParameters) {
         requestBody.parameters = {}
         requestBody.parameterTypes = {}
@@ -239,16 +244,7 @@ const SqlExecution: React.FC = () => {
       const data = await response.json()
       if (response.ok) {
         setResult(data)
-        
-        // Record execution for saved query if applicable
-        if (currentQueryId) {
-          try {
-            await apiRequest(`/api/queries/saved/${currentQueryId}/execute`, { method: 'POST' })
-          } catch (err) {
-            // Don't fail the main execution if recording fails
-            console.warn('Failed to record query execution:', err)
-          }
-        }
+        // Execution count is now automatically recorded on the backend
       } else {
         setError(data.error || 'SQL execution failed')
       }

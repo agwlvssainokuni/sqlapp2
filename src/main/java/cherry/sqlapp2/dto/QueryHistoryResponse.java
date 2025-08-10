@@ -17,6 +17,8 @@
 package cherry.sqlapp2.dto;
 
 import cherry.sqlapp2.entity.QueryHistory;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.time.LocalDateTime;
 import java.util.Map;
@@ -50,6 +52,18 @@ public class QueryHistoryResponse {
         this.connectionName = queryHistory.getConnectionName();
         this.databaseType = queryHistory.getDatabaseType();
         this.executedAt = queryHistory.getExecutedAt();
+
+        // Parse parameter values from JSON string
+        if (queryHistory.getParameterValues() != null && !queryHistory.getParameterValues().trim().isEmpty()) {
+            try {
+                ObjectMapper mapper = new ObjectMapper();
+                this.parameterValues = mapper.readValue(queryHistory.getParameterValues(), 
+                    new TypeReference<Map<String, Object>>() {});
+            } catch (Exception e) {
+                // If JSON parsing fails, leave parameterValues as null
+                this.parameterValues = null;
+            }
+        }
 
         if (queryHistory.getConnection() != null) {
             this.connectionId = queryHistory.getConnection().getId();

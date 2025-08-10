@@ -46,6 +46,9 @@ public class SqlExecutionRequest {
     @JsonProperty("parameterTypes")
     private Map<String, String> parameterTypes;
 
+    @JsonProperty("savedQueryId")
+    private Long savedQueryId;
+
     // Default constructor
     public SqlExecutionRequest() {}
 
@@ -101,5 +104,13 @@ public class SqlExecutionRequest {
 
     public void setParameterTypes(Map<String, String> parameterTypes) {
         this.parameterTypes = parameterTypes;
+    }
+
+    public Long getSavedQueryId() {
+        return savedQueryId;
+    }
+
+    public void setSavedQueryId(Long savedQueryId) {
+        this.savedQueryId = savedQueryId;
     }
 }
