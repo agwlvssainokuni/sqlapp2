@@ -15,6 +15,7 @@
  */
 
 import React, { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useAuth } from '../context/AuthContext'
 
 interface DatabaseConnection {
@@ -75,6 +76,7 @@ interface TableDetails {
 }
 
 const SchemaViewer: React.FC = () => {
+  const { t } = useTranslation()
   const { } = useAuth()
   const [connections, setConnections] = useState<DatabaseConnection[]>([])
   const [selectedConnectionId, setSelectedConnectionId] = useState<number | null>(null)
@@ -111,10 +113,10 @@ const SchemaViewer: React.FC = () => {
         const data = await response.json()
         setConnections(data)
       } else {
-        setError('Failed to load connections')
+        setError('Failed to load connections') // TODO: Add translation
       }
     } catch (err) {
-      setError('Error loading connections: ' + (err as Error).message)
+      setError('Error loading connections: ' + (err as Error).message) // TODO: Add translation
     }
   }
 
@@ -135,10 +137,10 @@ const SchemaViewer: React.FC = () => {
         setSchemaInfo(data)
       } else {
         const errorData = await response.json()
-        setError(typeof errorData === 'string' ? errorData : 'Failed to load schema info')
+        setError(typeof errorData === 'string' ? errorData : t('schemaViewer.loadFailed'))
       }
     } catch (err) {
-      setError('Error loading schema info: ' + (err as Error).message)
+      setError('Error loading schema info: ' + (err as Error).message) // TODO: Add translation
     } finally {
       setLoading(false)
     }
@@ -196,10 +198,10 @@ const SchemaViewer: React.FC = () => {
         setSelectedTable(tableName)
       } else {
         const errorData = await response.json()
-        setError(typeof errorData === 'string' ? errorData : 'Failed to load table details')
+        setError(typeof errorData === 'string' ? errorData : 'Failed to load table details') // TODO: Add translation
       }
     } catch (err) {
-      setError('Error loading table details: ' + (err as Error).message)
+      setError('Error loading table details: ' + (err as Error).message) // TODO: Add translation
     } finally {
       setLoading(false)
     }
@@ -229,15 +231,15 @@ const SchemaViewer: React.FC = () => {
   return (
     <div className="schema-viewer">
       <div className="schema-header">
-        <h2>Database Schema Viewer</h2>
+        <h2>{t('schemaViewer.title')}</h2>
         
         <div className="connection-selector">
-          <label>Select Connection:</label>
+          <label>Select Connection:</label> {/* TODO: Add translation */}
           <select 
             value={selectedConnectionId || ''} 
             onChange={(e) => handleConnectionChange(e.target.value)}
           >
-            <option value="">Select a database connection</option>
+            <option value="">{t('schemaViewer.selectConnection')}</option>
             {connections.map(conn => (
               <option key={conn.id} value={conn.id}>
                 {conn.connectionName} ({conn.databaseType})
@@ -249,25 +251,25 @@ const SchemaViewer: React.FC = () => {
 
       {error && (
         <div className="error-message">
-          <strong>Error:</strong> {error}
+          <strong>{t('common.error')}:</strong> {error}
         </div>
       )}
 
       {schemaInfo && (
         <div className="schema-info">
-          <h3>Database Information</h3>
+          <h3>Database Information</h3> {/* TODO: Add translation */}
           <div className="info-grid">
-            <div><strong>Database:</strong> {schemaInfo.databaseProductName} {schemaInfo.databaseProductVersion}</div>
-            <div><strong>Driver:</strong> {schemaInfo.driverName} {schemaInfo.driverVersion}</div>
+            <div><strong>Database:</strong> {schemaInfo.databaseProductName} {schemaInfo.databaseProductVersion}</div> {/* TODO: Add translation */}
+            <div><strong>Driver:</strong> {schemaInfo.driverName} {schemaInfo.driverVersion}</div> {/* TODO: Add translation */}
           </div>
 
           {(schemaInfo.catalogs.length > 0 || schemaInfo.schemas.length > 0) && (
             <div className="schema-filters">
               {schemaInfo.catalogs.length > 0 && (
                 <div>
-                  <label>Catalog:</label>
+                  <label>Catalog:</label> {/* TODO: Add translation */}
                   <select value={selectedCatalog} onChange={(e) => setSelectedCatalog(e.target.value)}>
-                    <option value="">All Catalogs</option>
+                    <option value="">All Catalogs</option> {/* TODO: Add translation */}
                     {schemaInfo.catalogs.map(catalog => (
                       <option key={catalog} value={catalog}>{catalog}</option>
                     ))}
@@ -277,9 +279,9 @@ const SchemaViewer: React.FC = () => {
 
               {schemaInfo.schemas.length > 0 && (
                 <div>
-                  <label>Schema:</label>
+                  <label>Schema:</label> {/* TODO: Add translation */}
                   <select value={selectedSchema} onChange={(e) => setSelectedSchema(e.target.value)}>
-                    <option value="">All Schemas</option>
+                    <option value="">All Schemas</option> {/* TODO: Add translation */}
                     {schemaInfo.schemas.map(schema => (
                       <option key={schema.name} value={schema.name}>{schema.name}</option>
                     ))}
@@ -291,11 +293,11 @@ const SchemaViewer: React.FC = () => {
         </div>
       )}
 
-      {loading && <div className="loading">Loading...</div>}
+      {loading && <div className="loading">{t('common.loading')}</div>}
 
       {tables.length > 0 && (
         <div className="tables-section">
-          <h3>Tables and Views</h3>
+          <h3>{t('schemaViewer.tables')}</h3>
           <div className="tables-list">
             {tables.map(table => (
               <div 
@@ -314,21 +316,21 @@ const SchemaViewer: React.FC = () => {
 
       {tableDetails && (
         <div className="table-details">
-          <h3>Table Details: {tableDetails.tableName}</h3>
+          <h3>Table Details: {tableDetails.tableName}</h3> {/* TODO: Add translation */}
           
           <div className="details-tabs">
             <div className="tab-content">
-              <h4>Columns</h4>
+              <h4>{t('schemaViewer.columns')}</h4>
               <div className="columns-table">
                 <table>
                   <thead>
                     <tr>
-                      <th>Name</th>
-                      <th>Type</th>
-                      <th>Size</th>
-                      <th>Nullable</th>
-                      <th>Default</th>
-                      <th>Remarks</th>
+                      <th>Name</th> {/* TODO: Add translation */}
+                      <th>Type</th> {/* TODO: Add translation */}
+                      <th>Size</th> {/* TODO: Add translation */}
+                      <th>{t('schemaViewer.nullable')}</th>
+                      <th>Default</th> {/* TODO: Add translation */}
+                      <th>Remarks</th> {/* TODO: Add translation */}
                     </tr>
                   </thead>
                   <tbody>
@@ -337,7 +339,7 @@ const SchemaViewer: React.FC = () => {
                         <td>{column.name}</td>
                         <td>{column.typeName}</td>
                         <td>{column.columnSize}{column.decimalDigits > 0 && `,${column.decimalDigits}`}</td>
-                        <td>{column.nullable ? 'Yes' : 'No'}</td>
+                        <td>{column.nullable ? t('common.yes') : t('common.no')}</td>
                         <td>{column.defaultValue || '-'}</td>
                         <td>{column.remarks || '-'}</td>
                       </tr>

@@ -15,6 +15,7 @@
  */
 
 import React, { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useAuth } from '../context/AuthContext'
 
 interface DatabaseConnection {
@@ -114,6 +115,7 @@ interface QueryBuilderResponse {
 }
 
 const QueryBuilder: React.FC = () => {
+  const { t } = useTranslation()
   const { apiRequest } = useAuth()
   const [connections, setConnections] = useState<DatabaseConnection[]>([])
   const [selectedConnectionId, setSelectedConnectionId] = useState<number | null>(null)
@@ -297,7 +299,7 @@ const QueryBuilder: React.FC = () => {
 
   return (
     <div className="query-builder">
-      <h1>SQL Query Builder</h1>
+      <h1>{t('queryBuilder.title')}</h1>
       
       {/* Connection Selection */}
       <div className="section">
@@ -318,7 +320,7 @@ const QueryBuilder: React.FC = () => {
 
       {/* SELECT Clause */}
       <div className="section">
-        <h2>SELECT Columns</h2>
+        <h2>{t('queryBuilder.selectClause')}</h2>
         {queryStructure.selectColumns.map((column, index) => (
           <div key={index} className="clause-item">
             <select 
@@ -384,7 +386,7 @@ const QueryBuilder: React.FC = () => {
 
       {/* FROM Clause */}
       <div className="section">
-        <h2>FROM Tables</h2>
+        <h2>{t('queryBuilder.fromClause')}</h2>
         {queryStructure.fromTables.map((table, index) => (
           <div key={index} className="clause-item">
             <select 
@@ -414,7 +416,7 @@ const QueryBuilder: React.FC = () => {
 
       {/* WHERE Clause */}
       <div className="section">
-        <h2>WHERE Conditions</h2>
+        <h2>{t('queryBuilder.whereClause')}</h2>
         {queryStructure.whereConditions.map((condition, index) => (
           <div key={index} className="clause-item">
             <select 
@@ -496,7 +498,7 @@ const QueryBuilder: React.FC = () => {
 
       {/* ORDER BY Clause */}
       <div className="section">
-        <h2>ORDER BY</h2>
+        <h2>{t('queryBuilder.orderByClause')}</h2>
         {queryStructure.orderByColumns.map((column, index) => (
           <div key={index} className="clause-item">
             <select 
@@ -541,7 +543,7 @@ const QueryBuilder: React.FC = () => {
 
       {/* LIMIT */}
       <div className="section">
-        <h2>LIMIT</h2>
+        <h2>{t('queryBuilder.limitClause')}</h2>
         <input 
           type="number" 
           placeholder="Limit (optional)" 
@@ -569,14 +571,14 @@ const QueryBuilder: React.FC = () => {
           disabled={isBuilding} 
           className="build-btn"
         >
-          {isBuilding ? 'Building...' : 'Build Query'}
+          {isBuilding ? 'Building...' : t('queryBuilder.generateSQL')} {/* TODO: Improve translation */}
         </button>
       </div>
 
       {/* Validation Errors */}
       {validationErrors.length > 0 && (
         <div className="validation-errors">
-          <h3>Validation Errors:</h3>
+          <h3>Validation Errors:</h3> {/* TODO: Add translation */}
           <ul>
             {validationErrors.map((error, index) => (
               <li key={index}>{error}</li>
@@ -588,7 +590,7 @@ const QueryBuilder: React.FC = () => {
       {/* Generated SQL */}
       {generatedSql && (
         <div className="generated-sql">
-          <h2>Generated SQL</h2>
+          <h2>Generated SQL</h2> {/* TODO: Add translation */}
           <pre>{generatedSql}</pre>
         </div>
       )}
