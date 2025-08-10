@@ -17,6 +17,7 @@
 import React, {useState, useEffect} from 'react'
 import {useTranslation} from 'react-i18next'
 import {useAuth} from '../context/AuthContext'
+import type {QueryValidationResponse, QueryExecutionErrorResponse} from '../types/api'
 import Layout from './Layout'
 
 interface DatabaseConnection {
@@ -189,7 +190,7 @@ const SqlExecution: React.FC = () => {
         })
       })
 
-      const data = await response.json()
+      const data: QueryValidationResponse = await response.json()
       if (!response.ok) {
         setError(data.error || 'SQL validation failed') // TODO: Add translation
         return false
@@ -249,7 +250,8 @@ const SqlExecution: React.FC = () => {
         setResult(data)
         // Execution count is now automatically recorded on the backend
       } else {
-        setError(data.error || 'SQL execution failed') // TODO: Add translation
+        const errorData = data as QueryExecutionErrorResponse
+        setError(errorData.error || 'SQL execution failed') // TODO: Add translation
       }
     } catch (err) {
       setError('Execution error: ' + (err as Error).message) // TODO: Add translation

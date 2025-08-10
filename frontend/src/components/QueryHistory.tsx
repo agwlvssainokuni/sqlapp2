@@ -17,6 +17,7 @@
 import React, {useState, useEffect} from 'react'
 import {useTranslation} from 'react-i18next'
 import {useAuth} from '../context/AuthContext'
+import type {UserStatisticsResponse} from '../types/api'
 import Layout from './Layout'
 
 interface QueryHistoryItem {
@@ -35,18 +36,12 @@ interface QueryHistoryItem {
   executedAt: string
 }
 
-interface Statistics {
-  savedQueryCount: number
-  executionCount: number
-  averageExecutionTime?: number
-  failedQueryCount: number
-}
 
 const QueryHistory: React.FC = () => {
   const {t} = useTranslation()
   const {apiRequest} = useAuth()
   const [history, setHistory] = useState<QueryHistoryItem[]>([])
-  const [statistics, setStatistics] = useState<Statistics | null>(null)
+  const [statistics, setStatistics] = useState<UserStatisticsResponse | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
