@@ -87,7 +87,7 @@ const QueryHistory: React.FC = () => {
       setStatistics(statsRes)
     } catch (err) {
       console.error('Failed to load query history:', err)
-      setError('クエリ履歴の読み込みに失敗しました')
+      setError('Failed to load query history')
     } finally {
       setLoading(false)
     }
@@ -114,7 +114,7 @@ const QueryHistory: React.FC = () => {
       setHistory(historyRes.content || [])
     } catch (err) {
       console.error('Failed to search query history:', err)
-      setError('クエリ履歴の検索に失敗しました')
+      setError('Failed to search query history')
     } finally {
       setLoading(false)
     }
@@ -152,7 +152,7 @@ const QueryHistory: React.FC = () => {
   if (loading && history.length === 0) {
     return (
       <div className="container">
-        <div className="loading">読み込み中...</div>
+        <div className="loading">Loading...</div>
       </div>
     )
   }
@@ -160,7 +160,7 @@ const QueryHistory: React.FC = () => {
   return (
     <div className="container">
       <div className="header">
-        <h1>クエリ実行履歴</h1>
+        <h1>Query Execution History</h1>
       </div>
 
       {error && (
@@ -174,11 +174,11 @@ const QueryHistory: React.FC = () => {
         <div className="stats-container">
           <div className="stat-card">
             <div className="stat-value">{statistics.savedQueryCount}</div>
-            <div className="stat-label">保存済みクエリ</div>
+            <div className="stat-label">Saved Queries</div>
           </div>
           <div className="stat-card">
             <div className="stat-value">{statistics.executionCount}</div>
-            <div className="stat-label">総実行回数</div>
+            <div className="stat-label">Total Executions</div>
           </div>
           <div className="stat-card">
             <div className="stat-value">
@@ -187,11 +187,11 @@ const QueryHistory: React.FC = () => {
                 : 'N/A'
               }
             </div>
-            <div className="stat-label">平均実行時間</div>
+            <div className="stat-label">Average Execution Time</div>
           </div>
           <div className="stat-card">
             <div className="stat-value">{statistics.failedQueryCount}</div>
-            <div className="stat-label">失敗したクエリ</div>
+            <div className="stat-label">Failed Queries</div>
           </div>
         </div>
       )}
@@ -199,7 +199,7 @@ const QueryHistory: React.FC = () => {
       {/* Filters */}
       <div className="filters">
         <div className="filter-group">
-          <label>フィルター:</label>
+          <label>Filter:</label>
           <select
             value={filterType}
             onChange={(e) => {
@@ -207,23 +207,23 @@ const QueryHistory: React.FC = () => {
               setCurrentPage(0)
             }}
           >
-            <option value="all">すべて</option>
-            <option value="successful">成功のみ</option>
-            <option value="failed">失敗のみ</option>
+            <option value="all">All</option>
+            <option value="successful">Successful Only</option>
+            <option value="failed">Failed Only</option>
           </select>
         </div>
         
         <div className="search-group">
           <input
             type="text"
-            placeholder="SQL文、接続名、クエリ名で検索..."
+            placeholder="Search by SQL, connection name, or query name..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
             className="search-input"
           />
           <button className="btn-search" onClick={handleSearch}>
-            検索
+            Search
           </button>
         </div>
       </div>
@@ -232,7 +232,7 @@ const QueryHistory: React.FC = () => {
       <div className="history-list">
         {filteredHistory.length === 0 ? (
           <div className="no-data">
-            {searchTerm ? '検索結果が見つかりませんでした' : 'クエリ実行履歴がありません'}
+            {searchTerm ? 'No search results found' : 'No query execution history available'}
           </div>
         ) : (
           filteredHistory.map(item => (
@@ -252,15 +252,15 @@ const QueryHistory: React.FC = () => {
           disabled={currentPage === 0}
           onClick={() => setCurrentPage(currentPage - 1)}
         >
-          前のページ
+          Previous
         </button>
-        <span className="page-info">ページ {currentPage + 1}</span>
+        <span className="page-info">Page {currentPage + 1}</span>
         <button
           className="btn-page"
           disabled={filteredHistory.length < pageSize}
           onClick={() => setCurrentPage(currentPage + 1)}
         >
-          次のページ
+          Next
         </button>
       </div>
 
@@ -458,29 +458,29 @@ const HistoryCard: React.FC<HistoryCardProps> = ({ item, onReExecute }) => {
         <div className="query-type-info">
           {item.savedQueryId ? (
             <span className="query-type-badge saved-query">
-              🔖 保存済みクエリ{item.savedQueryName ? `: ${item.savedQueryName}` : ''}
+              🔖 Saved Query{item.savedQueryName ? `: ${item.savedQueryName}` : ''}
             </span>
           ) : (
             <span className="query-type-badge direct-query">
-              📝 直接入力クエリ
+              📝 Direct Input Query
             </span>
           )}
         </div>
         <div className="status-info">
           <span className={`status-badge ${item.isSuccessful ? 'success' : 'error'}`}>
-            {item.isSuccessful ? '成功' : '失敗'}
+            {item.isSuccessful ? 'Success' : 'Failed'}
           </span>
           <span className="execution-time">
             {formatExecutionTime(item.executionTimeMs)}
           </span>
           {item.resultCount !== undefined && (
             <span className="result-count">
-              {item.resultCount}件
+              {item.resultCount} rows
             </span>
           )}
           <div className="card-actions">
             <button className="btn-rerun" onClick={() => onReExecute(item)}>
-              再実行
+              Re-run
             </button>
           </div>
         </div>
@@ -492,7 +492,7 @@ const HistoryCard: React.FC<HistoryCardProps> = ({ item, onReExecute }) => {
 
       {item.parameterValues && Object.keys(item.parameterValues).length > 0 && (
         <div className="parameters">
-          <strong>パラメータ:</strong>
+          <strong>Parameters:</strong>
           <div className="param-list">
             {Object.entries(item.parameterValues).map(([key, value]) => (
               <span key={key} className="param-item">
@@ -505,18 +505,18 @@ const HistoryCard: React.FC<HistoryCardProps> = ({ item, onReExecute }) => {
 
       {item.errorMessage && (
         <div className="error-details">
-          <strong>エラー:</strong> {item.errorMessage}
+          <strong>Error:</strong> {item.errorMessage}
         </div>
       )}
 
       <div className="card-meta">
         <div className="meta-row">
-          <span>実行日時: <strong>{formatDate(item.executedAt)}</strong></span>
-          <span>接続: <strong>{item.connectionName}</strong> ({item.databaseType})</span>
+          <span>Executed At: <strong>{formatDate(item.executedAt)}</strong></span>
+          <span>Connection: <strong>{item.connectionName}</strong> ({item.databaseType})</span>
         </div>
         {item.savedQueryName && (
           <div className="meta-row">
-            <span>保存済みクエリ: <strong>{item.savedQueryName}</strong></span>
+            <span>Saved Query: <strong>{item.savedQueryName}</strong></span>
           </div>
         )}
       </div>
