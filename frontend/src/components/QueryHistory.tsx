@@ -160,112 +160,114 @@ const QueryHistory: React.FC = () => {
   }
 
   return (
-    <div className="container">
-      <div className="header">
-        <h1>{t('queryHistory.title')}</h1>
-      </div>
-
-      {error && (
-        <div className="error-message">
-          {error}
+    <div className="query-history">
+      <div className="container">
+        <div className="header">
+          <h1>{t('queryHistory.title')}</h1>
         </div>
-      )}
 
-      {/* Statistics */}
-      {statistics && (
-        <div className="stats-container">
-          <div className="stat-card">
-            <div className="stat-value">{statistics.savedQueryCount}</div>
-            <div className="stat-label">{t('queryHistory.savedQueries')}</div>
+        {error && (
+          <div className="error-message">
+            {error}
           </div>
-          <div className="stat-card">
-            <div className="stat-value">{statistics.executionCount}</div>
-            <div className="stat-label">{t('queryHistory.totalExecutions')}</div>
-          </div>
-          <div className="stat-card">
-            <div className="stat-value">
-              {statistics.averageExecutionTime
-                ? formatExecutionTime(Math.round(statistics.averageExecutionTime))
-                : 'N/A'
-              }
+        )}
+
+        {/* Statistics */}
+        {statistics && (
+          <div className="stats-container">
+            <div className="stat-card">
+              <div className="stat-value">{statistics.savedQueryCount}</div>
+              <div className="stat-label">{t('queryHistory.savedQueries')}</div>
             </div>
-            <div className="stat-label">{t('queryHistory.averageExecutionTime')}</div>
+            <div className="stat-card">
+              <div className="stat-value">{statistics.executionCount}</div>
+              <div className="stat-label">{t('queryHistory.totalExecutions')}</div>
+            </div>
+            <div className="stat-card">
+              <div className="stat-value">
+                {statistics.averageExecutionTime
+                  ? formatExecutionTime(Math.round(statistics.averageExecutionTime))
+                  : 'N/A'
+                }
+              </div>
+              <div className="stat-label">{t('queryHistory.averageExecutionTime')}</div>
+            </div>
+            <div className="stat-card">
+              <div className="stat-value">{statistics.failedQueryCount}</div>
+              <div className="stat-label">{t('queryHistory.failedQueries')}</div>
+            </div>
           </div>
-          <div className="stat-card">
-            <div className="stat-value">{statistics.failedQueryCount}</div>
-            <div className="stat-label">{t('queryHistory.failedQueries')}</div>
+        )}
+
+        {/* Filters */}
+        <div className="filters">
+          <div className="filter-group">
+            <label>{t('queryHistory.filter')}:</label>
+            <select
+              value={filterType}
+              onChange={(e) => {
+                setFilterType(e.target.value as 'all' | 'successful' | 'failed')
+                setCurrentPage(0)
+              }}
+            >
+              <option value="all">{t('queryHistory.all')}</option>
+              <option value="successful">{t('queryHistory.successfulOnly')}</option>
+              <option value="failed">{t('queryHistory.failedOnly')}</option>
+            </select>
+          </div>
+
+          <div className="search-group">
+            <input
+              type="text"
+              placeholder={t('queryHistory.searchPlaceholder')}
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+              className="search-input"
+            />
+            <button className="btn-search" onClick={handleSearch}>
+              {t('queryHistory.search')}
+            </button>
           </div>
         </div>
-      )}
 
-      {/* Filters */}
-      <div className="filters">
-        <div className="filter-group">
-          <label>{t('queryHistory.filter')}:</label>
-          <select
-            value={filterType}
-            onChange={(e) => {
-              setFilterType(e.target.value as 'all' | 'successful' | 'failed')
-              setCurrentPage(0)
-            }}
+        {/* History List */}
+        <div className="history-list">
+          {filteredHistory.length === 0 ? (
+            <div className="no-data">
+              {searchTerm ? t('queryHistory.noSearchResults') : t('queryHistory.noHistory')}
+            </div>
+          ) : (
+            filteredHistory.map(item => (
+              <HistoryCard
+                key={item.id}
+                item={item}
+                onReExecute={handleReExecute}
+              />
+            ))
+          )}
+        </div>
+
+        {/* Pagination */}
+        <div className="pagination">
+          <button
+            className="btn-page"
+            disabled={currentPage === 0}
+            onClick={() => setCurrentPage(currentPage - 1)}
           >
-            <option value="all">{t('queryHistory.all')}</option>
-            <option value="successful">{t('queryHistory.successfulOnly')}</option>
-            <option value="failed">{t('queryHistory.failedOnly')}</option>
-          </select>
-        </div>
-
-        <div className="search-group">
-          <input
-            type="text"
-            placeholder={t('queryHistory.searchPlaceholder')}
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-            className="search-input"
-          />
-          <button className="btn-search" onClick={handleSearch}>
-            {t('queryHistory.search')}
+            {t('queryHistory.previous')}
+          </button>
+          <span className="page-info">{t('queryHistory.page')} {currentPage + 1}</span>
+          <button
+            className="btn-page"
+            disabled={filteredHistory.length < pageSize}
+            onClick={() => setCurrentPage(currentPage + 1)}
+          >
+            {t('queryHistory.next')}
           </button>
         </div>
-      </div>
 
-      {/* History List */}
-      <div className="history-list">
-        {filteredHistory.length === 0 ? (
-          <div className="no-data">
-            {searchTerm ? t('queryHistory.noSearchResults') : t('queryHistory.noHistory')}
-          </div>
-        ) : (
-          filteredHistory.map(item => (
-            <HistoryCard
-              key={item.id}
-              item={item}
-              onReExecute={handleReExecute}
-            />
-          ))
-        )}
       </div>
-
-      {/* Pagination */}
-      <div className="pagination">
-        <button
-          className="btn-page"
-          disabled={currentPage === 0}
-          onClick={() => setCurrentPage(currentPage - 1)}
-        >
-          {t('queryHistory.previous')}
-        </button>
-        <span className="page-info">{t('queryHistory.page')} {currentPage + 1}</span>
-        <button
-          className="btn-page"
-          disabled={filteredHistory.length < pageSize}
-          onClick={() => setCurrentPage(currentPage + 1)}
-        >
-          {t('queryHistory.next')}
-        </button>
-      </div>
-
     </div>
   )
 }
@@ -289,74 +291,76 @@ const HistoryCard: React.FC<HistoryCardProps> = ({item, onReExecute}) => {
   }
 
   return (
-    <div className={`history-card ${item.isSuccessful ? 'successful' : 'failed'}`}>
-      <div className="card-header">
-        <div className="query-type-info">
-          {item.savedQueryId ? (
-            <span className="query-type-badge saved-query">
+    <div className="query-history">
+      <div className={`history-card ${item.isSuccessful ? 'successful' : 'failed'}`}>
+        <div className="card-header">
+          <div className="query-type-info">
+            {item.savedQueryId ? (
+              <span className="query-type-badge saved-query">
               🔖 {t('queryHistory.savedQueryType')}{item.savedQueryName ? `: ${item.savedQueryName}` : ''}
             </span>
-          ) : (
-            <span className="query-type-badge direct-query">
+            ) : (
+              <span className="query-type-badge direct-query">
               📝 {t('queryHistory.directQueryType')}
             </span>
-          )}
-        </div>
-        <div className="status-info">
+            )}
+          </div>
+          <div className="status-info">
           <span className={`status-badge ${item.isSuccessful ? 'success' : 'error'}`}>
             {item.isSuccessful ? t('queryHistory.success') : t('queryHistory.failed')}
           </span>
-          <span className="execution-time">
+            <span className="execution-time">
             {formatExecutionTime(item.executionTimeMs)}
           </span>
-          {item.resultCount !== undefined && (
-            <span className="result-count">
+            {item.resultCount !== undefined && (
+              <span className="result-count">
               {item.resultCount} {t('queryHistory.rows')}
             </span>
-          )}
-          <div className="card-actions">
-            <button className="btn-rerun" onClick={() => onReExecute(item)}>
-              {t('queryHistory.rerun')}
-            </button>
+            )}
+            <div className="card-actions">
+              <button className="btn-rerun" onClick={() => onReExecute(item)}>
+                {t('queryHistory.rerun')}
+              </button>
+            </div>
           </div>
         </div>
-      </div>
 
-      <div className="sql-content">
-        <pre>{item.sqlContent.substring(0, 300)}{item.sqlContent.length > 300 ? '...' : ''}</pre>
-      </div>
+        <div className="sql-content">
+          <pre>{item.sqlContent.substring(0, 300)}{item.sqlContent.length > 300 ? '...' : ''}</pre>
+        </div>
 
-      {item.parameterValues && Object.keys(item.parameterValues).length > 0 && (
-        <div className="parameters">
-          <strong>{t('queryHistory.parameters')}:</strong>
-          <div className="param-list">
-            {Object.entries(item.parameterValues).map(([key, value]) => (
-              <span key={key} className="param-item">
+        {item.parameterValues && Object.keys(item.parameterValues).length > 0 && (
+          <div className="parameters">
+            <strong>{t('queryHistory.parameters')}:</strong>
+            <div className="param-list">
+              {Object.entries(item.parameterValues).map(([key, value]) => (
+                <span key={key} className="param-item">
                 {key}: {String(value)}
               </span>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {item.errorMessage && (
-        <div className="error-details">
-          <strong>{t('queryHistory.error')}:</strong> {item.errorMessage}
-        </div>
-      )}
-
-      <div className="card-meta">
-        <div className="meta-row">
-          <span>{t('queryHistory.executedAt')}: <strong>{formatDate(item.executedAt)}</strong></span>
-          <span>{t('queryHistory.connection')}: <strong>{item.connectionName}</strong> ({item.databaseType})</span>
-        </div>
-        {item.savedQueryName && (
-          <div className="meta-row">
-            <span>{t('queryHistory.savedQuery')}: <strong>{item.savedQueryName}</strong></span>
+              ))}
+            </div>
           </div>
         )}
-      </div>
 
+        {item.errorMessage && (
+          <div className="error-details">
+            <strong>{t('queryHistory.error')}:</strong> {item.errorMessage}
+          </div>
+        )}
+
+        <div className="card-meta">
+          <div className="meta-row">
+            <span>{t('queryHistory.executedAt')}: <strong>{formatDate(item.executedAt)}</strong></span>
+            <span>{t('queryHistory.connection')}: <strong>{item.connectionName}</strong> ({item.databaseType})</span>
+          </div>
+          {item.savedQueryName && (
+            <div className="meta-row">
+              <span>{t('queryHistory.savedQuery')}: <strong>{item.savedQueryName}</strong></span>
+            </div>
+          )}
+        </div>
+
+      </div>
     </div>
   )
 }
