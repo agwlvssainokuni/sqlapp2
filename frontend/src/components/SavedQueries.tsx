@@ -99,7 +99,7 @@ const SavedQueries: React.FC = () => {
       setConnections(Array.isArray(connectionsRes) ? connectionsRes : [])
     } catch (err) {
       console.error('Failed to load data:', err)
-      setError('データの読み込みに失敗しました')
+      setError('Failed to load data')
     } finally {
       setLoading(false)
     }
@@ -110,7 +110,7 @@ const SavedQueries: React.FC = () => {
       setError(null)
       
       if (!formData.name.trim() || !formData.sqlContent.trim()) {
-        setError('クエリ名とSQL内容は必須です')
+        setError('Query name and SQL content are required')
         return
       }
 
@@ -134,7 +134,7 @@ const SavedQueries: React.FC = () => {
       resetForm()
     } catch (err) {
       console.error('Failed to save query:', err)
-      setError('クエリの保存に失敗しました')
+      setError('Failed to save query')
     }
   }
 
@@ -151,7 +151,7 @@ const SavedQueries: React.FC = () => {
   }
 
   const handleDelete = async (queryId: number) => {
-    if (!window.confirm('このクエリを削除しますか？')) {
+    if (!window.confirm('Are you sure you want to delete this query?')) {
       return
     }
 
@@ -165,7 +165,7 @@ const SavedQueries: React.FC = () => {
       await loadData()
     } catch (err) {
       console.error('Failed to delete query:', err)
-      setError('クエリの削除に失敗しました')
+      setError('Failed to delete query')
     }
   }
 
@@ -199,7 +199,7 @@ const SavedQueries: React.FC = () => {
   if (loading) {
     return (
       <div className="container">
-        <div className="loading">読み込み中...</div>
+        <div className="loading">Loading...</div>
       </div>
     )
   }
@@ -207,12 +207,12 @@ const SavedQueries: React.FC = () => {
   return (
     <div className="container">
       <div className="header">
-        <h1>保存済みクエリ</h1>
+        <h1>Saved Queries</h1>
         <button 
           className="btn-primary" 
           onClick={() => setShowForm(true)}
         >
-          新規クエリ作成
+          Create New Query
         </button>
       </div>
 
@@ -228,13 +228,13 @@ const SavedQueries: React.FC = () => {
           className={`tab ${activeTab === 'my-queries' ? 'active' : ''}`}
           onClick={() => setActiveTab('my-queries')}
         >
-          マイクエリ ({Array.isArray(savedQueries) ? savedQueries.length : 0})
+          My Queries ({Array.isArray(savedQueries) ? savedQueries.length : 0})
         </button>
         <button 
           className={`tab ${activeTab === 'public-queries' ? 'active' : ''}`}
           onClick={() => setActiveTab('public-queries')}
         >
-          公開クエリ ({Array.isArray(publicQueries) ? publicQueries.length : 0})
+          Public Queries ({Array.isArray(publicQueries) ? publicQueries.length : 0})
         </button>
       </div>
 
@@ -242,7 +242,7 @@ const SavedQueries: React.FC = () => {
       <div className="search-container">
         <input
           type="text"
-          placeholder="クエリ名または説明で検索..."
+          placeholder="Search by query name or description..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           className="search-input"
@@ -253,7 +253,7 @@ const SavedQueries: React.FC = () => {
       <div className="query-list">
         {activeTab === 'my-queries' ? (
           filteredMyQueries.length === 0 ? (
-            <div className="no-data">保存済みクエリがありません</div>
+            <div className="no-data">No saved queries found</div>
           ) : (
             filteredMyQueries.map(query => (
               <QueryCard
@@ -268,7 +268,7 @@ const SavedQueries: React.FC = () => {
           )
         ) : (
           filteredPublicQueries.length === 0 ? (
-            <div className="no-data">公開クエリがありません</div>
+            <div className="no-data">No public queries found</div>
           ) : (
             filteredPublicQueries.map(query => (
               <QueryCard
@@ -287,59 +287,59 @@ const SavedQueries: React.FC = () => {
         <div className="modal-backdrop" onClick={() => resetForm()}>
           <div className="modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
-              <h3>{editingQuery ? 'クエリ編集' : '新規クエリ作成'}</h3>
+              <h3>{editingQuery ? 'Edit Query' : 'Create New Query'}</h3>
               <button className="close-btn" onClick={resetForm}>×</button>
             </div>
             
             <div className="form-group">
-              <label>クエリ名 *</label>
+              <label>Query Name *</label>
               <input
                 type="text"
                 value={formData.name}
                 onChange={(e) => setFormData({...formData, name: e.target.value})}
-                placeholder="クエリ名を入力..."
+                placeholder="Enter query name..."
               />
             </div>
             
             <div className="form-group">
-              <label>説明</label>
+              <label>Description</label>
               <input
                 type="text"
                 value={formData.description}
                 onChange={(e) => setFormData({...formData, description: e.target.value})}
-                placeholder="クエリの説明を入力..."
+                placeholder="Enter query description..."
               />
             </div>
             
             <div className="form-group">
-              <label>SQL内容 *</label>
+              <label>SQL Content *</label>
               <textarea
                 value={formData.sqlContent}
                 onChange={(e) => setFormData({...formData, sqlContent: e.target.value})}
-                placeholder="SQL文を入力..."
+                placeholder="Enter SQL statement..."
                 rows={10}
               />
             </div>
             
             <div className="form-row">
               <div className="form-group">
-                <label>共有設定</label>
+                <label>Sharing Scope</label>
                 <select
                   value={formData.sharingScope}
                   onChange={(e) => setFormData({...formData, sharingScope: e.target.value as 'PRIVATE' | 'PUBLIC'})}
                 >
-                  <option value="PRIVATE">プライベート</option>
-                  <option value="PUBLIC">公開</option>
+                  <option value="PRIVATE">Private</option>
+                  <option value="PUBLIC">Public</option>
                 </select>
               </div>
               
               <div className="form-group">
-                <label>デフォルト接続</label>
+                <label>Default Connection</label>
                 <select
                   value={formData.defaultConnectionId || ''}
                   onChange={(e) => setFormData({...formData, defaultConnectionId: e.target.value ? parseInt(e.target.value) : undefined})}
                 >
-                  <option value="">選択なし</option>
+                  <option value="">None Selected</option>
                   {connections.map(conn => (
                     <option key={conn.id} value={conn.id}>
                       {conn.connectionName} ({conn.databaseType})
@@ -351,10 +351,10 @@ const SavedQueries: React.FC = () => {
             
             <div className="modal-actions">
               <button className="btn-secondary" onClick={resetForm}>
-                キャンセル
+                Cancel
               </button>
               <button className="btn-primary" onClick={handleSave}>
-                {editingQuery ? '更新' : '保存'}
+                {editingQuery ? 'Update' : 'Save'}
               </button>
             </div>
           </div>
@@ -567,21 +567,21 @@ const QueryCard: React.FC<QueryCardProps> = ({ query, isOwner, onEdit, onDelete,
         <div className="query-title">
           <h3>{query.name}</h3>
           <span className={`scope-badge ${query.sharingScope?.toLowerCase() || 'private'}`}>
-            {query.sharingScope === 'PUBLIC' ? '公開' : 'プライベート'}
+            {query.sharingScope === 'PUBLIC' ? 'Public' : 'Private'}
           </span>
         </div>
         <div className="query-actions">
           <button className="btn-execute" onClick={() => onExecute(query)}>
-            実行
+            Execute
           </button>
           {isOwner && onEdit && (
             <button className="btn-edit" onClick={() => onEdit(query)}>
-              編集
+              Edit
             </button>
           )}
           {isOwner && onDelete && (
             <button className="btn-delete" onClick={() => onDelete(query.id)}>
-              削除
+              Delete
             </button>
           )}
         </div>
@@ -597,18 +597,18 @@ const QueryCard: React.FC<QueryCardProps> = ({ query, isOwner, onEdit, onDelete,
 
       <div className="query-meta">
         <div className="meta-row">
-          <span>作成者: <strong>{query.username}</strong></span>
+          <span>Created By: <strong>{query.username}</strong></span>
           {query.defaultConnection && (
-            <span>接続: <strong>{query.defaultConnection.connectionName}</strong></span>
+            <span>Connection: <strong>{query.defaultConnection.connectionName}</strong></span>
           )}
         </div>
         <div className="meta-row">
-          <span>作成日: {formatDate(query.createdAt)}</span>
-          <span>実行回数: {query.executionCount || 0}回</span>
+          <span>Created At: {formatDate(query.createdAt)}</span>
+          <span>Execution Count: {query.executionCount || 0}</span>
         </div>
         {query.lastExecutedAt && (
           <div className="meta-row">
-            <span>最終実行: {formatDate(query.lastExecutedAt)}</span>
+            <span>Last Executed: {formatDate(query.lastExecutedAt)}</span>
           </div>
         )}
       </div>

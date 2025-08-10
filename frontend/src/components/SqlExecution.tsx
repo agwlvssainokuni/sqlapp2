@@ -289,17 +289,17 @@ const SqlExecution: React.FC = () => {
             <div className="mode-badge saved-query-mode">
               <span className="mode-icon">🔖</span>
               <span className="mode-text">
-                保存済みクエリを実行中: <strong>{currentQueryName}</strong>
+                Executing Saved Query: <strong>{currentQueryName}</strong>
               </span>
-              <span className="mode-note">(SQLは読み取り専用)</span>
+              <span className="mode-note">(SQL is read-only)</span>
             </div>
           ) : executionMode === 'history' ? (
             <div className="mode-badge history-mode">
               <span className="mode-icon">🕒</span>
               <span className="mode-text">
-                履歴からクエリを再実行中
+                Re-executing Query from History
               </span>
-              <span className="mode-note">(SQLを編集できます)</span>
+              <span className="mode-note">(SQL can be edited)</span>
             </div>
           ) : null}
         </div>
