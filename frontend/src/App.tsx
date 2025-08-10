@@ -32,69 +32,67 @@ function App() {
   return (
     <AuthProvider>
       <Router>
-        <div className="App">
-          <Routes>
-            <Route path="/login" element={<Login/>}/>
-            <Route path="/register" element={<Register/>}/>
-            <Route
-              path="/dashboard"
-              element={
-                <ProtectedRoute>
-                  <Dashboard/>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/sql"
-              element={
-                <ProtectedRoute>
-                  <SqlExecution/>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/connections"
-              element={
-                <ProtectedRoute>
-                  <ConnectionManagement/>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/schema"
-              element={
-                <ProtectedRoute>
-                  <SchemaViewer/>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/queries"
-              element={
-                <ProtectedRoute>
-                  <SavedQueries/>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/history"
-              element={
-                <ProtectedRoute>
-                  <QueryHistory/>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/builder"
-              element={
-                <ProtectedRoute>
-                  <QueryBuilder/>
-                </ProtectedRoute>
-              }
-            />
-            <Route path="/" element={<Navigate to="/dashboard" replace/>}/>
-          </Routes>
-        </div>
+        <Routes>
+          <Route path="/login" element={<Login/>}/>
+          <Route path="/register" element={<Register/>}/>
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <Dashboard/>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/sql"
+            element={
+              <ProtectedRoute>
+                <SqlExecution/>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/connections"
+            element={
+              <ProtectedRoute>
+                <ConnectionManagement/>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/schema"
+            element={
+              <ProtectedRoute>
+                <SchemaViewer/>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/queries"
+            element={
+              <ProtectedRoute>
+                <SavedQueries/>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/history"
+            element={
+              <ProtectedRoute>
+                <QueryHistory/>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/builder"
+            element={
+              <ProtectedRoute>
+                <QueryBuilder/>
+              </ProtectedRoute>
+            }
+          />
+          <Route path="/" element={<Navigate to="/dashboard" replace/>}/>
+        </Routes>
       </Router>
     </AuthProvider>
   )

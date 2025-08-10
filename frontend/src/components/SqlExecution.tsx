@@ -121,12 +121,7 @@ const SqlExecution: React.FC = () => {
 
   const loadConnections = async () => {
     try {
-      const token = localStorage.getItem('token')
-      const response = await fetch('/api/connections', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      })
+      const response = await apiRequest('/api/connections')
 
       if (response.ok) {
         const data = await response.json()
@@ -169,13 +164,8 @@ const SqlExecution: React.FC = () => {
     }
 
     try {
-      const token = localStorage.getItem('token')
-      const response = await fetch('/api/sql/validate', {
+      const response = await apiRequest('/api/sql/validate', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
         body: JSON.stringify({
           sql: sql,
           connectionId: selectedConnectionId

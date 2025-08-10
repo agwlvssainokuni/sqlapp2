@@ -17,10 +17,12 @@
 import React, {useState} from 'react'
 import {Link, useNavigate} from 'react-router-dom'
 import {useTranslation} from 'react-i18next'
+import {useAuth} from '../context/AuthContext'
 import LanguageSwitcher from './LanguageSwitcher'
 
 const Register: React.FC = () => {
   const {t} = useTranslation()
+  const {apiRequest} = useAuth()
   const [username, setUsername] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -41,11 +43,8 @@ const Register: React.FC = () => {
     setIsLoading(true)
 
     try {
-      const response = await fetch('/api/auth/register', {
+      const response = await apiRequest('/api/auth/register', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
         body: JSON.stringify({username, email, password}),
       })
 
