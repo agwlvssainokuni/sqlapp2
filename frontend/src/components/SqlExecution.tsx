@@ -315,6 +315,11 @@ const SqlExecution: React.FC = () => {
           onChange={(e) => setSql(e.target.value)}
           placeholder={t('sqlExecution.enterQuery')}
           rows={8}
+          readOnly={executionMode === 'saved_query'}
+          style={{
+            backgroundColor: executionMode === 'saved_query' ? '#f8f9fa' : 'white',
+            cursor: executionMode === 'saved_query' ? 'not-allowed' : 'text'
+          }}
         />
       </div>
 
