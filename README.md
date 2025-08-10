@@ -50,6 +50,13 @@ SqlApp2 is a secure, modern web application that provides an intuitive interface
 - **Real-time Updates**: Dynamic parameter detection and form generation
 - **Connection Management**: Visual database connection testing and management
 
+### 🌐 Internationalization (i18n)
+- **Multi-language Support**: Complete English and Japanese interface
+- **Real-time Language Switching**: Seamless language change without reload
+- **Browser Language Detection**: Automatic language detection on first visit
+- **Persistent Preferences**: Language selection saved in localStorage
+- **Complete Translation Coverage**: 590+ translation keys across all components
+
 ### 🐳 Deployment Ready
 - **Single WAR Deployment**: Integrated frontend and backend
 - **Docker Support**: Containerized deployment with Docker Compose
@@ -85,6 +92,7 @@ SqlApp2 is a secure, modern web application that provides an intuitive interface
 - **TypeScript** - Type-safe JavaScript development
 - **Vite 7.1.1** - Fast development build tool
 - **React Router** - Client-side routing
+- **react-i18next v15.6.1** - Internationalization framework
 - **CSS3** - Modern styling with Grid/Flexbox
 
 ### Database Drivers
@@ -263,6 +271,10 @@ sqlapp2/
 │   ├── src/
 │   │   ├── components/                  # React components
 │   │   ├── context/                     # React context providers
+│   │   ├── locales/                     # Internationalization resources
+│   │   │   ├── en/translation.json      # English translations
+│   │   │   └── ja/translation.json      # Japanese translations
+│   │   ├── i18n.ts                      # i18n configuration
 │   │   └── utils/                       # Utility functions
 │   ├── package.json                     # Frontend dependencies
 │   └── vite.config.ts                   # Vite configuration
@@ -371,6 +383,15 @@ This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENS
 - [x] Intelligent re-execute logic for saved queries vs history
 - [x] Proper saved query ID tracking in execution history
 - [x] Comprehensive parameter handling and JSON parsing
+
+#### Phase A+B: Internationalization Implementation (Completed)
+- [x] **Phase A: Complete English Unification** - Systematic language consistency across all components
+- [x] **Phase B: Multi-language i18n Foundation** - Complete react-i18next integration
+- [x] **Translation Resources** - 590+ translation keys for English and Japanese
+- [x] **Component Integration** - All 8 major components with complete i18n support
+- [x] **Language Switcher** - Real-time language switching UI component
+- [x] **Browser Detection** - Automatic language detection with localStorage persistence
+- [x] **User Experience** - Seamless English ⇔ Japanese language switching
 
 ### 🔄 Phase 4+: Enterprise Features (Optional)
 - [ ] Advanced JOIN clause builder with visual relationship mapping
