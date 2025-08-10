@@ -54,6 +54,8 @@ const SqlExecution: React.FC = () => {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [currentQueryId, setCurrentQueryId] = useState<number | null>(null)
+  const [executionMode, setExecutionMode] = useState<'new' | 'saved_query' | 'history' | null>(null)
+  const [currentQueryName, setCurrentQueryName] = useState<string>('')
 
   useEffect(() => {
     loadConnections()
@@ -75,6 +77,8 @@ const SqlExecution: React.FC = () => {
         if (response.ok) {
           setSql(savedQuery.sqlContent || '')
           setCurrentQueryId(Number(queryId))
+          setCurrentQueryName(savedQuery.name || '')
+          setExecutionMode('saved_query')
         }
       } catch (error) {
         console.error('Failed to load saved query:', error)
@@ -89,6 +93,7 @@ const SqlExecution: React.FC = () => {
         
         if (response.ok) {
           setSql(historyItem.sqlContent || '')
+          setExecutionMode('history')
           // Load parameter values if available
           if (historyItem.parameterValues) {
             const paramDefs = Object.entries(historyItem.parameterValues).map(([name, value]) => ({
@@ -102,6 +107,11 @@ const SqlExecution: React.FC = () => {
       } catch (error) {
         console.error('Failed to load query history:', error)
       }
+    }
+    
+    // If no queryId or historyId, this is a new query
+    if (!queryId && !historyId) {
+      setExecutionMode('new')
     }
     
     if (connectionId && !isNaN(Number(connectionId))) {
@@ -275,6 +285,29 @@ const SqlExecution: React.FC = () => {
           </select>
         </div>
       </div>
+
+      {/* Execution Mode Indicator */}
+      {executionMode && executionMode !== 'new' && (
+        <div className="execution-mode-indicator">
+          {executionMode === 'saved_query' ? (
+            <div className="mode-badge saved-query-mode">
+              <span className="mode-icon">🔖</span>
+              <span className="mode-text">
+                保存済みクエリを実行中: <strong>{currentQueryName}</strong>
+              </span>
+              <span className="mode-note">(SQLは読み取り専用)</span>
+            </div>
+          ) : executionMode === 'history' ? (
+            <div className="mode-badge history-mode">
+              <span className="mode-icon">🕒</span>
+              <span className="mode-text">
+                履歴からクエリを再実行中
+              </span>
+              <span className="mode-note">(SQLを編集できます)</span>
+            </div>
+          ) : null}
+        </div>
+      )}
 
       <div className="sql-input-section">
         <label htmlFor="sql-textarea">SQL Query:</label>
