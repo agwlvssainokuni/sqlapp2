@@ -15,6 +15,7 @@
  */
 
 import React, { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useAuth } from '../context/AuthContext'
 
 interface QueryHistoryItem {
@@ -41,6 +42,7 @@ interface Statistics {
 }
 
 const QueryHistory: React.FC = () => {
+  const { t } = useTranslation()
   const { apiRequest } = useAuth()
   const [history, setHistory] = useState<QueryHistoryItem[]>([])
   const [statistics, setStatistics] = useState<Statistics | null>(null)
@@ -87,7 +89,7 @@ const QueryHistory: React.FC = () => {
       setStatistics(statsRes)
     } catch (err) {
       console.error('Failed to load query history:', err)
-      setError('Failed to load query history')
+      setError(t('queryHistory.loadFailed'))
     } finally {
       setLoading(false)
     }
@@ -114,7 +116,7 @@ const QueryHistory: React.FC = () => {
       setHistory(historyRes.content || [])
     } catch (err) {
       console.error('Failed to search query history:', err)
-      setError('Failed to search query history')
+      setError(t('queryHistory.searchFailed'))
     } finally {
       setLoading(false)
     }
@@ -152,7 +154,7 @@ const QueryHistory: React.FC = () => {
   if (loading && history.length === 0) {
     return (
       <div className="container">
-        <div className="loading">Loading...</div>
+        <div className="loading">{t('queryHistory.loading')}</div>
       </div>
     )
   }
@@ -160,7 +162,7 @@ const QueryHistory: React.FC = () => {
   return (
     <div className="container">
       <div className="header">
-        <h1>Query Execution History</h1>
+        <h1>{t('queryHistory.title')}</h1>
       </div>
 
       {error && (
@@ -174,11 +176,11 @@ const QueryHistory: React.FC = () => {
         <div className="stats-container">
           <div className="stat-card">
             <div className="stat-value">{statistics.savedQueryCount}</div>
-            <div className="stat-label">Saved Queries</div>
+            <div className="stat-label">{t('queryHistory.savedQueries')}</div>
           </div>
           <div className="stat-card">
             <div className="stat-value">{statistics.executionCount}</div>
-            <div className="stat-label">Total Executions</div>
+            <div className="stat-label">{t('queryHistory.totalExecutions')}</div>
           </div>
           <div className="stat-card">
             <div className="stat-value">
@@ -187,11 +189,11 @@ const QueryHistory: React.FC = () => {
                 : 'N/A'
               }
             </div>
-            <div className="stat-label">Average Execution Time</div>
+            <div className="stat-label">{t('queryHistory.averageExecutionTime')}</div>
           </div>
           <div className="stat-card">
             <div className="stat-value">{statistics.failedQueryCount}</div>
-            <div className="stat-label">Failed Queries</div>
+            <div className="stat-label">{t('queryHistory.failedQueries')}</div>
           </div>
         </div>
       )}
@@ -199,7 +201,7 @@ const QueryHistory: React.FC = () => {
       {/* Filters */}
       <div className="filters">
         <div className="filter-group">
-          <label>Filter:</label>
+          <label>{t('queryHistory.filter')}:</label>
           <select
             value={filterType}
             onChange={(e) => {
@@ -207,23 +209,23 @@ const QueryHistory: React.FC = () => {
               setCurrentPage(0)
             }}
           >
-            <option value="all">All</option>
-            <option value="successful">Successful Only</option>
-            <option value="failed">Failed Only</option>
+            <option value="all">{t('queryHistory.all')}</option>
+            <option value="successful">{t('queryHistory.successfulOnly')}</option>
+            <option value="failed">{t('queryHistory.failedOnly')}</option>
           </select>
         </div>
         
         <div className="search-group">
           <input
             type="text"
-            placeholder="Search by SQL, connection name, or query name..."
+            placeholder={t('queryHistory.searchPlaceholder')}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
             className="search-input"
           />
           <button className="btn-search" onClick={handleSearch}>
-            Search
+            {t('queryHistory.search')}
           </button>
         </div>
       </div>
@@ -232,7 +234,7 @@ const QueryHistory: React.FC = () => {
       <div className="history-list">
         {filteredHistory.length === 0 ? (
           <div className="no-data">
-            {searchTerm ? 'No search results found' : 'No query execution history available'}
+            {searchTerm ? t('queryHistory.noSearchResults') : t('queryHistory.noHistory')}
           </div>
         ) : (
           filteredHistory.map(item => (
@@ -252,15 +254,15 @@ const QueryHistory: React.FC = () => {
           disabled={currentPage === 0}
           onClick={() => setCurrentPage(currentPage - 1)}
         >
-          Previous
+          {t('queryHistory.previous')}
         </button>
-        <span className="page-info">Page {currentPage + 1}</span>
+        <span className="page-info">{t('queryHistory.page')} {currentPage + 1}</span>
         <button
           className="btn-page"
           disabled={filteredHistory.length < pageSize}
           onClick={() => setCurrentPage(currentPage + 1)}
         >
-          Next
+          {t('queryHistory.next')}
         </button>
       </div>
 
@@ -441,6 +443,7 @@ interface HistoryCardProps {
 }
 
 const HistoryCard: React.FC<HistoryCardProps> = ({ item, onReExecute }) => {
+  const { t } = useTranslation()
   const formatExecutionTime = (timeMs: number) => {
     if (timeMs < 1000) {
       return `${timeMs}ms`
@@ -458,29 +461,29 @@ const HistoryCard: React.FC<HistoryCardProps> = ({ item, onReExecute }) => {
         <div className="query-type-info">
           {item.savedQueryId ? (
             <span className="query-type-badge saved-query">
-              🔖 Saved Query{item.savedQueryName ? `: ${item.savedQueryName}` : ''}
+              🔖 {t('queryHistory.savedQueryType')}{item.savedQueryName ? `: ${item.savedQueryName}` : ''}
             </span>
           ) : (
             <span className="query-type-badge direct-query">
-              📝 Direct Input Query
+              📝 {t('queryHistory.directQueryType')}
             </span>
           )}
         </div>
         <div className="status-info">
           <span className={`status-badge ${item.isSuccessful ? 'success' : 'error'}`}>
-            {item.isSuccessful ? 'Success' : 'Failed'}
+            {item.isSuccessful ? t('queryHistory.success') : t('queryHistory.failed')}
           </span>
           <span className="execution-time">
             {formatExecutionTime(item.executionTimeMs)}
           </span>
           {item.resultCount !== undefined && (
             <span className="result-count">
-              {item.resultCount} rows
+              {item.resultCount} {t('queryHistory.rows')}
             </span>
           )}
           <div className="card-actions">
             <button className="btn-rerun" onClick={() => onReExecute(item)}>
-              Re-run
+              {t('queryHistory.rerun')}
             </button>
           </div>
         </div>
@@ -492,7 +495,7 @@ const HistoryCard: React.FC<HistoryCardProps> = ({ item, onReExecute }) => {
 
       {item.parameterValues && Object.keys(item.parameterValues).length > 0 && (
         <div className="parameters">
-          <strong>Parameters:</strong>
+          <strong>{t('queryHistory.parameters')}:</strong>
           <div className="param-list">
             {Object.entries(item.parameterValues).map(([key, value]) => (
               <span key={key} className="param-item">
@@ -505,18 +508,18 @@ const HistoryCard: React.FC<HistoryCardProps> = ({ item, onReExecute }) => {
 
       {item.errorMessage && (
         <div className="error-details">
-          <strong>Error:</strong> {item.errorMessage}
+          <strong>{t('queryHistory.error')}:</strong> {item.errorMessage}
         </div>
       )}
 
       <div className="card-meta">
         <div className="meta-row">
-          <span>Executed At: <strong>{formatDate(item.executedAt)}</strong></span>
-          <span>Connection: <strong>{item.connectionName}</strong> ({item.databaseType})</span>
+          <span>{t('queryHistory.executedAt')}: <strong>{formatDate(item.executedAt)}</strong></span>
+          <span>{t('queryHistory.connection')}: <strong>{item.connectionName}</strong> ({item.databaseType})</span>
         </div>
         {item.savedQueryName && (
           <div className="meta-row">
-            <span>Saved Query: <strong>{item.savedQueryName}</strong></span>
+            <span>{t('queryHistory.savedQuery')}: <strong>{item.savedQueryName}</strong></span>
           </div>
         )}
       </div>

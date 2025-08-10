@@ -15,6 +15,7 @@
  */
 
 import React, { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useAuth } from '../context/AuthContext'
 
 interface SavedQuery {
@@ -54,6 +55,7 @@ interface SavedQueryForm {
 }
 
 const SavedQueries: React.FC = () => {
+  const { t } = useTranslation()
   const { apiRequest } = useAuth()
   const [savedQueries, setSavedQueries] = useState<SavedQuery[]>([])
   const [publicQueries, setPublicQueries] = useState<SavedQuery[]>([])
@@ -99,7 +101,7 @@ const SavedQueries: React.FC = () => {
       setConnections(Array.isArray(connectionsRes) ? connectionsRes : [])
     } catch (err) {
       console.error('Failed to load data:', err)
-      setError('Failed to load data')
+      setError(t('savedQueries.loadFailed'))
     } finally {
       setLoading(false)
     }
@@ -110,7 +112,7 @@ const SavedQueries: React.FC = () => {
       setError(null)
       
       if (!formData.name.trim() || !formData.sqlContent.trim()) {
-        setError('Query name and SQL content are required')
+        setError(t('savedQueries.nameRequired'))
         return
       }
 
@@ -134,7 +136,7 @@ const SavedQueries: React.FC = () => {
       resetForm()
     } catch (err) {
       console.error('Failed to save query:', err)
-      setError('Failed to save query')
+      setError(t('savedQueries.saveFailed'))
     }
   }
 
@@ -151,7 +153,7 @@ const SavedQueries: React.FC = () => {
   }
 
   const handleDelete = async (queryId: number) => {
-    if (!window.confirm('Are you sure you want to delete this query?')) {
+    if (!window.confirm(t('savedQueries.confirmDelete'))) {
       return
     }
 
@@ -165,7 +167,7 @@ const SavedQueries: React.FC = () => {
       await loadData()
     } catch (err) {
       console.error('Failed to delete query:', err)
-      setError('Failed to delete query')
+      setError(t('savedQueries.deleteFailed'))
     }
   }
 
@@ -199,7 +201,7 @@ const SavedQueries: React.FC = () => {
   if (loading) {
     return (
       <div className="container">
-        <div className="loading">Loading...</div>
+        <div className="loading">{t('savedQueries.loading')}</div>
       </div>
     )
   }
@@ -207,12 +209,12 @@ const SavedQueries: React.FC = () => {
   return (
     <div className="container">
       <div className="header">
-        <h1>Saved Queries</h1>
+        <h1>{t('savedQueries.title')}</h1>
         <button 
           className="btn-primary" 
           onClick={() => setShowForm(true)}
         >
-          Create New Query
+          {t('savedQueries.createQuery')}
         </button>
       </div>
 
@@ -228,13 +230,13 @@ const SavedQueries: React.FC = () => {
           className={`tab ${activeTab === 'my-queries' ? 'active' : ''}`}
           onClick={() => setActiveTab('my-queries')}
         >
-          My Queries ({Array.isArray(savedQueries) ? savedQueries.length : 0})
+          {t('savedQueries.myQueries')} ({Array.isArray(savedQueries) ? savedQueries.length : 0})
         </button>
         <button 
           className={`tab ${activeTab === 'public-queries' ? 'active' : ''}`}
           onClick={() => setActiveTab('public-queries')}
         >
-          Public Queries ({Array.isArray(publicQueries) ? publicQueries.length : 0})
+          {t('savedQueries.publicQueries')} ({Array.isArray(publicQueries) ? publicQueries.length : 0})
         </button>
       </div>
 
@@ -242,7 +244,7 @@ const SavedQueries: React.FC = () => {
       <div className="search-container">
         <input
           type="text"
-          placeholder="Search by query name or description..."
+          placeholder={t('savedQueries.searchPlaceholder')}
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           className="search-input"
@@ -253,7 +255,7 @@ const SavedQueries: React.FC = () => {
       <div className="query-list">
         {activeTab === 'my-queries' ? (
           filteredMyQueries.length === 0 ? (
-            <div className="no-data">No saved queries found</div>
+            <div className="no-data">{t('savedQueries.noSavedQueries')}</div>
           ) : (
             filteredMyQueries.map(query => (
               <QueryCard
@@ -268,7 +270,7 @@ const SavedQueries: React.FC = () => {
           )
         ) : (
           filteredPublicQueries.length === 0 ? (
-            <div className="no-data">No public queries found</div>
+            <div className="no-data">{t('savedQueries.noPublicQueries')}</div>
           ) : (
             filteredPublicQueries.map(query => (
               <QueryCard
@@ -287,59 +289,59 @@ const SavedQueries: React.FC = () => {
         <div className="modal-backdrop" onClick={() => resetForm()}>
           <div className="modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
-              <h3>{editingQuery ? 'Edit Query' : 'Create New Query'}</h3>
+              <h3>{editingQuery ? t('savedQueries.editQuery') : t('savedQueries.createQuery')}</h3>
               <button className="close-btn" onClick={resetForm}>×</button>
             </div>
             
             <div className="form-group">
-              <label>Query Name *</label>
+              <label>{t('savedQueries.queryName')} *</label>
               <input
                 type="text"
                 value={formData.name}
                 onChange={(e) => setFormData({...formData, name: e.target.value})}
-                placeholder="Enter query name..."
+                placeholder={t('savedQueries.enterQueryName')}
               />
             </div>
             
             <div className="form-group">
-              <label>Description</label>
+              <label>{t('savedQueries.description')}</label>
               <input
                 type="text"
                 value={formData.description}
                 onChange={(e) => setFormData({...formData, description: e.target.value})}
-                placeholder="Enter query description..."
+                placeholder={t('savedQueries.enterDescription')}
               />
             </div>
             
             <div className="form-group">
-              <label>SQL Content *</label>
+              <label>{t('savedQueries.sqlContent')} *</label>
               <textarea
                 value={formData.sqlContent}
                 onChange={(e) => setFormData({...formData, sqlContent: e.target.value})}
-                placeholder="Enter SQL statement..."
+                placeholder={t('savedQueries.enterSQL')}
                 rows={10}
               />
             </div>
             
             <div className="form-row">
               <div className="form-group">
-                <label>Sharing Scope</label>
+                <label>{t('savedQueries.sharingScope')}</label>
                 <select
                   value={formData.sharingScope}
                   onChange={(e) => setFormData({...formData, sharingScope: e.target.value as 'PRIVATE' | 'PUBLIC'})}
                 >
-                  <option value="PRIVATE">Private</option>
-                  <option value="PUBLIC">Public</option>
+                  <option value="PRIVATE">{t('savedQueries.private')}</option>
+                  <option value="PUBLIC">{t('savedQueries.public')}</option>
                 </select>
               </div>
               
               <div className="form-group">
-                <label>Default Connection</label>
+                <label>{t('savedQueries.defaultConnection')}</label>
                 <select
                   value={formData.defaultConnectionId || ''}
                   onChange={(e) => setFormData({...formData, defaultConnectionId: e.target.value ? parseInt(e.target.value) : undefined})}
                 >
-                  <option value="">None Selected</option>
+                  <option value="">{t('savedQueries.noneSelected')}</option>
                   {connections.map(conn => (
                     <option key={conn.id} value={conn.id}>
                       {conn.connectionName} ({conn.databaseType})
@@ -351,10 +353,10 @@ const SavedQueries: React.FC = () => {
             
             <div className="modal-actions">
               <button className="btn-secondary" onClick={resetForm}>
-                Cancel
+                {t('savedQueries.cancel')}
               </button>
               <button className="btn-primary" onClick={handleSave}>
-                {editingQuery ? 'Update' : 'Save'}
+                {editingQuery ? t('savedQueries.update') : t('savedQueries.save')}
               </button>
             </div>
           </div>
@@ -557,6 +559,7 @@ interface QueryCardProps {
 }
 
 const QueryCard: React.FC<QueryCardProps> = ({ query, isOwner, onEdit, onDelete, onExecute }) => {
+  const { t } = useTranslation()
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleString('ja-JP')
   }
@@ -567,21 +570,21 @@ const QueryCard: React.FC<QueryCardProps> = ({ query, isOwner, onEdit, onDelete,
         <div className="query-title">
           <h3>{query.name}</h3>
           <span className={`scope-badge ${query.sharingScope?.toLowerCase() || 'private'}`}>
-            {query.sharingScope === 'PUBLIC' ? 'Public' : 'Private'}
+            {query.sharingScope === 'PUBLIC' ? t('savedQueries.public') : t('savedQueries.private')}
           </span>
         </div>
         <div className="query-actions">
           <button className="btn-execute" onClick={() => onExecute(query)}>
-            Execute
+            {t('savedQueries.execute')}
           </button>
           {isOwner && onEdit && (
             <button className="btn-edit" onClick={() => onEdit(query)}>
-              Edit
+              {t('savedQueries.edit')}
             </button>
           )}
           {isOwner && onDelete && (
             <button className="btn-delete" onClick={() => onDelete(query.id)}>
-              Delete
+              {t('savedQueries.delete')}
             </button>
           )}
         </div>
@@ -597,18 +600,18 @@ const QueryCard: React.FC<QueryCardProps> = ({ query, isOwner, onEdit, onDelete,
 
       <div className="query-meta">
         <div className="meta-row">
-          <span>Created By: <strong>{query.username}</strong></span>
+          <span>{t('savedQueries.createdBy')}: <strong>{query.username}</strong></span>
           {query.defaultConnection && (
-            <span>Connection: <strong>{query.defaultConnection.connectionName}</strong></span>
+            <span>{t('savedQueries.connection')}: <strong>{query.defaultConnection.connectionName}</strong></span>
           )}
         </div>
         <div className="meta-row">
-          <span>Created At: {formatDate(query.createdAt)}</span>
-          <span>Execution Count: {query.executionCount || 0}</span>
+          <span>{t('savedQueries.createdAt')}: {formatDate(query.createdAt)}</span>
+          <span>{t('savedQueries.executionCount')}: {query.executionCount || 0}</span>
         </div>
         {query.lastExecutedAt && (
           <div className="meta-row">
-            <span>Last Executed: {formatDate(query.lastExecutedAt)}</span>
+            <span>{t('savedQueries.lastExecuted')}: {formatDate(query.lastExecutedAt)}</span>
           </div>
         )}
       </div>
