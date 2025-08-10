@@ -16,9 +16,12 @@
 
 import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { useAuth } from '../context/AuthContext'
+import LanguageSwitcher from './LanguageSwitcher'
 
 const Login: React.FC = () => {
+  const { t } = useTranslation()
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
@@ -35,7 +38,7 @@ const Login: React.FC = () => {
       await login(username, password)
       navigate('/dashboard')
     } catch (error) {
-      setError('Login failed. Please check your credentials.')
+      setError(t('auth.loginFailed'))
     } finally {
       setIsLoading(false)
     }
@@ -44,10 +47,13 @@ const Login: React.FC = () => {
   return (
     <div className="login-container">
       <div className="login-form">
-        <h2>SqlApp2 Login</h2>
+        <div className="login-header">
+          <h2>SqlApp2 {t('auth.login')}</h2>
+          <LanguageSwitcher />
+        </div>
         <form onSubmit={handleSubmit}>
           <div className="form-group">
-            <label htmlFor="username">Username:</label>
+            <label htmlFor="username">{t('auth.username')}:</label>
             <input
               type="text"
               id="username"
@@ -57,7 +63,7 @@ const Login: React.FC = () => {
             />
           </div>
           <div className="form-group">
-            <label htmlFor="password">Password:</label>
+            <label htmlFor="password">{t('auth.password')}:</label>
             <input
               type="password"
               id="password"
@@ -68,11 +74,11 @@ const Login: React.FC = () => {
           </div>
           {error && <div className="error-message">{error}</div>}
           <button type="submit" disabled={isLoading}>
-            {isLoading ? 'Logging in...' : 'Login'}
+            {isLoading ? `${t('auth.loginButton')}...` : t('auth.loginButton')}
           </button>
         </form>
         <p>
-          Don't have an account? <Link to="/register">Register here</Link>
+          {t('auth.dontHaveAccount')} <Link to="/register">{t('auth.register')}</Link>
         </p>
       </div>
     </div>

@@ -16,8 +16,11 @@
 
 import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
+import LanguageSwitcher from './LanguageSwitcher'
 
 const Register: React.FC = () => {
+  const { t } = useTranslation()
   const [username, setUsername] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -31,7 +34,7 @@ const Register: React.FC = () => {
     setError('')
 
     if (password !== confirmPassword) {
-      setError('Passwords do not match')
+      setError('Passwords do not match') // TODO: Add to translation
       return
     }
 
@@ -51,9 +54,9 @@ const Register: React.FC = () => {
         throw new Error(errorData)
       }
 
-      navigate('/login', { state: { message: 'Registration successful! Please login.' } })
+      navigate('/login', { state: { message: 'Registration successful! Please login.' } }) // TODO: Add to translation
     } catch (error) {
-      setError(error instanceof Error ? error.message : 'Registration failed')
+      setError(error instanceof Error ? error.message : t('auth.registrationFailed'))
     } finally {
       setIsLoading(false)
     }
@@ -62,10 +65,13 @@ const Register: React.FC = () => {
   return (
     <div className="register-container">
       <div className="register-form">
-        <h2>SqlApp2 Registration</h2>
+        <div className="register-header">
+          <h2>SqlApp2 {t('auth.register')}</h2>
+          <LanguageSwitcher />
+        </div>
         <form onSubmit={handleSubmit}>
           <div className="form-group">
-            <label htmlFor="username">Username:</label>
+            <label htmlFor="username">{t('auth.username')}:</label>
             <input
               type="text"
               id="username"
@@ -75,7 +81,7 @@ const Register: React.FC = () => {
             />
           </div>
           <div className="form-group">
-            <label htmlFor="email">Email:</label>
+            <label htmlFor="email">{t('auth.email')}:</label>
             <input
               type="email"
               id="email"
@@ -85,7 +91,7 @@ const Register: React.FC = () => {
             />
           </div>
           <div className="form-group">
-            <label htmlFor="password">Password:</label>
+            <label htmlFor="password">{t('auth.password')}:</label>
             <input
               type="password"
               id="password"
@@ -95,7 +101,7 @@ const Register: React.FC = () => {
             />
           </div>
           <div className="form-group">
-            <label htmlFor="confirmPassword">Confirm Password:</label>
+            <label htmlFor="confirmPassword">{t('auth.confirmPassword')}:</label>
             <input
               type="password"
               id="confirmPassword"
@@ -106,11 +112,11 @@ const Register: React.FC = () => {
           </div>
           {error && <div className="error-message">{error}</div>}
           <button type="submit" disabled={isLoading}>
-            {isLoading ? 'Registering...' : 'Register'}
+            {isLoading ? `${t('auth.registerButton')}...` : t('auth.registerButton')}
           </button>
         </form>
         <p>
-          Already have an account? <Link to="/login">Login here</Link>
+          {t('auth.alreadyHaveAccount')} <Link to="/login">{t('auth.login')}</Link>
         </p>
       </div>
     </div>

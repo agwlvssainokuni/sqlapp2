@@ -15,6 +15,7 @@
  */
 
 import React, { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useAuth } from '../context/AuthContext'
 
 interface DatabaseConnection {
@@ -49,6 +50,7 @@ interface ConnectionTestResult {
 }
 
 const ConnectionManagement: React.FC = () => {
+  const { t } = useTranslation()
   const { } = useAuth()
   const [connections, setConnections] = useState<DatabaseConnection[]>([])
   const [showCreateForm, setShowCreateForm] = useState(false)
@@ -86,10 +88,10 @@ const ConnectionManagement: React.FC = () => {
         const data = await response.json()
         setConnections(data)
       } else {
-        setError('Failed to load connections')
+        setError('Failed to load connections') // TODO: Add translation
       }
     } catch (err) {
-      setError('Error loading connections: ' + (err as Error).message)
+      setError('Error loading connections: ' + (err as Error).message) // TODO: Add translation
     } finally {
       setLoading(false)
     }
@@ -172,7 +174,7 @@ const ConnectionManagement: React.FC = () => {
   }
 
   const deleteConnection = async (id: number) => {
-    if (!confirm('Are you sure you want to delete this connection?')) return
+    if (!confirm(t('connections.confirmDelete'))) return
     
     try {
       setLoading(true)
@@ -200,7 +202,7 @@ const ConnectionManagement: React.FC = () => {
   const testConnection = async (connection: DatabaseConnection) => {
     try {
       setTesting(prev => ({ ...prev, [connection.id]: true }))
-      setTestResults(prev => ({ ...prev, [connection.id]: { success: false, message: 'Testing...' } }))
+      setTestResults(prev => ({ ...prev, [connection.id]: { success: false, message: t('connections.testing') } }))
       
       const token = localStorage.getItem('token')
       const response = await fetch(`/api/connections/${connection.id}/test`, {
@@ -217,7 +219,7 @@ const ConnectionManagement: React.FC = () => {
         ...prev, 
         [connection.id]: { 
           success: false, 
-          message: 'Test failed: ' + (err as Error).message 
+          message: t('connections.connectionFailed') + ': ' + (err as Error).message 
         } 
       }))
     } finally {
@@ -271,39 +273,39 @@ const ConnectionManagement: React.FC = () => {
   return (
     <div className="connection-management">
       <div className="connection-header">
-        <h2>Database Connection Management</h2>
+        <h2>{t('connections.title')}</h2>
         <button 
           onClick={() => setShowCreateForm(true)}
           disabled={loading}
           className="create-btn"
         >
-          Add New Connection
+          {t('connections.addConnection')}
         </button>
       </div>
 
       {error && (
         <div className="error-message">
-          <strong>Error:</strong> {error}
+          <strong>{t('common.error')}:</strong> {error}
         </div>
       )}
 
       {showCreateForm && (
         <div className="connection-form">
-          <h3>{editingConnection ? 'Edit Connection' : 'Create New Connection'}</h3>
+          <h3>{editingConnection ? t('connections.editConnection') : t('connections.addConnection')}</h3>
           
           <div className="form-grid">
             <div className="form-group">
-              <label>Connection Name *</label>
+              <label>{t('connections.connectionName')} *</label>
               <input
                 type="text"
                 value={newConnection.connectionName}
                 onChange={(e) => setNewConnection(prev => ({ ...prev, connectionName: e.target.value }))}
-                placeholder="My Database Connection"
+                placeholder={t('connections.connectionName')}
               />
             </div>
 
             <div className="form-group">
-              <label>Database Type *</label>
+              <label>{t('connections.databaseType')} *</label>
               <select
                 value={newConnection.databaseType}
                 onChange={(e) => handleDatabaseTypeChange(e.target.value as 'MYSQL' | 'POSTGRESQL' | 'MARIADB')}
@@ -315,7 +317,7 @@ const ConnectionManagement: React.FC = () => {
             </div>
 
             <div className="form-group">
-              <label>Host *</label>
+              <label>{t('connections.host')} *</label>
               <input
                 type="text"
                 value={newConnection.host}
@@ -325,7 +327,7 @@ const ConnectionManagement: React.FC = () => {
             </div>
 
             <div className="form-group">
-              <label>Port *</label>
+              <label>{t('connections.port')} *</label>
               <input
                 type="number"
                 value={newConnection.port}
@@ -336,7 +338,7 @@ const ConnectionManagement: React.FC = () => {
             </div>
 
             <div className="form-group">
-              <label>Database Name *</label>
+              <label>{t('connections.databaseName')} *</label>
               <input
                 type="text"
                 value={newConnection.databaseName}
@@ -346,7 +348,7 @@ const ConnectionManagement: React.FC = () => {
             </div>
 
             <div className="form-group">
-              <label>Username *</label>
+              <label>{t('connections.username')} *</label>
               <input
                 type="text"
                 value={newConnection.username}
@@ -356,17 +358,17 @@ const ConnectionManagement: React.FC = () => {
             </div>
 
             <div className="form-group">
-              <label>Password *</label>
+              <label>{t('connections.password')} *</label>
               <input
                 type="password"
                 value={newConnection.password}
                 onChange={(e) => setNewConnection(prev => ({ ...prev, password: e.target.value }))}
-                placeholder={editingConnection ? "Leave empty to keep current password" : "Enter password"}
+                placeholder={editingConnection ? "Leave empty to keep current password" : t('connections.password')} // TODO: Add translation
               />
             </div>
 
             <div className="form-group full-width">
-              <label>Additional Parameters</label>
+              <label>Additional Parameters</label> {/* TODO: Add translation */}
               <input
                 type="text"
                 value={newConnection.additionalParams}
@@ -385,30 +387,30 @@ const ConnectionManagement: React.FC = () => {
               disabled={loading || !newConnection.connectionName || !newConnection.host || !newConnection.username}
               className="save-btn"
             >
-              {loading ? 'Saving...' : editingConnection ? 'Update Connection' : 'Create Connection'}
+              {loading ? `${t('connections.save')}...` : editingConnection ? t('connections.editConnection') : t('connections.addConnection')}
             </button>
             <button 
               onClick={cancelEdit}
               disabled={loading}
               className="cancel-btn"
             >
-              Cancel
+              {t('connections.cancel')}
             </button>
           </div>
         </div>
       )}
 
       <div className="connections-list">
-        <h3>Your Database Connections</h3>
+        <h3>{t('connections.title')}</h3>
         
         {loading && !showCreateForm && (
-          <div className="loading">Loading connections...</div>
+          <div className="loading">{t('common.loading')}</div>
         )}
 
         {connections.length === 0 && !loading ? (
           <div className="no-connections">
-            <p>No database connections found.</p>
-            <p>Click "Add New Connection" to get started.</p>
+            <p>{t('connections.noConnections')}</p>
+            <p>Click "{t('connections.addConnection')}" to get started.</p> {/* TODO: Improve translation */}
           </div>
         ) : (
           <div className="connections-grid">
@@ -423,21 +425,21 @@ const ConnectionManagement: React.FC = () => {
                 
                 <div className="connection-details">
                   <div className="detail-row">
-                    <span className="label">Host:</span>
+                    <span className="label">{t('connections.host')}:</span>
                     <span>{connection.host}:{connection.port}</span>
                   </div>
                   <div className="detail-row">
-                    <span className="label">Database:</span>
+                    <span className="label">{t('connections.databaseName')}:</span>
                     <span>{connection.databaseName}</span>
                   </div>
                   <div className="detail-row">
-                    <span className="label">Username:</span>
+                    <span className="label">{t('connections.username')}:</span>
                     <span>{connection.username}</span>
                   </div>
                   <div className="detail-row">
-                    <span className="label">Status:</span>
+                    <span className="label">Status:</span> {/* TODO: Add translation */}
                     <span className={connection.isActive ? 'status-active' : 'status-inactive'}>
-                      {connection.isActive ? 'Active' : 'Inactive'}
+                      {connection.isActive ? 'Active' : 'Inactive'} {/* TODO: Add translation */}
                     </span>
                   </div>
                 </div>
@@ -457,21 +459,21 @@ const ConnectionManagement: React.FC = () => {
                     disabled={testing[connection.id]}
                     className="test-btn"
                   >
-                    {testing[connection.id] ? 'Testing...' : 'Test Connection'}
+                    {testing[connection.id] ? t('connections.testing') : t('connections.testConnection')}
                   </button>
                   <button 
                     onClick={() => startEdit(connection)}
                     disabled={loading}
                     className="edit-btn"
                   >
-                    Edit
+                    {t('connections.edit')}
                   </button>
                   <button 
                     onClick={() => deleteConnection(connection.id)}
                     disabled={loading}
                     className="delete-btn"
                   >
-                    Delete
+                    {t('connections.delete')}
                   </button>
                 </div>
               </div>

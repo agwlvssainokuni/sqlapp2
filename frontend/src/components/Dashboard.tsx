@@ -15,9 +15,12 @@
  */
 
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import { useAuth } from '../context/AuthContext'
+import LanguageSwitcher from './LanguageSwitcher'
 
 const Dashboard: React.FC = () => {
+  const { t } = useTranslation()
   const { user, logout } = useAuth()
 
   const handleLogout = () => {
@@ -27,46 +30,47 @@ const Dashboard: React.FC = () => {
   return (
     <div className="dashboard">
       <header className="dashboard-header">
-        <h1>SqlApp2 Dashboard</h1>
+        <h1>{t('dashboard.title')}</h1>
         <div className="user-info">
-          <span>Welcome, {user?.username}</span>
+          <LanguageSwitcher />
+          <span>{t('dashboard.welcome')}, {user?.username}</span>
           <button onClick={handleLogout} className="logout-btn">
-            Logout
+            {t('auth.logout')}
           </button>
         </div>
       </header>
       <main className="dashboard-content">
-        <h2>SqlApp2 Features</h2>
+        <h2>{t('dashboard.quickActions')}</h2>
         <div className="feature-cards">
           <div className="feature-card">
-            <h3>SQL Query Execution</h3>
+            <h3>{t('navigation.sqlExecution')}</h3>
             <p>Execute SQL queries with parameterized support against your configured databases.</p>
-            <a href="/sql" className="feature-link">Go to SQL Execution</a>
+            <a href="/sql" className="feature-link">{t('dashboard.executeSQL')}</a>
           </div>
           <div className="feature-card">
-            <h3>Database Connections</h3>
+            <h3>{t('navigation.connections')}</h3>
             <p>Manage your database connections for MySQL, PostgreSQL, and MariaDB.</p>
-            <a href="/connections" className="feature-link">Manage Connections</a>
+            <a href="/connections" className="feature-link">{t('dashboard.manageConnections')}</a>
           </div>
           <div className="feature-card">
-            <h3>Schema Viewer</h3>
+            <h3>{t('navigation.schemaViewer')}</h3>
             <p>Browse database schemas, tables, columns, and their relationships.</p>
-            <a href="/schema" className="feature-link">View Schema</a>
+            <a href="/schema" className="feature-link">{t('dashboard.browseSchema')}</a>
           </div>
           <div className="feature-card">
-            <h3>Saved Queries</h3>
+            <h3>{t('navigation.savedQueries')}</h3>
             <p>Save, organize, and share your SQL queries with parameter templates.</p>
-            <a href="/queries" className="feature-link">Manage Queries</a>
+            <a href="/queries" className="feature-link">{t('dashboard.viewQueries')}</a>
           </div>
           <div className="feature-card">
-            <h3>Query History</h3>
+            <h3>{t('navigation.queryHistory')}</h3>
             <p>Track and analyze your SQL execution history with performance metrics.</p>
-            <a href="/history" className="feature-link">View History</a>
+            <a href="/history" className="feature-link">{t('dashboard.viewHistory')}</a>
           </div>
           <div className="feature-card">
-            <h3>SQL Query Builder</h3>
+            <h3>{t('navigation.queryBuilder')}</h3>
             <p>Build SQL queries visually with drag-and-drop interface and schema assistance.</p>
-            <a href="/builder" className="feature-link">Use Query Builder</a>
+            <a href="/builder" className="feature-link">{t('dashboard.buildQuery')}</a>
           </div>
         </div>
       </main>
