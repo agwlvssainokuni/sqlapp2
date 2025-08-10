@@ -36,32 +36,6 @@ const LanguageSwitcher: React.FC = () => {
         <option value="en">English</option>
         <option value="ja">日本語</option>
       </select>
-
-      <style>{`
-        .language-switcher {
-          display: inline-block;
-        }
-        
-        .language-select {
-          padding: 6px 12px;
-          border: 1px solid #ccc;
-          border-radius: 4px;
-          background-color: white;
-          font-size: 14px;
-          cursor: pointer;
-          min-width: 100px;
-        }
-        
-        .language-select:focus {
-          outline: none;
-          border-color: #007bff;
-          box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
-        }
-        
-        .language-select:hover {
-          border-color: #007bff;
-        }
-      `}</style>
     </div>
   )
 }
