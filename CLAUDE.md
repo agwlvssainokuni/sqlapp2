@@ -11,6 +11,7 @@ SqlApp2 is a web-based SQL execution tool that provides a user interface for exe
   - **Build Tool**: Vite 7.1.1
   - **Routing**: React Router DOM
   - **Styling**: CSS3 with component-based approach
+  - **Internationalization**: react-i18next v15.6.1 with browser language detection
 - **Backend**: Java 21 + Spring Boot 3.5.4
   - **Build Tool**: Gradle 9.0.0
   - **Web**: Spring Web MVC
@@ -18,7 +19,7 @@ SqlApp2 is a web-based SQL execution tool that provides a user interface for exe
 - **Architecture**: Client-Server with REST APIs, integrated SPA deployment
 - **Internal Database**: H2 Database (with JPA/Hibernate)
 - **Data Access**: Spring Data JPA
-- **Authentication**: Spring Security + JWT (planned)
+- **Authentication**: Spring Security + JWT
 - **Password Security**: BCrypt hashing
 - **Target RDBMS**: MySQL, PostgreSQL, MariaDB (via JDBC)
 - **Deployment**: Executable WAR, Container-ready (Docker + Docker Compose)
@@ -78,6 +79,13 @@ SqlApp2 is a web-based SQL execution tool that provides a user interface for exe
    - SQL input auto-completion based on schema metadata
    - Table schema definition display (column names, data types, constraints)
    - Query building assistance based on available schema
+
+7. **Internationalization (i18n)**
+   - Multi-language user interface support (English, Japanese)
+   - Real-time language switching with LanguageSwitcher component
+   - Browser language auto-detection and localStorage persistence
+   - Comprehensive translation coverage for all UI components
+   - Fallback language configuration (default: English)
 
 ### Internal Database (H2)
 - **Purpose**: 
@@ -204,9 +212,20 @@ sqlapp2/
 │   │   │   ├── Login.tsx           # Login component
 │   │   │   ├── Register.tsx        # Registration component
 │   │   │   ├── Dashboard.tsx       # Main dashboard
-│   │   │   └── ProtectedRoute.tsx  # Authentication guard
+│   │   │   ├── ProtectedRoute.tsx  # Authentication guard
+│   │   │   ├── LanguageSwitcher.tsx # Language switching UI
+│   │   │   ├── SqlExecution.tsx    # SQL execution interface
+│   │   │   ├── SavedQueries.tsx    # Query management
+│   │   │   ├── QueryHistory.tsx    # Execution history
+│   │   │   ├── ConnectionManagement.tsx # Database connections
+│   │   │   ├── SchemaViewer.tsx    # Database schema browser
+│   │   │   └── QueryBuilder.tsx    # Visual SQL builder
 │   │   ├── context/
 │   │   │   └── AuthContext.tsx     # Authentication context
+│   │   ├── locales/                # i18n translation resources
+│   │   │   ├── en/translation.json # English translations
+│   │   │   └── ja/translation.json # Japanese translations
+│   │   ├── i18n.ts                 # Internationalization configuration
 │   │   ├── App.tsx                 # Main React app
 │   │   └── main.tsx               # React entry point
 │   ├── package.json               # Frontend dependencies
@@ -312,6 +331,21 @@ sqlapp2/
    - Proper saved query ID tracking in execution history for accurate origin identification
    - Improved user experience with clear visual distinction between execution modes
    - Comprehensive parameter handling and display in query history
+
+12. **Complete Internationalization Implementation (Phase A+B - Complete)**:
+   - **Phase A: Complete English Unification**: Systematic conversion of all mixed-language UI components to consistent English
+     - QueryHistory.tsx: Complete English localization (28 text changes)
+     - SavedQueries.tsx: Complete English localization (80+ text changes) 
+     - SqlExecution.tsx: Execution mode display English localization
+   - **Phase B: Multi-language i18n Foundation**: Full react-i18next integration and comprehensive translation
+     - **i18n Infrastructure**: react-i18next v15.6.1, browser language detection, localStorage persistence
+     - **Translation Resources**: Comprehensive English/Japanese translation files (590+ translation keys)
+     - **Component Integration**: All 8 major components with complete i18n implementation
+       - Priority High: Dashboard, Login/Register (with LanguageSwitcher integration)
+       - Priority Medium: ConnectionManagement, SqlExecution, SavedQueries, QueryHistory  
+       - Priority Low: SchemaViewer, QueryBuilder
+     - **LanguageSwitcher Component**: Real-time language switching UI component
+     - **User Experience**: Seamless English ⇔ Japanese language switching with persistent preferences
 
 ### 🔄 Next Phase (Phase 4+ - Optional Extensions)
 

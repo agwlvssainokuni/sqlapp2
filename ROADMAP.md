@@ -136,6 +136,30 @@ SqlApp2は、複数のRDBMSに対応したWebベースのSQL実行ツールで�
 
 **進捗**: 100% | **状態**: ✅ 完了
 
+### Phase A+B: 国際化機能実装 (2週間) ✅ 完了
+**目標**: 多言語対応と一貫したUI言語統一
+
+#### 📋 Phase A: 完全英語統一化 (3日)
+- [x] 言語混在問題分析・対策策定
+- [x] QueryHistory.tsx英語統一化 (28文字列変更)
+- [x] SavedQueries.tsx英語統一化 (80+文字列変更)  
+- [x] SqlExecution.tsx実行モード表示英語化
+- [x] UI一貫性検証・トーン調整
+
+**進捗**: 100% | **状態**: ✅ 完了
+
+#### 📋 Phase B: i18n多言語基盤実装 (4日)
+- [x] **i18n基盤構築**: react-i18next v15.6.1統合・browser言語検出・localStorage永続化
+- [x] **翻訳リソース作成**: 包括的英語・日本語翻訳ファイル (590+翻訳キー)
+- [x] **LanguageSwitcher**: リアルタイム言語切り替えUIコンポーネント
+- [x] **全コンポーネント適用** (8コンポーネント):
+  - Priority High: Dashboard, Login/Register (LanguageSwitcher統合)
+  - Priority Medium: ConnectionManagement, SqlExecution, SavedQueries, QueryHistory
+  - Priority Low: SchemaViewer, QueryBuilder
+- [x] **完全動作検証**: English ⇔ Japanese シームレス言語切り替え
+
+**進捗**: 100% | **状態**: ✅ 完了
+
 ### Phase 4: エンタープライズ機能 (4-6週間)
 **目標**: 実行履歴とパフォーマンス管理
 
