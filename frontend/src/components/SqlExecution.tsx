@@ -17,6 +17,7 @@
 import React, {useState, useEffect} from 'react'
 import {useTranslation} from 'react-i18next'
 import {useAuth} from '../context/AuthContext'
+import Layout from './Layout'
 
 interface DatabaseConnection {
   id: number
@@ -264,9 +265,8 @@ const SqlExecution: React.FC = () => {
   }
 
   return (
-    <div className="sql-execution">
-      <div className="sql-header">
-        <h2>{t('sqlExecution.title')}</h2>
+    <Layout title={t('sqlExecution.title')}>
+      <div className="sql-execution">
         <div className="connection-selector">
           <label htmlFor="connection-select">{t('sqlExecution.databaseConnection')}:</label>
           <select
@@ -431,7 +431,8 @@ const SqlExecution: React.FC = () => {
           )}
         </div>
       )}
-    </div>
+      </div>
+    </Layout>
   )
 }
 

@@ -17,29 +17,19 @@
 import React from 'react'
 import {useTranslation} from 'react-i18next'
 import {useAuth} from '../context/AuthContext'
-import LanguageSwitcher from './LanguageSwitcher'
+import Layout from './Layout'
 
 const Dashboard: React.FC = () => {
   const {t} = useTranslation()
-  const {user, logout} = useAuth()
-
-  const handleLogout = () => {
-    logout()
-  }
+  const {user} = useAuth()
 
   return (
-    <div className="dashboard">
-      <header className="dashboard-header">
-        <h1>{t('dashboard.title')}</h1>
-        <div className="user-info">
-          <LanguageSwitcher/>
-          <span>{t('dashboard.welcome')}, {user?.username}</span>
-          <button onClick={handleLogout} className="logout-btn">
-            {t('auth.logout')}
-          </button>
-        </div>
-      </header>
-      <main className="dashboard-content">
+    <Layout title={t('dashboard.title')}>
+      <div className="dashboard-welcome">
+        <p>{t('dashboard.welcome')}, <strong>{user?.username}</strong></p>
+      </div>
+      
+      <section className="dashboard-content">
         <h2>{t('dashboard.quickActions')}</h2>
         <div className="feature-cards">
           <div className="feature-card">
@@ -73,8 +63,8 @@ const Dashboard: React.FC = () => {
             <a href="/builder" className="feature-link">{t('dashboard.buildQuery')}</a>
           </div>
         </div>
-      </main>
-    </div>
+      </section>
+    </Layout>
   )
 }
 

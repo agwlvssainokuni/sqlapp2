@@ -17,6 +17,7 @@
 import React, {useState, useEffect} from 'react'
 import {useTranslation} from 'react-i18next'
 import {useAuth} from '../context/AuthContext'
+import Layout from './Layout'
 
 interface DatabaseConnection {
   id: number
@@ -298,8 +299,8 @@ const QueryBuilder: React.FC = () => {
   }
 
   return (
-    <div className="query-builder">
-      <h1>{t('queryBuilder.title')}</h1>
+    <Layout title={t('queryBuilder.title')}>
+      <div className="query-builder">
 
       {/* Connection Selection */}
       <div className="section">
@@ -598,7 +599,8 @@ const QueryBuilder: React.FC = () => {
           <pre>{generatedSql}</pre>
         </div>
       )}
-    </div>
+      </div>
+    </Layout>
   )
 }
 

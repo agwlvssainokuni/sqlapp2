@@ -17,6 +17,7 @@
 import React, {useState, useEffect} from 'react'
 import {useTranslation} from 'react-i18next'
 import {useAuth} from '../context/AuthContext'
+import Layout from './Layout'
 
 interface DatabaseConnection {
   id: number
@@ -271,10 +272,10 @@ const ConnectionManagement: React.FC = () => {
   }
 
   return (
-    <div className="connection-management">
-      <div className="connection-header">
-        <h2>{t('connections.title')}</h2>
-        <button
+    <Layout title={t('connections.title')}>
+      <div className="connection-management">
+        <div className="connection-header">
+          <button
           onClick={() => setShowCreateForm(true)}
           disabled={loading}
           className="create-btn"
@@ -491,7 +492,7 @@ const ConnectionManagement: React.FC = () => {
           </div>
         )}
       </div>
-    </div>
+    </Layout>
   )
 }
 

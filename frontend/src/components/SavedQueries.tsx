@@ -17,6 +17,7 @@
 import React, {useState, useEffect} from 'react'
 import {useTranslation} from 'react-i18next'
 import {useAuth} from '../context/AuthContext'
+import Layout from './Layout'
 
 interface SavedQuery {
   id: number
@@ -207,10 +208,9 @@ const SavedQueries: React.FC = () => {
   }
 
   return (
-    <div className="saved-queries">
-      <div className="container">
+    <Layout title={t('savedQueries.title')}>
+      <div className="saved-queries">
         <div className="header">
-          <h1>{t('savedQueries.title')}</h1>
           <button
             className="btn-primary"
             onClick={() => setShowForm(true)}
@@ -371,7 +371,7 @@ const SavedQueries: React.FC = () => {
         )}
 
       </div>
-    </div>
+    </Layout>
   )
 }
 

@@ -14,6 +14,10 @@
     "loginFailed": "ログインに失敗しました",
     "registrationFailed": "登録に失敗しました"
   },
+  "common": {
+    "dashboard": "ダッシュボード",
+    "logout": "ログアウト"
+  },
   "navigation": {
     "dashboard": "ダッシュボード",
     "connections": "データベース接続",

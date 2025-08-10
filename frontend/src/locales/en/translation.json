@@ -14,6 +14,10 @@
     "loginFailed": "Login failed",
     "registrationFailed": "Registration failed"
   },
+  "common": {
+    "dashboard": "Dashboard",
+    "logout": "Logout"
+  },
   "navigation": {
     "dashboard": "Dashboard",
     "connections": "Database Connections",

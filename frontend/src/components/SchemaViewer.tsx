@@ -17,6 +17,7 @@
 import React, {useState, useEffect} from 'react'
 import {useTranslation} from 'react-i18next'
 import {useAuth} from '../context/AuthContext'
+import Layout from './Layout'
 
 interface DatabaseConnection {
   id: number
@@ -229,9 +230,8 @@ const SchemaViewer: React.FC = () => {
   }
 
   return (
-    <div className="schema-viewer">
-      <div className="schema-header">
-        <h2>{t('schemaViewer.title')}</h2>
+    <Layout title={t('schemaViewer.title')}>
+      <div className="schema-viewer">
 
         <div className="connection-selector">
           <label>{t('schemaViewer.selectConnectionLabel')}</label>
@@ -393,7 +393,8 @@ const SchemaViewer: React.FC = () => {
           </div>
         </div>
       )}
-    </div>
+      </div>
+    </Layout>
   )
 }
 

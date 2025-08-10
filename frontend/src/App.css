@@ -1,3 +1,171 @@
+/* Common Layout Styles */
+.app-layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: #f8f9fa;
+}
+
+/* Header Styles */
+.app-header {
+  background-color: #007bff;
+  color: white;
+  padding: 0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+.header-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header-left .app-title {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: white;
+}
+
+.header-nav {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.header-nav .nav-link,
+.header-nav .logout-btn {
+  background: none;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+}
+
+.header-nav .nav-link:hover,
+.header-nav .logout-btn:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+/* Main Content */
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.content-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Page Header */
+.page-header {
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #e9ecef;
+}
+
+.page-title {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 600;
+  color: #333;
+  text-align: left;
+}
+
+/* Footer Styles */
+.app-footer {
+  background-color: #343a40;
+  color: #fff;
+  padding: 1rem 0;
+  margin-top: auto;
+}
+
+.footer-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.footer-left .copyright {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #adb5bd;
+}
+
+.footer-right {
+  display: flex;
+  align-items: center;
+}
+
+/* Language Switcher in Footer */
+.footer-right .language-switcher {
+  margin: 0;
+}
+
+.footer-right .language-switcher .language-select {
+  background-color: #495057;
+  color: white;
+  border: 1px solid #6c757d;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+}
+
+.footer-right .language-switcher .language-select:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .header-content {
+    padding: 1rem;
+    flex-direction: column;
+    gap: 1rem;
+    text-align: center;
+  }
+
+  .header-nav {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .content-container {
+    padding: 1rem;
+  }
+
+  .page-title {
+    font-size: 1.5rem;
+    text-align: center;
+  }
+
+  .footer-content {
+    padding: 0 1rem;
+    flex-direction: column;
+    gap: 1rem;
+    text-align: center;
+  }
+}
+
 /* Login and Register Forms */
 .login-container, .register-container {
   display: flex;
@@ -1772,4 +1940,80 @@ a:hover {
     flex-direction: column;
     gap: 5px;
   }
+}
+
+/* Component Layout Adjustments for Unified Layout */
+/* Remove top margins from component headers since Layout provides page title */
+.connection-management .connection-header,
+.saved-queries .header,
+.dashboard-content,
+.sql-execution .connection-selector,
+.schema-viewer .connection-selector {
+  margin-top: 0;
+}
+
+/* Adjust component spacing for unified layout */
+.dashboard-welcome {
+  background: white;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 2rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.dashboard-welcome p {
+  margin: 0;
+  font-size: 1.1rem;
+  color: #495057;
+}
+
+/* Connection selector styling consistency */
+.connection-selector {
+  background: white;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.connection-selector label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: #495057;
+}
+
+.connection-selector select {
+  width: 100%;
+  max-width: 300px;
+  padding: 0.5rem;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+/* Header action button alignment */
+.connection-header,
+.saved-queries .header {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 1.5rem;
+}
+
+/* Component content containers */
+.connection-management,
+.saved-queries,
+.query-history,
+.query-builder,
+.schema-viewer,
+.sql-execution {
+  /* Remove any conflicting container styles */
+}
+
+/* Override any component-specific container margins */
+.query-history .container,
+.saved-queries .container {
+  padding: 0;
+  margin: 0;
+  max-width: none;
 }

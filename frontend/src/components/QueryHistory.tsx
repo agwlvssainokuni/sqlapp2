@@ -17,6 +17,7 @@
 import React, {useState, useEffect} from 'react'
 import {useTranslation} from 'react-i18next'
 import {useAuth} from '../context/AuthContext'
+import Layout from './Layout'
 
 interface QueryHistoryItem {
   id: number
@@ -160,11 +161,8 @@ const QueryHistory: React.FC = () => {
   }
 
   return (
-    <div className="query-history">
-      <div className="container">
-        <div className="header">
-          <h1>{t('queryHistory.title')}</h1>
-        </div>
+    <Layout title={t('queryHistory.title')}>
+      <div className="query-history">
 
         {error && (
           <div className="error-message">
@@ -268,7 +266,7 @@ const QueryHistory: React.FC = () => {
         </div>
 
       </div>
-    </div>
+    </Layout>
   )
 }
 
