@@ -72,9 +72,9 @@ export interface SqlValidationResult {
 
 // SqlExecutionController - 統一されたSQL実行結果レスポンス
 export interface SqlExecutionResult {
-  success: boolean
-  message: string
-  executedAt: string
+  ok: boolean
+  executedAt?: string
+  executionTime?: number
   sql?: string
   data?: SqlResultData
   error?: string
@@ -89,7 +89,6 @@ export interface SqlResultData {
   columns: string[]
   rows: any[][]
   rowCount: number
-  executionTime: number
 }
 
 export interface QueryExecutionErrorResponse {

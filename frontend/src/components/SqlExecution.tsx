@@ -17,21 +17,10 @@
 import React, {useState, useEffect} from 'react'
 import {useTranslation} from 'react-i18next'
 import {useAuth} from '../context/AuthContext'
-import type {SqlValidationResult, QueryExecutionErrorResponse, DatabaseConnection} from '../types/api'
+import type {SqlValidationResult, QueryExecutionErrorResponse, DatabaseConnection, SqlExecutionResult} from '../types/api'
 import Layout from './Layout'
 
 
-interface SqlExecutionResult {
-  success: boolean
-  rowCount: number
-  executionTimeMs: number
-  columns: string[]
-  rows: Array<Record<string, any>>
-  message?: string
-  resultType?: string
-  hasMoreRows?: boolean
-  note?: string
-}
 
 interface ParameterDefinition {
   name: string
@@ -223,12 +212,13 @@ const SqlExecution: React.FC = () => {
       })
 
       const data = response.data
-      if (response.ok) {
+      if (response.ok && data.ok) {
         setResult(data)
         // Execution count is now automatically recorded on the backend
       } else {
-        const errorData = data as QueryExecutionErrorResponse
-        setError(errorData.error || 'SQL execution failed') // TODO: Add translation
+        // Handle both API errors and SQL execution errors
+        const errorMessage = data.error || (data as QueryExecutionErrorResponse).error || 'SQL execution failed'
+        setError(errorMessage) // TODO: Add translation
       }
     } catch (err) {
       setError('Execution error: ' + (err as Error).message) // TODO: Add translation
@@ -364,40 +354,29 @@ const SqlExecution: React.FC = () => {
             <div className="result-header">
               <h3>{t('sqlExecution.queryResult')}</h3>
               <div className="result-meta">
-                <span>{t('sqlExecution.rows')}: {result.rowCount}</span>
-                <span>{t('sqlExecution.executionTime')}: {result.executionTimeMs}{t('sqlExecution.ms')}</span>
+                <span>{t('sqlExecution.rows')}: {result.data?.rowCount || 0}</span>
+                <span>{t('sqlExecution.executionTime')}: {result.executionTime}{t('sqlExecution.ms')}</span>
               </div>
             </div>
 
-            {result.message && (
-              <div className="result-message">
-                {result.message}
-              </div>
-            )}
 
-            {result.hasMoreRows && result.note && (
-              <div className="result-warning">
-                ⚠️ {result.note}
-              </div>
-            )}
-
-            {result.columns && result.columns.length > 0 && (
+            {result.data?.columns && result.data.columns.length > 0 && (
               <div className="result-table-container">
                 <table className="result-table">
                   <thead>
                   <tr>
-                    {result.columns.map((column, index) => (
+                    {result.data!.columns.map((column, index) => (
                       <th key={index}>{column}</th>
                     ))}
                   </tr>
                   </thead>
                   <tbody>
-                  {result.rows.map((row, rowIndex) => (
+                  {result.data!.rows.map((row, rowIndex) => (
                     <tr key={rowIndex}>
-                      {result.columns.map((column, colIndex) => (
+                      {result.data!.columns.map((_, colIndex) => (
                         <td key={colIndex}>
-                          {row[column] !== null && row[column] !== undefined
-                            ? String(row[column])
+                          {row[colIndex] !== null && row[colIndex] !== undefined
+                            ? String(row[colIndex])
                             : 'NULL'}
                         </td>
                       ))}
