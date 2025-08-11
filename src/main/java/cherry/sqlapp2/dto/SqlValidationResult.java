@@ -22,20 +22,19 @@ import java.time.LocalDateTime;
  * SQLクエリ検証APIのレスポンス
  */
 public record SqlValidationResult(
-        Boolean valid,
-        String message,
-        String error,
-        String errorType,
+        boolean ok,
         LocalDateTime validatedAt,
-        String sql
+        String sql,
+        String error,
+        String errorType
 ) {
     // 成功時のコンストラクタ
-    public SqlValidationResult(Boolean valid, String message, LocalDateTime validatedAt, String sql) {
-        this(valid, message, null, null, validatedAt, sql);
+    public static SqlValidationResult validationOk(LocalDateTime validatedAt, String sql) {
+        return new SqlValidationResult(true, validatedAt, sql, null, null);
     }
-    
+
     // エラー時のコンストラクタ
-    public SqlValidationResult(Boolean valid, String error, String errorType, LocalDateTime validatedAt, String sql) {
-        this(valid, null, error, errorType, validatedAt, sql);
+    public static SqlValidationResult validationNg(LocalDateTime validatedAt, String sql, String error, String errorType) {
+        return new SqlValidationResult(false, validatedAt, sql, error, errorType);
     }
 }

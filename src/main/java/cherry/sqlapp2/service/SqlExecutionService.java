@@ -16,7 +16,6 @@
 package cherry.sqlapp2.service;
 
 import cherry.sqlapp2.dto.SqlExecutionResult;
-import cherry.sqlapp2.entity.DatabaseConnection;
 import cherry.sqlapp2.entity.SavedQuery;
 import cherry.sqlapp2.entity.User;
 import cherry.sqlapp2.repository.DatabaseConnectionRepository;
@@ -25,13 +24,9 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.sql.*;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.sql.Date;
+import java.time.*;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -43,109 +38,255 @@ public class SqlExecutionService {
     private final DatabaseConnectionRepository connectionRepository;
 
     @Autowired
-    public SqlExecutionService(DynamicDataSourceService dataSourceService, 
-                             QueryManagementService queryManagementService,
-                             DatabaseConnectionRepository connectionRepository) {
+    public SqlExecutionService(
+            DynamicDataSourceService dataSourceService,
+            QueryManagementService queryManagementService,
+            DatabaseConnectionRepository connectionRepository
+    ) {
         this.dataSourceService = dataSourceService;
         this.queryManagementService = queryManagementService;
         this.connectionRepository = connectionRepository;
     }
 
     /**
-     * Execute SQL query and return results
-     */
-    public SqlExecutionResult executeQuery(User user, Long connectionId, String sql) throws SQLException {
-        return executeQuery(user, connectionId, sql, null);
-    }
-
-    /**
      * Execute SQL query and return results with optional SavedQuery association
      */
-    public SqlExecutionResult executeQuery(User user, Long connectionId, String sql, SavedQuery savedQuery) throws SQLException {
-        if (sql == null || sql.trim().isEmpty()) {
-            throw new IllegalArgumentException("SQL query cannot be empty");
-        }
+    public SqlExecutionResult executeQuery(
+            User user,
+            Long connectionId,
+            String sql,
+            SavedQuery savedQuery
+    ) {
+
+        // Determine if this is a SELECT query or other operation
+        String trimmedSql = sql.trim().toLowerCase();
+        boolean isSelect = trimmedSql.startsWith("select") ||
+                trimmedSql.startsWith("with") ||
+                trimmedSql.startsWith("show") ||
+                trimmedSql.startsWith("describe") ||
+                trimmedSql.startsWith("desc") ||
+                trimmedSql.startsWith("explain");
 
         long startTime = System.currentTimeMillis();
-        
+
         try (Connection connection = dataSourceService.getConnection(user, connectionId);
              Statement statement = connection.createStatement()) {
-            
-            Map<String, Object> result = new LinkedHashMap<>();
-            
-            // Determine if this is a SELECT query or other operation
-            String trimmedSql = sql.trim().toLowerCase();
-            boolean isSelect = trimmedSql.startsWith("select") || 
-                             trimmedSql.startsWith("with") || 
-                             trimmedSql.startsWith("show") ||
-                             trimmedSql.startsWith("describe") ||
-                             trimmedSql.startsWith("desc") ||
-                             trimmedSql.startsWith("explain");
-            
+
+            SqlExecutionResult.SqlResultData data = null;
             if (isSelect) {
                 // Execute SELECT query
                 try (ResultSet resultSet = statement.executeQuery(sql)) {
-                    result = processResultSet(resultSet);
+                    data = processResultSet(resultSet);
                 }
             } else {
                 // Execute UPDATE/INSERT/DELETE/DDL
+                @SuppressWarnings("unused")
                 int affectedRows = statement.executeUpdate(sql);
-                result.put("affectedRows", affectedRows);
-                result.put("resultType", "update");
             }
-            
             long executionTime = System.currentTimeMillis() - startTime;
-            result.put("executionTimeMs", executionTime);
-            result.put("executedAt", LocalDateTime.now());
-            result.put("sql", sql);
-            result.put("success", true);
-            
+            LocalDateTime executedAt = LocalDateTime.now();
+
             // Record query execution in history
-            recordQueryExecution(user, connectionId, sql, null, executionTime, 
-                               getResultCount(result), true, null, savedQuery);
-            
-            // Convert Map result to SqlExecutionResult
-            SqlExecutionResult.SqlResultData data = null;
-            if (isSelect && result.containsKey("data")) {
-                @SuppressWarnings("unchecked")
-                List<String> columns = (List<String>) result.get("columns");
-                @SuppressWarnings("unchecked")
-                List<List<Object>> rows = (List<List<Object>>) result.get("data");
-                Integer rowCount = (Integer) result.get("rowCount");
-                data = new SqlExecutionResult.SqlResultData(columns, rows, rowCount, executionTime);
-            }
-            
-            return new SqlExecutionResult(true, data, LocalDateTime.now(), sql, null, 
-                                        savedQuery != null ? savedQuery.getId() : null);
-            
-        } catch (SQLException e) {
+            recordQueryExecution(
+                    user,
+                    connectionId,
+                    sql,
+                    null,
+                    executionTime,
+                    Optional.ofNullable(data).map(SqlExecutionResult.SqlResultData::rowCount).orElse(null),
+                    true,
+                    null,
+                    savedQuery
+            );
+
+            return SqlExecutionResult.success(
+                    executedAt,
+                    executionTime,
+                    sql,
+                    data,
+                    null,
+                    Optional.ofNullable(savedQuery).map(SavedQuery::getId).orElse(null)
+            );
+
+        } catch (SQLException ex) {
             long executionTime = System.currentTimeMillis() - startTime;
-            
+            LocalDateTime executedAt = LocalDateTime.now();
+
             // Record failed query execution in history
-            recordQueryExecution(user, connectionId, sql, null, executionTime, 
-                               null, false, e.getMessage(), savedQuery);
-            
-            throw new SQLException("SQL execution failed: " + e.getMessage(), e);
+            recordQueryExecution(
+                    user,
+                    connectionId,
+                    sql,
+                    null,
+                    executionTime,
+                    null,
+                    false,
+                    ex.getMessage(),
+                    savedQuery
+            );
+
+            return SqlExecutionResult.error(
+                    executedAt,
+                    sql,
+                    ex.getMessage(),
+                    "SQLException",
+                    ex.getErrorCode(),
+                    ex.getSQLState()
+            );
+        }
+    }
+
+    /**
+     * Validate SQL query for basic security
+     */
+    public void validateQuery(String sql) throws IllegalArgumentException {
+
+        String trimmedSql = sql.trim().toLowerCase();
+
+        // Basic validation - prevent potentially dangerous operations
+        List<String> dangerousPatterns = List.of(
+                "drop database",
+                "drop schema",
+                "drop table",
+                "drop view",
+                "drop index",
+                "truncate",
+                "alter table",
+                "alter database",
+                "alter schema",
+                "create user",
+                "drop user",
+                "grant",
+                "revoke"
+        );
+
+        for (String pattern : dangerousPatterns) {
+            if (trimmedSql.contains(pattern)) {
+                throw new IllegalArgumentException("Potentially dangerous SQL operation detected: " + pattern);
+            }
+        }
+
+        // Check for maximum length
+        if (sql.length() > 10000) {
+            throw new IllegalArgumentException("SQL query too long (maximum 10,000 characters)");
+        }
+    }
+
+    /**
+     * Execute parameterized SQL query and return results with optional SavedQuery association
+     */
+    public SqlExecutionResult executeParameterizedQuery(
+            User user,
+            Long connectionId,
+            String sql,
+            Map<String, Object> parameters,
+            Map<String, String> parameterTypes,
+            SavedQuery savedQuery
+    ) {
+
+        // Determine if this is a SELECT query or other operation
+        String trimmedSql = sql.trim().toLowerCase();
+        boolean isSelect = trimmedSql.startsWith("select") ||
+                trimmedSql.startsWith("with") ||
+                trimmedSql.startsWith("show") ||
+                trimmedSql.startsWith("describe") ||
+                trimmedSql.startsWith("desc") ||
+                trimmedSql.startsWith("explain");
+
+        long startTime = System.currentTimeMillis();
+
+        try (Connection connection = dataSourceService.getConnection(user, connectionId)) {
+
+            // Convert named parameters to positioned parameters
+            ParameterizedQuery paramQuery = convertNamedParameters(sql, parameters, parameterTypes);
+
+            try (PreparedStatement statement = connection.prepareStatement(paramQuery.sql())) {
+
+                // Set parameters
+                setParameters(statement, paramQuery.parameters(), paramQuery.parameterTypes());
+
+                SqlExecutionResult.SqlResultData data = null;
+                if (isSelect) {
+                    // Execute SELECT query
+                    try (ResultSet resultSet = statement.executeQuery()) {
+                        data = processResultSet(resultSet);
+                    }
+                } else {
+                    // Execute UPDATE/INSERT/DELETE/DDL
+                    @SuppressWarnings("unused")
+                    int affectedRows = statement.executeUpdate();
+                }
+                long executionTime = System.currentTimeMillis() - startTime;
+                LocalDateTime executedAt = LocalDateTime.now();
+
+                // Record query execution in history
+                recordQueryExecution(
+                        user,
+                        connectionId,
+                        sql,
+                        parameters,
+                        executionTime,
+                        Optional.ofNullable(data).map(SqlExecutionResult.SqlResultData::rowCount).orElse(null),
+                        true,
+                        null,
+                        savedQuery
+                );
+
+                return SqlExecutionResult.success(
+                        executedAt,
+                        executionTime,
+                        sql,
+                        data,
+                        null,
+                        Optional.ofNullable(savedQuery).map(SavedQuery::getId).orElse(null)
+                );
+            }
+
+        } catch (SQLException ex) {
+            long executionTime = System.currentTimeMillis() - startTime;
+            LocalDateTime executedAt = LocalDateTime.now();
+
+            // Record failed query execution in history
+            recordQueryExecution(
+                    user,
+                    connectionId,
+                    sql,
+                    null,
+                    executionTime,
+                    null,
+                    false,
+                    ex.getMessage(),
+                    savedQuery
+            );
+
+            return SqlExecutionResult.error(
+                    executedAt,
+                    sql,
+                    ex.getMessage(),
+                    "SQLException",
+                    ex.getErrorCode(),
+                    ex.getSQLState()
+            );
         }
     }
 
     /**
      * Process ResultSet and convert to structured data
      */
-    private Map<String, Object> processResultSet(ResultSet resultSet) throws SQLException {
-        Map<String, Object> result = new LinkedHashMap<>();
-        
+    private SqlExecutionResult.SqlResultData processResultSet(ResultSet resultSet) throws SQLException {
+
         // Get column metadata
         ResultSetMetaData metaData = resultSet.getMetaData();
         int columnCount = metaData.getColumnCount();
-        
+
         // Get column names for frontend (string array)
         // TODO: 将来的にはカラムの詳細情報（type, nullable, precision等）も返却する
         List<String> columns = new ArrayList<>();
+        @SuppressWarnings("unused")
         List<Map<String, Object>> columnDetails = new ArrayList<>();
         for (int i = 1; i <= columnCount; i++) {
             columns.add(metaData.getColumnName(i));
-            
+
             // 詳細情報は将来の拡張用に保持
             Map<String, Object> columnDetail = new LinkedHashMap<>();
             columnDetail.put("name", metaData.getColumnName(i));
@@ -157,192 +298,49 @@ public class SqlExecutionService {
             columnDetail.put("scale", metaData.getScale(i));
             columnDetails.add(columnDetail);
         }
-        
+
         // Process rows
-        List<Map<String, Object>> rows = new ArrayList<>();
+        List<List<Object>> rows = new ArrayList<>();
         int rowCount = 0;
-        
+
         while (resultSet.next() && rowCount < 1000) { // Limit to 1000 rows for now
-            Map<String, Object> row = new LinkedHashMap<>();
-            
+            List<Object> row = new ArrayList<>(columnCount);
+
             for (int i = 1; i <= columnCount; i++) {
-                String columnName = metaData.getColumnName(i);
                 Object value = resultSet.getObject(i);
-                
+
                 // Handle special cases for better JSON serialization
-                if (value instanceof Clob) {
-                    Clob clob = (Clob) value;
-                    value = clob.getSubString(1, (int) clob.length());
-                } else if (value instanceof Blob) {
-                    value = "[BLOB data]";
-                } else if (value instanceof Date) {
-                    value = value.toString();
-                } else if (value instanceof Time) {
-                    value = value.toString();
-                } else if (value instanceof Timestamp) {
-                    value = value.toString();
+                switch (value) {
+                    case Clob clob -> row.add(clob.getSubString(1, (int) clob.length()));
+                    case Blob blob -> row.add("[BLOB data]");
+                    case Date date -> row.add(date.toLocalDate());
+                    case Time time -> row.add(
+                            LocalDateTime.ofInstant(
+                                    Instant.ofEpochMilli(time.getTime()),
+                                    ZoneId.systemDefault()
+                            ).toLocalTime()
+                    );
+                    case Timestamp timestamp -> row.add(timestamp.toLocalDateTime());
+                    case null, default -> row.add(value);
                 }
-                
-                row.put(columnName, value);
             }
-            
+
             rows.add(row);
             rowCount++;
         }
-        
-        result.put("resultType", "select");
-        result.put("columns", columns);
-        result.put("rows", rows);
-        result.put("rowCount", rowCount);
-        result.put("columnCount", columnCount);
-        
-        // Check if there are more rows
-        if (resultSet.next()) {
-            result.put("hasMoreRows", true);
-            result.put("note", "Result limited to 1000 rows");
-        } else {
-            result.put("hasMoreRows", false);
-        }
-        
-        return result;
-    }
 
-    /**
-     * Validate SQL query for basic security
-     */
-    public void validateQuery(String sql) throws IllegalArgumentException {
-        if (sql == null || sql.trim().isEmpty()) {
-            throw new IllegalArgumentException("SQL query cannot be empty");
-        }
-
-        String trimmedSql = sql.trim().toLowerCase();
-        
-        // Basic validation - prevent potentially dangerous operations
-        List<String> dangerousPatterns = List.of(
-            "drop database",
-            "drop schema", 
-            "drop table",
-            "drop view",
-            "drop index",
-            "truncate",
-            "alter table",
-            "alter database",
-            "alter schema",
-            "create user",
-            "drop user",
-            "grant",
-            "revoke"
+        return new SqlExecutionResult.SqlResultData(
+                columns,
+                rows,
+                rowCount
         );
-        
-        for (String pattern : dangerousPatterns) {
-            if (trimmedSql.contains(pattern)) {
-                throw new IllegalArgumentException("Potentially dangerous SQL operation detected: " + pattern);
-            }
-        }
-        
-        // Check for maximum length
-        if (sql.length() > 10000) {
-            throw new IllegalArgumentException("SQL query too long (maximum 10,000 characters)");
-        }
-    }
-
-    /**
-     * Execute parameterized SQL query and return results
-     */
-    public SqlExecutionResult executeParameterizedQuery(User user, Long connectionId, String sql, 
-                                                        Map<String, Object> parameters, 
-                                                        Map<String, String> parameterTypes) throws SQLException {
-        return executeParameterizedQuery(user, connectionId, sql, parameters, parameterTypes, null);
-    }
-
-    /**
-     * Execute parameterized SQL query and return results with optional SavedQuery association
-     */
-    public SqlExecutionResult executeParameterizedQuery(User user, Long connectionId, String sql, 
-                                                        Map<String, Object> parameters, 
-                                                        Map<String, String> parameterTypes, 
-                                                        SavedQuery savedQuery) throws SQLException {
-        if (sql == null || sql.trim().isEmpty()) {
-            throw new IllegalArgumentException("SQL query cannot be empty");
-        }
-
-        long startTime = System.currentTimeMillis();
-        
-        try (Connection connection = dataSourceService.getConnection(user, connectionId)) {
-            
-            Map<String, Object> result = new LinkedHashMap<>();
-            
-            // Convert named parameters to positioned parameters
-            ParameterizedQuery paramQuery = convertNamedParameters(sql, parameters, parameterTypes);
-            
-            try (PreparedStatement statement = connection.prepareStatement(paramQuery.getSql())) {
-                
-                // Set parameters
-                setParameters(statement, paramQuery.getParameters(), paramQuery.getParameterTypes());
-                
-                // Determine if this is a SELECT query or other operation
-                String trimmedSql = sql.trim().toLowerCase();
-                boolean isSelect = trimmedSql.startsWith("select") || 
-                                 trimmedSql.startsWith("with") || 
-                                 trimmedSql.startsWith("show") ||
-                                 trimmedSql.startsWith("describe") ||
-                                 trimmedSql.startsWith("desc") ||
-                                 trimmedSql.startsWith("explain");
-                
-                if (isSelect) {
-                    // Execute SELECT query
-                    try (ResultSet resultSet = statement.executeQuery()) {
-                        result = processResultSet(resultSet);
-                    }
-                } else {
-                    // Execute UPDATE/INSERT/DELETE/DDL
-                    int affectedRows = statement.executeUpdate();
-                    result.put("affectedRows", affectedRows);
-                    result.put("resultType", "update");
-                }
-                
-                long executionTime = System.currentTimeMillis() - startTime;
-                result.put("executionTimeMs", executionTime);
-                result.put("executedAt", LocalDateTime.now());
-                result.put("sql", sql);
-                result.put("parameters", parameters);
-                result.put("success", true);
-                
-                // Record query execution in history
-                recordQueryExecution(user, connectionId, sql, parameters, executionTime, 
-                                   getResultCount(result), true, null, savedQuery);
-                
-                // Convert Map result to SqlExecutionResult
-                SqlExecutionResult.SqlResultData data = null;
-                if (result.containsKey("data")) {
-                    @SuppressWarnings("unchecked")
-                    List<String> columns = (List<String>) result.get("columns");
-                    @SuppressWarnings("unchecked")
-                    List<List<Object>> rows = (List<List<Object>>) result.get("data");
-                    Integer rowCount = (Integer) result.get("rowCount");
-                    data = new SqlExecutionResult.SqlResultData(columns, rows, rowCount, executionTime);
-                }
-                
-                return new SqlExecutionResult(true, data, LocalDateTime.now(), sql, null, 
-                                            savedQuery != null ? savedQuery.getId() : null);
-            }
-            
-        } catch (SQLException e) {
-            long executionTime = System.currentTimeMillis() - startTime;
-            
-            // Record failed query execution in history
-            recordQueryExecution(user, connectionId, sql, parameters, executionTime, 
-                               null, false, e.getMessage(), savedQuery);
-            
-            throw new SQLException("Parameterized SQL execution failed: " + e.getMessage(), e);
-        }
     }
 
     /**
      * Convert named parameters (:param) to positioned parameters (?)
      */
-    private ParameterizedQuery convertNamedParameters(String sql, Map<String, Object> parameters, 
-                                                    Map<String, String> parameterTypes) {
+    private ParameterizedQuery convertNamedParameters(String sql, Map<String, Object> parameters,
+                                                      Map<String, String> parameterTypes) {
         if (parameters == null || parameters.isEmpty()) {
             return new ParameterizedQuery(sql, new ArrayList<>(), new ArrayList<>());
         }
@@ -350,11 +348,11 @@ public class SqlExecutionService {
         // Pattern to match named parameters like :paramName
         Pattern pattern = Pattern.compile(":(\\w+)");
         Matcher matcher = pattern.matcher(sql);
-        
+
         List<Object> parameterValues = new ArrayList<>();
         List<String> parameterTypesList = new ArrayList<>();
         String convertedSql = sql;
-        
+
         while (matcher.find()) {
             String paramName = matcher.group(1);
             if (parameters.containsKey(paramName)) {
@@ -365,19 +363,19 @@ public class SqlExecutionService {
                 throw new IllegalArgumentException("Parameter not provided: " + paramName);
             }
         }
-        
+
         return new ParameterizedQuery(convertedSql, parameterValues, parameterTypesList);
     }
 
     /**
      * Set parameters in PreparedStatement
      */
-    private void setParameters(PreparedStatement statement, List<Object> parameters, 
-                             List<String> parameterTypes) throws SQLException {
+    private void setParameters(PreparedStatement statement, List<Object> parameters,
+                               List<String> parameterTypes) throws SQLException {
         for (int i = 0; i < parameters.size(); i++) {
             Object value = parameters.get(i);
             String type = i < parameterTypes.size() ? parameterTypes.get(i) : null;
-            
+
             if (value == null) {
                 statement.setNull(i + 1, Types.NULL);
             } else if (type != null) {
@@ -446,82 +444,55 @@ public class SqlExecutionService {
      * Set parameter with automatic type detection
      */
     private void setAutoTypedParameter(PreparedStatement statement, int index, Object value) throws SQLException {
-        if (value instanceof String) {
-            statement.setString(index, (String) value);
-        } else if (value instanceof Integer) {
-            statement.setInt(index, (Integer) value);
-        } else if (value instanceof Long) {
-            statement.setLong(index, (Long) value);
-        } else if (value instanceof Double) {
-            statement.setDouble(index, (Double) value);
-        } else if (value instanceof BigDecimal) {
-            statement.setBigDecimal(index, (BigDecimal) value);
-        } else if (value instanceof Boolean) {
-            statement.setBoolean(index, (Boolean) value);
-        } else if (value instanceof LocalDate) {
-            statement.setDate(index, Date.valueOf((LocalDate) value));
-        } else if (value instanceof LocalTime) {
-            statement.setTime(index, Time.valueOf((LocalTime) value));
-        } else if (value instanceof LocalDateTime) {
-            statement.setTimestamp(index, Timestamp.valueOf((LocalDateTime) value));
-        } else {
-            statement.setString(index, value.toString());
+        switch (value) {
+            case String s -> statement.setString(index, s);
+            case Integer i -> statement.setInt(index, i);
+            case Long l -> statement.setLong(index, l);
+            case Double v -> statement.setDouble(index, v);
+            case BigDecimal bigDecimal -> statement.setBigDecimal(index, bigDecimal);
+            case Boolean b -> statement.setBoolean(index, b);
+            case LocalDate localDate -> statement.setDate(index, Date.valueOf(localDate));
+            case LocalTime localTime -> statement.setTime(index, Time.valueOf(localTime));
+            case LocalDateTime localDateTime -> statement.setTimestamp(index, Timestamp.valueOf(localDateTime));
+            default -> statement.setString(index, value.toString());
         }
     }
 
     /**
      * Internal class to hold parameterized query data
      */
-    private static class ParameterizedQuery {
-        private final String sql;
-        private final List<Object> parameters;
-        private final List<String> parameterTypes;
-
-        public ParameterizedQuery(String sql, List<Object> parameters, List<String> parameterTypes) {
-            this.sql = sql;
-            this.parameters = parameters;
-            this.parameterTypes = parameterTypes;
-        }
-
-        public String getSql() { return sql; }
-        public List<Object> getParameters() { return parameters; }
-        public List<String> getParameterTypes() { return parameterTypes; }
+    private record ParameterizedQuery(
+            String sql,
+            List<Object> parameters,
+            List<String> parameterTypes
+    ) {
     }
 
     // ==================== Query History Helper Methods ====================
 
-    private void recordQueryExecution(User user, Long connectionId, String sql, 
-                                    Map<String, Object> parameterValues, long executionTimeMs,
-                                    Integer resultCount, boolean isSuccessful, String errorMessage,
-                                    SavedQuery savedQuery) {
-        try {
-            DatabaseConnection connection = connectionRepository.findByUserAndId(user, connectionId)
-                .orElse(null);
-            
-            if (connection != null) {
-                queryManagementService.recordExecution(sql, parameterValues, executionTimeMs, 
-                                                     resultCount, isSuccessful, errorMessage, 
-                                                     user, connection, savedQuery);
-            }
-        } catch (Exception e) {
-            // Don't fail the main query execution if history recording fails
-            System.err.println("Failed to record query execution in history: " + e.getMessage());
-        }
-    }
-
-    private Integer getResultCount(Map<String, Object> result) {
-        if (result.containsKey("data")) {
-            Object data = result.get("data");
-            if (data instanceof List) {
-                return ((List<?>) data).size();
-            }
-        }
-        if (result.containsKey("affectedRows")) {
-            Object affectedRows = result.get("affectedRows");
-            if (affectedRows instanceof Number) {
-                return ((Number) affectedRows).intValue();
-            }
-        }
-        return null;
+    private void recordQueryExecution(
+            User user,
+            Long connectionId,
+            String sql,
+            Map<String, Object> parameterValues,
+            long executionTimeMs,
+            Integer resultCount,
+            boolean isSuccessful,
+            String errorMessage,
+            SavedQuery savedQuery
+    ) {
+        connectionRepository.findByUserAndId(user, connectionId).ifPresent(connection ->
+                queryManagementService.recordExecution(
+                        sql,
+                        parameterValues,
+                        executionTimeMs,
+                        resultCount,
+                        isSuccessful,
+                        errorMessage,
+                        user,
+                        connection,
+                        savedQuery
+                )
+        );
     }
 }

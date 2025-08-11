@@ -15,10 +15,10 @@
  */
 package cherry.sqlapp2.controller;
 
-import cherry.sqlapp2.dto.QueryExecutionErrorResponse;
+import cherry.sqlapp2.dto.ApiResponse;
+import cherry.sqlapp2.dto.SqlExecutionRequest;
 import cherry.sqlapp2.dto.SqlExecutionResult;
 import cherry.sqlapp2.dto.SqlValidationResult;
-import cherry.sqlapp2.dto.SqlExecutionRequest;
 import cherry.sqlapp2.entity.SavedQuery;
 import cherry.sqlapp2.entity.User;
 import cherry.sqlapp2.service.QueryManagementService;
@@ -26,16 +26,16 @@ import cherry.sqlapp2.service.SqlExecutionService;
 import cherry.sqlapp2.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.sql.SQLException;
 import java.time.LocalDateTime;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/sql")
@@ -46,108 +46,99 @@ public class SqlExecutionController {
     private final QueryManagementService queryManagementService;
 
     @Autowired
-    public SqlExecutionController(SqlExecutionService sqlExecutionService, UserService userService, 
-                                QueryManagementService queryManagementService) {
+    public SqlExecutionController(
+            SqlExecutionService sqlExecutionService,
+            UserService userService,
+            QueryManagementService queryManagementService
+    ) {
         this.sqlExecutionService = sqlExecutionService;
         this.userService = userService;
         this.queryManagementService = queryManagementService;
     }
 
     private User getCurrentUser() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || !authentication.isAuthenticated()) {
-            throw new RuntimeException("User not authenticated");
-        }
-
-        String username = authentication.getName();
-        return userService.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("User not found: " + username));
+        return Optional.of(SecurityContextHolder.getContext())
+                .map(SecurityContext::getAuthentication)
+                .filter(Authentication::isAuthenticated)
+                .map(Authentication::getName)
+                .flatMap(userService::findByUsername)
+                .get();
     }
 
     @PostMapping("/execute")
-    public ResponseEntity<?> executeQuery(@Valid @RequestBody SqlExecutionRequest request) {
+    public ApiResponse<SqlExecutionResult> executeQuery(
+            @Valid @RequestBody SqlExecutionRequest request
+    ) {
+        User currentUser = getCurrentUser();
+
+        // Validate SQL first
         try {
-            User currentUser = getCurrentUser();
-            
-            // Validate SQL first
             sqlExecutionService.validateQuery(request.getSql());
-            
-            // If validation only, return success without execution
-            if (request.isValidateOnly()) {
-                SqlExecutionResult response = new SqlExecutionResult(
-                        true, "SQL query is valid", LocalDateTime.now());
-                return ResponseEntity.ok(response);
-            }
-            
-            // Execute the query
-            SqlExecutionResult result;
-            
-            // Get SavedQuery if savedQueryId is provided
-            SavedQuery savedQuery = null;
-            if (request.getSavedQueryId() != null) {
-                savedQuery = queryManagementService.getAccessibleQuery(request.getSavedQueryId(), currentUser)
-                    .orElse(null);
-            }
-            
-            // Check if this is a parameterized query
-            if (request.getParameters() != null && !request.getParameters().isEmpty()) {
-                result = sqlExecutionService.executeParameterizedQuery(
-                    currentUser, 
-                    request.getConnectionId(), 
+        } catch (IllegalArgumentException e) {
+            return ApiResponse.success(
+                    SqlExecutionResult.validationNg(
+                            LocalDateTime.now(), request.getSql(), e.getMessage(), "ValidationError"
+                    )
+            );
+        }
+
+        // If validation only, return success without execution
+        if (request.isValidateOnly()) {
+            return ApiResponse.success(
+                    SqlExecutionResult.validationOk(
+                            LocalDateTime.now(), request.getSql()
+                    )
+            );
+        }
+
+        // Execute the query
+        SqlExecutionResult result;
+
+        // Get SavedQuery if savedQueryId is provided
+        SavedQuery savedQuery = Optional.ofNullable(request.getSavedQueryId())
+                .flatMap(savedQueryId ->
+                        queryManagementService.getAccessibleQuery(savedQueryId, currentUser)
+                ).orElse(null);
+
+        // Check if this is a parameterized query
+        if (request.getParameters() != null && !request.getParameters().isEmpty()) {
+            result = sqlExecutionService.executeParameterizedQuery(
+                    currentUser,
+                    request.getConnectionId(),
                     request.getSql(),
                     request.getParameters(),
                     request.getParameterTypes(),
                     savedQuery
-                );
-            } else {
-                result = sqlExecutionService.executeQuery(
-                    currentUser, 
-                    request.getConnectionId(), 
+            );
+        } else {
+            result = sqlExecutionService.executeQuery(
+                    currentUser,
+                    request.getConnectionId(),
                     request.getSql(),
                     savedQuery
-                );
-            }
-            
-            return ResponseEntity.ok(result);
-            
-        } catch (IllegalArgumentException e) {
-            SqlExecutionResult errorResponse = new SqlExecutionResult(
-                    false, e.getMessage(), "ValidationError", LocalDateTime.now(),
-                    request.getSql(), null, null);
-            
-            return ResponseEntity.badRequest().body(errorResponse);
-            
-        } catch (SQLException e) {
-            SqlExecutionResult errorResponse = new SqlExecutionResult(
-                    false, e.getMessage(), "SQLException", LocalDateTime.now(),
-                    request.getSql(), e.getErrorCode(), e.getSQLState());
-            
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
-            
-        } catch (Exception e) {
-            SqlExecutionResult errorResponse = new SqlExecutionResult(
-                    false, "Unexpected error: " + e.getMessage(), "SystemError", LocalDateTime.now(),
-                    request.getSql(), null, null);
-            
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+            );
         }
+
+        return ApiResponse.success(result);
     }
 
     @PostMapping("/validate")
-    public ResponseEntity<SqlValidationResult> validateQuery(@Valid @RequestBody SqlExecutionRequest request) {
+    public ApiResponse<SqlValidationResult> validateQuery(@Valid @RequestBody SqlExecutionRequest request) {
+        // Validate SQL first
         try {
             sqlExecutionService.validateQuery(request.getSql());
-            
-            SqlValidationResult response = new SqlValidationResult(
-                    true, "SQL query is valid", LocalDateTime.now(), request.getSql());
-            
-            return ResponseEntity.ok(response);
-            
         } catch (IllegalArgumentException e) {
-            SqlValidationResult errorResponse = new SqlValidationResult(
-                    false, e.getMessage(), "ValidationError", LocalDateTime.now(), request.getSql());
-            
-            return ResponseEntity.badRequest().body(errorResponse);
+            return ApiResponse.success(
+                    SqlValidationResult.validationNg(
+                            LocalDateTime.now(), request.getSql(), e.getMessage(), "ValidationError"
+                    )
+            );
         }
+
+        return ApiResponse.success(
+                SqlValidationResult.validationOk(
+                        LocalDateTime.now(), request.getSql()
+                )
+        );
     }
 }

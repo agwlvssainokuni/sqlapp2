@@ -16,46 +16,65 @@
 
 package cherry.sqlapp2.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * SQL実行結果のレスポンス
  */
 public record SqlExecutionResult(
-        Boolean success,
-        String message,
+        boolean ok,
+        @JsonInclude(JsonInclude.Include.NON_NULL)
         LocalDateTime executedAt,
+        @JsonInclude(JsonInclude.Include.NON_NULL)
+        Long executionTime,
+        @JsonInclude(JsonInclude.Include.NON_NULL)
         String sql,
         // SQL実行結果データ（SELECT文の場合）
+        @JsonInclude(JsonInclude.Include.NON_NULL)
         SqlResultData data,
         // エラー情報
+        @JsonInclude(JsonInclude.Include.NON_NULL)
         String error,
+        @JsonInclude(JsonInclude.Include.NON_NULL)
         String errorType,
+        @JsonInclude(JsonInclude.Include.NON_NULL)
         Integer errorCode,
+        @JsonInclude(JsonInclude.Include.NON_NULL)
         String sqlState,
         // 実行履歴・保存クエリID
+        @JsonInclude(JsonInclude.Include.NON_NULL)
         Long queryHistoryId,
+        @JsonInclude(JsonInclude.Include.NON_NULL)
         Long savedQueryId
 ) {
-    // 検証のみ成功レスポンス用コンストラクタ
-    public SqlExecutionResult(Boolean valid, String message, LocalDateTime validatedAt) {
-        this(valid, message, validatedAt, null, null, null, null, null, null, null, null);
+
+    // 検証OKレスポンス用コンストラクタ
+    public static SqlExecutionResult validationOk(LocalDateTime validatedAt, String sql) {
+        return new SqlExecutionResult(true, validatedAt, null, sql, null, null, null, null, null, null, null);
     }
-    
+
+    // 検証NGレスポンス用コンストラクタ
+    public static SqlExecutionResult validationNg(LocalDateTime validatedAt, String sql, String error, String errorType) {
+        return new SqlExecutionResult(false, validatedAt, null, sql, null, error, errorType, null, null, null, null);
+    }
+
     // SQL実行成功レスポンス用コンストラクタ
-    public SqlExecutionResult(Boolean success, SqlResultData data, LocalDateTime executedAt, String sql, Long queryHistoryId, Long savedQueryId) {
-        this(success, "Query executed successfully", executedAt, sql, data, null, null, null, null, queryHistoryId, savedQueryId);
+    public static SqlExecutionResult success(LocalDateTime executedAt, Long executionTime, String sql, SqlResultData data, Long queryHistoryId, Long savedQueryId) {
+        return new SqlExecutionResult(true, executedAt, executionTime, sql, data, null, null, null, null, queryHistoryId, savedQueryId);
     }
-    
+
     // エラーレスポンス用コンストラクタ
-    public SqlExecutionResult(Boolean success, String error, String errorType, LocalDateTime executedAt, String sql, Integer errorCode, String sqlState) {
-        this(success, error, executedAt, sql, null, error, errorType, errorCode, sqlState, null, null);
+    public static SqlExecutionResult error(LocalDateTime executedAt, String sql, String error, String errorType, Integer errorCode, String sqlState) {
+        return new SqlExecutionResult(false, executedAt, null, sql, null, error, errorType, errorCode, sqlState, null, null);
     }
-    
+
     public record SqlResultData(
-        java.util.List<String> columns,
-        java.util.List<java.util.List<Object>> rows,
-        Integer rowCount,
-        Long executionTime
-    ) {}
+            List<String> columns,
+            List<List<Object>> rows,
+            int rowCount
+    ) {
+    }
 }
