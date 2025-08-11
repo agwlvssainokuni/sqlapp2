@@ -15,6 +15,7 @@
  */
 package cherry.sqlapp2.service;
 
+import cherry.sqlapp2.dto.SchemaInfoResponse;
 import cherry.sqlapp2.entity.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -35,22 +36,18 @@ public class SchemaService {
     /**
      * Get database schema information including tables and views
      */
-    public Map<String, Object> getSchemaInfo(User user, Long connectionId) throws SQLException {
+    public SchemaInfoResponse getSchemaInfo(User user, Long connectionId) throws SQLException {
         try (Connection connection = dynamicDataSourceService.getConnection(user, connectionId)) {
             DatabaseMetaData metaData = connection.getMetaData();
-            Map<String, Object> schemaInfo = new LinkedHashMap<>();
             
-            // Database basic info
-            schemaInfo.put("databaseProductName", metaData.getDatabaseProductName());
-            schemaInfo.put("databaseProductVersion", metaData.getDatabaseProductVersion());
-            schemaInfo.put("driverName", metaData.getDriverName());
-            schemaInfo.put("driverVersion", metaData.getDriverVersion());
-            
-            // Get catalogs and schemas
-            schemaInfo.put("catalogs", getCatalogs(metaData));
-            schemaInfo.put("schemas", getSchemas(metaData));
-            
-            return schemaInfo;
+            return new SchemaInfoResponse(
+                metaData.getDatabaseProductName(),
+                metaData.getDatabaseProductVersion(),
+                metaData.getDriverName(),
+                metaData.getDriverVersion(),
+                getCatalogs(metaData),
+                getSchemas(metaData)
+            );
         }
     }
 
@@ -214,14 +211,14 @@ public class SchemaService {
         return catalogs;
     }
 
-    private List<Map<String, Object>> getSchemas(DatabaseMetaData metaData) throws SQLException {
-        List<Map<String, Object>> schemas = new ArrayList<>();
+    private List<SchemaInfoResponse.SchemaDetail> getSchemas(DatabaseMetaData metaData) throws SQLException {
+        List<SchemaInfoResponse.SchemaDetail> schemas = new ArrayList<>();
         try (ResultSet rs = metaData.getSchemas()) {
             while (rs.next()) {
-                Map<String, Object> schema = new LinkedHashMap<>();
-                schema.put("name", rs.getString("TABLE_SCHEM"));
-                schema.put("catalog", rs.getString("TABLE_CATALOG"));
-                schemas.add(schema);
+                schemas.add(new SchemaInfoResponse.SchemaDetail(
+                    rs.getString("TABLE_SCHEM"),
+                    rs.getString("TABLE_CATALOG")
+                ));
             }
         }
         return schemas;

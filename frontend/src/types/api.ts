@@ -95,6 +95,58 @@ export interface DatabaseConnection {
   updatedAt: string
 }
 
+// SchemaController
+export interface SchemaInfo {
+  databaseProductName: string
+  databaseProductVersion: string
+  driverName: string
+  driverVersion: string
+  catalogs: string[]
+  schemas: Array<{ name: string; catalog: string }>
+}
+
+export interface Table {
+  catalog: string
+  schema: string
+  name: string
+  type: string
+  remarks: string
+}
+
+export interface Column {
+  name: string
+  dataType: number
+  typeName: string
+  columnSize: number
+  decimalDigits: number
+  nullable: boolean
+  defaultValue: string
+  ordinalPosition: number
+  remarks: string
+}
+
+export interface TableDetails {
+  tableName: string
+  catalog: string
+  schema: string
+  columns: Column[]
+  primaryKeys: Array<{ columnName: string; keySeq: number; pkName: string }>
+  foreignKeys: Array<{
+    pkTableName: string
+    pkColumnName: string
+    fkColumnName: string
+    keySeq: number
+    fkName: string
+  }>
+  indexes: Array<{
+    indexName: string
+    unique: boolean
+    columnName: string
+    ordinalPosition: number
+    ascOrDesc: string
+  }>
+}
+
 // 既存のレスポンス型（互換性維持）
 export interface SqlExecutionResult {
   success: boolean

@@ -15,6 +15,7 @@
  */
 package cherry.sqlapp2.controller;
 
+import cherry.sqlapp2.dto.SchemaInfoResponse;
 import cherry.sqlapp2.entity.User;
 import cherry.sqlapp2.service.SchemaService;
 import cherry.sqlapp2.service.UserService;
@@ -59,7 +60,7 @@ public class SchemaController {
     public ResponseEntity<?> getSchemaInfo(@PathVariable Long connectionId) {
         try {
             User currentUser = getCurrentUser();
-            Map<String, Object> schemaInfo = schemaService.getSchemaInfo(currentUser, connectionId);
+            SchemaInfoResponse schemaInfo = schemaService.getSchemaInfo(currentUser, connectionId);
             return ResponseEntity.ok(schemaInfo);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body("Schema info retrieval failed: " + e.getMessage());

@@ -17,60 +17,8 @@
 import React, {useState, useEffect} from 'react'
 import {useTranslation} from 'react-i18next'
 import {useAuth} from '../context/AuthContext'
-import type {DatabaseConnection} from '../types/api'
+import type {DatabaseConnection, SchemaInfo, Table, TableDetails} from '../types/api'
 import Layout from './Layout'
-
-
-interface SchemaInfo {
-  databaseProductName: string
-  databaseProductVersion: string
-  driverName: string
-  driverVersion: string
-  catalogs: string[]
-  schemas: Array<{ name: string; catalog: string }>
-}
-
-interface Table {
-  catalog: string
-  schema: string
-  name: string
-  type: string
-  remarks: string
-}
-
-interface Column {
-  name: string
-  dataType: number
-  typeName: string
-  columnSize: number
-  decimalDigits: number
-  nullable: boolean
-  defaultValue: string
-  ordinalPosition: number
-  remarks: string
-}
-
-interface TableDetails {
-  tableName: string
-  catalog: string
-  schema: string
-  columns: Column[]
-  primaryKeys: Array<{ columnName: string; keySeq: number; pkName: string }>
-  foreignKeys: Array<{
-    pkTableName: string
-    pkColumnName: string
-    fkColumnName: string
-    keySeq: number
-    fkName: string
-  }>
-  indexes: Array<{
-    indexName: string
-    unique: boolean
-    columnName: string
-    ordinalPosition: number
-    ascOrDesc: string
-  }>
-}
 
 const SchemaViewer: React.FC = () => {
   const {t} = useTranslation()
