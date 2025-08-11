@@ -23,7 +23,6 @@ import org.springframework.stereotype.Service;
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -32,13 +31,13 @@ public class DynamicDataSourceService {
 
     private final DatabaseConnectionService connectionService;
     private final EncryptionService encryptionService;
-    
+
     // Connection pool per user per database connection
     private final Map<String, DataSource> dataSourceCache = new ConcurrentHashMap<>();
-    
+
     @Autowired
-    public DynamicDataSourceService(DatabaseConnectionService connectionService, 
-                                   EncryptionService encryptionService) {
+    public DynamicDataSourceService(DatabaseConnectionService connectionService,
+                                    EncryptionService encryptionService) {
         this.connectionService = connectionService;
         this.encryptionService = encryptionService;
     }
@@ -49,14 +48,14 @@ public class DynamicDataSourceService {
     public Connection getConnection(User user, Long connectionId) throws SQLException {
         DatabaseConnection dbConfig = connectionService.getConnectionEntityById(user, connectionId)
                 .orElseThrow(() -> new IllegalArgumentException("Connection not found: " + connectionId));
-        
+
         if (!dbConfig.isActive()) {
             throw new IllegalStateException("Connection is not active: " + dbConfig.getConnectionName());
         }
-        
+
         return createConnection(dbConfig);
     }
-    
+
     /**
      * Get a JDBC Connection for the specified database connection entity
      */
@@ -64,7 +63,7 @@ public class DynamicDataSourceService {
         if (!dbConfig.isActive()) {
             throw new IllegalStateException("Connection is not active: " + dbConfig.getConnectionName());
         }
-        
+
         return createConnection(dbConfig);
     }
 
@@ -74,80 +73,19 @@ public class DynamicDataSourceService {
     private Connection createConnection(DatabaseConnection dbConfig) throws SQLException {
         String decryptedPassword = encryptionService.decrypt(dbConfig.getEncryptedPassword());
         String connectionUrl = dbConfig.buildJdbcUrl();
-        
+
         try {
             return java.sql.DriverManager.getConnection(
-                    connectionUrl, 
-                    dbConfig.getUsername(), 
+                    connectionUrl,
+                    dbConfig.getUsername(),
                     decryptedPassword
             );
         } catch (SQLException e) {
             throw new SQLException(
-                "Failed to connect to database '" + dbConfig.getConnectionName() + "': " + e.getMessage(), 
-                e
+                    "Failed to connect to database '" + dbConfig.getConnectionName() + "': " + e.getMessage(),
+                    e
             );
         }
-    }
-
-    /**
-     * Test if connection is available and active
-     */
-    @Deprecated
-    public boolean isConnectionAvailable(User user, Long connectionId) {
-        try {
-            DatabaseConnection dbConfig = connectionService.getConnectionEntityById(user, connectionId)
-                    .orElse(null);
-            
-            if (dbConfig == null || !dbConfig.isActive()) {
-                return false;
-            }
-            
-            try (Connection conn = createConnection(dbConfig)) {
-                return conn.isValid(5);
-            }
-        } catch (Exception e) {
-            return false;
-        }
-    }
-
-    /**
-     * Get connection metadata for display purposes
-     */
-    @Deprecated
-    public Map<String, Object> getConnectionInfo(User user, Long connectionId) throws SQLException {
-        DatabaseConnection dbConfig = connectionService.getConnectionEntityById(user, connectionId)
-                .orElseThrow(() -> new IllegalArgumentException("Connection not found: " + connectionId));
-        
-        Map<String, Object> info = new HashMap<>();
-        
-        try (Connection conn = createConnection(dbConfig)) {
-            var metaData = conn.getMetaData();
-            
-            info.put("connectionName", dbConfig.getConnectionName());
-            info.put("databaseType", dbConfig.getDatabaseType().toString());
-            info.put("host", dbConfig.getHost());
-            info.put("port", dbConfig.getPort());
-            info.put("databaseName", dbConfig.getDatabaseName());
-            info.put("username", dbConfig.getUsername());
-            info.put("databaseProductName", metaData.getDatabaseProductName());
-            info.put("databaseProductVersion", metaData.getDatabaseProductVersion());
-            info.put("driverName", metaData.getDriverName());
-            info.put("driverVersion", metaData.getDriverVersion());
-            info.put("jdbcUrl", dbConfig.buildJdbcUrl());
-            info.put("connected", conn.isValid(5));
-            
-        } catch (SQLException e) {
-            info.put("connectionName", dbConfig.getConnectionName());
-            info.put("databaseType", dbConfig.getDatabaseType().toString());
-            info.put("host", dbConfig.getHost());
-            info.put("port", dbConfig.getPort());
-            info.put("databaseName", dbConfig.getDatabaseName());
-            info.put("username", dbConfig.getUsername());
-            info.put("connected", false);
-            info.put("error", e.getMessage());
-        }
-        
-        return info;
     }
 
     /**

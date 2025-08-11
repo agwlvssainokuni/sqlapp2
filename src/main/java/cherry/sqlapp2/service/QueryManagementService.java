@@ -26,7 +26,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,21 +39,28 @@ import java.util.Optional;
 @Transactional
 public class QueryManagementService {
 
-    @Autowired
-    private SavedQueryRepository savedQueryRepository;
+    private final SavedQueryRepository savedQueryRepository;
 
-    @Autowired
-    private QueryHistoryRepository queryHistoryRepository;
+    private final QueryHistoryRepository queryHistoryRepository;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
+    @Autowired
+    public QueryManagementService(
+            SavedQueryRepository savedQueryRepository,
+            QueryHistoryRepository queryHistoryRepository
+    ) {
+        this.savedQueryRepository = savedQueryRepository;
+        this.queryHistoryRepository = queryHistoryRepository;
+    }
+
     // ==================== Saved Queries Management ====================
 
-    public SavedQuery saveQuery(String name, String sqlContent, String description, 
-                               Map<String, String> parameterDefinitions, 
-                               SavedQuery.SharingScope sharingScope,
-                               User user, DatabaseConnection defaultConnection) {
-        
+    public SavedQuery saveQuery(String name, String sqlContent, String description,
+                                Map<String, String> parameterDefinitions,
+                                SavedQuery.SharingScope sharingScope,
+                                User user, DatabaseConnection defaultConnection) {
+
         if (savedQueryRepository.existsByUserAndName(user, name)) {
             throw new IllegalArgumentException("Query name already exists for this user: " + name);
         }
@@ -78,13 +84,13 @@ public class QueryManagementService {
         return savedQueryRepository.save(savedQuery);
     }
 
-    public SavedQuery updateSavedQuery(Long queryId, String name, String sqlContent, 
-                                     String description, Map<String, String> parameterDefinitions,
-                                     SavedQuery.SharingScope sharingScope,
-                                     DatabaseConnection defaultConnection, User user) {
-        
+    public SavedQuery updateSavedQuery(Long queryId, String name, String sqlContent,
+                                       String description, Map<String, String> parameterDefinitions,
+                                       SavedQuery.SharingScope sharingScope,
+                                       DatabaseConnection defaultConnection, User user) {
+
         SavedQuery savedQuery = savedQueryRepository.findById(queryId)
-            .orElseThrow(() -> new RuntimeException("Saved query not found: " + queryId));
+                .orElseThrow(() -> new RuntimeException("Saved query not found: " + queryId));
 
         if (!savedQuery.getUser().getId().equals(user.getId())) {
             throw new RuntimeException("Access denied: You can only update your own queries");
@@ -118,27 +124,9 @@ public class QueryManagementService {
         return savedQueryRepository.findByUserOrderByUpdatedAtDesc(user);
     }
 
-    @Deprecated
-    @Transactional(readOnly = true)
-    public Page<SavedQuery> getUserQueries(User user, Pageable pageable) {
-        return savedQueryRepository.findByUserOrderByUpdatedAtDesc(user, pageable);
-    }
-
     @Transactional(readOnly = true)
     public List<SavedQuery> getPublicQueries() {
         return savedQueryRepository.findPublicQueries();
-    }
-
-    @Deprecated
-    @Transactional(readOnly = true)
-    public Page<SavedQuery> getPublicQueries(Pageable pageable) {
-        return savedQueryRepository.findPublicQueries(pageable);
-    }
-
-    @Deprecated
-    @Transactional(readOnly = true)
-    public Page<SavedQuery> searchAccessibleQueries(User user, String searchTerm, Pageable pageable) {
-        return savedQueryRepository.searchAccessibleQueries(user, searchTerm, pageable);
     }
 
     @Transactional(readOnly = true)
@@ -148,7 +136,7 @@ public class QueryManagementService {
 
     public void deleteSavedQuery(Long queryId, User user) {
         SavedQuery savedQuery = savedQueryRepository.findById(queryId)
-            .orElseThrow(() -> new RuntimeException("Saved query not found: " + queryId));
+                .orElseThrow(() -> new RuntimeException("Saved query not found: " + queryId));
 
         if (!savedQuery.getUser().getId().equals(user.getId())) {
             throw new RuntimeException("Access denied: You can only delete your own queries");
@@ -157,20 +145,11 @@ public class QueryManagementService {
         savedQueryRepository.delete(savedQuery);
     }
 
-    @Deprecated
-    public void updateQueryExecutionStats(Long queryId, User user) {
-        SavedQuery savedQuery = savedQueryRepository.findAccessibleQuery(queryId, user)
-            .orElseThrow(() -> new RuntimeException("Saved query not found or not accessible: " + queryId));
-
-        savedQuery.incrementExecutionCount();
-        savedQueryRepository.save(savedQuery);
-    }
-
     @SuppressWarnings("unchecked")
     @Transactional(readOnly = true)
     public Map<String, String> getParameterDefinitions(Long queryId, User user) {
         SavedQuery savedQuery = savedQueryRepository.findAccessibleQuery(queryId, user)
-            .orElseThrow(() -> new RuntimeException("Saved query not found or not accessible: " + queryId));
+                .orElseThrow(() -> new RuntimeException("Saved query not found or not accessible: " + queryId));
 
         if (savedQuery.getParameterDefinitions() == null || savedQuery.getParameterDefinitions().trim().isEmpty()) {
             return Map.of();
@@ -186,9 +165,9 @@ public class QueryManagementService {
     // ==================== Query History Management ====================
 
     public QueryHistory recordExecution(String sqlContent, Map<String, Object> parameterValues,
-                                      long executionTimeMs, Integer resultCount, boolean isSuccessful,
-                                      String errorMessage, User user, DatabaseConnection connection,
-                                      SavedQuery savedQuery) {
+                                        long executionTimeMs, Integer resultCount, boolean isSuccessful,
+                                        String errorMessage, User user, DatabaseConnection connection,
+                                        SavedQuery savedQuery) {
 
         QueryHistory history = new QueryHistory();
         history.setSqlContent(sqlContent);
@@ -220,13 +199,6 @@ public class QueryManagementService {
     @Transactional(readOnly = true)
     public Page<QueryHistory> getUserQueryHistory(User user, Pageable pageable) {
         return queryHistoryRepository.findByUserOrderByExecutedAtDesc(user, pageable);
-    }
-
-    @Deprecated
-    @Transactional(readOnly = true)
-    public List<QueryHistory> getRecentQueryHistory(User user, int limit) {
-        Pageable pageable = PageRequest.of(0, limit);
-        return queryHistoryRepository.findByUserOrderByExecutedAtDesc(user, pageable).getContent();
     }
 
     @Transactional(readOnly = true)
@@ -283,6 +255,7 @@ public class QueryManagementService {
 
     // ==================== Cleanup ====================
 
+    @Transactional
     public void cleanupOldHistory(User user, int daysToKeep) {
         LocalDateTime cutoffDate = LocalDateTime.now().minusDays(daysToKeep);
         queryHistoryRepository.deleteByUserAndExecutedAtBefore(user, cutoffDate);

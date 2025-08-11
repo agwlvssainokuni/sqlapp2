@@ -16,10 +16,9 @@
 package cherry.sqlapp2.service;
 
 import cherry.sqlapp2.dto.ConnectionTestResult;
-import cherry.sqlapp2.dto.DatabaseConnectionRequest;
 import cherry.sqlapp2.dto.DatabaseConnection;
+import cherry.sqlapp2.dto.DatabaseConnectionRequest;
 import cherry.sqlapp2.entity.User;
-import cherry.sqlapp2.enums.DatabaseType;
 import cherry.sqlapp2.repository.DatabaseConnectionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -40,8 +39,8 @@ public class DatabaseConnectionService {
     private final EncryptionService encryptionService;
 
     @Autowired
-    public DatabaseConnectionService(DatabaseConnectionRepository connectionRepository, 
-                                   EncryptionService encryptionService) {
+    public DatabaseConnectionService(DatabaseConnectionRepository connectionRepository,
+                                     EncryptionService encryptionService) {
         this.connectionRepository = connectionRepository;
         this.encryptionService = encryptionService;
     }
@@ -60,13 +59,6 @@ public class DatabaseConnectionService {
                 .stream()
                 .map(DatabaseConnection::new)
                 .collect(Collectors.toList());
-    }
-
-    @Deprecated
-    @Transactional(readOnly = true)
-    public Optional<DatabaseConnection> getConnectionById(User user, Long connectionId) {
-        return connectionRepository.findByUserAndId(user, connectionId)
-                .map(DatabaseConnection::new);
     }
 
     @Transactional(readOnly = true)
@@ -154,38 +146,14 @@ public class DatabaseConnectionService {
     public void deleteConnection(User user, Long connectionId) {
         var connection = connectionRepository.findByUserAndId(user, connectionId)
                 .orElseThrow(() -> new IllegalArgumentException("Connection not found: " + connectionId));
-        
+
         connectionRepository.delete(connection);
-    }
-
-    @Deprecated
-    public void toggleConnectionStatus(User user, Long connectionId) {
-        var connection = connectionRepository.findByUserAndId(user, connectionId)
-                .orElseThrow(() -> new IllegalArgumentException("Connection not found: " + connectionId));
-        
-        connection.setActive(!connection.isActive());
-        connectionRepository.save(connection);
-    }
-
-    @Deprecated
-    @Transactional(readOnly = true)
-    public long getActiveConnectionCount(User user) {
-        return connectionRepository.countActiveConnectionsByUser(user);
-    }
-
-    @Deprecated
-    @Transactional(readOnly = true)
-    public List<DatabaseConnection> getConnectionsByType(User user, DatabaseType databaseType) {
-        return connectionRepository.findByUserAndDatabaseType(user, databaseType)
-                .stream()
-                .map(DatabaseConnection::new)
-                .collect(Collectors.toList());
     }
 
     public String getDecryptedPassword(User user, Long connectionId) {
         var connection = connectionRepository.findByUserAndId(user, connectionId)
                 .orElseThrow(() -> new IllegalArgumentException("Connection not found: " + connectionId));
-        
+
         return encryptionService.decrypt(connection.getEncryptedPassword());
     }
 
@@ -193,7 +161,7 @@ public class DatabaseConnectionService {
         try {
             var connection = connectionRepository.findByUserAndId(user, connectionId)
                     .orElseThrow(() -> new IllegalArgumentException("Connection not found: " + connectionId));
-            
+
             return testConnection(connection);
         } catch (IllegalArgumentException e) {
             return ConnectionTestResult.createFailure(e.getMessage());
@@ -209,11 +177,11 @@ public class DatabaseConnectionService {
             }
 
             String baseUrl = request.getDatabaseType().buildUrl(
-                    request.getHost(), 
-                    port, 
+                    request.getHost(),
+                    port,
                     request.getDatabaseName()
             );
-            
+
             // Add additional parameters if provided
             String connectionUrl = baseUrl;
             if (request.getAdditionalParams() != null && !request.getAdditionalParams().trim().isEmpty()) {
@@ -225,17 +193,17 @@ public class DatabaseConnectionService {
             }
 
             try (Connection conn = DriverManager.getConnection(
-                    connectionUrl, 
-                    request.getUsername(), 
+                    connectionUrl,
+                    request.getUsername(),
                     request.getPassword())) {
-                
+
                 // Test if connection is valid with 5 second timeout
                 if (conn.isValid(5)) {
                     return ConnectionTestResult.createSuccess();
                 } else {
                     return ConnectionTestResult.createFailure("Connection is not valid");
                 }
-                
+
             } catch (SQLException e) {
                 return ConnectionTestResult.createFailure("Database connection failed: " + e.getMessage());
             }
@@ -250,17 +218,17 @@ public class DatabaseConnectionService {
             String connectionUrl = connection.buildJdbcUrl();
 
             try (Connection conn = DriverManager.getConnection(
-                    connectionUrl, 
-                    connection.getUsername(), 
+                    connectionUrl,
+                    connection.getUsername(),
                     decryptedPassword)) {
-                
+
                 // Test if connection is valid with 5 second timeout
                 if (conn.isValid(5)) {
                     return ConnectionTestResult.createSuccess();
                 } else {
                     return ConnectionTestResult.createFailure("Connection is not valid");
                 }
-                
+
             } catch (SQLException e) {
                 return ConnectionTestResult.createFailure("Database connection failed: " + e.getMessage());
             }

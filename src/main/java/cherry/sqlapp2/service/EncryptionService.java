@@ -35,14 +35,20 @@ public class EncryptionService {
     private static final int GCM_IV_LENGTH = 12;
     private static final int GCM_TAG_LENGTH = 16;
 
-    @Value("${app.encryption.key:}")
-    private String encryptionKeyBase64;
+    private final String encryptionKeyBase64;
+
+    public EncryptionService(
+            @Value("${app.encryption.key:}")
+            String encryptionKeyBase64
+    ) {
+        this.encryptionKeyBase64 = encryptionKeyBase64;
+    }
 
     private SecretKey getEncryptionKey() {
         if (encryptionKeyBase64 == null || encryptionKeyBase64.isEmpty()) {
             throw new IllegalStateException("Encryption key is not configured. Please set app.encryption.key property.");
         }
-        
+
         try {
             byte[] keyBytes = Base64.getDecoder().decode(encryptionKeyBase64);
             return new SecretKeySpec(keyBytes, ALGORITHM);
@@ -58,24 +64,24 @@ public class EncryptionService {
 
         try {
             SecretKey key = getEncryptionKey();
-            
+
             // Generate random IV
             byte[] iv = new byte[GCM_IV_LENGTH];
             new SecureRandom().nextBytes(iv);
-            
+
             Cipher cipher = Cipher.getInstance(TRANSFORMATION);
             GCMParameterSpec parameterSpec = new GCMParameterSpec(GCM_TAG_LENGTH * 8, iv);
             cipher.init(Cipher.ENCRYPT_MODE, key, parameterSpec);
-            
+
             byte[] encryptedData = cipher.doFinal(plaintext.getBytes(StandardCharsets.UTF_8));
-            
+
             // Combine IV and encrypted data
             byte[] encryptedWithIv = new byte[iv.length + encryptedData.length];
             System.arraycopy(iv, 0, encryptedWithIv, 0, iv.length);
             System.arraycopy(encryptedData, 0, encryptedWithIv, iv.length, encryptedData.length);
-            
+
             return Base64.getEncoder().encodeToString(encryptedWithIv);
-            
+
         } catch (Exception e) {
             throw new RuntimeException("Failed to encrypt data", e);
         }
@@ -88,22 +94,22 @@ public class EncryptionService {
 
         try {
             SecretKey key = getEncryptionKey();
-            
+
             byte[] encryptedWithIv = Base64.getDecoder().decode(encryptedText);
-            
+
             // Extract IV and encrypted data
             byte[] iv = new byte[GCM_IV_LENGTH];
             byte[] encryptedData = new byte[encryptedWithIv.length - GCM_IV_LENGTH];
             System.arraycopy(encryptedWithIv, 0, iv, 0, iv.length);
             System.arraycopy(encryptedWithIv, iv.length, encryptedData, 0, encryptedData.length);
-            
+
             Cipher cipher = Cipher.getInstance(TRANSFORMATION);
             GCMParameterSpec parameterSpec = new GCMParameterSpec(GCM_TAG_LENGTH * 8, iv);
             cipher.init(Cipher.DECRYPT_MODE, key, parameterSpec);
-            
+
             byte[] decryptedData = cipher.doFinal(encryptedData);
             return new String(decryptedData, StandardCharsets.UTF_8);
-            
+
         } catch (Exception e) {
             throw new RuntimeException("Failed to decrypt data", e);
         }

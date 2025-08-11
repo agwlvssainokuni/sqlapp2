@@ -20,8 +20,12 @@ import cherry.sqlapp2.entity.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.sql.*;
-import java.util.*;
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class SchemaService {
@@ -29,7 +33,9 @@ public class SchemaService {
     private final DynamicDataSourceService dynamicDataSourceService;
 
     @Autowired
-    public SchemaService(DynamicDataSourceService dynamicDataSourceService) {
+    public SchemaService(
+            DynamicDataSourceService dynamicDataSourceService
+    ) {
         this.dynamicDataSourceService = dynamicDataSourceService;
     }
 
@@ -39,14 +45,14 @@ public class SchemaService {
     public DatabaseInfo getDatabaseInfo(User user, Long connectionId) throws SQLException {
         try (Connection connection = dynamicDataSourceService.getConnection(user, connectionId)) {
             DatabaseMetaData metaData = connection.getMetaData();
-            
+
             return new DatabaseInfo(
-                metaData.getDatabaseProductName(),
-                metaData.getDatabaseProductVersion(),
-                metaData.getDriverName(),
-                metaData.getDriverVersion(),
-                getCatalogs(metaData),
-                getSchemaDetails(metaData)
+                    metaData.getDatabaseProductName(),
+                    metaData.getDatabaseProductVersion(),
+                    metaData.getDriverName(),
+                    metaData.getDriverVersion(),
+                    getCatalogs(metaData),
+                    getSchemaDetails(metaData)
             );
         }
     }
@@ -58,20 +64,20 @@ public class SchemaService {
         try (Connection connection = dynamicDataSourceService.getConnection(user, connectionId)) {
             DatabaseMetaData metaData = connection.getMetaData();
             List<TableInfo> tables = new ArrayList<>();
-            
+
             String[] tableTypes = {"TABLE", "VIEW"};
             try (ResultSet rs = metaData.getTables(catalog, schema, null, tableTypes)) {
                 while (rs.next()) {
                     tables.add(new TableInfo(
-                        rs.getString("TABLE_CAT"),
-                        rs.getString("TABLE_SCHEM"),
-                        rs.getString("TABLE_NAME"),
-                        rs.getString("TABLE_TYPE"),
-                        rs.getString("REMARKS")
+                            rs.getString("TABLE_CAT"),
+                            rs.getString("TABLE_SCHEM"),
+                            rs.getString("TABLE_NAME"),
+                            rs.getString("TABLE_TYPE"),
+                            rs.getString("REMARKS")
                     ));
                 }
             }
-            
+
             return tables;
         }
     }
@@ -83,23 +89,23 @@ public class SchemaService {
         try (Connection connection = dynamicDataSourceService.getConnection(user, connectionId)) {
             DatabaseMetaData metaData = connection.getMetaData();
             List<ColumnInfo> columns = new ArrayList<>();
-            
+
             try (ResultSet rs = metaData.getColumns(catalog, schema, tableName, null)) {
                 while (rs.next()) {
                     columns.add(new ColumnInfo(
-                        rs.getString("COLUMN_NAME"),
-                        rs.getInt("DATA_TYPE"),
-                        rs.getString("TYPE_NAME"),
-                        rs.getInt("COLUMN_SIZE"),
-                        rs.getInt("DECIMAL_DIGITS"),
-                        rs.getInt("NULLABLE") == DatabaseMetaData.columnNullable,
-                        rs.getString("COLUMN_DEF"),
-                        rs.getInt("ORDINAL_POSITION"),
-                        rs.getString("REMARKS")
+                            rs.getString("COLUMN_NAME"),
+                            rs.getInt("DATA_TYPE"),
+                            rs.getString("TYPE_NAME"),
+                            rs.getInt("COLUMN_SIZE"),
+                            rs.getInt("DECIMAL_DIGITS"),
+                            rs.getInt("NULLABLE") == DatabaseMetaData.columnNullable,
+                            rs.getString("COLUMN_DEF"),
+                            rs.getInt("ORDINAL_POSITION"),
+                            rs.getString("REMARKS")
                     ));
                 }
             }
-            
+
             return columns;
         }
     }
@@ -111,17 +117,17 @@ public class SchemaService {
         try (Connection connection = dynamicDataSourceService.getConnection(user, connectionId)) {
             DatabaseMetaData metaData = connection.getMetaData();
             List<PrimaryKeyInfo> primaryKeys = new ArrayList<>();
-            
+
             try (ResultSet rs = metaData.getPrimaryKeys(catalog, schema, tableName)) {
                 while (rs.next()) {
                     primaryKeys.add(new PrimaryKeyInfo(
-                        rs.getString("COLUMN_NAME"),
-                        rs.getShort("KEY_SEQ"),
-                        rs.getString("PK_NAME")
+                            rs.getString("COLUMN_NAME"),
+                            rs.getShort("KEY_SEQ"),
+                            rs.getString("PK_NAME")
                     ));
                 }
             }
-            
+
             return primaryKeys;
         }
     }
@@ -133,24 +139,24 @@ public class SchemaService {
         try (Connection connection = dynamicDataSourceService.getConnection(user, connectionId)) {
             DatabaseMetaData metaData = connection.getMetaData();
             List<ForeignKeyInfo> foreignKeys = new ArrayList<>();
-            
+
             try (ResultSet rs = metaData.getImportedKeys(catalog, schema, tableName)) {
                 while (rs.next()) {
                     foreignKeys.add(new ForeignKeyInfo(
-                        rs.getString("PKTABLE_CAT"),
-                        rs.getString("PKTABLE_SCHEM"),
-                        rs.getString("PKTABLE_NAME"),
-                        rs.getString("PKCOLUMN_NAME"),
-                        rs.getString("FKTABLE_CAT"),
-                        rs.getString("FKTABLE_SCHEM"),
-                        rs.getString("FKTABLE_NAME"),
-                        rs.getString("FKCOLUMN_NAME"),
-                        rs.getShort("KEY_SEQ"),
-                        rs.getString("FK_NAME")
+                            rs.getString("PKTABLE_CAT"),
+                            rs.getString("PKTABLE_SCHEM"),
+                            rs.getString("PKTABLE_NAME"),
+                            rs.getString("PKCOLUMN_NAME"),
+                            rs.getString("FKTABLE_CAT"),
+                            rs.getString("FKTABLE_SCHEM"),
+                            rs.getString("FKTABLE_NAME"),
+                            rs.getString("FKCOLUMN_NAME"),
+                            rs.getShort("KEY_SEQ"),
+                            rs.getString("FK_NAME")
                     ));
                 }
             }
-            
+
             return foreignKeys;
         }
     }
@@ -162,24 +168,24 @@ public class SchemaService {
         try (Connection connection = dynamicDataSourceService.getConnection(user, connectionId)) {
             DatabaseMetaData metaData = connection.getMetaData();
             List<IndexInfo> indexes = new ArrayList<>();
-            
+
             try (ResultSet rs = metaData.getIndexInfo(catalog, schema, tableName, false, false)) {
                 while (rs.next()) {
                     // Skip table statistics
                     if (rs.getShort("TYPE") == DatabaseMetaData.tableIndexStatistic) {
                         continue;
                     }
-                    
+
                     indexes.add(new IndexInfo(
-                        rs.getString("INDEX_NAME"),
-                        !rs.getBoolean("NON_UNIQUE"),
-                        rs.getString("COLUMN_NAME"),
-                        rs.getShort("ORDINAL_POSITION"),
-                        rs.getString("ASC_OR_DESC")
+                            rs.getString("INDEX_NAME"),
+                            !rs.getBoolean("NON_UNIQUE"),
+                            rs.getString("COLUMN_NAME"),
+                            rs.getShort("ORDINAL_POSITION"),
+                            rs.getString("ASC_OR_DESC")
                     ));
                 }
             }
-            
+
             return indexes;
         }
     }
@@ -189,13 +195,13 @@ public class SchemaService {
      */
     public TableDetails getTableDetails(User user, Long connectionId, String catalog, String schema, String tableName) throws SQLException {
         return new TableDetails(
-            tableName,
-            catalog,
-            schema,
-            getTableColumns(user, connectionId, catalog, schema, tableName),
-            getPrimaryKeys(user, connectionId, catalog, schema, tableName),
-            getForeignKeys(user, connectionId, catalog, schema, tableName),
-            getIndexes(user, connectionId, catalog, schema, tableName)
+                tableName,
+                catalog,
+                schema,
+                getTableColumns(user, connectionId, catalog, schema, tableName),
+                getPrimaryKeys(user, connectionId, catalog, schema, tableName),
+                getForeignKeys(user, connectionId, catalog, schema, tableName),
+                getIndexes(user, connectionId, catalog, schema, tableName)
         );
     }
 
@@ -214,8 +220,8 @@ public class SchemaService {
         try (ResultSet rs = metaData.getSchemas()) {
             while (rs.next()) {
                 schemas.add(new DatabaseInfo.SchemaDetail(
-                    rs.getString("TABLE_SCHEM"),
-                    rs.getString("TABLE_CATALOG")
+                        rs.getString("TABLE_SCHEM"),
+                        rs.getString("TABLE_CATALOG")
                 ));
             }
         }
