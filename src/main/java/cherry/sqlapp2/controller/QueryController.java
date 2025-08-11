@@ -16,6 +16,7 @@
 
 package cherry.sqlapp2.controller;
 
+import cherry.sqlapp2.dto.ApiResponse;
 import cherry.sqlapp2.dto.QueryHistory;
 import cherry.sqlapp2.dto.SavedQueryRequest;
 import cherry.sqlapp2.dto.SavedQueryResponse;
@@ -34,7 +35,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -62,267 +62,335 @@ public class QueryController {
     // ==================== Saved Queries Endpoints ====================
 
     @PostMapping("/saved")
-    public ResponseEntity<SavedQueryResponse> saveQuery(
+    public ApiResponse<SavedQueryResponse> saveQuery(
             @Valid @RequestBody SavedQueryRequest request,
             Authentication authentication) {
         
-        User user = getCurrentUser(authentication);
-        DatabaseConnection defaultConnection = null;
+        try {
+            User user = getCurrentUser(authentication);
+            DatabaseConnection defaultConnection = null;
 
-        if (request.getDefaultConnectionId() != null) {
-            defaultConnection = connectionRepository.findByUserAndId(user, request.getDefaultConnectionId())
-                .orElseThrow(() -> new RuntimeException("Database connection not found"));
+            if (request.getDefaultConnectionId() != null) {
+                defaultConnection = connectionRepository.findByUserAndId(user, request.getDefaultConnectionId())
+                    .orElseThrow(() -> new RuntimeException("Database connection not found"));
+            }
+
+            SavedQuery savedQuery = queryManagementService.saveQuery(
+                request.getName(),
+                request.getSqlContent(),
+                request.getDescription(),
+                request.getParameterDefinitions(),
+                request.getSharingScope(),
+                user,
+                defaultConnection
+            );
+
+            SavedQueryResponse response = createSavedQueryResponse(savedQuery);
+            return ApiResponse.success(response);
+        } catch (Exception e) {
+            return ApiResponse.error(List.of("Failed to save query: " + e.getMessage()));
         }
-
-        SavedQuery savedQuery = queryManagementService.saveQuery(
-            request.getName(),
-            request.getSqlContent(),
-            request.getDescription(),
-            request.getParameterDefinitions(),
-            request.getSharingScope(),
-            user,
-            defaultConnection
-        );
-
-        SavedQueryResponse response = createSavedQueryResponse(savedQuery);
-        return ResponseEntity.ok(response);
     }
 
     @PutMapping("/saved/{queryId}")
-    public ResponseEntity<SavedQueryResponse> updateSavedQuery(
+    public ApiResponse<SavedQueryResponse> updateSavedQuery(
             @PathVariable Long queryId,
             @Valid @RequestBody SavedQueryRequest request,
             Authentication authentication) {
         
-        User user = getCurrentUser(authentication);
-        DatabaseConnection defaultConnection = null;
+        try {
+            User user = getCurrentUser(authentication);
+            DatabaseConnection defaultConnection = null;
 
-        if (request.getDefaultConnectionId() != null) {
-            defaultConnection = connectionRepository.findByUserAndId(user, request.getDefaultConnectionId())
-                .orElseThrow(() -> new RuntimeException("Database connection not found"));
+            if (request.getDefaultConnectionId() != null) {
+                defaultConnection = connectionRepository.findByUserAndId(user, request.getDefaultConnectionId())
+                    .orElseThrow(() -> new RuntimeException("Database connection not found"));
+            }
+
+            SavedQuery savedQuery = queryManagementService.updateSavedQuery(
+                queryId,
+                request.getName(),
+                request.getSqlContent(),
+                request.getDescription(),
+                request.getParameterDefinitions(),
+                request.getSharingScope(),
+                defaultConnection,
+                user
+            );
+
+            SavedQueryResponse response = createSavedQueryResponse(savedQuery);
+            return ApiResponse.success(response);
+        } catch (Exception e) {
+            return ApiResponse.error(List.of("Failed to update saved query: " + e.getMessage()));
         }
-
-        SavedQuery savedQuery = queryManagementService.updateSavedQuery(
-            queryId,
-            request.getName(),
-            request.getSqlContent(),
-            request.getDescription(),
-            request.getParameterDefinitions(),
-            request.getSharingScope(),
-            defaultConnection,
-            user
-        );
-
-        SavedQueryResponse response = createSavedQueryResponse(savedQuery);
-        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/saved")
-    public ResponseEntity<List<SavedQueryResponse>> getUserSavedQueries(
+    public ApiResponse<List<SavedQueryResponse>> getUserSavedQueries(
             Authentication authentication) {
         
-        User user = getCurrentUser(authentication);
-        List<SavedQuery> savedQueries = queryManagementService.getUserQueries(user);
-        
-        List<SavedQueryResponse> response = savedQueries.stream()
-            .map(this::createSavedQueryResponse)
-            .collect(Collectors.toList());
+        try {
+            User user = getCurrentUser(authentication);
+            List<SavedQuery> savedQueries = queryManagementService.getUserQueries(user);
             
-        return ResponseEntity.ok(response);
+            List<SavedQueryResponse> response = savedQueries.stream()
+                .map(this::createSavedQueryResponse)
+                .collect(Collectors.toList());
+                
+            return ApiResponse.success(response);
+        } catch (Exception e) {
+            return ApiResponse.error(List.of("Failed to retrieve saved queries: " + e.getMessage()));
+        }
     }
 
     @Deprecated
     @GetMapping("/saved/paged")
-    public ResponseEntity<Page<SavedQueryResponse>> getUserSavedQueriesPaged(
+    public ApiResponse<Page<SavedQueryResponse>> getUserSavedQueriesPaged(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
             Authentication authentication) {
         
-        User user = getCurrentUser(authentication);
-        Pageable pageable = PageRequest.of(page, size);
-        Page<SavedQuery> savedQueries = queryManagementService.getUserQueries(user, pageable);
-        
-        Page<SavedQueryResponse> response = savedQueries.map(this::createSavedQueryResponse);
-        return ResponseEntity.ok(response);
+        try {
+            User user = getCurrentUser(authentication);
+            Pageable pageable = PageRequest.of(page, size);
+            Page<SavedQuery> savedQueries = queryManagementService.getUserQueries(user, pageable);
+            
+            Page<SavedQueryResponse> response = savedQueries.map(this::createSavedQueryResponse);
+            return ApiResponse.success(response);
+        } catch (Exception e) {
+            return ApiResponse.error(List.of("Failed to retrieve paged saved queries: " + e.getMessage()));
+        }
     }
 
     @Deprecated
     @GetMapping("/saved/{queryId}")
-    public ResponseEntity<SavedQueryResponse> getSavedQuery(
+    public ApiResponse<SavedQueryResponse> getSavedQuery(
             @PathVariable Long queryId,
             Authentication authentication) {
         
-        User user = getCurrentUser(authentication);
-        SavedQuery savedQuery = queryManagementService.getAccessibleQuery(queryId, user)
-            .orElseThrow(() -> new RuntimeException("Saved query not found or not accessible"));
-            
-        SavedQueryResponse response = createSavedQueryResponse(savedQuery);
-        return ResponseEntity.ok(response);
+        try {
+            User user = getCurrentUser(authentication);
+            SavedQuery savedQuery = queryManagementService.getAccessibleQuery(queryId, user)
+                .orElseThrow(() -> new RuntimeException("Saved query not found or not accessible"));
+                
+            SavedQueryResponse response = createSavedQueryResponse(savedQuery);
+            return ApiResponse.success(response);
+        } catch (Exception e) {
+            return ApiResponse.error(List.of("Failed to retrieve saved query: " + e.getMessage()));
+        }
     }
 
     @DeleteMapping("/saved/{queryId}")
-    public ResponseEntity<Void> deleteSavedQuery(
+    public ApiResponse<Void> deleteSavedQuery(
             @PathVariable Long queryId,
             Authentication authentication) {
         
-        User user = getCurrentUser(authentication);
-        queryManagementService.deleteSavedQuery(queryId, user);
-        return ResponseEntity.noContent().build();
+        try {
+            User user = getCurrentUser(authentication);
+            queryManagementService.deleteSavedQuery(queryId, user);
+            return ApiResponse.success(null);
+        } catch (Exception e) {
+            return ApiResponse.error(List.of("Failed to delete saved query: " + e.getMessage()));
+        }
     }
 
     @GetMapping("/public")
-    public ResponseEntity<List<SavedQueryResponse>> getPublicQueries() {
-        List<SavedQuery> publicQueries = queryManagementService.getPublicQueries();
-        
-        List<SavedQueryResponse> response = publicQueries.stream()
-            .map(this::createSavedQueryResponse)
-            .collect(Collectors.toList());
+    public ApiResponse<List<SavedQueryResponse>> getPublicQueries() {
+        try {
+            List<SavedQuery> publicQueries = queryManagementService.getPublicQueries();
             
-        return ResponseEntity.ok(response);
+            List<SavedQueryResponse> response = publicQueries.stream()
+                .map(this::createSavedQueryResponse)
+                .collect(Collectors.toList());
+                
+            return ApiResponse.success(response);
+        } catch (Exception e) {
+            return ApiResponse.error(List.of("Failed to retrieve public queries: " + e.getMessage()));
+        }
     }
 
     @Deprecated
     @GetMapping("/public/paged")
-    public ResponseEntity<Page<SavedQueryResponse>> getPublicQueriesPaged(
+    public ApiResponse<Page<SavedQueryResponse>> getPublicQueriesPaged(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
         
-        Pageable pageable = PageRequest.of(page, size);
-        Page<SavedQuery> publicQueries = queryManagementService.getPublicQueries(pageable);
-        
-        Page<SavedQueryResponse> response = publicQueries.map(this::createSavedQueryResponse);
-        return ResponseEntity.ok(response);
+        try {
+            Pageable pageable = PageRequest.of(page, size);
+            Page<SavedQuery> publicQueries = queryManagementService.getPublicQueries(pageable);
+            
+            Page<SavedQueryResponse> response = publicQueries.map(this::createSavedQueryResponse);
+            return ApiResponse.success(response);
+        } catch (Exception e) {
+            return ApiResponse.error(List.of("Failed to retrieve paged public queries: " + e.getMessage()));
+        }
     }
 
     @Deprecated
     @GetMapping("/search")
-    public ResponseEntity<Page<SavedQueryResponse>> searchQueries(
+    public ApiResponse<Page<SavedQueryResponse>> searchQueries(
             @RequestParam String searchTerm,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
             Authentication authentication) {
         
-        User user = getCurrentUser(authentication);
-        Pageable pageable = PageRequest.of(page, size);
-        Page<SavedQuery> searchResults = queryManagementService.searchAccessibleQueries(user, searchTerm, pageable);
-        
-        Page<SavedQueryResponse> response = searchResults.map(this::createSavedQueryResponse);
-        return ResponseEntity.ok(response);
+        try {
+            User user = getCurrentUser(authentication);
+            Pageable pageable = PageRequest.of(page, size);
+            Page<SavedQuery> searchResults = queryManagementService.searchAccessibleQueries(user, searchTerm, pageable);
+            
+            Page<SavedQueryResponse> response = searchResults.map(this::createSavedQueryResponse);
+            return ApiResponse.success(response);
+        } catch (Exception e) {
+            return ApiResponse.error(List.of("Failed to search queries: " + e.getMessage()));
+        }
     }
 
     @Deprecated
     @PostMapping("/saved/{queryId}/execute")
-    public ResponseEntity<Void> recordQueryExecution(
+    public ApiResponse<Void> recordQueryExecution(
             @PathVariable Long queryId,
             Authentication authentication) {
         
-        User user = getCurrentUser(authentication);
-        queryManagementService.updateQueryExecutionStats(queryId, user);
-        return ResponseEntity.ok().build();
+        try {
+            User user = getCurrentUser(authentication);
+            queryManagementService.updateQueryExecutionStats(queryId, user);
+            return ApiResponse.success(null);
+        } catch (Exception e) {
+            return ApiResponse.error(List.of("Failed to record query execution: " + e.getMessage()));
+        }
     }
 
     // ==================== Query History Endpoints ====================
 
     @GetMapping("/history")
-    public ResponseEntity<Page<QueryHistory>> getQueryHistory(
+    public ApiResponse<Page<QueryHistory>> getQueryHistory(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
             Authentication authentication) {
         
-        User user = getCurrentUser(authentication);
-        Pageable pageable = PageRequest.of(page, size);
-        var history = queryManagementService.getUserQueryHistory(user, pageable);
-        
-        var response = history.map(this::createQueryHistory);
-        return ResponseEntity.ok(response);
+        try {
+            User user = getCurrentUser(authentication);
+            Pageable pageable = PageRequest.of(page, size);
+            var history = queryManagementService.getUserQueryHistory(user, pageable);
+            
+            var response = history.map(this::createQueryHistory);
+            return ApiResponse.success(response);
+        } catch (Exception e) {
+            return ApiResponse.error(List.of("Failed to retrieve query history: " + e.getMessage()));
+        }
     }
 
     @Deprecated
     @GetMapping("/history/recent")
-    public ResponseEntity<List<QueryHistory>> getRecentQueryHistory(
+    public ApiResponse<List<QueryHistory>> getRecentQueryHistory(
             @RequestParam(defaultValue = "10") int limit,
             Authentication authentication) {
         
-        User user = getCurrentUser(authentication);
-        var recentHistory = queryManagementService.getRecentQueryHistory(user, limit);
-        
-        var response = recentHistory.stream()
-            .map(this::createQueryHistory)
-            .collect(Collectors.toList());
+        try {
+            User user = getCurrentUser(authentication);
+            var recentHistory = queryManagementService.getRecentQueryHistory(user, limit);
             
-        return ResponseEntity.ok(response);
+            var response = recentHistory.stream()
+                .map(this::createQueryHistory)
+                .collect(Collectors.toList());
+                
+            return ApiResponse.success(response);
+        } catch (Exception e) {
+            return ApiResponse.error(List.of("Failed to retrieve recent query history: " + e.getMessage()));
+        }
     }
 
     @GetMapping("/history/{historyId}")
-    public ResponseEntity<QueryHistory> getQueryHistoryById(
+    public ApiResponse<QueryHistory> getQueryHistoryById(
             @PathVariable Long historyId,
             Authentication authentication) {
         
-        User user = getCurrentUser(authentication);
-        var queryHistory = queryManagementService.getQueryHistoryById(historyId, user)
-            .orElseThrow(() -> new RuntimeException("Query history not found or not accessible"));
-            
-        QueryHistory response = createQueryHistory(queryHistory);
-        return ResponseEntity.ok(response);
+        try {
+            User user = getCurrentUser(authentication);
+            var queryHistory = queryManagementService.getQueryHistoryById(historyId, user)
+                .orElseThrow(() -> new RuntimeException("Query history not found or not accessible"));
+                
+            QueryHistory response = createQueryHistory(queryHistory);
+            return ApiResponse.success(response);
+        } catch (Exception e) {
+            return ApiResponse.error(List.of("Failed to retrieve query history by ID: " + e.getMessage()));
+        }
     }
 
     @GetMapping("/history/search")
-    public ResponseEntity<Page<QueryHistory>> searchQueryHistory(
+    public ApiResponse<Page<QueryHistory>> searchQueryHistory(
             @RequestParam String searchTerm,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
             Authentication authentication) {
         
-        User user = getCurrentUser(authentication);
-        Pageable pageable = PageRequest.of(page, size);
-        var searchResults = queryManagementService.searchQueryHistory(user, searchTerm, pageable);
-        
-        var response = searchResults.map(this::createQueryHistory);
-        return ResponseEntity.ok(response);
+        try {
+            User user = getCurrentUser(authentication);
+            Pageable pageable = PageRequest.of(page, size);
+            var searchResults = queryManagementService.searchQueryHistory(user, searchTerm, pageable);
+            
+            var response = searchResults.map(this::createQueryHistory);
+            return ApiResponse.success(response);
+        } catch (Exception e) {
+            return ApiResponse.error(List.of("Failed to search query history: " + e.getMessage()));
+        }
     }
 
     @GetMapping("/history/successful")
-    public ResponseEntity<Page<QueryHistory>> getSuccessfulQueries(
+    public ApiResponse<Page<QueryHistory>> getSuccessfulQueries(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
             Authentication authentication) {
         
-        User user = getCurrentUser(authentication);
-        Pageable pageable = PageRequest.of(page, size);
-        var successfulQueries = queryManagementService.getSuccessfulQueries(user, pageable);
-        
-        var response = successfulQueries.map(this::createQueryHistory);
-        return ResponseEntity.ok(response);
+        try {
+            User user = getCurrentUser(authentication);
+            Pageable pageable = PageRequest.of(page, size);
+            var successfulQueries = queryManagementService.getSuccessfulQueries(user, pageable);
+            
+            var response = successfulQueries.map(this::createQueryHistory);
+            return ApiResponse.success(response);
+        } catch (Exception e) {
+            return ApiResponse.error(List.of("Failed to retrieve successful queries: " + e.getMessage()));
+        }
     }
 
     @GetMapping("/history/failed")
-    public ResponseEntity<Page<QueryHistory>> getFailedQueries(
+    public ApiResponse<Page<QueryHistory>> getFailedQueries(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
             Authentication authentication) {
         
-        User user = getCurrentUser(authentication);
-        Pageable pageable = PageRequest.of(page, size);
-        var failedQueries = queryManagementService.getFailedQueries(user, pageable);
-        
-        var response = failedQueries.map(this::createQueryHistory);
-        return ResponseEntity.ok(response);
+        try {
+            User user = getCurrentUser(authentication);
+            Pageable pageable = PageRequest.of(page, size);
+            var failedQueries = queryManagementService.getFailedQueries(user, pageable);
+            
+            var response = failedQueries.map(this::createQueryHistory);
+            return ApiResponse.success(response);
+        } catch (Exception e) {
+            return ApiResponse.error(List.of("Failed to retrieve failed queries: " + e.getMessage()));
+        }
     }
 
     // ==================== Statistics Endpoints ====================
 
     @GetMapping("/stats")
-    public ResponseEntity<UserStatisticsResponse> getUserStatistics(Authentication authentication) {
-        User user = getCurrentUser(authentication);
-        
-        UserStatisticsResponse response = new UserStatisticsResponse(
-                queryManagementService.getUserQueryCount(user),
-                queryManagementService.getUserExecutionCount(user),
-                queryManagementService.getUserAverageExecutionTime(user),
-                queryManagementService.getUserFailedQueryCount(user)
-        );
-        
-        return ResponseEntity.ok(response);
+    public ApiResponse<UserStatisticsResponse> getUserStatistics(Authentication authentication) {
+        try {
+            User user = getCurrentUser(authentication);
+            
+            UserStatisticsResponse response = new UserStatisticsResponse(
+                    queryManagementService.getUserQueryCount(user),
+                    queryManagementService.getUserExecutionCount(user),
+                    queryManagementService.getUserAverageExecutionTime(user),
+                    queryManagementService.getUserFailedQueryCount(user)
+            );
+            
+            return ApiResponse.success(response);
+        } catch (Exception e) {
+            return ApiResponse.error(List.of("Failed to retrieve user statistics: " + e.getMessage()));
+        }
     }
 
     // ==================== Helper Methods ====================

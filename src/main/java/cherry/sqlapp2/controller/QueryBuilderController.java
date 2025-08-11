@@ -16,12 +16,13 @@
 
 package cherry.sqlapp2.controller;
 
+import cherry.sqlapp2.dto.ApiResponse;
 import cherry.sqlapp2.dto.QueryBuilderRequest;
 import cherry.sqlapp2.dto.QueryBuilderResponse;
 import cherry.sqlapp2.service.QueryBuilderService;
+import java.util.List;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -36,18 +37,15 @@ public class QueryBuilderController {
      * Build SQL query from structure
      */
     @PostMapping("/build")
-    public ResponseEntity<QueryBuilderResponse> buildQuery(
+    public ApiResponse<QueryBuilderResponse> buildQuery(
             @Valid @RequestBody QueryBuilderRequest request,
             Authentication authentication) {
         
         try {
             QueryBuilderResponse response = queryBuilderService.buildQuery(request);
-            return ResponseEntity.ok(response);
+            return ApiResponse.success(response);
         } catch (Exception e) {
-            QueryBuilderResponse errorResponse = new QueryBuilderResponse();
-            errorResponse.setValid(false);
-            errorResponse.setValidationErrors(java.util.Arrays.asList("Failed to build query: " + e.getMessage()));
-            return ResponseEntity.badRequest().body(errorResponse);
+            return ApiResponse.error(List.of("Failed to build query: " + e.getMessage()));
         }
     }
 
@@ -56,7 +54,7 @@ public class QueryBuilderController {
      */
     @Deprecated
     @PostMapping("/validate")
-    public ResponseEntity<QueryBuilderResponse> validateQuery(
+    public ApiResponse<QueryBuilderResponse> validateQuery(
             @Valid @RequestBody QueryBuilderRequest request,
             Authentication authentication) {
         
@@ -72,15 +70,12 @@ public class QueryBuilderController {
                 QueryBuilderResponse validationResponse = new QueryBuilderResponse();
                 validationResponse.setValid(true);
                 validationResponse.setBuildTimeMs(response.getBuildTimeMs());
-                return ResponseEntity.ok(validationResponse);
+                return ApiResponse.success(validationResponse);
             } else {
-                return ResponseEntity.badRequest().body(response);
+                return ApiResponse.error(response.getValidationErrors());
             }
         } catch (Exception e) {
-            QueryBuilderResponse errorResponse = new QueryBuilderResponse();
-            errorResponse.setValid(false);
-            errorResponse.setValidationErrors(java.util.Arrays.asList("Validation failed: " + e.getMessage()));
-            return ResponseEntity.badRequest().body(errorResponse);
+            return ApiResponse.error(List.of("Validation failed: " + e.getMessage()));
         }
     }
 
@@ -89,15 +84,19 @@ public class QueryBuilderController {
      */
     @Deprecated
     @PostMapping("/suggestions")
-    public ResponseEntity<QueryBuilderSuggestions> getQuerySuggestions(
+    public ApiResponse<QueryBuilderSuggestions> getQuerySuggestions(
             @RequestBody QuerySuggestionsRequest request,
             Authentication authentication) {
         
-        // This would integrate with schema service to provide intelligent suggestions
-        // For now, return a placeholder response
-        QueryBuilderSuggestions suggestions = new QueryBuilderSuggestions();
-        
-        return ResponseEntity.ok(suggestions);
+        try {
+            // This would integrate with schema service to provide intelligent suggestions
+            // For now, return a placeholder response
+            QueryBuilderSuggestions suggestions = new QueryBuilderSuggestions();
+            
+            return ApiResponse.success(suggestions);
+        } catch (Exception e) {
+            return ApiResponse.error(List.of("Failed to get query suggestions: " + e.getMessage()));
+        }
     }
 
     // Supporting classes for suggestions endpoint

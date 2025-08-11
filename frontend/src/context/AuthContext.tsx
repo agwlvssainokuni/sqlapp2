@@ -77,7 +77,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
       throw new Error('Login failed')
     }
 
-    const data = await response.json() as LoginResult
+    const apiResponse = await response.json()
+    const data = apiResponse.data as LoginResult
     setUser(data.user)
     localStorage.setItem('token', data.access_token)
     localStorage.setItem('user', JSON.stringify(data.user))

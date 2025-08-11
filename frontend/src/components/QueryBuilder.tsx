@@ -151,7 +151,7 @@ const QueryBuilder: React.FC = () => {
   const loadConnections = async () => {
     try {
       const response = await apiRequest('/api/connections')
-      setConnections(await response.json())
+      setConnections(response.data)
     } catch (error) {
       console.error('Failed to load connections:', error)
     }
@@ -161,14 +161,14 @@ const QueryBuilder: React.FC = () => {
     try {
       // Load tables first
       const tablesResponse = await apiRequest(`/api/schema/connections/${connectionId}/tables`)
-      const tables = await tablesResponse.json()
+      const tables = tablesResponse.data
 
       // Load columns for each table
       const tablesWithColumns = await Promise.all(
         tables.map(async (table: any) => {
           try {
             const columnsResponse = await apiRequest(`/api/schema/connections/${connectionId}/tables/${table.name}/columns`)
-            const columns = await columnsResponse.json()
+            const columns = columnsResponse.data
             return {...table, columns}
           } catch (error) {
             console.error(`Failed to load columns for table ${table.name}:`, error)
@@ -203,7 +203,7 @@ const QueryBuilder: React.FC = () => {
         body: JSON.stringify(request)
       })
 
-      const result: QueryBuilderResponse = await response.json()
+      const result: QueryBuilderResponse = response.data
 
       if (result.valid) {
         setGeneratedSql(result.generatedSql ?? '')

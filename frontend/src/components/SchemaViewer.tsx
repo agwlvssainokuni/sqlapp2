@@ -50,7 +50,7 @@ const SchemaViewer: React.FC = () => {
       const response = await apiRequest('/api/connections?activeOnly=true')
 
       if (response.ok) {
-        const data = await response.json()
+        const data = response.data
         setConnections(data)
       } else {
         setError(t('schemaViewer.loadFailed'))
@@ -68,11 +68,11 @@ const SchemaViewer: React.FC = () => {
       const response = await apiRequest(`/api/schema/connections/${selectedConnectionId}`)
 
       if (response.ok) {
-        const data = await response.json()
+        const data = response.data
         setSchemaInfo(data)
       } else {
-        const errorData = await response.json()
-        setError(typeof errorData === 'string' ? errorData : t('schemaViewer.loadFailed'))
+        const errorData = response.error
+        setError(Array.isArray(errorData) ? errorData.join(', ') : t('schemaViewer.loadFailed'))
       }
     } catch (err) {
       setError(t('common.error') + ': ' + (err as Error).message)
@@ -93,11 +93,11 @@ const SchemaViewer: React.FC = () => {
       const response = await apiRequest(`/api/schema/connections/${selectedConnectionId}/tables?${params}`)
 
       if (response.ok) {
-        const data = await response.json()
+        const data = response.data
         setTables(data)
       } else {
-        const errorData = await response.json()
-        setError(typeof errorData === 'string' ? errorData : t('schemaViewer.loadFailed'))
+        const errorData = response.error
+        setError(Array.isArray(errorData) ? errorData.join(', ') : t('schemaViewer.loadFailed'))
       }
     } catch (err) {
       setError(t('common.error') + ': ' + (err as Error).message)
@@ -118,12 +118,12 @@ const SchemaViewer: React.FC = () => {
       const response = await apiRequest(`/api/schema/connections/${selectedConnectionId}/tables/${tableName}?${params}`)
 
       if (response.ok) {
-        const data = await response.json()
+        const data = response.data
         setTableDetails(data)
         setSelectedTable(tableName)
       } else {
-        const errorData = await response.json()
-        setError(typeof errorData === 'string' ? errorData : t('schemaViewer.loadFailed'))
+        const errorData = response.error
+        setError(Array.isArray(errorData) ? errorData.join(', ') : t('schemaViewer.loadFailed'))
       }
     } catch (err) {
       setError(t('common.error') + ': ' + (err as Error).message)

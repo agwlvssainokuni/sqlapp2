@@ -87,9 +87,9 @@ const SavedQueries: React.FC = () => {
         apiRequest('/api/connections')
       ])
 
-      const savedQueriesRes = await savedQueriesResp.json()
-      const publicQueriesRes = await publicQueriesResp.json()
-      const connectionsRes = await connectionsResp.json()
+      const savedQueriesRes = savedQueriesResp.data
+      const publicQueriesRes = publicQueriesResp.data
+      const connectionsRes = connectionsResp.data
 
       setSavedQueries(Array.isArray(savedQueriesRes) ? savedQueriesRes : [])
       setPublicQueries(Array.isArray(publicQueriesRes) ? publicQueriesRes : [])
@@ -124,7 +124,7 @@ const SavedQueries: React.FC = () => {
       })
 
       if (!response.ok) {
-        throw new Error(`API request failed: ${response.status}`)
+        throw new Error(`API request failed: ${response.error?.join(', ') || 'Unknown error'}`)
       }
 
       await loadData()
@@ -157,7 +157,7 @@ const SavedQueries: React.FC = () => {
       const response = await apiRequest(`/api/queries/saved/${queryId}`, {method: 'DELETE'})
 
       if (!response.ok) {
-        throw new Error(`Delete failed: ${response.status}`)
+        throw new Error(`Delete failed: ${response.error?.join(', ') || 'Unknown error'}`)
       }
       await loadData()
     } catch (err) {

@@ -68,7 +68,7 @@ const SqlExecution: React.FC = () => {
     if (queryId && !isNaN(Number(queryId))) {
       try {
         const response = await apiRequest(`/api/queries/saved/${queryId}`)
-        const savedQuery = await response.json()
+        const savedQuery = response.data
 
         if (response.ok) {
           setSql(savedQuery.sqlContent || '')
@@ -85,7 +85,7 @@ const SqlExecution: React.FC = () => {
     if (historyId && !isNaN(Number(historyId))) {
       try {
         const response = await apiRequest(`/api/queries/history/${historyId}`)
-        const historyItem = await response.json()
+        const historyItem = response.data
 
         if (response.ok) {
           setSql(historyItem.sqlContent || '')
@@ -124,7 +124,7 @@ const SqlExecution: React.FC = () => {
       const response = await apiRequest('/api/connections')
 
       if (response.ok) {
-        const data = await response.json()
+        const data = response.data
         setConnections(data)
         if (data.length > 0) {
           setSelectedConnectionId(data[0].id)
@@ -172,7 +172,7 @@ const SqlExecution: React.FC = () => {
         })
       })
 
-      const data: SqlValidationResult = await response.json()
+      const data: SqlValidationResult = response.data
       if (!response.ok) {
         setError(data.error || 'SQL validation failed') // TODO: Add translation
         return false
@@ -222,7 +222,7 @@ const SqlExecution: React.FC = () => {
         body: JSON.stringify(requestBody)
       })
 
-      const data = await response.json()
+      const data = response.data
       if (response.ok) {
         setResult(data)
         // Execution count is now automatically recorded on the backend

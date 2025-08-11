@@ -49,7 +49,7 @@ const Register: React.FC = () => {
       })
 
       if (!response.ok) {
-        const errorData = await response.text()
+        const errorData = response.error?.join('\n') || 'Registration failed'
         throw new Error(errorData)
       }
 

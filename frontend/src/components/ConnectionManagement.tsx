@@ -51,7 +51,7 @@ const ConnectionManagement: React.FC = () => {
       const response = await apiRequest('/api/connections')
 
       if (response.ok) {
-        const data = response.data()
+        const data = response.data
         setConnections(data)
       } else {
         setError('Failed to load connections') // TODO: Add translation

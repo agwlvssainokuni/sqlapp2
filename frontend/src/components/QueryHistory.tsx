@@ -78,8 +78,8 @@ const QueryHistory: React.FC = () => {
         apiRequest('/api/queries/stats')
       ])
 
-      const historyRes = await historyResp.json()
-      const statsRes = await statsResp.json()
+      const historyRes = historyResp.data
+      const statsRes = statsResp.data
 
       setHistory(historyRes.content || [])
       setStatistics(statsRes)
@@ -108,7 +108,7 @@ const QueryHistory: React.FC = () => {
       })
 
       const historyResp = await apiRequest(`/api/queries/history/search?${params}`)
-      const historyRes = await historyResp.json()
+      const historyRes = historyResp.data
       setHistory(historyRes.content || [])
     } catch (err) {
       console.error('Failed to search query history:', err)
