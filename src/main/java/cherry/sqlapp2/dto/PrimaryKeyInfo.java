@@ -16,14 +16,8 @@
 
 package cherry.sqlapp2.dto;
 
-import java.util.List;
-
-public record TableDetailsResponse(
-    String tableName,
-    String catalog,
-    String schema,
-    List<ColumnInfoResponse> columns,
-    List<PrimaryKeyInfoResponse> primaryKeys,
-    List<ForeignKeyInfoResponse> foreignKeys,
-    List<IndexInfoResponse> indexes
+public record PrimaryKeyInfo(
+    String columnName,
+    short keySeq,
+    String pkName
 ) {}

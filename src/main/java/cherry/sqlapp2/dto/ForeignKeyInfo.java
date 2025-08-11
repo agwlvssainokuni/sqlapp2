@@ -16,7 +16,7 @@
 
 package cherry.sqlapp2.dto;
 
-public record ForeignKeyInfoResponse(
+public record ForeignKeyInfo(
     String pkTableCatalog,
     String pkTableSchema,
     String pkTableName,

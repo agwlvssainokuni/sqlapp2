@@ -54,15 +54,15 @@ public class SchemaService {
     /**
      * Get table list for a specific database/schema
      */
-    public List<TableInfoResponse> getTables(User user, Long connectionId, String catalog, String schema) throws SQLException {
+    public List<TableInfo> getTables(User user, Long connectionId, String catalog, String schema) throws SQLException {
         try (Connection connection = dynamicDataSourceService.getConnection(user, connectionId)) {
             DatabaseMetaData metaData = connection.getMetaData();
-            List<TableInfoResponse> tables = new ArrayList<>();
+            List<TableInfo> tables = new ArrayList<>();
             
             String[] tableTypes = {"TABLE", "VIEW"};
             try (ResultSet rs = metaData.getTables(catalog, schema, null, tableTypes)) {
                 while (rs.next()) {
-                    tables.add(new TableInfoResponse(
+                    tables.add(new TableInfo(
                         rs.getString("TABLE_CAT"),
                         rs.getString("TABLE_SCHEM"),
                         rs.getString("TABLE_NAME"),
@@ -79,14 +79,14 @@ public class SchemaService {
     /**
      * Get column information for a specific table
      */
-    public List<ColumnInfoResponse> getTableColumns(User user, Long connectionId, String catalog, String schema, String tableName) throws SQLException {
+    public List<ColumnInfo> getTableColumns(User user, Long connectionId, String catalog, String schema, String tableName) throws SQLException {
         try (Connection connection = dynamicDataSourceService.getConnection(user, connectionId)) {
             DatabaseMetaData metaData = connection.getMetaData();
-            List<ColumnInfoResponse> columns = new ArrayList<>();
+            List<ColumnInfo> columns = new ArrayList<>();
             
             try (ResultSet rs = metaData.getColumns(catalog, schema, tableName, null)) {
                 while (rs.next()) {
-                    columns.add(new ColumnInfoResponse(
+                    columns.add(new ColumnInfo(
                         rs.getString("COLUMN_NAME"),
                         rs.getInt("DATA_TYPE"),
                         rs.getString("TYPE_NAME"),
@@ -107,14 +107,14 @@ public class SchemaService {
     /**
      * Get primary key information for a table
      */
-    public List<PrimaryKeyInfoResponse> getPrimaryKeys(User user, Long connectionId, String catalog, String schema, String tableName) throws SQLException {
+    public List<PrimaryKeyInfo> getPrimaryKeys(User user, Long connectionId, String catalog, String schema, String tableName) throws SQLException {
         try (Connection connection = dynamicDataSourceService.getConnection(user, connectionId)) {
             DatabaseMetaData metaData = connection.getMetaData();
-            List<PrimaryKeyInfoResponse> primaryKeys = new ArrayList<>();
+            List<PrimaryKeyInfo> primaryKeys = new ArrayList<>();
             
             try (ResultSet rs = metaData.getPrimaryKeys(catalog, schema, tableName)) {
                 while (rs.next()) {
-                    primaryKeys.add(new PrimaryKeyInfoResponse(
+                    primaryKeys.add(new PrimaryKeyInfo(
                         rs.getString("COLUMN_NAME"),
                         rs.getShort("KEY_SEQ"),
                         rs.getString("PK_NAME")
@@ -129,14 +129,14 @@ public class SchemaService {
     /**
      * Get foreign key information for a table
      */
-    public List<ForeignKeyInfoResponse> getForeignKeys(User user, Long connectionId, String catalog, String schema, String tableName) throws SQLException {
+    public List<ForeignKeyInfo> getForeignKeys(User user, Long connectionId, String catalog, String schema, String tableName) throws SQLException {
         try (Connection connection = dynamicDataSourceService.getConnection(user, connectionId)) {
             DatabaseMetaData metaData = connection.getMetaData();
-            List<ForeignKeyInfoResponse> foreignKeys = new ArrayList<>();
+            List<ForeignKeyInfo> foreignKeys = new ArrayList<>();
             
             try (ResultSet rs = metaData.getImportedKeys(catalog, schema, tableName)) {
                 while (rs.next()) {
-                    foreignKeys.add(new ForeignKeyInfoResponse(
+                    foreignKeys.add(new ForeignKeyInfo(
                         rs.getString("PKTABLE_CAT"),
                         rs.getString("PKTABLE_SCHEM"),
                         rs.getString("PKTABLE_NAME"),
@@ -158,10 +158,10 @@ public class SchemaService {
     /**
      * Get index information for a table
      */
-    public List<IndexInfoResponse> getIndexes(User user, Long connectionId, String catalog, String schema, String tableName) throws SQLException {
+    public List<IndexInfo> getIndexes(User user, Long connectionId, String catalog, String schema, String tableName) throws SQLException {
         try (Connection connection = dynamicDataSourceService.getConnection(user, connectionId)) {
             DatabaseMetaData metaData = connection.getMetaData();
-            List<IndexInfoResponse> indexes = new ArrayList<>();
+            List<IndexInfo> indexes = new ArrayList<>();
             
             try (ResultSet rs = metaData.getIndexInfo(catalog, schema, tableName, false, false)) {
                 while (rs.next()) {
@@ -170,7 +170,7 @@ public class SchemaService {
                         continue;
                     }
                     
-                    indexes.add(new IndexInfoResponse(
+                    indexes.add(new IndexInfo(
                         rs.getString("INDEX_NAME"),
                         !rs.getBoolean("NON_UNIQUE"),
                         rs.getString("COLUMN_NAME"),
@@ -187,8 +187,8 @@ public class SchemaService {
     /**
      * Get complete table information including columns, primary keys, foreign keys, and indexes
      */
-    public TableDetailsResponse getTableDetails(User user, Long connectionId, String catalog, String schema, String tableName) throws SQLException {
-        return new TableDetailsResponse(
+    public TableDetails getTableDetails(User user, Long connectionId, String catalog, String schema, String tableName) throws SQLException {
+        return new TableDetails(
             tableName,
             catalog,
             schema,

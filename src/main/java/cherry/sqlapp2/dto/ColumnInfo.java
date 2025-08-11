@@ -16,10 +16,14 @@
 
 package cherry.sqlapp2.dto;
 
-public record IndexInfoResponse(
-    String indexName,
-    boolean unique,
-    String columnName,
-    short ordinalPosition,
-    String ascOrDesc
+public record ColumnInfo(
+    String name,
+    int dataType,
+    String typeName,
+    int columnSize,
+    int decimalDigits,
+    boolean nullable,
+    String defaultValue,
+    int ordinalPosition,
+    String remarks
 ) {}

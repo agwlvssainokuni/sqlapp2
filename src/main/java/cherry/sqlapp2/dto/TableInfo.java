@@ -16,14 +16,10 @@
 
 package cherry.sqlapp2.dto;
 
-public record ColumnInfoResponse(
+public record TableInfo(
+    String catalog,
+    String schema,
     String name,
-    int dataType,
-    String typeName,
-    int columnSize,
-    int decimalDigits,
-    boolean nullable,
-    String defaultValue,
-    int ordinalPosition,
+    String type,
     String remarks
 ) {}

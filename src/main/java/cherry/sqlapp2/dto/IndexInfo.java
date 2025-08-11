@@ -16,8 +16,10 @@
 
 package cherry.sqlapp2.dto;
 
-public record PrimaryKeyInfoResponse(
+public record IndexInfo(
+    String indexName,
+    boolean unique,
     String columnName,
-    short keySeq,
-    String pkName
+    short ordinalPosition,
+    String ascOrDesc
 ) {}

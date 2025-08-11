@@ -16,10 +16,14 @@
 
 package cherry.sqlapp2.dto;
 
-public record TableInfoResponse(
+import java.util.List;
+
+public record TableDetails(
+    String tableName,
     String catalog,
     String schema,
-    String name,
-    String type,
-    String remarks
+    List<ColumnInfo> columns,
+    List<PrimaryKeyInfo> primaryKeys,
+    List<ForeignKeyInfo> foreignKeys,
+    List<IndexInfo> indexes
 ) {}
