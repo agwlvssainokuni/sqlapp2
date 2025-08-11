@@ -16,10 +16,10 @@
 
 package cherry.sqlapp2.controller;
 
-import cherry.sqlapp2.dto.AuthResponse;
+import cherry.sqlapp2.dto.AuthResult;
 import cherry.sqlapp2.dto.LoginRequest;
 import cherry.sqlapp2.dto.UserRegistrationRequest;
-import cherry.sqlapp2.dto.UserResponse;
+import cherry.sqlapp2.dto.LoginUser;
 import cherry.sqlapp2.entity.User;
 import cherry.sqlapp2.service.UserService;
 import cherry.sqlapp2.util.JwtUtil;
@@ -61,9 +61,9 @@ public class AuthController {
             
             String token = jwtUtil.generateToken(user.getUsername());
             Long expiresIn = jwtUtil.getExpirationTime();
-            UserResponse userResponse = new UserResponse(user);
+            LoginUser userResponse = new LoginUser(user);
             
-            AuthResponse authResponse = new AuthResponse(token, expiresIn, userResponse);
+            AuthResult authResponse = new AuthResult(token, expiresIn, userResponse);
             return ResponseEntity.ok(authResponse);
             
         } catch (AuthenticationException e) {
@@ -77,7 +77,7 @@ public class AuthController {
     public ResponseEntity<?> register(@Valid @RequestBody UserRegistrationRequest request) {
         try {
             User user = userService.createUser(request.getUsername(), request.getPassword(), request.getEmail());
-            UserResponse response = new UserResponse(user);
+            LoginUser response = new LoginUser(user);
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body("Registration failed: " + e.getMessage());
@@ -96,7 +96,7 @@ public class AuthController {
             User user = userService.findByUsername(username)
                     .orElseThrow(() -> new RuntimeException("User not found"));
 
-            UserResponse userResponse = new UserResponse(user);
+            LoginUser userResponse = new LoginUser(user);
             return ResponseEntity.ok(userResponse);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
@@ -107,7 +107,7 @@ public class AuthController {
     @GetMapping("/user/{username}")
     public ResponseEntity<?> getUser(@PathVariable String username) {
         return userService.findByUsername(username)
-                .map(user -> ResponseEntity.ok(new UserResponse(user)))
+                .map(user -> ResponseEntity.ok(new LoginUser(user)))
                 .orElse(ResponseEntity.notFound().build());
     }
 }

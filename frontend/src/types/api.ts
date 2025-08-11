@@ -176,3 +176,18 @@ export interface SqlExecutionResult {
   queryHistoryId?: number
   savedQueryId?: number
 }
+
+// AuthController
+export interface AuthResult {
+  access_token: string
+  token_type: string
+  expires_in: number
+  user: LoginUser
+}
+
+export interface LoginUser {
+  id: number
+  username: string
+  email: string
+  createdAt: string
+}

@@ -16,15 +16,10 @@
 
 import React, {createContext, useContext, useState, useEffect, type ReactNode} from 'react'
 import {apiRequest} from '../utils/api'
-
-interface User {
-  id: number
-  username: string
-  email: string
-}
+import type {AuthResult, LoginUser} from "../types/api.ts";
 
 interface AuthContextType {
-  user: User | null
+  user: LoginUser | null
   isAuthenticated: boolean
   login: (username: string, password: string) => Promise<void>
   logout: () => void
@@ -40,7 +35,7 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
-  const [user, setUser] = useState<User | null>(null)
+  const [user, setUser] = useState<LoginUser | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
@@ -82,7 +77,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
       throw new Error('Login failed')
     }
 
-    const data = await response.json()
+    const data = await response.json() as AuthResult
     setUser(data.user)
     localStorage.setItem('token', data.access_token)
     localStorage.setItem('user', JSON.stringify(data.user))
