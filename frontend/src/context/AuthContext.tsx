@@ -25,7 +25,7 @@ interface AuthContextType {
   logout: () => void
   isLoading: boolean
   checkAuthStatus: () => Promise<boolean>
-  apiRequest: (url: string, options?: RequestInit) => Promise<ApiResponse<any>>
+  apiRequest: (url: string, options?: RequestInit) => Promise<ApiResponse<unknown>>
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -53,7 +53,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
             localStorage.removeItem('token')
             localStorage.removeItem('user')
           }
-        } catch (error) {
+        } catch {
           localStorage.removeItem('token')
           localStorage.removeItem('user')
         }
@@ -88,7 +88,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
     try {
       const response = await apiRequest('/api/auth/me')
       return response.ok
-    } catch (error) {
+    } catch {
       return false
     }
   }
@@ -116,6 +116,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
   )
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useAuth = (): AuthContextType => {
   const context = useContext(AuthContext)
   if (context === undefined) {

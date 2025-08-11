@@ -88,7 +88,7 @@ export interface SqlExecutionResult {
 export interface SqlResultData {
   columns: string[]
   columnDetails: ColumnDetail[]
-  rows: any[][]
+  rows: unknown[][]
   rowCount: number
 }
 
@@ -126,7 +126,7 @@ export interface SavedQuery {
 export interface QueryHistory {
   id: number
   sqlContent: string
-  parameterValues?: Record<string, any>
+  parameterValues?: Record<string, unknown>
   executionTimeMs: number
   resultCount?: number
   isSuccessful: boolean

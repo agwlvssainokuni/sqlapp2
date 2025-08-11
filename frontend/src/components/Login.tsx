@@ -37,7 +37,7 @@ const Login: React.FC = () => {
     try {
       await login(username, password)
       navigate('/dashboard')
-    } catch (error) {
+    } catch {
       setError(t('auth.loginFailed'))
     } finally {
       setIsLoading(false)
