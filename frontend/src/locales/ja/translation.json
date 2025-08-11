@@ -12,11 +12,14 @@
     "alreadyHaveAccount": "すでにアカウントをお持ちですか？",
     "dontHaveAccount": "アカウントをお持ちでないですか？",
     "loginFailed": "ログインに失敗しました",
-    "registrationFailed": "登録に失敗しました"
+    "registrationFailed": "登録に失敗しました",
+    "passwordsMismatch": "パスワードが一致しません",
+    "registrationSuccess": "登録が完了しました！ログインしてください。"
   },
   "common": {
     "dashboard": "ダッシュボード",
-    "logout": "ログアウト"
+    "logout": "ログアウト",
+    "error": "エラー"
   },
   "navigation": {
     "dashboard": "ダッシュボード",
@@ -58,7 +61,15 @@
     "connectionSuccessful": "接続成功",
     "connectionFailed": "接続失敗",
     "confirmDelete": "この接続を削除してもよろしいですか？",
-    "noConnections": "データベース接続が設定されていません"
+    "noConnections": "データベース接続が設定されていません",
+    "loadConnectionsFailed": "接続の読み込みに失敗しました",
+    "passwordPlaceholder": "現在のパスワードを保持する場合は空のままにしてください",
+    "additionalParameters": "追加パラメータ",
+    "connectionNote": "注意: 接続テストを行う前に、データベースサーバーが稼働しており、接続詳細が正しいことを確認してください。無効な接続設定では、接続がタイムアウトするまでアプリケーションがハングする場合があります。テストに時間がかかる場合は、設定を再確認し、データベースサーバーが開始されていることを確認してください。",
+    "status": "ステータス",
+    "active": "アクティブ",
+    "inactive": "非アクティブ",
+    "getStartedMessage": "「{{action}}」をクリックして始めましょう。"
   },
   "sqlExecution": {
     "title": "SQLクエリ実行",
@@ -78,7 +89,13 @@
     "executingQuery": "保存済みクエリを実行中",
     "reExecutingHistory": "履歴からクエリを再実行中",
     "sqlReadOnly": "SQLは読み取り専用です",
-    "sqlEditable": "SQLを編集できます"
+    "sqlEditable": "SQLを編集できます",
+    "enterQueryError": "SQLクエリを入力してください",
+    "selectConnectionError": "データベース接続を選択してください",
+    "validationFailed": "SQL検証に失敗しました",
+    "validationError": "検証エラー",
+    "executionFailed": "SQL実行に失敗しました",
+    "executionError": "実行エラー"
   },
   "savedQueries": {
     "title": "保存済みクエリ",

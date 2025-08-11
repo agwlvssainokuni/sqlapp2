@@ -54,7 +54,7 @@ const ConnectionManagementPage: React.FC = () => {
         const data = response.data
         setConnections(data)
       } else {
-        setError('Failed to load connections') // TODO: Add translation
+        setError(t('connections.loadConnectionsFailed'))
       }
     } finally {
       setLoading(false)
@@ -316,12 +316,12 @@ const ConnectionManagementPage: React.FC = () => {
                   type="password"
                   value={newConnection.password}
                   onChange={(e) => setNewConnection(prev => ({...prev, password: e.target.value}))}
-                  placeholder={editingConnection ? "Leave empty to keep current password" : t('connections.password')} // TODO: Add translation
+                  placeholder={editingConnection ? t('connections.passwordPlaceholder') : t('connections.password')}
                 />
               </div>
 
               <div className="form-group full-width">
-                <label>Additional Parameters</label> {/* TODO: Add translation */}
+                <label>{t('connections.additionalParameters')}</label>
                 <input
                   type="text"
                   value={newConnection.additionalParams}
@@ -367,8 +367,7 @@ const ConnectionManagementPage: React.FC = () => {
           {connections.length === 0 && !loading ? (
             <div className="no-connections">
               <p>{t('connections.noConnections')}</p>
-              <p>Click "{t('connections.addConnection')}" to get
-                started.</p> {/* TODO: Improve translation */}
+              <p>{t('connections.getStartedMessage', { action: t('connections.addConnection') })}</p>
             </div>
           ) : (
             <div className="connections-grid">
@@ -395,9 +394,9 @@ const ConnectionManagementPage: React.FC = () => {
                       <span>{connection.username}</span>
                     </div>
                     <div className="detail-row">
-                      <span className="label">Status:</span> {/* TODO: Add translation */}
+                      <span className="label">{t('connections.status')}:</span>
                       <span className={connection.isActive ? 'status-active' : 'status-inactive'}>
-                      {connection.isActive ? 'Active' : 'Inactive'} {/* TODO: Add translation */}
+                      {connection.isActive ? t('connections.active') : t('connections.inactive')}
                     </span>
                     </div>
                   </div>

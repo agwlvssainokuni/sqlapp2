@@ -36,7 +36,7 @@ const Register: React.FC = () => {
     setError('')
 
     if (password !== confirmPassword) {
-      setError('Passwords do not match') // TODO: Add to translation
+      setError(t('auth.passwordsMismatch'))
       return
     }
 
@@ -53,7 +53,7 @@ const Register: React.FC = () => {
         throw new Error(errorData)
       }
 
-      navigate('/login', {state: {message: 'Registration successful! Please login.'}}) // TODO: Add to translation
+      navigate('/login', {state: {message: t('auth.registrationSuccess')}})
     } catch (error) {
       setError(error instanceof Error ? error.message : t('auth.registrationFailed'))
     } finally {

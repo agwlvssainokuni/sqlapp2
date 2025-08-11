@@ -141,12 +141,12 @@ const SqlExecutionPage: React.FC = () => {
 
   const validateSql = async () => {
     if (!sql.trim()) {
-      setError('Please enter SQL query') // TODO: Add translation
+      setError(t('sqlExecution.enterQueryError'))
       return false
     }
 
     if (!selectedConnectionId) {
-      setError('Please select a database connection') // TODO: Add translation
+      setError(t('sqlExecution.selectConnectionError'))
       return false
     }
 
@@ -161,14 +161,14 @@ const SqlExecutionPage: React.FC = () => {
 
       const data: SqlValidationResult = response.data
       if (!response.ok) {
-        setError(data.error || 'SQL validation failed') // TODO: Add translation
+        setError(data.error || t('sqlExecution.validationFailed'))
         return false
       }
 
       setError(null)
       return true
     } catch (err) {
-      setError('Validation error: ' + (err as Error).message) // TODO: Add translation
+      setError(t('sqlExecution.validationError') + ': ' + (err as Error).message)
       return false
     }
   }
@@ -216,10 +216,10 @@ const SqlExecutionPage: React.FC = () => {
       } else {
         // Handle both API errors and SQL execution errors
         const errorMessage = data.error || 'SQL execution failed'
-        setError(errorMessage) // TODO: Add translation
+        setError(errorMessage || t('sqlExecution.executionFailed'))
       }
     } catch (err) {
-      setError('Execution error: ' + (err as Error).message) // TODO: Add translation
+      setError(t('sqlExecution.executionError') + ': ' + (err as Error).message)
     } finally {
       setLoading(false)
     }

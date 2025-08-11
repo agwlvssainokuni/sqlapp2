@@ -12,11 +12,14 @@
     "alreadyHaveAccount": "Already have an account?",
     "dontHaveAccount": "Don't have an account?",
     "loginFailed": "Login failed",
-    "registrationFailed": "Registration failed"
+    "registrationFailed": "Registration failed",
+    "passwordsMismatch": "Passwords do not match",
+    "registrationSuccess": "Registration successful! Please login."
   },
   "common": {
     "dashboard": "Dashboard",
-    "logout": "Logout"
+    "logout": "Logout",
+    "error": "Error"
   },
   "navigation": {
     "dashboard": "Dashboard",
@@ -58,7 +61,15 @@
     "connectionSuccessful": "Connection successful",
     "connectionFailed": "Connection failed",
     "confirmDelete": "Are you sure you want to delete this connection?",
-    "noConnections": "No database connections configured"
+    "noConnections": "No database connections configured",
+    "loadConnectionsFailed": "Failed to load connections",
+    "passwordPlaceholder": "Leave empty to keep current password",
+    "additionalParameters": "Additional Parameters",
+    "connectionNote": "Note: Please ensure the database server is running and the connection details are correct before testing the connection. Invalid connection settings may cause the application to hang until the connection times out. If the test takes a long time, please double-check your settings and ensure the database server is started.",
+    "status": "Status",
+    "active": "Active",
+    "inactive": "Inactive",
+    "getStartedMessage": "Click \"{{action}}\" to get started."
   },
   "sqlExecution": {
     "title": "SQL Query Execution",
@@ -78,7 +89,13 @@
     "executingQuery": "Executing Saved Query",
     "reExecutingHistory": "Re-executing Query from History",
     "sqlReadOnly": "SQL is read-only",
-    "sqlEditable": "SQL can be edited"
+    "sqlEditable": "SQL can be edited",
+    "enterQueryError": "Please enter SQL query",
+    "selectConnectionError": "Please select a database connection",
+    "validationFailed": "SQL validation failed",
+    "validationError": "Validation error",
+    "executionFailed": "SQL execution failed",
+    "executionError": "Execution error"
   },
   "savedQueries": {
     "title": "Saved Queries",
