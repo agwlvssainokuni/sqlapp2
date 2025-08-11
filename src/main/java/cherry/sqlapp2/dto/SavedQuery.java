@@ -16,19 +16,17 @@
 
 package cherry.sqlapp2.dto;
 
-import cherry.sqlapp2.entity.SavedQuery;
-
 import java.time.LocalDateTime;
 import java.util.Map;
 
-public class SavedQueryResponse {
+public class SavedQuery {
 
     private Long id;
     private String name;
     private String sqlContent;
     private String description;
     private Map<String, String> parameterDefinitions;
-    private SavedQuery.SharingScope sharingScope;
+    private cherry.sqlapp2.entity.SavedQuery.SharingScope sharingScope;
     private String username;
     private Long userId;
     private DatabaseConnection defaultConnection;
@@ -38,9 +36,10 @@ public class SavedQueryResponse {
     private Integer executionCount;
 
     // Constructors
-    public SavedQueryResponse() {}
+    public SavedQuery() {
+    }
 
-    public SavedQueryResponse(SavedQuery savedQuery) {
+    public SavedQuery(cherry.sqlapp2.entity.SavedQuery savedQuery) {
         this.id = savedQuery.getId();
         this.name = savedQuery.getName();
         this.sqlContent = savedQuery.getSqlContent();
@@ -99,11 +98,11 @@ public class SavedQueryResponse {
         this.parameterDefinitions = parameterDefinitions;
     }
 
-    public SavedQuery.SharingScope getSharingScope() {
+    public cherry.sqlapp2.entity.SavedQuery.SharingScope getSharingScope() {
         return sharingScope;
     }
 
-    public void setSharingScope(SavedQuery.SharingScope sharingScope) {
+    public void setSharingScope(cherry.sqlapp2.entity.SavedQuery.SharingScope sharingScope) {
         this.sharingScope = sharingScope;
     }
 

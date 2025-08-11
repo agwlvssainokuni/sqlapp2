@@ -19,7 +19,7 @@ package cherry.sqlapp2.dto;
 /**
  * ユーザー統計情報APIのレスポンス
  */
-public record UserStatisticsResponse(
+public record UserStatistics(
         Long savedQueryCount,
         Long executionCount,
         Double averageExecutionTime,
