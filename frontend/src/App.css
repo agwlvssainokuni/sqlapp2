@@ -709,14 +709,12 @@ button:disabled {
 }
 
 .connections-list {
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.connections-list h3 {
-  margin: 0 0 8px 0;
-  color: #333;
+.connections-list h2 {
+  display: flex;
+  justify-content: flex-start;
+  margin: 16px 0;
 }
 
 .loading {
@@ -737,14 +735,17 @@ button:disabled {
 
 .connections-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 16px;
+  margin-top: 16px;
 }
 
 .connection-card {
-  border: 1px solid #e9ecef;
+  background: white;
+  padding: 16px;
   border-radius: 8px;
-  background: #f8f9fa;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e9ecef;
 }
 
 .connection-card .connection-header {
@@ -760,7 +761,7 @@ button:disabled {
 .connection-card .connection-header h4 {
   margin: 0;
   color: #333;
-  font-size: 18px;
+  font-size: 20px;
 }
 
 .connection-type {
@@ -768,7 +769,7 @@ button:disabled {
   color: white;
   padding: 4px 12px;
   border-radius: 12px;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 500;
 }
 
@@ -1999,7 +2000,7 @@ a:hover {
 .saved-queries .header {
   display: flex;
   justify-content: flex-end;
-  margin-bottom: 1rem;
+  margin-bottom: 16px;
 }
 
 /* Component content containers */

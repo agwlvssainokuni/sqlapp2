@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import React, {useEffect, useState, useCallback} from 'react'
+import React, {useCallback, useEffect, useState} from 'react'
 import {useTranslation} from 'react-i18next'
 import {useAuth} from '../context/AuthContext'
 import type {ConnectionTestResult, DatabaseConnection, NewConnection} from '../types/api'
@@ -358,7 +358,7 @@ const ConnectionManagementPage: React.FC = () => {
         )}
 
         <div className="connections-list">
-          <h3>{t('connections.title')}</h3>
+          <h2>{t('connections.title')}</h2>
 
           {loading && !showCreateForm && (
             <div className="loading">{t('common.loading')}</div>
@@ -367,7 +367,7 @@ const ConnectionManagementPage: React.FC = () => {
           {connections.length === 0 && !loading ? (
             <div className="no-connections">
               <p>{t('connections.noConnections')}</p>
-              <p>{t('connections.getStartedMessage', { action: t('connections.addConnection') })}</p>
+              <p>{t('connections.getStartedMessage', {action: t('connections.addConnection')})}</p>
             </div>
           ) : (
             <div className="connections-grid">
