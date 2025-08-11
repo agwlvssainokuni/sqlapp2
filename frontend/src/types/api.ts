@@ -105,7 +105,7 @@ export interface SchemaInfo {
   schemas: Array<{ name: string; catalog: string }>
 }
 
-export interface Table {
+export interface TableInfoResponse {
   catalog: string
   schema: string
   name: string
@@ -113,7 +113,7 @@ export interface Table {
   remarks: string
 }
 
-export interface Column {
+export interface ColumnInfoResponse {
   name: string
   dataType: number
   typeName: string
@@ -125,27 +125,47 @@ export interface Column {
   remarks: string
 }
 
-export interface TableDetails {
+export interface PrimaryKeyInfoResponse {
+  columnName: string
+  keySeq: number
+  pkName: string
+}
+
+export interface ForeignKeyInfoResponse {
+  pkTableCatalog: string
+  pkTableSchema: string
+  pkTableName: string
+  pkColumnName: string
+  fkTableCatalog: string
+  fkTableSchema: string
+  fkTableName: string
+  fkColumnName: string
+  keySeq: number
+  fkName: string
+}
+
+export interface IndexInfoResponse {
+  indexName: string
+  unique: boolean
+  columnName: string
+  ordinalPosition: number
+  ascOrDesc: string
+}
+
+export interface TableDetailsResponse {
   tableName: string
   catalog: string
   schema: string
-  columns: Column[]
-  primaryKeys: Array<{ columnName: string; keySeq: number; pkName: string }>
-  foreignKeys: Array<{
-    pkTableName: string
-    pkColumnName: string
-    fkColumnName: string
-    keySeq: number
-    fkName: string
-  }>
-  indexes: Array<{
-    indexName: string
-    unique: boolean
-    columnName: string
-    ordinalPosition: number
-    ascOrDesc: string
-  }>
+  columns: ColumnInfoResponse[]
+  primaryKeys: PrimaryKeyInfoResponse[]
+  foreignKeys: ForeignKeyInfoResponse[]
+  indexes: IndexInfoResponse[]
 }
+
+// 後方互換性のためのエイリアス
+export type Table = TableInfoResponse
+export type Column = ColumnInfoResponse  
+export type TableDetails = TableDetailsResponse
 
 // 既存のレスポンス型（互換性維持）
 export interface SqlExecutionResult {
