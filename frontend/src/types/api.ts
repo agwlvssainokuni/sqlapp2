@@ -64,10 +64,26 @@ export interface QueryValidationResponse {
   sql: string
 }
 
-export interface QueryExecutionValidationResponse {
-  valid: boolean
+// SqlExecutionController - 統一されたSQL実行結果レスポンス
+export interface SqlExecutionResult {
+  success: boolean
   message: string
-  validatedAt: string
+  executedAt: string
+  sql?: string
+  data?: SqlResultData
+  error?: string
+  errorType?: string
+  errorCode?: number
+  sqlState?: string
+  queryHistoryId?: number
+  savedQueryId?: number
+}
+
+export interface SqlResultData {
+  columns: string[]
+  rows: any[][]
+  rowCount: number
+  executionTime: number
 }
 
 export interface QueryExecutionErrorResponse {
@@ -162,20 +178,6 @@ export interface TableDetails {
   indexes: IndexInfo[]
 }
 
-// 既存のレスポンス型（互換性維持）
-export interface SqlExecutionResult {
-  success: boolean
-  data?: {
-    columns: string[]
-    rows: any[][]
-    rowCount: number
-    executionTime: number
-  }
-  error?: string
-  executedAt?: string
-  queryHistoryId?: number
-  savedQueryId?: number
-}
 
 // AuthController
 export interface AuthResult {

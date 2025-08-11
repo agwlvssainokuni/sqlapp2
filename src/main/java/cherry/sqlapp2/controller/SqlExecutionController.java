@@ -16,7 +16,7 @@
 package cherry.sqlapp2.controller;
 
 import cherry.sqlapp2.dto.QueryExecutionErrorResponse;
-import cherry.sqlapp2.dto.QueryExecutionValidationResponse;
+import cherry.sqlapp2.dto.SqlExecutionResult;
 import cherry.sqlapp2.dto.QueryValidationResponse;
 import cherry.sqlapp2.dto.SqlExecutionRequest;
 import cherry.sqlapp2.entity.SavedQuery;
@@ -74,13 +74,13 @@ public class SqlExecutionController {
             
             // If validation only, return success without execution
             if (request.isValidateOnly()) {
-                QueryExecutionValidationResponse response = new QueryExecutionValidationResponse(
+                SqlExecutionResult response = new SqlExecutionResult(
                         true, "SQL query is valid", LocalDateTime.now());
                 return ResponseEntity.ok(response);
             }
             
             // Execute the query
-            Map<String, Object> result;
+            SqlExecutionResult result;
             
             // Get SavedQuery if savedQueryId is provided
             SavedQuery savedQuery = null;
@@ -111,21 +111,23 @@ public class SqlExecutionController {
             return ResponseEntity.ok(result);
             
         } catch (IllegalArgumentException e) {
-            QueryExecutionErrorResponse errorResponse = new QueryExecutionErrorResponse(
-                    false, e.getMessage(), "ValidationError", LocalDateTime.now());
+            SqlExecutionResult errorResponse = new SqlExecutionResult(
+                    false, e.getMessage(), "ValidationError", LocalDateTime.now(),
+                    request.getSql(), null, null);
             
             return ResponseEntity.badRequest().body(errorResponse);
             
         } catch (SQLException e) {
-            QueryExecutionErrorResponse errorResponse = new QueryExecutionErrorResponse(
+            SqlExecutionResult errorResponse = new SqlExecutionResult(
                     false, e.getMessage(), "SQLException", LocalDateTime.now(),
                     request.getSql(), e.getErrorCode(), e.getSQLState());
             
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
             
         } catch (Exception e) {
-            QueryExecutionErrorResponse errorResponse = new QueryExecutionErrorResponse(
-                    false, "Unexpected error: " + e.getMessage(), "SystemError", LocalDateTime.now());
+            SqlExecutionResult errorResponse = new SqlExecutionResult(
+                    false, "Unexpected error: " + e.getMessage(), "SystemError", LocalDateTime.now(),
+                    request.getSql(), null, null);
             
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
         }

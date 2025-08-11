@@ -15,6 +15,7 @@
  */
 package cherry.sqlapp2.service;
 
+import cherry.sqlapp2.dto.SqlExecutionResult;
 import cherry.sqlapp2.entity.DatabaseConnection;
 import cherry.sqlapp2.entity.SavedQuery;
 import cherry.sqlapp2.entity.User;
@@ -53,14 +54,14 @@ public class SqlExecutionService {
     /**
      * Execute SQL query and return results
      */
-    public Map<String, Object> executeQuery(User user, Long connectionId, String sql) throws SQLException {
+    public SqlExecutionResult executeQuery(User user, Long connectionId, String sql) throws SQLException {
         return executeQuery(user, connectionId, sql, null);
     }
 
     /**
      * Execute SQL query and return results with optional SavedQuery association
      */
-    public Map<String, Object> executeQuery(User user, Long connectionId, String sql, SavedQuery savedQuery) throws SQLException {
+    public SqlExecutionResult executeQuery(User user, Long connectionId, String sql, SavedQuery savedQuery) throws SQLException {
         if (sql == null || sql.trim().isEmpty()) {
             throw new IllegalArgumentException("SQL query cannot be empty");
         }
@@ -103,7 +104,19 @@ public class SqlExecutionService {
             recordQueryExecution(user, connectionId, sql, null, executionTime, 
                                getResultCount(result), true, null, savedQuery);
             
-            return result;
+            // Convert Map result to SqlExecutionResult
+            SqlExecutionResult.SqlResultData data = null;
+            if (isSelect && result.containsKey("data")) {
+                @SuppressWarnings("unchecked")
+                List<String> columns = (List<String>) result.get("columns");
+                @SuppressWarnings("unchecked")
+                List<List<Object>> rows = (List<List<Object>>) result.get("data");
+                Integer rowCount = (Integer) result.get("rowCount");
+                data = new SqlExecutionResult.SqlResultData(columns, rows, rowCount, executionTime);
+            }
+            
+            return new SqlExecutionResult(true, data, LocalDateTime.now(), sql, null, 
+                                        savedQuery != null ? savedQuery.getId() : null);
             
         } catch (SQLException e) {
             long executionTime = System.currentTimeMillis() - startTime;
@@ -111,15 +124,6 @@ public class SqlExecutionService {
             // Record failed query execution in history
             recordQueryExecution(user, connectionId, sql, null, executionTime, 
                                null, false, e.getMessage(), savedQuery);
-            
-            Map<String, Object> errorResult = new LinkedHashMap<>();
-            errorResult.put("success", false);
-            errorResult.put("error", e.getMessage());
-            errorResult.put("sqlState", e.getSQLState());
-            errorResult.put("errorCode", e.getErrorCode());
-            errorResult.put("sql", sql);
-            errorResult.put("executionTimeMs", executionTime);
-            errorResult.put("executedAt", LocalDateTime.now());
             
             throw new SQLException("SQL execution failed: " + e.getMessage(), e);
         }
@@ -245,7 +249,7 @@ public class SqlExecutionService {
     /**
      * Execute parameterized SQL query and return results
      */
-    public Map<String, Object> executeParameterizedQuery(User user, Long connectionId, String sql, 
+    public SqlExecutionResult executeParameterizedQuery(User user, Long connectionId, String sql, 
                                                         Map<String, Object> parameters, 
                                                         Map<String, String> parameterTypes) throws SQLException {
         return executeParameterizedQuery(user, connectionId, sql, parameters, parameterTypes, null);
@@ -254,7 +258,7 @@ public class SqlExecutionService {
     /**
      * Execute parameterized SQL query and return results with optional SavedQuery association
      */
-    public Map<String, Object> executeParameterizedQuery(User user, Long connectionId, String sql, 
+    public SqlExecutionResult executeParameterizedQuery(User user, Long connectionId, String sql, 
                                                         Map<String, Object> parameters, 
                                                         Map<String, String> parameterTypes, 
                                                         SavedQuery savedQuery) throws SQLException {
@@ -308,7 +312,19 @@ public class SqlExecutionService {
                 recordQueryExecution(user, connectionId, sql, parameters, executionTime, 
                                    getResultCount(result), true, null, savedQuery);
                 
-                return result;
+                // Convert Map result to SqlExecutionResult
+                SqlExecutionResult.SqlResultData data = null;
+                if (result.containsKey("data")) {
+                    @SuppressWarnings("unchecked")
+                    List<String> columns = (List<String>) result.get("columns");
+                    @SuppressWarnings("unchecked")
+                    List<List<Object>> rows = (List<List<Object>>) result.get("data");
+                    Integer rowCount = (Integer) result.get("rowCount");
+                    data = new SqlExecutionResult.SqlResultData(columns, rows, rowCount, executionTime);
+                }
+                
+                return new SqlExecutionResult(true, data, LocalDateTime.now(), sql, null, 
+                                            savedQuery != null ? savedQuery.getId() : null);
             }
             
         } catch (SQLException e) {
@@ -317,16 +333,6 @@ public class SqlExecutionService {
             // Record failed query execution in history
             recordQueryExecution(user, connectionId, sql, parameters, executionTime, 
                                null, false, e.getMessage(), savedQuery);
-            
-            Map<String, Object> errorResult = new LinkedHashMap<>();
-            errorResult.put("success", false);
-            errorResult.put("error", e.getMessage());
-            errorResult.put("sqlState", e.getSQLState());
-            errorResult.put("errorCode", e.getErrorCode());
-            errorResult.put("sql", sql);
-            errorResult.put("parameters", parameters);
-            errorResult.put("executionTimeMs", executionTime);
-            errorResult.put("executedAt", LocalDateTime.now());
             
             throw new SQLException("Parameterized SQL execution failed: " + e.getMessage(), e);
         }
