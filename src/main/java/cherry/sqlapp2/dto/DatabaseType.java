@@ -17,9 +17,11 @@
 package cherry.sqlapp2.dto;
 
 /**
- * データベース接続数APIのレスポンス
+ * データベースタイプ情報APIのレスポンス
  */
-public record ConnectionCountResponse(
-        Long activeConnections
+public record DatabaseType(
+        String name,
+        String displayName,
+        Integer defaultPort
 ) {
 }

@@ -31,7 +31,7 @@ public class SavedQueryResponse {
     private SavedQuery.SharingScope sharingScope;
     private String username;
     private Long userId;
-    private DatabaseConnectionResponse defaultConnection;
+    private DatabaseConnection defaultConnection;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private LocalDateTime lastExecutedAt;
@@ -54,7 +54,7 @@ public class SavedQueryResponse {
         this.executionCount = savedQuery.getExecutionCount();
 
         if (savedQuery.getDefaultConnection() != null) {
-            this.defaultConnection = new DatabaseConnectionResponse(savedQuery.getDefaultConnection());
+            this.defaultConnection = new DatabaseConnection(savedQuery.getDefaultConnection());
         }
     }
 
@@ -123,11 +123,11 @@ public class SavedQueryResponse {
         this.userId = userId;
     }
 
-    public DatabaseConnectionResponse getDefaultConnection() {
+    public DatabaseConnection getDefaultConnection() {
         return defaultConnection;
     }
 
-    public void setDefaultConnection(DatabaseConnectionResponse defaultConnection) {
+    public void setDefaultConnection(DatabaseConnection defaultConnection) {
         this.defaultConnection = defaultConnection;
     }
 

@@ -16,12 +16,19 @@
 
 package cherry.sqlapp2.dto;
 
+import java.time.LocalDateTime;
+
 /**
- * データベースタイプ情報APIのレスポンス
+ * データベース接続ステータスAPIのレスポンス
  */
-public record DatabaseTypeResponse(
-        String name,
-        String displayName,
-        Integer defaultPort
+public record ConnectionStatus(
+        Long connectionId,
+        Boolean available,
+        String error,
+        LocalDateTime checkedAt
 ) {
+    // エラーなしの場合のコンストラクタ
+    public ConnectionStatus(Long connectionId, Boolean available, LocalDateTime checkedAt) {
+        this(connectionId, available, null, checkedAt);
+    }
 }

@@ -16,19 +16,10 @@
 
 package cherry.sqlapp2.dto;
 
-import java.time.LocalDateTime;
-
 /**
- * データベース接続ステータスAPIのレスポンス
+ * データベース接続数APIのレスポンス
  */
-public record ConnectionStatusResponse(
-        Long connectionId,
-        Boolean available,
-        String error,
-        LocalDateTime checkedAt
+public record ConnectionCount(
+        Long activeConnections
 ) {
-    // エラーなしの場合のコンストラクタ
-    public ConnectionStatusResponse(Long connectionId, Boolean available, LocalDateTime checkedAt) {
-        this(connectionId, available, null, checkedAt);
-    }
 }

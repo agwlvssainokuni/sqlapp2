@@ -29,17 +29,17 @@ export interface HealthResponse {
 }
 
 // DatabaseConnectionController
-export interface ConnectionCountResponse {
+export interface ConnectionCount {
   activeConnections: number
 }
 
-export interface DatabaseTypeResponse {
+export interface DatabaseType {
   name: string
   displayName: string
   defaultPort: number
 }
 
-export interface ConnectionStatusResponse {
+export interface ConnectionStatus {
   connectionId: number
   available: boolean
   error?: string

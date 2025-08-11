@@ -17,8 +17,7 @@ package cherry.sqlapp2.service;
 
 import cherry.sqlapp2.dto.ConnectionTestResult;
 import cherry.sqlapp2.dto.DatabaseConnectionRequest;
-import cherry.sqlapp2.dto.DatabaseConnectionResponse;
-import cherry.sqlapp2.entity.DatabaseConnection;
+import cherry.sqlapp2.dto.DatabaseConnection;
 import cherry.sqlapp2.entity.User;
 import cherry.sqlapp2.enums.DatabaseType;
 import cherry.sqlapp2.repository.DatabaseConnectionRepository;
@@ -48,29 +47,29 @@ public class DatabaseConnectionService {
     }
 
     @Transactional(readOnly = true)
-    public List<DatabaseConnectionResponse> getAllConnectionsByUser(User user) {
+    public List<DatabaseConnection> getAllConnectionsByUser(User user) {
         return connectionRepository.findByUserOrderByUpdatedAtDesc(user)
                 .stream()
-                .map(DatabaseConnectionResponse::new)
+                .map(DatabaseConnection::new)
                 .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
-    public List<DatabaseConnectionResponse> getActiveConnectionsByUser(User user) {
+    public List<DatabaseConnection> getActiveConnectionsByUser(User user) {
         return connectionRepository.findByUserAndIsActiveOrderByUpdatedAtDesc(user, true)
                 .stream()
-                .map(DatabaseConnectionResponse::new)
+                .map(DatabaseConnection::new)
                 .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
-    public Optional<DatabaseConnectionResponse> getConnectionById(User user, Long connectionId) {
+    public Optional<DatabaseConnection> getConnectionById(User user, Long connectionId) {
         return connectionRepository.findByUserAndId(user, connectionId)
-                .map(DatabaseConnectionResponse::new);
+                .map(DatabaseConnection::new);
     }
 
     @Transactional(readOnly = true)
-    public Optional<DatabaseConnection> getConnectionEntityById(User user, Long connectionId) {
+    public Optional<cherry.sqlapp2.entity.DatabaseConnection> getConnectionEntityById(User user, Long connectionId) {
         return connectionRepository.findByUserAndId(user, connectionId);
     }
 
@@ -79,7 +78,7 @@ public class DatabaseConnectionService {
         return connectionRepository.existsByUserAndConnectionName(user, connectionName);
     }
 
-    public DatabaseConnectionResponse createConnection(User user, DatabaseConnectionRequest request) {
+    public DatabaseConnection createConnection(User user, DatabaseConnectionRequest request) {
         // Check if connection name already exists for this user
         if (connectionRepository.existsByUserAndConnectionName(user, request.getConnectionName())) {
             throw new IllegalArgumentException("Connection name already exists: " + request.getConnectionName());
@@ -92,7 +91,7 @@ public class DatabaseConnectionService {
         }
 
         // Create new connection entity
-        DatabaseConnection connection = new DatabaseConnection(
+        var connection = new cherry.sqlapp2.entity.DatabaseConnection(
                 user,
                 request.getConnectionName(),
                 request.getDatabaseType(),
@@ -109,12 +108,12 @@ public class DatabaseConnectionService {
         connection.setActive(request.isActive());
 
         // Save and return response
-        DatabaseConnection savedConnection = connectionRepository.save(connection);
-        return new DatabaseConnectionResponse(savedConnection);
+        var savedConnection = connectionRepository.save(connection);
+        return new DatabaseConnection(savedConnection);
     }
 
-    public DatabaseConnectionResponse updateConnection(User user, Long connectionId, DatabaseConnectionRequest request) {
-        DatabaseConnection existingConnection = connectionRepository.findByUserAndId(user, connectionId)
+    public DatabaseConnection updateConnection(User user, Long connectionId, DatabaseConnectionRequest request) {
+        var existingConnection = connectionRepository.findByUserAndId(user, connectionId)
                 .orElseThrow(() -> new IllegalArgumentException("Connection not found: " + connectionId));
 
         // Check if new connection name conflicts with existing ones (excluding current)
@@ -147,19 +146,19 @@ public class DatabaseConnectionService {
         }
 
         // Save and return response
-        DatabaseConnection updatedConnection = connectionRepository.save(existingConnection);
-        return new DatabaseConnectionResponse(updatedConnection);
+        var updatedConnection = connectionRepository.save(existingConnection);
+        return new DatabaseConnection(updatedConnection);
     }
 
     public void deleteConnection(User user, Long connectionId) {
-        DatabaseConnection connection = connectionRepository.findByUserAndId(user, connectionId)
+        var connection = connectionRepository.findByUserAndId(user, connectionId)
                 .orElseThrow(() -> new IllegalArgumentException("Connection not found: " + connectionId));
         
         connectionRepository.delete(connection);
     }
 
     public void toggleConnectionStatus(User user, Long connectionId) {
-        DatabaseConnection connection = connectionRepository.findByUserAndId(user, connectionId)
+        var connection = connectionRepository.findByUserAndId(user, connectionId)
                 .orElseThrow(() -> new IllegalArgumentException("Connection not found: " + connectionId));
         
         connection.setActive(!connection.isActive());
@@ -172,15 +171,15 @@ public class DatabaseConnectionService {
     }
 
     @Transactional(readOnly = true)
-    public List<DatabaseConnectionResponse> getConnectionsByType(User user, DatabaseType databaseType) {
+    public List<DatabaseConnection> getConnectionsByType(User user, DatabaseType databaseType) {
         return connectionRepository.findByUserAndDatabaseType(user, databaseType)
                 .stream()
-                .map(DatabaseConnectionResponse::new)
+                .map(DatabaseConnection::new)
                 .collect(Collectors.toList());
     }
 
     public String getDecryptedPassword(User user, Long connectionId) {
-        DatabaseConnection connection = connectionRepository.findByUserAndId(user, connectionId)
+        var connection = connectionRepository.findByUserAndId(user, connectionId)
                 .orElseThrow(() -> new IllegalArgumentException("Connection not found: " + connectionId));
         
         return encryptionService.decrypt(connection.getEncryptedPassword());
@@ -188,7 +187,7 @@ public class DatabaseConnectionService {
 
     public ConnectionTestResult testConnection(User user, Long connectionId) {
         try {
-            DatabaseConnection connection = connectionRepository.findByUserAndId(user, connectionId)
+            var connection = connectionRepository.findByUserAndId(user, connectionId)
                     .orElseThrow(() -> new IllegalArgumentException("Connection not found: " + connectionId));
             
             return testConnection(connection);
@@ -241,7 +240,7 @@ public class DatabaseConnectionService {
         }
     }
 
-    private ConnectionTestResult testConnection(DatabaseConnection connection) {
+    private ConnectionTestResult testConnection(cherry.sqlapp2.entity.DatabaseConnection connection) {
         try {
             String decryptedPassword = encryptionService.decrypt(connection.getEncryptedPassword());
             String connectionUrl = connection.buildJdbcUrl();

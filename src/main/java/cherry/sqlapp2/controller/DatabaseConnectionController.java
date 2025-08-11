@@ -15,14 +15,13 @@
  */
 package cherry.sqlapp2.controller;
 
-import cherry.sqlapp2.dto.ConnectionCountResponse;
-import cherry.sqlapp2.dto.ConnectionStatusResponse;
+import cherry.sqlapp2.dto.ConnectionCount;
+import cherry.sqlapp2.dto.ConnectionStatus;
 import cherry.sqlapp2.dto.ConnectionTestResult;
 import cherry.sqlapp2.dto.DatabaseConnectionRequest;
-import cherry.sqlapp2.dto.DatabaseConnectionResponse;
-import cherry.sqlapp2.dto.DatabaseTypeResponse;
+import cherry.sqlapp2.dto.DatabaseConnection;
+import cherry.sqlapp2.dto.DatabaseType;
 import cherry.sqlapp2.entity.User;
-import cherry.sqlapp2.enums.DatabaseType;
 import cherry.sqlapp2.service.DatabaseConnectionService;
 import cherry.sqlapp2.service.DynamicDataSourceService;
 import cherry.sqlapp2.service.UserService;
@@ -69,11 +68,11 @@ public class DatabaseConnectionController {
     }
 
     @GetMapping
-    public ResponseEntity<List<DatabaseConnectionResponse>> getAllConnections(
+    public ResponseEntity<List<DatabaseConnection>> getAllConnections(
             @RequestParam(defaultValue = "false") boolean activeOnly) {
         try {
             User currentUser = getCurrentUser();
-            List<DatabaseConnectionResponse> connections;
+            List<DatabaseConnection> connections;
             
             if (activeOnly) {
                 connections = connectionService.getActiveConnectionsByUser(currentUser);
@@ -88,7 +87,7 @@ public class DatabaseConnectionController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<DatabaseConnectionResponse> getConnectionById(@PathVariable Long id) {
+    public ResponseEntity<DatabaseConnection> getConnectionById(@PathVariable Long id) {
         try {
             User currentUser = getCurrentUser();
             return connectionService.getConnectionById(currentUser, id)
@@ -109,7 +108,7 @@ public class DatabaseConnectionController {
             }
             
             User currentUser = getCurrentUser();
-            DatabaseConnectionResponse response = connectionService.createConnection(currentUser, request);
+            DatabaseConnection response = connectionService.createConnection(currentUser, request);
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body("Connection creation failed: " + e.getMessage());
@@ -123,7 +122,7 @@ public class DatabaseConnectionController {
     public ResponseEntity<?> updateConnection(@PathVariable Long id, @Valid @RequestBody DatabaseConnectionRequest request) {
         try {
             User currentUser = getCurrentUser();
-            DatabaseConnectionResponse response = connectionService.updateConnection(currentUser, id, request);
+            DatabaseConnection response = connectionService.updateConnection(currentUser, id, request);
             return ResponseEntity.ok(response);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body("Connection update failed: " + e.getMessage());
@@ -162,12 +161,12 @@ public class DatabaseConnectionController {
     }
 
     @GetMapping("/count")
-    public ResponseEntity<ConnectionCountResponse> getConnectionCount() {
+    public ResponseEntity<ConnectionCount> getConnectionCount() {
         try {
             User currentUser = getCurrentUser();
             long activeCount = connectionService.getActiveConnectionCount(currentUser);
             
-            ConnectionCountResponse response = new ConnectionCountResponse(activeCount);
+            ConnectionCount response = new ConnectionCount(activeCount);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
@@ -175,10 +174,10 @@ public class DatabaseConnectionController {
     }
 
     @GetMapping("/types")
-    public ResponseEntity<List<DatabaseTypeResponse>> getDatabaseTypes() {
+    public ResponseEntity<List<DatabaseType>> getDatabaseTypes() {
         try {
-            List<DatabaseTypeResponse> types = Arrays.stream(DatabaseType.values())
-                    .map(type -> new DatabaseTypeResponse(
+            List<DatabaseType> types = Arrays.stream(cherry.sqlapp2.enums.DatabaseType.values())
+                    .map(type -> new DatabaseType(
                             type.name(),
                             type.getDisplayName(),
                             type.getDefaultPort()))
@@ -190,15 +189,15 @@ public class DatabaseConnectionController {
     }
 
     @GetMapping("/by-type/{databaseType}")
-    public ResponseEntity<List<DatabaseConnectionResponse>> getConnectionsByType(@PathVariable String databaseType) {
+    public ResponseEntity<List<DatabaseConnection>> getConnectionsByType(@PathVariable String databaseType) {
         try {
             User currentUser = getCurrentUser();
-            DatabaseType type = DatabaseType.fromString(databaseType);
+            cherry.sqlapp2.enums.DatabaseType type = cherry.sqlapp2.enums.DatabaseType.fromString(databaseType);
             if (type == null) {
                 return ResponseEntity.badRequest().build();
             }
             
-            List<DatabaseConnectionResponse> connections = connectionService.getConnectionsByType(currentUser, type);
+            List<DatabaseConnection> connections = connectionService.getConnectionsByType(currentUser, type);
             return ResponseEntity.ok(connections);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
@@ -243,17 +242,17 @@ public class DatabaseConnectionController {
     }
 
     @GetMapping("/{id}/status")
-    public ResponseEntity<ConnectionStatusResponse> getConnectionStatus(@PathVariable Long id) {
+    public ResponseEntity<ConnectionStatus> getConnectionStatus(@PathVariable Long id) {
         try {
             User currentUser = getCurrentUser();
             boolean available = dynamicDataSourceService.isConnectionAvailable(currentUser, id);
             
-            ConnectionStatusResponse response = new ConnectionStatusResponse(
+            ConnectionStatus response = new ConnectionStatus(
                     id, available, LocalDateTime.now());
             
             return ResponseEntity.ok(response);
         } catch (Exception e) {
-            ConnectionStatusResponse response = new ConnectionStatusResponse(
+            ConnectionStatus response = new ConnectionStatus(
                     id, false, e.getMessage(), LocalDateTime.now());
             
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
