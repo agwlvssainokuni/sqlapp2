@@ -19,6 +19,7 @@ import cherry.sqlapp2.dto.QueryExecutionErrorResponse;
 import cherry.sqlapp2.dto.QueryExecutionValidationResponse;
 import cherry.sqlapp2.dto.QueryValidationResponse;
 import cherry.sqlapp2.dto.SqlExecutionRequest;
+import cherry.sqlapp2.dto.SqlExecutionResult;
 import cherry.sqlapp2.entity.SavedQuery;
 import cherry.sqlapp2.entity.User;
 import cherry.sqlapp2.service.QueryManagementService;
@@ -80,7 +81,7 @@ public class SqlExecutionController {
             }
             
             // Execute the query
-            Map<String, Object> result;
+            SqlExecutionResult result;
             
             // Get SavedQuery if savedQueryId is provided
             SavedQuery savedQuery = null;

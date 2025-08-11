@@ -15,6 +15,7 @@
  */
 package cherry.sqlapp2.service;
 
+import cherry.sqlapp2.dto.SqlExecutionResult;
 import cherry.sqlapp2.entity.DatabaseConnection;
 import cherry.sqlapp2.entity.SavedQuery;
 import cherry.sqlapp2.entity.User;
@@ -53,14 +54,14 @@ public class SqlExecutionService {
     /**
      * Execute SQL query and return results
      */
-    public Map<String, Object> executeQuery(User user, Long connectionId, String sql) throws SQLException {
+    public SqlExecutionResult executeQuery(User user, Long connectionId, String sql) throws SQLException {
         return executeQuery(user, connectionId, sql, null);
     }
 
     /**
      * Execute SQL query and return results with optional SavedQuery association
      */
-    public Map<String, Object> executeQuery(User user, Long connectionId, String sql, SavedQuery savedQuery) throws SQLException {
+    public SqlExecutionResult executeQuery(User user, Long connectionId, String sql, SavedQuery savedQuery) throws SQLException {
         if (sql == null || sql.trim().isEmpty()) {
             throw new IllegalArgumentException("SQL query cannot be empty");
         }
@@ -70,7 +71,8 @@ public class SqlExecutionService {
         try (Connection connection = dataSourceService.getConnection(user, connectionId);
              Statement statement = connection.createStatement()) {
             
-            Map<String, Object> result = new LinkedHashMap<>();
+            LocalDateTime executedAt = LocalDateTime.now();
+            long executionTime = System.currentTimeMillis() - startTime;
             
             // Determine if this is a SELECT query or other operation
             String trimmedSql = sql.trim().toLowerCase();
@@ -81,23 +83,33 @@ public class SqlExecutionService {
                              trimmedSql.startsWith("desc") ||
                              trimmedSql.startsWith("explain");
             
+            SqlExecutionResult result;
             if (isSelect) {
                 // Execute SELECT query
                 try (ResultSet resultSet = statement.executeQuery(sql)) {
-                    result = processResultSet(resultSet);
+                    var processedResult = processResultSet(resultSet);
+                    result = SqlExecutionResult.selectResult(
+                            (List<String>) processedResult.get("columns"),
+                            (List<Map<String, Object>>) processedResult.get("rows"),
+                            (Integer) processedResult.get("rowCount"),
+                            (Integer) processedResult.get("columnCount"),
+                            (Boolean) processedResult.get("hasMoreRows"),
+                            (String) processedResult.get("note"),
+                            executionTime,
+                            executedAt,
+                            sql
+                    );
                 }
             } else {
                 // Execute UPDATE/INSERT/DELETE/DDL
                 int affectedRows = statement.executeUpdate(sql);
-                result.put("affectedRows", affectedRows);
-                result.put("resultType", "update");
+                result = SqlExecutionResult.updateResult(
+                        affectedRows,
+                        executionTime,
+                        executedAt,
+                        sql
+                );
             }
-            
-            long executionTime = System.currentTimeMillis() - startTime;
-            result.put("executionTimeMs", executionTime);
-            result.put("executedAt", LocalDateTime.now());
-            result.put("sql", sql);
-            result.put("success", true);
             
             // Record query execution in history
             recordQueryExecution(user, connectionId, sql, null, executionTime, 
@@ -107,19 +119,11 @@ public class SqlExecutionService {
             
         } catch (SQLException e) {
             long executionTime = System.currentTimeMillis() - startTime;
+            LocalDateTime executedAt = LocalDateTime.now();
             
             // Record failed query execution in history
             recordQueryExecution(user, connectionId, sql, null, executionTime, 
                                null, false, e.getMessage(), savedQuery);
-            
-            Map<String, Object> errorResult = new LinkedHashMap<>();
-            errorResult.put("success", false);
-            errorResult.put("error", e.getMessage());
-            errorResult.put("sqlState", e.getSQLState());
-            errorResult.put("errorCode", e.getErrorCode());
-            errorResult.put("sql", sql);
-            errorResult.put("executionTimeMs", executionTime);
-            errorResult.put("executedAt", LocalDateTime.now());
             
             throw new SQLException("SQL execution failed: " + e.getMessage(), e);
         }
@@ -245,7 +249,7 @@ public class SqlExecutionService {
     /**
      * Execute parameterized SQL query and return results
      */
-    public Map<String, Object> executeParameterizedQuery(User user, Long connectionId, String sql, 
+    public SqlExecutionResult executeParameterizedQuery(User user, Long connectionId, String sql, 
                                                         Map<String, Object> parameters, 
                                                         Map<String, String> parameterTypes) throws SQLException {
         return executeParameterizedQuery(user, connectionId, sql, parameters, parameterTypes, null);
@@ -254,7 +258,7 @@ public class SqlExecutionService {
     /**
      * Execute parameterized SQL query and return results with optional SavedQuery association
      */
-    public Map<String, Object> executeParameterizedQuery(User user, Long connectionId, String sql, 
+    public SqlExecutionResult executeParameterizedQuery(User user, Long connectionId, String sql, 
                                                         Map<String, Object> parameters, 
                                                         Map<String, String> parameterTypes, 
                                                         SavedQuery savedQuery) throws SQLException {
@@ -266,7 +270,7 @@ public class SqlExecutionService {
         
         try (Connection connection = dataSourceService.getConnection(user, connectionId)) {
             
-            Map<String, Object> result = new LinkedHashMap<>();
+            LocalDateTime executedAt = LocalDateTime.now();
             
             // Convert named parameters to positioned parameters
             ParameterizedQuery paramQuery = convertNamedParameters(sql, parameters, parameterTypes);
@@ -275,6 +279,8 @@ public class SqlExecutionService {
                 
                 // Set parameters
                 setParameters(statement, paramQuery.getParameters(), paramQuery.getParameterTypes());
+                
+                long executionTime = System.currentTimeMillis() - startTime;
                 
                 // Determine if this is a SELECT query or other operation
                 String trimmedSql = sql.trim().toLowerCase();
@@ -285,24 +291,33 @@ public class SqlExecutionService {
                                  trimmedSql.startsWith("desc") ||
                                  trimmedSql.startsWith("explain");
                 
+                SqlExecutionResult result;
                 if (isSelect) {
                     // Execute SELECT query
                     try (ResultSet resultSet = statement.executeQuery()) {
-                        result = processResultSet(resultSet);
+                        var processedResult = processResultSet(resultSet);
+                        result = SqlExecutionResult.selectResult(
+                                (List<String>) processedResult.get("columns"),
+                                (List<Map<String, Object>>) processedResult.get("rows"),
+                                (Integer) processedResult.get("rowCount"),
+                                (Integer) processedResult.get("columnCount"),
+                                (Boolean) processedResult.get("hasMoreRows"),
+                                (String) processedResult.get("note"),
+                                executionTime,
+                                executedAt,
+                                sql
+                        );
                     }
                 } else {
                     // Execute UPDATE/INSERT/DELETE/DDL
                     int affectedRows = statement.executeUpdate();
-                    result.put("affectedRows", affectedRows);
-                    result.put("resultType", "update");
+                    result = SqlExecutionResult.updateResult(
+                            affectedRows,
+                            executionTime,
+                            executedAt,
+                            sql
+                    );
                 }
-                
-                long executionTime = System.currentTimeMillis() - startTime;
-                result.put("executionTimeMs", executionTime);
-                result.put("executedAt", LocalDateTime.now());
-                result.put("sql", sql);
-                result.put("parameters", parameters);
-                result.put("success", true);
                 
                 // Record query execution in history
                 recordQueryExecution(user, connectionId, sql, parameters, executionTime, 
@@ -313,20 +328,11 @@ public class SqlExecutionService {
             
         } catch (SQLException e) {
             long executionTime = System.currentTimeMillis() - startTime;
+            LocalDateTime executedAt = LocalDateTime.now();
             
             // Record failed query execution in history
             recordQueryExecution(user, connectionId, sql, parameters, executionTime, 
                                null, false, e.getMessage(), savedQuery);
-            
-            Map<String, Object> errorResult = new LinkedHashMap<>();
-            errorResult.put("success", false);
-            errorResult.put("error", e.getMessage());
-            errorResult.put("sqlState", e.getSQLState());
-            errorResult.put("errorCode", e.getErrorCode());
-            errorResult.put("sql", sql);
-            errorResult.put("parameters", parameters);
-            errorResult.put("executionTimeMs", executionTime);
-            errorResult.put("executedAt", LocalDateTime.now());
             
             throw new SQLException("Parameterized SQL execution failed: " + e.getMessage(), e);
         }
@@ -503,18 +509,12 @@ public class SqlExecutionService {
         }
     }
 
-    private Integer getResultCount(Map<String, Object> result) {
-        if (result.containsKey("data")) {
-            Object data = result.get("data");
-            if (data instanceof List) {
-                return ((List<?>) data).size();
-            }
+    private Integer getResultCount(SqlExecutionResult result) {
+        if (result.rowCount() != null) {
+            return result.rowCount();
         }
-        if (result.containsKey("affectedRows")) {
-            Object affectedRows = result.get("affectedRows");
-            if (affectedRows instanceof Number) {
-                return ((Number) affectedRows).intValue();
-            }
+        if (result.affectedRows() != null) {
+            return result.affectedRows();
         }
         return null;
     }

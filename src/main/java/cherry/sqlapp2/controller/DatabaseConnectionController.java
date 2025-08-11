@@ -16,6 +16,7 @@
 package cherry.sqlapp2.controller;
 
 import cherry.sqlapp2.dto.ConnectionCount;
+import cherry.sqlapp2.dto.ConnectionInfoResponse;
 import cherry.sqlapp2.dto.ConnectionStatus;
 import cherry.sqlapp2.dto.ConnectionTestResult;
 import cherry.sqlapp2.dto.DatabaseConnectionRequest;
@@ -228,16 +229,15 @@ public class DatabaseConnectionController {
     }
 
     @GetMapping("/{id}/info")
-    public ResponseEntity<?> getConnectionInfo(@PathVariable Long id) {
+    public ResponseEntity<ConnectionInfoResponse> getConnectionInfo(@PathVariable Long id) {
         try {
             User currentUser = getCurrentUser();
-            Map<String, Object> info = dynamicDataSourceService.getConnectionInfo(currentUser, id);
+            ConnectionInfoResponse info = dynamicDataSourceService.getConnectionInfo(currentUser, id);
             return ResponseEntity.ok(info);
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body("Connection info retrieval failed: " + e.getMessage());
+            return ResponseEntity.badRequest().build();
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Connection info retrieval failed: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 

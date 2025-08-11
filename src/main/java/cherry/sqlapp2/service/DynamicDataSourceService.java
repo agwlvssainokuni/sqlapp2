@@ -15,6 +15,7 @@
  */
 package cherry.sqlapp2.service;
 
+import cherry.sqlapp2.dto.ConnectionInfoResponse;
 import cherry.sqlapp2.entity.DatabaseConnection;
 import cherry.sqlapp2.entity.User;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -112,40 +113,39 @@ public class DynamicDataSourceService {
     /**
      * Get connection metadata for display purposes
      */
-    public Map<String, Object> getConnectionInfo(User user, Long connectionId) throws SQLException {
+    public ConnectionInfoResponse getConnectionInfo(User user, Long connectionId) throws SQLException {
         DatabaseConnection dbConfig = connectionService.getConnectionEntityById(user, connectionId)
                 .orElseThrow(() -> new IllegalArgumentException("Connection not found: " + connectionId));
-        
-        Map<String, Object> info = new HashMap<>();
         
         try (Connection conn = createConnection(dbConfig)) {
             var metaData = conn.getMetaData();
             
-            info.put("connectionName", dbConfig.getConnectionName());
-            info.put("databaseType", dbConfig.getDatabaseType().toString());
-            info.put("host", dbConfig.getHost());
-            info.put("port", dbConfig.getPort());
-            info.put("databaseName", dbConfig.getDatabaseName());
-            info.put("username", dbConfig.getUsername());
-            info.put("databaseProductName", metaData.getDatabaseProductName());
-            info.put("databaseProductVersion", metaData.getDatabaseProductVersion());
-            info.put("driverName", metaData.getDriverName());
-            info.put("driverVersion", metaData.getDriverVersion());
-            info.put("jdbcUrl", dbConfig.buildJdbcUrl());
-            info.put("connected", conn.isValid(5));
+            return ConnectionInfoResponse.success(
+                    dbConfig.getConnectionName(),
+                    dbConfig.getDatabaseType().toString(),
+                    dbConfig.getHost(),
+                    dbConfig.getPort(),
+                    dbConfig.getDatabaseName(),
+                    dbConfig.getUsername(),
+                    metaData.getDatabaseProductName(),
+                    metaData.getDatabaseProductVersion(),
+                    metaData.getDriverName(),
+                    metaData.getDriverVersion(),
+                    dbConfig.buildJdbcUrl(),
+                    conn.isValid(5)
+            );
             
         } catch (SQLException e) {
-            info.put("connectionName", dbConfig.getConnectionName());
-            info.put("databaseType", dbConfig.getDatabaseType().toString());
-            info.put("host", dbConfig.getHost());
-            info.put("port", dbConfig.getPort());
-            info.put("databaseName", dbConfig.getDatabaseName());
-            info.put("username", dbConfig.getUsername());
-            info.put("connected", false);
-            info.put("error", e.getMessage());
+            return ConnectionInfoResponse.error(
+                    dbConfig.getConnectionName(),
+                    dbConfig.getDatabaseType().toString(),
+                    dbConfig.getHost(),
+                    dbConfig.getPort(),
+                    dbConfig.getDatabaseName(),
+                    dbConfig.getUsername(),
+                    e.getMessage()
+            );
         }
-        
-        return info;
     }
 
     /**
