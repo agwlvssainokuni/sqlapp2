@@ -18,12 +18,12 @@ import {BrowserRouter as Router, Routes, Route, Navigate} from 'react-router-dom
 import Login from './components/Login'
 import Dashboard from './components/Dashboard'
 import Register from './components/Register'
-import SqlExecution from './components/SqlExecution'
-import ConnectionManagement from './components/ConnectionManagement'
-import SchemaViewer from './components/SchemaViewer'
-import SavedQueries from './components/SavedQueries'
-import QueryHistory from './components/QueryHistory'
-import QueryBuilder from './components/QueryBuilder'
+import SqlExecutionPage from './components/SqlExecutionPage'
+import ConnectionManagementPage from './components/ConnectionManagementPage'
+import SchemaViewerPage from './components/SchemaViewerPage'
+import SavedQueriesPage from './components/SavedQueriesPage'
+import QueryHistoryPage from './components/QueryHistoryPage'
+import QueryBuilderPage from './components/QueryBuilderPage'
 import {AuthProvider} from './context/AuthContext'
 import ProtectedRoute from './components/ProtectedRoute'
 import './App.css'
@@ -47,7 +47,7 @@ function App() {
             path="/sql"
             element={
               <ProtectedRoute>
-                <SqlExecution/>
+                <SqlExecutionPage/>
               </ProtectedRoute>
             }
           />
@@ -55,7 +55,7 @@ function App() {
             path="/connections"
             element={
               <ProtectedRoute>
-                <ConnectionManagement/>
+                <ConnectionManagementPage/>
               </ProtectedRoute>
             }
           />
@@ -63,7 +63,7 @@ function App() {
             path="/schema"
             element={
               <ProtectedRoute>
-                <SchemaViewer/>
+                <SchemaViewerPage/>
               </ProtectedRoute>
             }
           />
@@ -71,7 +71,7 @@ function App() {
             path="/queries"
             element={
               <ProtectedRoute>
-                <SavedQueries/>
+                <SavedQueriesPage/>
               </ProtectedRoute>
             }
           />
@@ -79,7 +79,7 @@ function App() {
             path="/history"
             element={
               <ProtectedRoute>
-                <QueryHistory/>
+                <QueryHistoryPage/>
               </ProtectedRoute>
             }
           />
@@ -87,7 +87,7 @@ function App() {
             path="/builder"
             element={
               <ProtectedRoute>
-                <QueryBuilder/>
+                <QueryBuilderPage/>
               </ProtectedRoute>
             }
           />

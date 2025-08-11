@@ -20,7 +20,7 @@ import {useAuth} from '../context/AuthContext'
 import type {DatabaseConnection, DatabaseInfo, TableInfo, TableDetails} from '../types/api'
 import Layout from './Layout'
 
-const SchemaViewer: React.FC = () => {
+const SchemaViewerPage: React.FC = () => {
   const {t} = useTranslation()
   const {apiRequest} = useAuth()
   const [connections, setConnections] = useState<DatabaseConnection[]>([])
@@ -321,4 +321,4 @@ const SchemaViewer: React.FC = () => {
   )
 }
 
-export default SchemaViewer
+export default SchemaViewerPage

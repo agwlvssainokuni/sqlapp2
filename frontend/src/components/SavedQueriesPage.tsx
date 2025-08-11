@@ -28,7 +28,7 @@ interface SavedQueryForm {
   defaultConnectionId?: number
 }
 
-const SavedQueries: React.FC = () => {
+const SavedQueriesPage: React.FC = () => {
   const {t} = useTranslation()
   const {apiRequest} = useAuth()
   const [savedQueries, setSavedQueries] = useState<SavedQuery[]>([])
@@ -420,4 +420,4 @@ const QueryCard: React.FC<QueryCardProps> = ({query, isOwner, onEdit, onDelete, 
   )
 }
 
-export default SavedQueries
+export default SavedQueriesPage

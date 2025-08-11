@@ -20,7 +20,7 @@ import {useAuth} from '../context/AuthContext'
 import type {ConnectionTestResult, DatabaseConnection, NewConnection} from '../types/api'
 import Layout from './Layout'
 
-const ConnectionManagement: React.FC = () => {
+const ConnectionManagementPage: React.FC = () => {
   const {t} = useTranslation()
   const {apiRequest} = useAuth()
   const [connections, setConnections] = useState<DatabaseConnection[]>([])
@@ -446,4 +446,4 @@ const ConnectionManagement: React.FC = () => {
   )
 }
 
-export default ConnectionManagement
+export default ConnectionManagementPage

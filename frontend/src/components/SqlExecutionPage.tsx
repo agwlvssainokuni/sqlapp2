@@ -26,7 +26,7 @@ interface ParameterDefinition {
   value: string
 }
 
-const SqlExecution: React.FC = () => {
+const SqlExecutionPage: React.FC = () => {
   const {t} = useTranslation()
   const {apiRequest} = useAuth()
   const [connections, setConnections] = useState<DatabaseConnection[]>([])
@@ -391,4 +391,4 @@ const SqlExecution: React.FC = () => {
   )
 }
 
-export default SqlExecution
+export default SqlExecutionPage

@@ -113,7 +113,7 @@ interface QueryBuilderResponse {
   buildTimeMs: number
 }
 
-const QueryBuilder: React.FC = () => {
+const QueryBuilderPage: React.FC = () => {
   const {t} = useTranslation()
   const {apiRequest} = useAuth()
   const [connections, setConnections] = useState<DatabaseConnection[]>([])
@@ -667,4 +667,4 @@ const QueryBuilder: React.FC = () => {
   )
 }
 
-export default QueryBuilder
+export default QueryBuilderPage

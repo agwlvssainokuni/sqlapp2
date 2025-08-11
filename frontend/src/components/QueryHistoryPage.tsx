@@ -20,7 +20,7 @@ import {useAuth} from '../context/AuthContext'
 import type {QueryHistory, UserStatisticsResponse} from '../types/api'
 import Layout from './Layout'
 
-const QueryHistory: React.FC = () => {
+const QueryHistoryPage: React.FC = () => {
   const {t} = useTranslation()
   const {apiRequest} = useAuth()
   const [history, setHistory] = useState<QueryHistory[]>([])
@@ -341,4 +341,4 @@ const HistoryCard: React.FC<HistoryCardProps> = ({item, onReExecute}) => {
   )
 }
 
-export default QueryHistory
+export default QueryHistoryPage
