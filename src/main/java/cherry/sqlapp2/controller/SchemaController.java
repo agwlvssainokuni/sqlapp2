@@ -20,14 +20,14 @@ import cherry.sqlapp2.entity.User;
 import cherry.sqlapp2.service.SchemaService;
 import cherry.sqlapp2.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.sql.SQLException;
 import java.util.List;
-import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/schema")
@@ -37,96 +37,75 @@ public class SchemaController {
     private final UserService userService;
 
     @Autowired
-    public SchemaController(SchemaService schemaService, UserService userService) {
+    public SchemaController(
+            SchemaService schemaService,
+            UserService userService
+    ) {
         this.schemaService = schemaService;
         this.userService = userService;
     }
 
     private User getCurrentUser() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || !authentication.isAuthenticated()) {
-            throw new RuntimeException("User not authenticated");
-        }
-
-        String username = authentication.getName();
-        return userService.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("User not found: " + username));
+        return Optional.of(SecurityContextHolder.getContext())
+                .map(SecurityContext::getAuthentication)
+                .filter(Authentication::isAuthenticated)
+                .map(Authentication::getName)
+                .flatMap(userService::findByUsername)
+                .get();
     }
 
     /**
      * Get database schema information
      */
     @GetMapping("/connections/{connectionId}")
-    public ResponseEntity<?> getDatabaseInfo(@PathVariable Long connectionId) {
-        try {
-            User currentUser = getCurrentUser();
-            DatabaseInfo schemaInfo = schemaService.getDatabaseInfo(currentUser, connectionId);
-            return ResponseEntity.ok(schemaInfo);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body("Schema info retrieval failed: " + e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Schema info retrieval failed: " + e.getMessage());
-        }
+    public ApiResponse<DatabaseInfo> getDatabaseInfo(@PathVariable Long connectionId) throws SQLException {
+        User currentUser = getCurrentUser();
+        DatabaseInfo databaseInfo = schemaService.getDatabaseInfo(currentUser, connectionId);
+        return ApiResponse.success(databaseInfo);
     }
 
     /**
      * Get tables for a specific catalog/schema
      */
     @GetMapping("/connections/{connectionId}/tables")
-    public ResponseEntity<?> getTables(@PathVariable Long connectionId,
-                                     @RequestParam(required = false) String catalog,
-                                     @RequestParam(required = false) String schema) {
-        try {
-            User currentUser = getCurrentUser();
-            List<TableInfo> tables = schemaService.getTables(currentUser, connectionId, catalog, schema);
-            return ResponseEntity.ok(tables);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body("Table list retrieval failed: " + e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Table list retrieval failed: " + e.getMessage());
-        }
+    public ApiResponse<List<TableInfo>> getTables(
+            @PathVariable Long connectionId,
+            @RequestParam(required = false) String catalog,
+            @RequestParam(required = false) String schema
+    ) throws SQLException {
+        User currentUser = getCurrentUser();
+        List<TableInfo> tables = schemaService.getTables(currentUser, connectionId, catalog, schema);
+        return ApiResponse.success(tables);
     }
 
     /**
      * Get table details including columns, primary keys, foreign keys, and indexes
      */
     @GetMapping("/connections/{connectionId}/tables/{tableName}")
-    public ResponseEntity<?> getTableDetails(@PathVariable Long connectionId,
-                                           @PathVariable String tableName,
-                                           @RequestParam(required = false) String catalog,
-                                           @RequestParam(required = false) String schema) {
-        try {
-            User currentUser = getCurrentUser();
-            TableDetails tableDetails = schemaService.getTableDetails(currentUser, connectionId, catalog, schema, tableName);
-            return ResponseEntity.ok(tableDetails);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body("Table details retrieval failed: " + e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Table details retrieval failed: " + e.getMessage());
-        }
+    public ApiResponse<TableDetails> getTableDetails(
+            @PathVariable Long connectionId,
+            @PathVariable String tableName,
+            @RequestParam(required = false) String catalog,
+            @RequestParam(required = false) String schema
+    ) throws SQLException {
+        User currentUser = getCurrentUser();
+        TableDetails tableDetails = schemaService.getTableDetails(currentUser, connectionId, catalog, schema, tableName);
+        return ApiResponse.success(tableDetails);
     }
 
     /**
      * Get columns for a specific table
      */
     @GetMapping("/connections/{connectionId}/tables/{tableName}/columns")
-    public ResponseEntity<?> getTableColumns(@PathVariable Long connectionId,
-                                           @PathVariable String tableName,
-                                           @RequestParam(required = false) String catalog,
-                                           @RequestParam(required = false) String schema) {
-        try {
-            User currentUser = getCurrentUser();
-            List<ColumnInfo> columns = schemaService.getTableColumns(currentUser, connectionId, catalog, schema, tableName);
-            return ResponseEntity.ok(columns);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body("Column list retrieval failed: " + e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Column list retrieval failed: " + e.getMessage());
-        }
+    public ApiResponse<List<ColumnInfo>> getTableColumns(
+            @PathVariable Long connectionId,
+            @PathVariable String tableName,
+            @RequestParam(required = false) String catalog,
+            @RequestParam(required = false) String schema
+    ) throws SQLException {
+        User currentUser = getCurrentUser();
+        List<ColumnInfo> columns = schemaService.getTableColumns(currentUser, connectionId, catalog, schema, tableName);
+        return ApiResponse.success(columns);
     }
 
     /**
@@ -134,20 +113,15 @@ public class SchemaController {
      */
     @Deprecated
     @GetMapping("/connections/{connectionId}/tables/{tableName}/primary-keys")
-    public ResponseEntity<?> getPrimaryKeys(@PathVariable Long connectionId,
-                                          @PathVariable String tableName,
-                                          @RequestParam(required = false) String catalog,
-                                          @RequestParam(required = false) String schema) {
-        try {
-            User currentUser = getCurrentUser();
-            List<PrimaryKeyInfo> primaryKeys = schemaService.getPrimaryKeys(currentUser, connectionId, catalog, schema, tableName);
-            return ResponseEntity.ok(primaryKeys);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body("Primary key retrieval failed: " + e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Primary key retrieval failed: " + e.getMessage());
-        }
+    public ApiResponse<List<PrimaryKeyInfo>> getPrimaryKeys(
+            @PathVariable Long connectionId,
+            @PathVariable String tableName,
+            @RequestParam(required = false) String catalog,
+            @RequestParam(required = false) String schema
+    ) throws SQLException {
+        User currentUser = getCurrentUser();
+        List<PrimaryKeyInfo> primaryKeys = schemaService.getPrimaryKeys(currentUser, connectionId, catalog, schema, tableName);
+        return ApiResponse.success(primaryKeys);
     }
 
     /**
@@ -155,20 +129,15 @@ public class SchemaController {
      */
     @Deprecated
     @GetMapping("/connections/{connectionId}/tables/{tableName}/foreign-keys")
-    public ResponseEntity<?> getForeignKeys(@PathVariable Long connectionId,
-                                          @PathVariable String tableName,
-                                          @RequestParam(required = false) String catalog,
-                                          @RequestParam(required = false) String schema) {
-        try {
-            User currentUser = getCurrentUser();
-            List<ForeignKeyInfo> foreignKeys = schemaService.getForeignKeys(currentUser, connectionId, catalog, schema, tableName);
-            return ResponseEntity.ok(foreignKeys);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body("Foreign key retrieval failed: " + e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Foreign key retrieval failed: " + e.getMessage());
-        }
+    public ApiResponse<List<ForeignKeyInfo>> getForeignKeys(
+            @PathVariable Long connectionId,
+            @PathVariable String tableName,
+            @RequestParam(required = false) String catalog,
+            @RequestParam(required = false) String schema
+    ) throws SQLException {
+        User currentUser = getCurrentUser();
+        List<ForeignKeyInfo> foreignKeys = schemaService.getForeignKeys(currentUser, connectionId, catalog, schema, tableName);
+        return ApiResponse.success(foreignKeys);
     }
 
     /**
@@ -176,19 +145,14 @@ public class SchemaController {
      */
     @Deprecated
     @GetMapping("/connections/{connectionId}/tables/{tableName}/indexes")
-    public ResponseEntity<?> getIndexes(@PathVariable Long connectionId,
-                                      @PathVariable String tableName,
-                                      @RequestParam(required = false) String catalog,
-                                      @RequestParam(required = false) String schema) {
-        try {
-            User currentUser = getCurrentUser();
-            List<IndexInfo> indexes = schemaService.getIndexes(currentUser, connectionId, catalog, schema, tableName);
-            return ResponseEntity.ok(indexes);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body("Index retrieval failed: " + e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Index retrieval failed: " + e.getMessage());
-        }
+    public ApiResponse<List<IndexInfo>> getIndexes(
+            @PathVariable Long connectionId,
+            @PathVariable String tableName,
+            @RequestParam(required = false) String catalog,
+            @RequestParam(required = false) String schema
+    ) throws SQLException {
+        User currentUser = getCurrentUser();
+        List<IndexInfo> indexes = schemaService.getIndexes(currentUser, connectionId, catalog, schema, tableName);
+        return ApiResponse.success(indexes);
     }
 }
