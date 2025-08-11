@@ -29,13 +29,11 @@ import java.util.Set;
  * <ul>
  *   <li>String literals: {@code SELECT ':param' FROM table}</li>
  *   <li>Line comments: {@code -- comment with :param}</li>
- *   <li>Block comments: {@code /* comment with :param */}</li>
+ *   <li>Block comments: comment with :param</li>
  * </ul>
  * 
  * <p>The extractor uses state-based parsing to distinguish between actual SQL code and
  * quoted content, ensuring only legitimate parameters are extracted.</p>
- * 
- * @see <a href="https://github.com/agwlvssainokuni/sqlapp2/issues/5">Issue #5</a>
  */
 public class SqlParameterExtractor {
 
@@ -98,6 +96,71 @@ public class SqlParameterExtractor {
         }
         
         return parameters;
+    }
+
+    /**
+     * Extract named parameters with their positions from SQL text, ignoring parameters that appear
+     * inside string literals or comments.
+     * 
+     * @param sql The SQL query text
+     * @return List of ParameterPosition objects with parameter names and positions
+     */
+    public static List<ParameterPosition> extractParametersWithPositions(String sql) {
+        if (sql == null || sql.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        List<ParameterPosition> parameters = new ArrayList<>();
+        int length = sql.length();
+        int i = 0;
+        
+        while (i < length) {
+            char c = sql.charAt(i);
+            
+            // Handle string literals (single quotes)
+            if (c == '\'') {
+                i = skipSingleQuotedString(sql, i);
+                continue;
+            }
+            
+            // Handle string literals (double quotes) 
+            if (c == '"') {
+                i = skipDoubleQuotedString(sql, i);
+                continue;
+            }
+            
+            // Handle line comments
+            if (c == '-' && i + 1 < length && sql.charAt(i + 1) == '-') {
+                i = skipLineComment(sql, i);
+                continue;
+            }
+            
+            // Handle block comments
+            if (c == '/' && i + 1 < length && sql.charAt(i + 1) == '*') {
+                i = skipBlockComment(sql, i);
+                continue;
+            }
+            
+            // Look for parameters in actual SQL code
+            if (c == ':' && i + 1 < length && Character.isLetter(sql.charAt(i + 1))) {
+                String paramName = extractParameterName(sql, i + 1);
+                if (paramName != null) {
+                    parameters.add(new ParameterPosition(paramName, i, i + paramName.length() + 1));
+                }
+                i += paramName != null ? paramName.length() + 1 : 1;
+                continue;
+            }
+            
+            i++;
+        }
+        
+        return parameters;
+    }
+
+    /**
+     * Record class to hold parameter name and position information.
+     */
+    public static record ParameterPosition(String name, int start, int end) {
     }
 
     /**

@@ -18,6 +18,7 @@ package cherry.sqlapp2.util;
 import org.junit.jupiter.api.Test;
 import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class SqlParameterExtractorTest {
 
@@ -170,5 +171,67 @@ class SqlParameterExtractorTest {
         List<String> params = SqlParameterExtractor.extractParameters(sql);
         // Should not find param since it's inside an unterminated comment
         assertTrue(params.isEmpty());
+    }
+
+    // Tests for extractParametersWithPositions method
+    @Test
+    void testExtractParametersWithPositions_basicCase() {
+        String sql = "SELECT * FROM users WHERE id = :user_id AND name = :name";
+        
+        List<SqlParameterExtractor.ParameterPosition> positions = 
+            SqlParameterExtractor.extractParametersWithPositions(sql);
+        
+        assertThat(positions).hasSize(2);
+        assertThat(positions.get(0).name()).isEqualTo("user_id");
+        assertThat(positions.get(1).name()).isEqualTo("name");
+        
+        // Verify positions are correct by checking actual content
+        assertThat(sql.substring(positions.get(0).start(), positions.get(0).end())).isEqualTo(":user_id");
+        assertThat(sql.substring(positions.get(1).start(), positions.get(1).end())).isEqualTo(":name");
+    }
+
+    @Test
+    void testExtractParametersWithPositions_ignoreInStringsAndComments() {
+        String sql = """
+            SELECT * FROM users 
+            WHERE name = ':not_a_param' -- comment with :also_not_param
+            AND id = :user_id
+            AND created_at > :start_date
+            /* block comment with :another_fake_param */
+            AND status = :status
+            """;
+        
+        List<SqlParameterExtractor.ParameterPosition> positions = 
+            SqlParameterExtractor.extractParametersWithPositions(sql);
+        
+        assertThat(positions).hasSize(3);
+        assertThat(positions.get(0).name()).isEqualTo("user_id");
+        assertThat(positions.get(1).name()).isEqualTo("start_date");
+        assertThat(positions.get(2).name()).isEqualTo("status");
+        
+        // Verify positions are correct by checking actual content
+        assertThat(sql.substring(positions.get(0).start(), positions.get(0).end())).isEqualTo(":user_id");
+        assertThat(sql.substring(positions.get(1).start(), positions.get(1).end())).isEqualTo(":start_date");
+        assertThat(sql.substring(positions.get(2).start(), positions.get(2).end())).isEqualTo(":status");
+    }
+
+    @Test 
+    void testExtractParametersWithPositions_duplicateParameters() {
+        String sql = "SELECT * FROM users WHERE id = :user_id OR parent_id = :user_id";
+        
+        List<SqlParameterExtractor.ParameterPosition> positions = 
+            SqlParameterExtractor.extractParametersWithPositions(sql);
+        
+        // Should return both occurrences, not deduplicate
+        assertThat(positions).hasSize(2);
+        assertThat(positions.get(0).name()).isEqualTo("user_id");
+        assertThat(positions.get(1).name()).isEqualTo("user_id");
+        
+        // Verify different positions
+        assertThat(positions.get(0).start()).isNotEqualTo(positions.get(1).start());
+        
+        // Verify positions are correct
+        assertThat(sql.substring(positions.get(0).start(), positions.get(0).end())).isEqualTo(":user_id");
+        assertThat(sql.substring(positions.get(1).start(), positions.get(1).end())).isEqualTo(":user_id");
     }
 }

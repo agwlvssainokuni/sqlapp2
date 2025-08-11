@@ -351,25 +351,42 @@ public class SqlExecutionService {
             return new ParameterizedQuery(sql, new ArrayList<>(), new ArrayList<>());
         }
 
-        // Extract parameters using the new sophisticated extractor
-        List<String> parameterNames = SqlParameterExtractor.extractParameters(sql);
+        // Extract parameters with positions using the sophisticated extractor
+        List<SqlParameterExtractor.ParameterPosition> parameterPositions = 
+                SqlParameterExtractor.extractParametersWithPositions(sql);
         
         List<Object> parameterValues = new ArrayList<>();
         List<String> parameterTypesList = new ArrayList<>();
-        String convertedSql = sql;
-
-        for (String paramName : parameterNames) {
+        
+        // Build the converted SQL by replacing parameters from right to left
+        // to avoid position shifts during replacement
+        StringBuilder convertedSqlBuilder = new StringBuilder(sql);
+        
+        // Process parameters in reverse order to maintain position accuracy
+        for (int i = parameterPositions.size() - 1; i >= 0; i--) {
+            SqlParameterExtractor.ParameterPosition paramPos = parameterPositions.get(i);
+            String paramName = paramPos.name();
+            
             if (parameters.containsKey(paramName)) {
-                parameterValues.add(parameters.get(paramName));
-                parameterTypesList.add(parameterTypes != null ? parameterTypes.get(paramName) : null);
-                // Replace the first occurrence of this parameter name
-                convertedSql = convertedSql.replaceFirst(":" + paramName, "?");
+                // Replace the specific parameter at its exact position
+                convertedSqlBuilder.replace(paramPos.start(), paramPos.end(), "?");
             } else {
                 throw new IllegalArgumentException("Parameter not provided: " + paramName);
             }
         }
+        
+        // Build parameter lists in original order (not reverse)
+        Set<String> addedParams = new LinkedHashSet<>();
+        for (SqlParameterExtractor.ParameterPosition paramPos : parameterPositions) {
+            String paramName = paramPos.name();
+            if (!addedParams.contains(paramName)) {
+                addedParams.add(paramName);
+                parameterValues.add(parameters.get(paramName));
+                parameterTypesList.add(parameterTypes != null ? parameterTypes.get(paramName) : null);
+            }
+        }
 
-        return new ParameterizedQuery(convertedSql, parameterValues, parameterTypesList);
+        return new ParameterizedQuery(convertedSqlBuilder.toString(), parameterValues, parameterTypesList);
     }
 
     /**
