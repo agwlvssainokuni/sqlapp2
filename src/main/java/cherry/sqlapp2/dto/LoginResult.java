@@ -17,13 +17,13 @@ package cherry.sqlapp2.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public record AuthResult(
+public record LoginResult(
     @JsonProperty("access_token") String accessToken,
     @JsonProperty("token_type") String tokenType,
     @JsonProperty("expires_in") Long expiresIn,
     LoginUser user
 ) {
-    public AuthResult(String accessToken, Long expiresIn, LoginUser user) {
+    public LoginResult(String accessToken, Long expiresIn, LoginUser user) {
         this(accessToken, "Bearer", expiresIn, user);
     }
 }

@@ -16,7 +16,7 @@
 
 import React, {createContext, useContext, useState, useEffect, type ReactNode} from 'react'
 import {apiRequest} from '../utils/api'
-import type {AuthResult, LoginUser} from "../types/api.ts";
+import type {LoginResult, LoginUser} from "../types/api.ts";
 
 interface AuthContextType {
   user: LoginUser | null
@@ -77,7 +77,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
       throw new Error('Login failed')
     }
 
-    const data = await response.json() as AuthResult
+    const data = await response.json() as LoginResult
     setUser(data.user)
     localStorage.setItem('token', data.access_token)
     localStorage.setItem('user', JSON.stringify(data.user))

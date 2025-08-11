@@ -16,7 +16,7 @@
 
 package cherry.sqlapp2.controller;
 
-import cherry.sqlapp2.dto.AuthResult;
+import cherry.sqlapp2.dto.LoginResult;
 import cherry.sqlapp2.dto.LoginRequest;
 import cherry.sqlapp2.dto.UserRegistrationRequest;
 import cherry.sqlapp2.dto.LoginUser;
@@ -63,7 +63,7 @@ public class AuthController {
             Long expiresIn = jwtUtil.getExpirationTime();
             LoginUser userResponse = new LoginUser(user);
             
-            AuthResult authResponse = new AuthResult(token, expiresIn, userResponse);
+            LoginResult authResponse = new LoginResult(token, expiresIn, userResponse);
             return ResponseEntity.ok(authResponse);
             
         } catch (AuthenticationException e) {
