@@ -27,6 +27,16 @@ export interface ApiResponse<T> {
   error?: string[]
 }
 
+export interface Page<T> {
+  content: T[]
+  totalElements: number
+  totalPages: number
+  size: number
+  number: number
+  first: boolean
+  last: boolean
+}
+
 // HealthController
 export interface HealthcheckResult {
   status: string

@@ -17,13 +17,21 @@
 import React, {useEffect, useState} from 'react'
 import {useTranslation} from 'react-i18next'
 import {useAuth} from '../context/AuthContext'
-import type {QueryHistory, UserStatisticsResponse} from '../types/api'
+import type {Page, QueryHistory, UserStatisticsResponse} from '../types/api'
 import Layout from './Layout'
 
 const QueryHistoryPage: React.FC = () => {
   const {t} = useTranslation()
   const {apiRequest} = useAuth()
-  const [history, setHistory] = useState<QueryHistory[]>([])
+  const [history, setHistory] = useState<Page<QueryHistory>>({
+    content: [],
+    totalElements: 0,
+    totalPages: 0,
+    size: 0,
+    number: 0,
+    first: true,
+    last: true
+  })
   const [statistics, setStatistics] = useState<UserStatisticsResponse | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -61,10 +69,10 @@ const QueryHistoryPage: React.FC = () => {
         apiRequest('/api/queries/stats')
       ])
 
-      const historyRes = historyResp.data as { content: QueryHistory[] }
+      const historyRes = historyResp.data as Page<QueryHistory>
       const statsRes = statsResp.data as UserStatisticsResponse
 
-      setHistory(historyRes.content || [])
+      setHistory(historyRes)
       setStatistics(statsRes)
     } catch (err) {
       console.error('Failed to load query history:', err)
@@ -91,8 +99,8 @@ const QueryHistoryPage: React.FC = () => {
       })
 
       const historyResp = await apiRequest(`/api/queries/history/search?${params}`)
-      const historyRes = historyResp.data as { content: QueryHistory[] }
-      setHistory(historyRes.content || [])
+      const historyRes = historyResp.data as Page<QueryHistory>
+      setHistory(historyRes)
     } catch (err) {
       console.error('Failed to search query history:', err)
       setError(t('queryHistory.searchFailed'))
@@ -123,14 +131,14 @@ const QueryHistoryPage: React.FC = () => {
   }
 
   const filteredHistory = searchTerm
-    ? history.filter(item =>
+    ? history.content.filter(item =>
       item.sqlContent.toLowerCase().includes(searchTerm.toLowerCase()) ||
       item.connectionName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (item.savedQueryName && item.savedQueryName.toLowerCase().includes(searchTerm.toLowerCase()))
     )
-    : history
+    : history.content
 
-  if (loading && history.length === 0) {
+  if (loading && history.totalElements === 0) {
     return (
       <div className="container">
         <div className="loading">{t('queryHistory.loading')}</div>
@@ -228,7 +236,7 @@ const QueryHistoryPage: React.FC = () => {
         <div className="pagination">
           <button
             className="btn-page"
-            disabled={currentPage === 0}
+            disabled={history.first}
             onClick={() => setCurrentPage(currentPage - 1)}
           >
             {t('queryHistory.previous')}
@@ -236,7 +244,7 @@ const QueryHistoryPage: React.FC = () => {
           <span className="page-info">{t('queryHistory.page')} {currentPage + 1}</span>
           <button
             className="btn-page"
-            disabled={filteredHistory.length < pageSize}
+            disabled={history.last}
             onClick={() => setCurrentPage(currentPage + 1)}
           >
             {t('queryHistory.next')}
