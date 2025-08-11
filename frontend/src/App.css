@@ -238,7 +238,6 @@
 }
 
 button {
-  width: 100%;
   padding: 12px;
   background-color: #007bff;
   color: white;
@@ -277,17 +276,6 @@ button:disabled {
   display: flex;
   align-items: center;
   gap: 16px;
-}
-
-.logout-btn {
-  width: auto;
-  padding: 8px 16px;
-  background-color: #dc3545;
-  font-size: 14px;
-}
-
-.logout-btn:hover {
-  background-color: #c82333;
 }
 
 .dashboard-content {
