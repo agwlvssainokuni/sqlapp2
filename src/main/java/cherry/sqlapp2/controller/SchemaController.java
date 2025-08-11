@@ -21,8 +21,6 @@ import cherry.sqlapp2.service.SchemaService;
 import cherry.sqlapp2.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.sql.SQLException;
@@ -45,10 +43,8 @@ public class SchemaController {
         this.userService = userService;
     }
 
-    private User getCurrentUser() {
-        return Optional.of(SecurityContextHolder.getContext())
-                .map(SecurityContext::getAuthentication)
-                .filter(Authentication::isAuthenticated)
+    private User getCurrentUser(Authentication authentication) {
+        return Optional.of(authentication)
                 .map(Authentication::getName)
                 .flatMap(userService::findByUsername)
                 .get();
@@ -58,8 +54,11 @@ public class SchemaController {
      * Get database schema information
      */
     @GetMapping("/connections/{connectionId}")
-    public ApiResponse<DatabaseInfo> getDatabaseInfo(@PathVariable Long connectionId) throws SQLException {
-        User currentUser = getCurrentUser();
+    public ApiResponse<DatabaseInfo> getDatabaseInfo(
+            @PathVariable Long connectionId,
+            Authentication authentication
+    ) throws SQLException {
+        User currentUser = getCurrentUser(authentication);
         DatabaseInfo databaseInfo = schemaService.getDatabaseInfo(currentUser, connectionId);
         return ApiResponse.success(databaseInfo);
     }
@@ -71,9 +70,10 @@ public class SchemaController {
     public ApiResponse<List<TableInfo>> getTables(
             @PathVariable Long connectionId,
             @RequestParam(required = false) String catalog,
-            @RequestParam(required = false) String schema
+            @RequestParam(required = false) String schema,
+            Authentication authentication
     ) throws SQLException {
-        User currentUser = getCurrentUser();
+        User currentUser = getCurrentUser(authentication);
         List<TableInfo> tables = schemaService.getTables(currentUser, connectionId, catalog, schema);
         return ApiResponse.success(tables);
     }
@@ -86,9 +86,10 @@ public class SchemaController {
             @PathVariable Long connectionId,
             @PathVariable String tableName,
             @RequestParam(required = false) String catalog,
-            @RequestParam(required = false) String schema
+            @RequestParam(required = false) String schema,
+            Authentication authentication
     ) throws SQLException {
-        User currentUser = getCurrentUser();
+        User currentUser = getCurrentUser(authentication);
         TableDetails tableDetails = schemaService.getTableDetails(currentUser, connectionId, catalog, schema, tableName);
         return ApiResponse.success(tableDetails);
     }
@@ -101,9 +102,10 @@ public class SchemaController {
             @PathVariable Long connectionId,
             @PathVariable String tableName,
             @RequestParam(required = false) String catalog,
-            @RequestParam(required = false) String schema
+            @RequestParam(required = false) String schema,
+            Authentication authentication
     ) throws SQLException {
-        User currentUser = getCurrentUser();
+        User currentUser = getCurrentUser(authentication);
         List<ColumnInfo> columns = schemaService.getTableColumns(currentUser, connectionId, catalog, schema, tableName);
         return ApiResponse.success(columns);
     }
@@ -117,9 +119,10 @@ public class SchemaController {
             @PathVariable Long connectionId,
             @PathVariable String tableName,
             @RequestParam(required = false) String catalog,
-            @RequestParam(required = false) String schema
+            @RequestParam(required = false) String schema,
+            Authentication authentication
     ) throws SQLException {
-        User currentUser = getCurrentUser();
+        User currentUser = getCurrentUser(authentication);
         List<PrimaryKeyInfo> primaryKeys = schemaService.getPrimaryKeys(currentUser, connectionId, catalog, schema, tableName);
         return ApiResponse.success(primaryKeys);
     }
@@ -133,9 +136,10 @@ public class SchemaController {
             @PathVariable Long connectionId,
             @PathVariable String tableName,
             @RequestParam(required = false) String catalog,
-            @RequestParam(required = false) String schema
+            @RequestParam(required = false) String schema,
+            Authentication authentication
     ) throws SQLException {
-        User currentUser = getCurrentUser();
+        User currentUser = getCurrentUser(authentication);
         List<ForeignKeyInfo> foreignKeys = schemaService.getForeignKeys(currentUser, connectionId, catalog, schema, tableName);
         return ApiResponse.success(foreignKeys);
     }
@@ -149,9 +153,10 @@ public class SchemaController {
             @PathVariable Long connectionId,
             @PathVariable String tableName,
             @RequestParam(required = false) String catalog,
-            @RequestParam(required = false) String schema
+            @RequestParam(required = false) String schema,
+            Authentication authentication
     ) throws SQLException {
-        User currentUser = getCurrentUser();
+        User currentUser = getCurrentUser(authentication);
         List<IndexInfo> indexes = schemaService.getIndexes(currentUser, connectionId, catalog, schema, tableName);
         return ApiResponse.success(indexes);
     }

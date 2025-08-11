@@ -28,8 +28,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -54,10 +52,8 @@ public class DatabaseConnectionController {
         this.userService = userService;
     }
 
-    private User getCurrentUser() {
-        return Optional.of(SecurityContextHolder.getContext())
-                .map(SecurityContext::getAuthentication)
-                .filter(Authentication::isAuthenticated)
+    private User getCurrentUser(Authentication authentication) {
+        return Optional.of(authentication)
                 .map(Authentication::getName)
                 .flatMap(userService::findByUsername)
                 .get();
@@ -65,9 +61,10 @@ public class DatabaseConnectionController {
 
     @GetMapping
     public ApiResponse<List<DatabaseConnection>> getAllConnections(
-            @RequestParam(defaultValue = "false") boolean activeOnly
+            @RequestParam(defaultValue = "false") boolean activeOnly,
+            Authentication authentication
     ) {
-        User currentUser = getCurrentUser();
+        User currentUser = getCurrentUser(authentication);
         if (activeOnly) {
             return ApiResponse.success(connectionService.getActiveConnectionsByUser(currentUser));
         } else {
@@ -77,8 +74,11 @@ public class DatabaseConnectionController {
 
     @Deprecated
     @GetMapping("/{id}")
-    public ApiResponse<DatabaseConnection> getConnectionById(@PathVariable Long id) {
-        User currentUser = getCurrentUser();
+    public ApiResponse<DatabaseConnection> getConnectionById(
+            @PathVariable Long id,
+            Authentication authentication
+    ) {
+        User currentUser = getCurrentUser(authentication);
         return connectionService.getConnectionById(currentUser, id)
                 .map(ApiResponse::success)
                 .get();
@@ -86,7 +86,8 @@ public class DatabaseConnectionController {
 
     @PostMapping
     public ResponseEntity<ApiResponse<DatabaseConnection>> createConnection(
-            @Valid @RequestBody DatabaseConnectionRequest request
+            @Valid @RequestBody DatabaseConnectionRequest request,
+            Authentication authentication
     ) {
         // 新規作成時はパスワードが必須
         if (request.getPassword() == null || request.getPassword().trim().isEmpty()) {
@@ -95,7 +96,7 @@ public class DatabaseConnectionController {
             );
         }
 
-        User currentUser = getCurrentUser();
+        User currentUser = getCurrentUser(authentication);
         DatabaseConnection connection = connectionService.createConnection(currentUser, request);
         return ResponseEntity.status(HttpStatus.CREATED).body(
                 ApiResponse.success(connection)
@@ -105,27 +106,30 @@ public class DatabaseConnectionController {
     @PutMapping("/{id}")
     public ApiResponse<DatabaseConnection> updateConnection(
             @PathVariable Long id,
-            @Valid @RequestBody DatabaseConnectionRequest request
+            @Valid @RequestBody DatabaseConnectionRequest request,
+            Authentication authentication
     ) {
-        User currentUser = getCurrentUser();
+        User currentUser = getCurrentUser(authentication);
         DatabaseConnection connection = connectionService.updateConnection(currentUser, id, request);
         return ApiResponse.success(connection);
     }
 
     @DeleteMapping("/{id}")
     public ApiResponse<Void> deleteConnection(
-            @PathVariable Long id
+            @PathVariable Long id,
+            Authentication authentication
     ) {
-        User currentUser = getCurrentUser();
+        User currentUser = getCurrentUser(authentication);
         connectionService.deleteConnection(currentUser, id);
         return ApiResponse.success(null);
     }
 
     @PostMapping("/{id}/test")
     public ApiResponse<ConnectionTestResult> testConnection(
-            @PathVariable Long id
+            @PathVariable Long id,
+            Authentication authentication
     ) {
-        User currentUser = getCurrentUser();
+        User currentUser = getCurrentUser(authentication);
         ConnectionTestResult result = connectionService.testConnection(currentUser, id);
         return ApiResponse.success(result);
     }

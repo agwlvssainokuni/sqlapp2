@@ -27,8 +27,6 @@ import cherry.sqlapp2.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -56,10 +54,8 @@ public class SqlExecutionController {
         this.queryManagementService = queryManagementService;
     }
 
-    private User getCurrentUser() {
-        return Optional.of(SecurityContextHolder.getContext())
-                .map(SecurityContext::getAuthentication)
-                .filter(Authentication::isAuthenticated)
+    private User getCurrentUser(Authentication authentication) {
+        return Optional.of(authentication)
                 .map(Authentication::getName)
                 .flatMap(userService::findByUsername)
                 .get();
@@ -67,9 +63,10 @@ public class SqlExecutionController {
 
     @PostMapping("/execute")
     public ApiResponse<SqlExecutionResult> executeQuery(
-            @Valid @RequestBody SqlExecutionRequest request
+            @Valid @RequestBody SqlExecutionRequest request,
+            Authentication authentication
     ) {
-        User currentUser = getCurrentUser();
+        User currentUser = getCurrentUser(authentication);
 
         // Validate SQL first
         try {
@@ -123,7 +120,9 @@ public class SqlExecutionController {
     }
 
     @PostMapping("/validate")
-    public ApiResponse<SqlValidationResult> validateQuery(@Valid @RequestBody SqlExecutionRequest request) {
+    public ApiResponse<SqlValidationResult> validateQuery(
+            @Valid @RequestBody SqlExecutionRequest request
+    ) {
         // Validate SQL first
         try {
             sqlExecutionService.validateQuery(request.getSql());

@@ -94,6 +94,21 @@ public class QueryController {
         );
     }
 
+    @GetMapping("/saved/{queryId}")
+    public ApiResponse<SavedQuery> getSavedQuery(
+            @PathVariable Long queryId,
+            Authentication authentication) {
+
+        User user = getCurrentUser(authentication);
+        cherry.sqlapp2.entity.SavedQuery savedQuery = queryManagementService.getAccessibleQuery(
+                queryId,
+                user
+        ).get();
+
+        SavedQuery response = createSavedQueryDto(savedQuery);
+        return ApiResponse.success(response);
+    }
+
     @PutMapping("/saved/{queryId}")
     public ApiResponse<SavedQuery> updateSavedQuery(
             @PathVariable Long queryId,

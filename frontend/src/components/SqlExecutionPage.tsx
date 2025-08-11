@@ -17,7 +17,7 @@
 import React, {useEffect, useState} from 'react'
 import {useTranslation} from 'react-i18next'
 import {useAuth} from '../context/AuthContext'
-import type {DatabaseConnection, SqlExecutionResult, SqlValidationResult} from '../types/api'
+import type {DatabaseConnection, SavedQuery, SqlExecutionResult, SqlValidationResult} from '../types/api'
 import Layout from './Layout'
 
 interface ParameterDefinition {
@@ -55,7 +55,7 @@ const SqlExecutionPage: React.FC = () => {
     if (queryId && !isNaN(Number(queryId))) {
       try {
         const response = await apiRequest(`/api/queries/saved/${queryId}`)
-        const savedQuery = response.data
+        const savedQuery = response.data as SavedQuery
 
         if (response.ok) {
           setSql(savedQuery.sqlContent || '')
