@@ -92,6 +92,7 @@ public class DynamicDataSourceService {
     /**
      * Test if connection is available and active
      */
+    @Deprecated
     public boolean isConnectionAvailable(User user, Long connectionId) {
         try {
             DatabaseConnection dbConfig = connectionService.getConnectionEntityById(user, connectionId)
@@ -112,6 +113,7 @@ public class DynamicDataSourceService {
     /**
      * Get connection metadata for display purposes
      */
+    @Deprecated
     public Map<String, Object> getConnectionInfo(User user, Long connectionId) throws SQLException {
         DatabaseConnection dbConfig = connectionService.getConnectionEntityById(user, connectionId)
                 .orElseThrow(() -> new IllegalArgumentException("Connection not found: " + connectionId));

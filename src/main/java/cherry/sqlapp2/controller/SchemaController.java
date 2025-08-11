@@ -132,6 +132,7 @@ public class SchemaController {
     /**
      * Get primary keys for a specific table
      */
+    @Deprecated
     @GetMapping("/connections/{connectionId}/tables/{tableName}/primary-keys")
     public ResponseEntity<?> getPrimaryKeys(@PathVariable Long connectionId,
                                           @PathVariable String tableName,
@@ -152,6 +153,7 @@ public class SchemaController {
     /**
      * Get foreign keys for a specific table
      */
+    @Deprecated
     @GetMapping("/connections/{connectionId}/tables/{tableName}/foreign-keys")
     public ResponseEntity<?> getForeignKeys(@PathVariable Long connectionId,
                                           @PathVariable String tableName,
@@ -172,6 +174,7 @@ public class SchemaController {
     /**
      * Get indexes for a specific table
      */
+    @Deprecated
     @GetMapping("/connections/{connectionId}/tables/{tableName}/indexes")
     public ResponseEntity<?> getIndexes(@PathVariable Long connectionId,
                                       @PathVariable String tableName,

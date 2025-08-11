@@ -103,6 +103,7 @@ public class AuthController {
         }
     }
 
+    @Deprecated
     @GetMapping("/user/{username}")
     public ResponseEntity<?> getUser(@PathVariable String username) {
         return userService.findByUsername(username)

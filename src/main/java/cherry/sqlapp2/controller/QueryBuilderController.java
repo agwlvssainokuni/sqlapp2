@@ -54,6 +54,7 @@ public class QueryBuilderController {
     /**
      * Validate query structure without building SQL
      */
+    @Deprecated
     @PostMapping("/validate")
     public ResponseEntity<QueryBuilderResponse> validateQuery(
             @Valid @RequestBody QueryBuilderRequest request,
@@ -86,6 +87,7 @@ public class QueryBuilderController {
     /**
      * Get query building suggestions based on partial structure
      */
+    @Deprecated
     @PostMapping("/suggestions")
     public ResponseEntity<QueryBuilderSuggestions> getQuerySuggestions(
             @RequestBody QuerySuggestionsRequest request,

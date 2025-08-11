@@ -62,6 +62,7 @@ public class DatabaseConnectionService {
                 .collect(Collectors.toList());
     }
 
+    @Deprecated
     @Transactional(readOnly = true)
     public Optional<DatabaseConnection> getConnectionById(User user, Long connectionId) {
         return connectionRepository.findByUserAndId(user, connectionId)
@@ -157,6 +158,7 @@ public class DatabaseConnectionService {
         connectionRepository.delete(connection);
     }
 
+    @Deprecated
     public void toggleConnectionStatus(User user, Long connectionId) {
         var connection = connectionRepository.findByUserAndId(user, connectionId)
                 .orElseThrow(() -> new IllegalArgumentException("Connection not found: " + connectionId));
@@ -165,11 +167,13 @@ public class DatabaseConnectionService {
         connectionRepository.save(connection);
     }
 
+    @Deprecated
     @Transactional(readOnly = true)
     public long getActiveConnectionCount(User user) {
         return connectionRepository.countActiveConnectionsByUser(user);
     }
 
+    @Deprecated
     @Transactional(readOnly = true)
     public List<DatabaseConnection> getConnectionsByType(User user, DatabaseType databaseType) {
         return connectionRepository.findByUserAndDatabaseType(user, databaseType)

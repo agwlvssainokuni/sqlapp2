@@ -132,6 +132,7 @@ public class QueryController {
         return ResponseEntity.ok(response);
     }
 
+    @Deprecated
     @GetMapping("/saved/paged")
     public ResponseEntity<Page<SavedQueryResponse>> getUserSavedQueriesPaged(
             @RequestParam(defaultValue = "0") int page,
@@ -146,6 +147,7 @@ public class QueryController {
         return ResponseEntity.ok(response);
     }
 
+    @Deprecated
     @GetMapping("/saved/{queryId}")
     public ResponseEntity<SavedQueryResponse> getSavedQuery(
             @PathVariable Long queryId,
@@ -180,6 +182,7 @@ public class QueryController {
         return ResponseEntity.ok(response);
     }
 
+    @Deprecated
     @GetMapping("/public/paged")
     public ResponseEntity<Page<SavedQueryResponse>> getPublicQueriesPaged(
             @RequestParam(defaultValue = "0") int page,
@@ -192,6 +195,7 @@ public class QueryController {
         return ResponseEntity.ok(response);
     }
 
+    @Deprecated
     @GetMapping("/search")
     public ResponseEntity<Page<SavedQueryResponse>> searchQueries(
             @RequestParam String searchTerm,
@@ -207,6 +211,7 @@ public class QueryController {
         return ResponseEntity.ok(response);
     }
 
+    @Deprecated
     @PostMapping("/saved/{queryId}/execute")
     public ResponseEntity<Void> recordQueryExecution(
             @PathVariable Long queryId,
@@ -233,6 +238,7 @@ public class QueryController {
         return ResponseEntity.ok(response);
     }
 
+    @Deprecated
     @GetMapping("/history/recent")
     public ResponseEntity<List<QueryHistoryResponse>> getRecentQueryHistory(
             @RequestParam(defaultValue = "10") int limit,
