@@ -87,6 +87,7 @@ public class DatabaseConnectionController {
         }
     }
 
+    @Deprecated
     @GetMapping("/{id}")
     public ResponseEntity<DatabaseConnection> getConnectionById(@PathVariable Long id) {
         try {
@@ -147,6 +148,7 @@ public class DatabaseConnectionController {
         }
     }
 
+    @Deprecated
     @PatchMapping("/{id}/toggle")
     public ResponseEntity<?> toggleConnectionStatus(@PathVariable Long id) {
         try {
@@ -161,6 +163,7 @@ public class DatabaseConnectionController {
         }
     }
 
+    @Deprecated
     @GetMapping("/count")
     public ResponseEntity<ConnectionCount> getConnectionCount() {
         try {
@@ -174,6 +177,7 @@ public class DatabaseConnectionController {
         }
     }
 
+    @Deprecated
     @GetMapping("/types")
     public ResponseEntity<List<DatabaseType>> getDatabaseTypes() {
         try {
@@ -189,6 +193,7 @@ public class DatabaseConnectionController {
         }
     }
 
+    @Deprecated
     @GetMapping("/by-type/{databaseType}")
     public ResponseEntity<List<DatabaseConnection>> getConnectionsByType(@PathVariable String databaseType) {
         try {
@@ -217,6 +222,7 @@ public class DatabaseConnectionController {
         }
     }
 
+    @Deprecated
     @PostMapping("/test")
     public ResponseEntity<ConnectionTestResult> testConnectionRequest(@Valid @RequestBody DatabaseConnectionRequest request) {
         try {
@@ -228,6 +234,7 @@ public class DatabaseConnectionController {
         }
     }
 
+    @Deprecated
     @GetMapping("/{id}/info")
     public ResponseEntity<ConnectionInfoResponse> getConnectionInfo(@PathVariable Long id) {
         try {
@@ -241,6 +248,7 @@ public class DatabaseConnectionController {
         }
     }
 
+    @Deprecated
     @GetMapping("/{id}/status")
     public ResponseEntity<ConnectionStatus> getConnectionStatus(@PathVariable Long id) {
         try {
