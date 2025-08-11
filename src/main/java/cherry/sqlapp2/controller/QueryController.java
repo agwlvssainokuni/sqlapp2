@@ -176,36 +176,6 @@ public class QueryController {
         return ApiResponse.success(response);
     }
 
-    @Deprecated
-    @GetMapping("/public/paged")
-    public ApiResponse<Page<SavedQuery>> getPublicQueriesPaged(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size
-    ) {
-
-        Pageable pageable = PageRequest.of(page, size);
-        Page<cherry.sqlapp2.entity.SavedQuery> publicQueries = queryManagementService.getPublicQueries(pageable);
-
-        Page<SavedQuery> response = publicQueries.map(this::createSavedQueryDto);
-        return ApiResponse.success(response);
-    }
-
-    @Deprecated
-    @GetMapping("/search")
-    public ApiResponse<Page<SavedQuery>> searchQueries(
-            @RequestParam String searchTerm,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size,
-            Authentication authentication
-    ) {
-
-        User user = getCurrentUser(authentication);
-        Pageable pageable = PageRequest.of(page, size);
-        Page<cherry.sqlapp2.entity.SavedQuery> searchResults = queryManagementService.searchAccessibleQueries(user, searchTerm, pageable);
-
-        Page<SavedQuery> response = searchResults.map(this::createSavedQueryDto);
-        return ApiResponse.success(response);
-    }
 
     // ==================== Query History Endpoints ====================
 

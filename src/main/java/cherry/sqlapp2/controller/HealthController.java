@@ -28,7 +28,6 @@ import java.time.LocalDateTime;
 @RequestMapping("/api")
 public class HealthController {
 
-    @Deprecated
     @GetMapping("/health")
     public ApiResponse<HealthcheckResult> health() {
         HealthcheckResult response = new HealthcheckResult(

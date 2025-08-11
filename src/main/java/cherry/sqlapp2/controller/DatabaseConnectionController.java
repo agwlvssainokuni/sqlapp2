@@ -72,18 +72,6 @@ public class DatabaseConnectionController {
         }
     }
 
-    @Deprecated
-    @GetMapping("/{id}")
-    public ApiResponse<DatabaseConnection> getConnectionById(
-            @PathVariable Long id,
-            Authentication authentication
-    ) {
-        User currentUser = getCurrentUser(authentication);
-        return connectionService.getConnectionById(currentUser, id)
-                .map(ApiResponse::success)
-                .get();
-    }
-
     @PostMapping
     public ResponseEntity<ApiResponse<DatabaseConnection>> createConnection(
             @Valid @RequestBody DatabaseConnectionRequest request,
