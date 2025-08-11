@@ -23,6 +23,19 @@ import java.util.Set;
 /**
  * Utility class for extracting named parameters from SQL queries while properly handling
  * string literals and comments to avoid false positives.
+ * 
+ * <p>This class solves the issue where simple regex patterns like {@code :(\\w+)} would
+ * incorrectly match parameter-like patterns inside:</p>
+ * <ul>
+ *   <li>String literals: {@code SELECT ':param' FROM table}</li>
+ *   <li>Line comments: {@code -- comment with :param}</li>
+ *   <li>Block comments: {@code /* comment with :param */}</li>
+ * </ul>
+ * 
+ * <p>The extractor uses state-based parsing to distinguish between actual SQL code and
+ * quoted content, ensuring only legitimate parameters are extracted.</p>
+ * 
+ * @see <a href="https://github.com/agwlvssainokuni/sqlapp2/issues/5">Issue #5</a>
  */
 public class SqlParameterExtractor {
 
