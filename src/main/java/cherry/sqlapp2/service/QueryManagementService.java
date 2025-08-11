@@ -118,6 +118,7 @@ public class QueryManagementService {
         return savedQueryRepository.findByUserOrderByUpdatedAtDesc(user);
     }
 
+    @Deprecated
     @Transactional(readOnly = true)
     public Page<SavedQuery> getUserQueries(User user, Pageable pageable) {
         return savedQueryRepository.findByUserOrderByUpdatedAtDesc(user, pageable);
@@ -128,11 +129,13 @@ public class QueryManagementService {
         return savedQueryRepository.findPublicQueries();
     }
 
+    @Deprecated
     @Transactional(readOnly = true)
     public Page<SavedQuery> getPublicQueries(Pageable pageable) {
         return savedQueryRepository.findPublicQueries(pageable);
     }
 
+    @Deprecated
     @Transactional(readOnly = true)
     public Page<SavedQuery> searchAccessibleQueries(User user, String searchTerm, Pageable pageable) {
         return savedQueryRepository.searchAccessibleQueries(user, searchTerm, pageable);
@@ -154,6 +157,7 @@ public class QueryManagementService {
         savedQueryRepository.delete(savedQuery);
     }
 
+    @Deprecated
     public void updateQueryExecutionStats(Long queryId, User user) {
         SavedQuery savedQuery = savedQueryRepository.findAccessibleQuery(queryId, user)
             .orElseThrow(() -> new RuntimeException("Saved query not found or not accessible: " + queryId));
@@ -212,6 +216,7 @@ public class QueryManagementService {
         return queryHistoryRepository.findByUserOrderByExecutedAtDesc(user, pageable);
     }
 
+    @Deprecated
     @Transactional(readOnly = true)
     public List<QueryHistory> getRecentQueryHistory(User user, int limit) {
         Pageable pageable = PageRequest.of(0, limit);
