@@ -22,7 +22,7 @@
  */
 
 // HealthController
-export interface HealthResponse {
+export interface HealthcheckResult {
   status: string
   timestamp: string
   application: string

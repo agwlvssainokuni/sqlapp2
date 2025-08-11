@@ -21,7 +21,7 @@ import java.time.LocalDateTime;
 /**
  * ヘルスチェックAPIのレスポンス
  */
-public record HealthResponse(
+public record HealthcheckResult(
         String status,
         LocalDateTime timestamp,
         String application
