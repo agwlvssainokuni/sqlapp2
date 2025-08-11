@@ -17,7 +17,7 @@
 import React, {useState, useEffect} from 'react'
 import {useTranslation} from 'react-i18next'
 import {useAuth} from '../context/AuthContext'
-import type {DatabaseConnection, SchemaInfo, TableInfoResponse, TableDetailsResponse} from '../types/api'
+import type {DatabaseConnection, SchemaInfo, TableInfo, TableDetails} from '../types/api'
 import Layout from './Layout'
 
 const SchemaViewer: React.FC = () => {
@@ -26,9 +26,9 @@ const SchemaViewer: React.FC = () => {
   const [connections, setConnections] = useState<DatabaseConnection[]>([])
   const [selectedConnectionId, setSelectedConnectionId] = useState<number | null>(null)
   const [schemaInfo, setSchemaInfo] = useState<SchemaInfo | null>(null)
-  const [tables, setTables] = useState<TableInfoResponse[]>([])
+  const [tables, setTables] = useState<TableInfo[]>([])
   const [selectedTable, setSelectedTable] = useState<string | null>(null)
-  const [tableDetails, setTableDetails] = useState<TableDetailsResponse | null>(null)
+  const [tableDetails, setTableDetails] = useState<TableDetails | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [selectedCatalog, setSelectedCatalog] = useState<string>('')
