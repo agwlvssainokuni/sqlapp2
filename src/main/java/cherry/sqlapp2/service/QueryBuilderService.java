@@ -19,19 +19,17 @@ package cherry.sqlapp2.service;
 import cherry.sqlapp2.dto.QueryStructure;
 import cherry.sqlapp2.dto.QueryBuilderRequest;
 import cherry.sqlapp2.dto.QueryBuilderResponse;
+import cherry.sqlapp2.util.SqlParameterExtractor;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Service
 public class QueryBuilderService {
-
-    private static final Pattern PARAMETER_PATTERN = Pattern.compile(":(\\w+)");
 
     public QueryBuilderResponse buildQuery(QueryBuilderRequest request) {
         long startTime = System.currentTimeMillis();
@@ -353,10 +351,9 @@ public class QueryBuilderService {
 
     private Map<String, String> detectParameters(String sql) {
         Map<String, String> parameters = new HashMap<>();
-        java.util.regex.Matcher matcher = PARAMETER_PATTERN.matcher(sql);
+        List<String> paramNames = SqlParameterExtractor.extractParameters(sql);
         
-        while (matcher.find()) {
-            String paramName = matcher.group(1);
+        for (String paramName : paramNames) {
             parameters.put(paramName, "string"); // Default type, could be enhanced
         }
         
