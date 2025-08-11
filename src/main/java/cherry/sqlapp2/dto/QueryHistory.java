@@ -16,14 +16,13 @@
 
 package cherry.sqlapp2.dto;
 
-import cherry.sqlapp2.entity.QueryHistory;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.time.LocalDateTime;
 import java.util.Map;
 
-public class QueryHistoryResponse {
+public class QueryHistory {
 
     private Long id;
     private String sqlContent;
@@ -40,9 +39,9 @@ public class QueryHistoryResponse {
     private LocalDateTime executedAt;
 
     // Constructors
-    public QueryHistoryResponse() {}
+    public QueryHistory() {}
 
-    public QueryHistoryResponse(QueryHistory queryHistory) {
+    public QueryHistory(cherry.sqlapp2.entity.QueryHistory queryHistory) {
         this.id = queryHistory.getId();
         this.sqlContent = queryHistory.getSqlContent();
         this.executionTimeMs = queryHistory.getExecutionTimeMs();

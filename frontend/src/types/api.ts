@@ -96,6 +96,23 @@ export interface QueryExecutionErrorResponse {
   sqlState?: string
 }
 
+// QueryController
+export interface QueryHistory {
+  id: number
+  sqlContent: string
+  parameterValues?: Record<string, any>
+  executionTimeMs: number
+  resultCount?: number
+  isSuccessful: boolean
+  errorMessage?: string
+  connectionName: string
+  databaseType: string
+  connectionId: number
+  savedQueryId?: number
+  savedQueryName?: string
+  executedAt: string
+}
+
 // DatabaseConnection型定義（統一型）
 export interface DatabaseConnection {
   id: number

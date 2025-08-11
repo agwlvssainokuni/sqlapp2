@@ -16,12 +16,11 @@
 
 package cherry.sqlapp2.controller;
 
-import cherry.sqlapp2.dto.QueryHistoryResponse;
+import cherry.sqlapp2.dto.QueryHistory;
 import cherry.sqlapp2.dto.SavedQueryRequest;
 import cherry.sqlapp2.dto.SavedQueryResponse;
 import cherry.sqlapp2.dto.UserStatisticsResponse;
 import cherry.sqlapp2.entity.DatabaseConnection;
-import cherry.sqlapp2.entity.QueryHistory;
 import cherry.sqlapp2.entity.SavedQuery;
 import cherry.sqlapp2.entity.User;
 import cherry.sqlapp2.repository.DatabaseConnectionRepository;
@@ -225,50 +224,50 @@ public class QueryController {
     // ==================== Query History Endpoints ====================
 
     @GetMapping("/history")
-    public ResponseEntity<Page<QueryHistoryResponse>> getQueryHistory(
+    public ResponseEntity<Page<QueryHistory>> getQueryHistory(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
             Authentication authentication) {
         
         User user = getCurrentUser(authentication);
         Pageable pageable = PageRequest.of(page, size);
-        Page<QueryHistory> history = queryManagementService.getUserQueryHistory(user, pageable);
+        var history = queryManagementService.getUserQueryHistory(user, pageable);
         
-        Page<QueryHistoryResponse> response = history.map(this::createQueryHistoryResponse);
+        var response = history.map(this::createQueryHistory);
         return ResponseEntity.ok(response);
     }
 
     @Deprecated
     @GetMapping("/history/recent")
-    public ResponseEntity<List<QueryHistoryResponse>> getRecentQueryHistory(
+    public ResponseEntity<List<QueryHistory>> getRecentQueryHistory(
             @RequestParam(defaultValue = "10") int limit,
             Authentication authentication) {
         
         User user = getCurrentUser(authentication);
-        List<QueryHistory> recentHistory = queryManagementService.getRecentQueryHistory(user, limit);
+        var recentHistory = queryManagementService.getRecentQueryHistory(user, limit);
         
-        List<QueryHistoryResponse> response = recentHistory.stream()
-            .map(this::createQueryHistoryResponse)
+        var response = recentHistory.stream()
+            .map(this::createQueryHistory)
             .collect(Collectors.toList());
             
         return ResponseEntity.ok(response);
     }
 
     @GetMapping("/history/{historyId}")
-    public ResponseEntity<QueryHistoryResponse> getQueryHistoryById(
+    public ResponseEntity<QueryHistory> getQueryHistoryById(
             @PathVariable Long historyId,
             Authentication authentication) {
         
         User user = getCurrentUser(authentication);
-        QueryHistory queryHistory = queryManagementService.getQueryHistoryById(historyId, user)
+        var queryHistory = queryManagementService.getQueryHistoryById(historyId, user)
             .orElseThrow(() -> new RuntimeException("Query history not found or not accessible"));
             
-        QueryHistoryResponse response = createQueryHistoryResponse(queryHistory);
+        QueryHistory response = createQueryHistory(queryHistory);
         return ResponseEntity.ok(response);
     }
 
     @GetMapping("/history/search")
-    public ResponseEntity<Page<QueryHistoryResponse>> searchQueryHistory(
+    public ResponseEntity<Page<QueryHistory>> searchQueryHistory(
             @RequestParam String searchTerm,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
@@ -276,37 +275,37 @@ public class QueryController {
         
         User user = getCurrentUser(authentication);
         Pageable pageable = PageRequest.of(page, size);
-        Page<QueryHistory> searchResults = queryManagementService.searchQueryHistory(user, searchTerm, pageable);
+        var searchResults = queryManagementService.searchQueryHistory(user, searchTerm, pageable);
         
-        Page<QueryHistoryResponse> response = searchResults.map(this::createQueryHistoryResponse);
+        var response = searchResults.map(this::createQueryHistory);
         return ResponseEntity.ok(response);
     }
 
     @GetMapping("/history/successful")
-    public ResponseEntity<Page<QueryHistoryResponse>> getSuccessfulQueries(
+    public ResponseEntity<Page<QueryHistory>> getSuccessfulQueries(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
             Authentication authentication) {
         
         User user = getCurrentUser(authentication);
         Pageable pageable = PageRequest.of(page, size);
-        Page<QueryHistory> successfulQueries = queryManagementService.getSuccessfulQueries(user, pageable);
+        var successfulQueries = queryManagementService.getSuccessfulQueries(user, pageable);
         
-        Page<QueryHistoryResponse> response = successfulQueries.map(this::createQueryHistoryResponse);
+        var response = successfulQueries.map(this::createQueryHistory);
         return ResponseEntity.ok(response);
     }
 
     @GetMapping("/history/failed")
-    public ResponseEntity<Page<QueryHistoryResponse>> getFailedQueries(
+    public ResponseEntity<Page<QueryHistory>> getFailedQueries(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
             Authentication authentication) {
         
         User user = getCurrentUser(authentication);
         Pageable pageable = PageRequest.of(page, size);
-        Page<QueryHistory> failedQueries = queryManagementService.getFailedQueries(user, pageable);
+        var failedQueries = queryManagementService.getFailedQueries(user, pageable);
         
-        Page<QueryHistoryResponse> response = failedQueries.map(this::createQueryHistoryResponse);
+        var response = failedQueries.map(this::createQueryHistory);
         return ResponseEntity.ok(response);
     }
 
@@ -345,8 +344,8 @@ public class QueryController {
         return response;
     }
 
-    private QueryHistoryResponse createQueryHistoryResponse(QueryHistory queryHistory) {
-        QueryHistoryResponse response = new QueryHistoryResponse(queryHistory);
+    private QueryHistory createQueryHistory(cherry.sqlapp2.entity.QueryHistory queryHistory) {
+        QueryHistory response = new QueryHistory(queryHistory);
         
         // Set parameter values if available
         if (queryHistory.getParameterValues() != null && !queryHistory.getParameterValues().trim().isEmpty()) {
