@@ -16,6 +16,7 @@
 package cherry.sqlapp2.service;
 
 import cherry.sqlapp2.dto.SqlExecutionResult;
+import cherry.sqlapp2.entity.QueryHistory;
 import cherry.sqlapp2.entity.SavedQuery;
 import cherry.sqlapp2.entity.User;
 import cherry.sqlapp2.repository.DatabaseConnectionRepository;
@@ -87,7 +88,7 @@ public class SqlExecutionService {
             LocalDateTime executedAt = LocalDateTime.now();
 
             // Record query execution in history
-            recordQueryExecution(
+            cherry.sqlapp2.entity.QueryHistory queryHistory = recordQueryExecution(
                     user,
                     connectionId,
                     sql,
@@ -104,7 +105,7 @@ public class SqlExecutionService {
                     executionTime,
                     sql,
                     data,
-                    null,
+                    Optional.ofNullable(queryHistory).map(QueryHistory::getId).orElse(null),
                     Optional.ofNullable(savedQuery).map(SavedQuery::getId).orElse(null)
             );
 
@@ -113,7 +114,7 @@ public class SqlExecutionService {
             LocalDateTime executedAt = LocalDateTime.now();
 
             // Record failed query execution in history
-            recordQueryExecution(
+            cherry.sqlapp2.entity.QueryHistory queryHistory = recordQueryExecution(
                     user,
                     connectionId,
                     sql,
@@ -131,7 +132,9 @@ public class SqlExecutionService {
                     ex.getMessage(),
                     "SQLException",
                     ex.getErrorCode(),
-                    ex.getSQLState()
+                    ex.getSQLState(),
+                    Optional.ofNullable(queryHistory).map(QueryHistory::getId).orElse(null),
+                    Optional.ofNullable(savedQuery).map(SavedQuery::getId).orElse(null)
             );
         }
     }
@@ -220,7 +223,7 @@ public class SqlExecutionService {
                 LocalDateTime executedAt = LocalDateTime.now();
 
                 // Record query execution in history
-                recordQueryExecution(
+                cherry.sqlapp2.entity.QueryHistory queryHistory = recordQueryExecution(
                         user,
                         connectionId,
                         sql,
@@ -237,7 +240,7 @@ public class SqlExecutionService {
                         executionTime,
                         sql,
                         data,
-                        null,
+                        Optional.ofNullable(queryHistory).map(QueryHistory::getId).orElse(null),
                         Optional.ofNullable(savedQuery).map(SavedQuery::getId).orElse(null)
                 );
             }
@@ -247,7 +250,7 @@ public class SqlExecutionService {
             LocalDateTime executedAt = LocalDateTime.now();
 
             // Record failed query execution in history
-            recordQueryExecution(
+            cherry.sqlapp2.entity.QueryHistory queryHistory = recordQueryExecution(
                     user,
                     connectionId,
                     sql,
@@ -265,7 +268,9 @@ public class SqlExecutionService {
                     ex.getMessage(),
                     "SQLException",
                     ex.getErrorCode(),
-                    ex.getSQLState()
+                    ex.getSQLState(),
+                    Optional.ofNullable(queryHistory).map(QueryHistory::getId).orElse(null),
+                    Optional.ofNullable(savedQuery).map(SavedQuery::getId).orElse(null)
             );
         }
     }
@@ -279,23 +284,23 @@ public class SqlExecutionService {
         ResultSetMetaData metaData = resultSet.getMetaData();
         int columnCount = metaData.getColumnCount();
 
-        // Get column names for frontend (string array)
-        // TODO: 将来的にはカラムの詳細情報（type, nullable, precision等）も返却する
+        // Get column names and detailed information for frontend
         List<String> columns = new ArrayList<>();
-        @SuppressWarnings("unused")
-        List<Map<String, Object>> columnDetails = new ArrayList<>();
+        List<SqlExecutionResult.ColumnDetail> columnDetails = new ArrayList<>();
         for (int i = 1; i <= columnCount; i++) {
-            columns.add(metaData.getColumnName(i));
+            String columnName = metaData.getColumnName(i);
+            columns.add(columnName);
 
-            // 詳細情報は将来の拡張用に保持
-            Map<String, Object> columnDetail = new LinkedHashMap<>();
-            columnDetail.put("name", metaData.getColumnName(i));
-            columnDetail.put("label", metaData.getColumnLabel(i));
-            columnDetail.put("type", metaData.getColumnTypeName(i));
-            columnDetail.put("className", metaData.getColumnClassName(i));
-            columnDetail.put("nullable", metaData.isNullable(i) == ResultSetMetaData.columnNullable);
-            columnDetail.put("precision", metaData.getPrecision(i));
-            columnDetail.put("scale", metaData.getScale(i));
+            // Create column detail information
+            SqlExecutionResult.ColumnDetail columnDetail = new SqlExecutionResult.ColumnDetail(
+                    columnName,
+                    metaData.getColumnLabel(i),
+                    metaData.getColumnTypeName(i),
+                    metaData.getColumnClassName(i),
+                    metaData.isNullable(i) == ResultSetMetaData.columnNullable,
+                    metaData.getPrecision(i),
+                    metaData.getScale(i)
+            );
             columnDetails.add(columnDetail);
         }
 
@@ -331,6 +336,7 @@ public class SqlExecutionService {
 
         return new SqlExecutionResult.SqlResultData(
                 columns,
+                columnDetails,
                 rows,
                 rowCount
         );
@@ -470,7 +476,7 @@ public class SqlExecutionService {
 
     // ==================== Query History Helper Methods ====================
 
-    private void recordQueryExecution(
+    private QueryHistory recordQueryExecution(
             User user,
             Long connectionId,
             String sql,
@@ -481,7 +487,7 @@ public class SqlExecutionService {
             String errorMessage,
             SavedQuery savedQuery
     ) {
-        connectionRepository.findByUserAndId(user, connectionId).ifPresent(connection ->
+        return connectionRepository.findByUserAndId(user, connectionId).map(connection ->
                 queryManagementService.recordExecution(
                         sql,
                         parameterValues,
@@ -493,6 +499,6 @@ public class SqlExecutionService {
                         connection,
                         savedQuery
                 )
-        );
+        ).orElse(null);
     }
 }

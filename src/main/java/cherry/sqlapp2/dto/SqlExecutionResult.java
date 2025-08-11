@@ -67,12 +67,24 @@ public record SqlExecutionResult(
     }
 
     // エラーレスポンス用コンストラクタ
-    public static SqlExecutionResult error(LocalDateTime executedAt, String sql, String error, String errorType, Integer errorCode, String sqlState) {
-        return new SqlExecutionResult(false, executedAt, null, sql, null, error, errorType, errorCode, sqlState, null, null);
+    public static SqlExecutionResult error(LocalDateTime executedAt, String sql, String error, String errorType, Integer errorCode, String sqlState, Long queryHistoryId, Long savedQueryId) {
+        return new SqlExecutionResult(false, executedAt, null, sql, null, error, errorType, errorCode, sqlState, queryHistoryId, savedQueryId);
+    }
+
+    public record ColumnDetail(
+            String name,
+            String label,
+            String type,
+            String className,
+            boolean nullable,
+            int precision,
+            int scale
+    ) {
     }
 
     public record SqlResultData(
             List<String> columns,
+            List<ColumnDetail> columnDetails,
             List<List<Object>> rows,
             int rowCount
     ) {

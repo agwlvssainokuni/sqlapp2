@@ -87,8 +87,19 @@ export interface SqlExecutionResult {
 
 export interface SqlResultData {
   columns: string[]
+  columnDetails: ColumnDetail[]
   rows: any[][]
   rowCount: number
+}
+
+export interface ColumnDetail {
+  name: string
+  label: string
+  type: string
+  className: string
+  nullable: boolean
+  precision: number
+  scale: number
 }
 
 // QueryController
