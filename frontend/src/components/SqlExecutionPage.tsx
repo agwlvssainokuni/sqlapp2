@@ -17,7 +17,7 @@
 import React, {useEffect, useState} from 'react'
 import {useTranslation} from 'react-i18next'
 import {useAuth} from '../context/AuthContext'
-import type {DatabaseConnection, SavedQuery, SqlExecutionResult, SqlValidationResult} from '../types/api'
+import type {DatabaseConnection, SavedQuery, SqlExecutionResult, SqlValidationResult, QueryHistory, SqlExecutionRequest} from '../types/api'
 import Layout from './Layout'
 
 interface ParameterDefinition {
@@ -72,7 +72,7 @@ const SqlExecutionPage: React.FC = () => {
     if (historyId && !isNaN(Number(historyId))) {
       try {
         const response = await apiRequest(`/api/queries/history/${historyId}`)
-        const historyItem = response.data
+        const historyItem = response.data as QueryHistory
 
         if (response.ok) {
           setSql(historyItem.sqlContent || '')
@@ -111,7 +111,7 @@ const SqlExecutionPage: React.FC = () => {
       const response = await apiRequest('/api/connections')
 
       if (response.ok) {
-        const data = response.data
+        const data = response.data as DatabaseConnection[]
         setConnections(data)
         if (data.length > 0) {
           setSelectedConnectionId(data[0].id)
@@ -159,7 +159,7 @@ const SqlExecutionPage: React.FC = () => {
         })
       })
 
-      const data: SqlValidationResult = response.data
+      const data = response.data as SqlValidationResult
       if (!response.ok) {
         setError(data.error || t('sqlExecution.validationFailed'))
         return false
@@ -184,7 +184,12 @@ const SqlExecutionPage: React.FC = () => {
 
       const hasParameters = parameters.length > 0
 
-      const requestBody: any = {
+      if (selectedConnectionId === null) {
+        setError(t('sqlExecution.noConnectionSelected'))
+        return
+      }
+
+      const requestBody: SqlExecutionRequest = {
         sql: sql,
         connectionId: selectedConnectionId
       }
@@ -199,8 +204,8 @@ const SqlExecutionPage: React.FC = () => {
         requestBody.parameterTypes = {}
 
         parameters.forEach(param => {
-          requestBody.parameters[param.name] = param.value
-          requestBody.parameterTypes[param.name] = param.type
+          requestBody.parameters![param.name] = param.value
+          requestBody.parameterTypes![param.name] = param.type
         })
       }
 
@@ -209,7 +214,7 @@ const SqlExecutionPage: React.FC = () => {
         body: JSON.stringify(requestBody)
       })
 
-      const data = response.data
+      const data = response.data as SqlExecutionResult
       if (response.ok && data.ok) {
         setResult(data)
         // Execution count is now automatically recorded on the backend

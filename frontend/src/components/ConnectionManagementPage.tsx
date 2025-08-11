@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import React, {useEffect, useState} from 'react'
+import React, {useEffect, useState, useCallback} from 'react'
 import {useTranslation} from 'react-i18next'
 import {useAuth} from '../context/AuthContext'
 import type {ConnectionTestResult, DatabaseConnection, NewConnection} from '../types/api'
@@ -41,17 +41,13 @@ const ConnectionManagementPage: React.FC = () => {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  useEffect(() => {
-    loadConnections()
-  }, [])
-
-  const loadConnections = async () => {
+  const loadConnections = useCallback(async () => {
     try {
       setLoading(true)
       const response = await apiRequest('/api/connections')
 
       if (response.ok) {
-        const data = response.data
+        const data = response.data as DatabaseConnection[]
         setConnections(data)
       } else {
         setError(t('connections.loadConnectionsFailed'))
@@ -59,7 +55,11 @@ const ConnectionManagementPage: React.FC = () => {
     } finally {
       setLoading(false)
     }
-  }
+  }, [apiRequest, t])
+
+  useEffect(() => {
+    loadConnections()
+  }, [loadConnections])
 
   const handleDatabaseTypeChange = (type: 'MYSQL' | 'POSTGRESQL' | 'MARIADB') => {
     const defaultPorts = {
@@ -153,7 +153,7 @@ const ConnectionManagementPage: React.FC = () => {
       })
 
       if (response.ok) {
-        const result = response.data
+        const result = response.data as ConnectionTestResult
         if (result.success) {
           setTestResults(prev => ({
             ...prev,

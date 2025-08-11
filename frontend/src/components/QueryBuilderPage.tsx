@@ -17,30 +17,19 @@
 import React, {useState, useEffect} from 'react'
 import {useTranslation} from 'react-i18next'
 import {useAuth} from '../context/AuthContext'
-import type {DatabaseConnection} from '../types/api'
+import type {DatabaseConnection, TableInfo as ApiTableInfo} from '../types/api'
 import Layout from './Layout'
 
 
 interface SchemaInfo {
-  tables: TableInfo[]
+  tables: LocalTableInfo[]
 }
 
-interface TableInfo {
+interface LocalTableInfo {
   name: string
-  columns: ColumnInfo[]
+  columns: { name: string }[]
 }
 
-interface ColumnInfo {
-  name: string
-  dataType: number
-  typeName: string
-  columnSize: number
-  decimalDigits: number
-  nullable: boolean
-  defaultValue: string | null
-  ordinalPosition: number
-  remarks: string | null
-}
 
 interface SelectColumn {
   tableName: string
@@ -109,7 +98,7 @@ interface QueryBuilderResponse {
   validationErrors: string[] | null
   warnings: string[] | null
   detectedParameters: Record<string, string> | null
-  parsedStructure: any | null
+  parsedStructure: QueryStructure | null
   buildTimeMs: number
 }
 
@@ -151,7 +140,7 @@ const QueryBuilderPage: React.FC = () => {
   const loadConnections = async () => {
     try {
       const response = await apiRequest('/api/connections')
-      setConnections(response.data)
+      setConnections(response.data as DatabaseConnection[])
     } catch (error) {
       console.error('Failed to load connections:', error)
     }
@@ -161,14 +150,14 @@ const QueryBuilderPage: React.FC = () => {
     try {
       // Load tables first
       const tablesResponse = await apiRequest(`/api/schema/connections/${connectionId}/tables`)
-      const tables = tablesResponse.data
+      const tables = tablesResponse.data as ApiTableInfo[]
 
       // Load columns for each table
       const tablesWithColumns = await Promise.all(
-        tables.map(async (table: any) => {
+        tables.map(async (table: ApiTableInfo) => {
           try {
             const columnsResponse = await apiRequest(`/api/schema/connections/${connectionId}/tables/${table.name}/columns`)
-            const columns = columnsResponse.data
+            const columns = columnsResponse.data as { name: string }[]
             return {...table, columns}
           } catch (error) {
             console.error(`Failed to load columns for table ${table.name}:`, error)
@@ -177,7 +166,7 @@ const QueryBuilderPage: React.FC = () => {
         })
       )
 
-      setSchemaInfo({tables: tablesWithColumns})
+      setSchemaInfo({tables: tablesWithColumns as LocalTableInfo[]})
     } catch (error) {
       console.error('Failed to load schema:', error)
     }
@@ -203,7 +192,7 @@ const QueryBuilderPage: React.FC = () => {
         body: JSON.stringify(request)
       })
 
-      const result: QueryBuilderResponse = response.data
+      const result = response.data as QueryBuilderResponse
 
       if (result.valid) {
         setGeneratedSql(result.generatedSql ?? '')
@@ -211,9 +200,9 @@ const QueryBuilderPage: React.FC = () => {
       } else {
         setValidationErrors(result.validationErrors || ['Unknown validation error'])
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Failed to build query:', error)
-      setValidationErrors([error.message || 'Failed to build query'])
+      setValidationErrors([error instanceof Error ? error.message : 'Failed to build query'])
     } finally {
       setIsBuilding(false)
     }
@@ -226,7 +215,7 @@ const QueryBuilderPage: React.FC = () => {
     }))
   }
 
-  const updateSelectColumn = (index: number, field: keyof SelectColumn, value: any) => {
+  const updateSelectColumn = (index: number, field: keyof SelectColumn, value: string) => {
     setQueryStructure(prev => ({
       ...prev,
       selectColumns: prev.selectColumns.map((col, i) =>
@@ -277,7 +266,7 @@ const QueryBuilderPage: React.FC = () => {
     }))
   }
 
-  const updateWhereCondition = (index: number, field: keyof WhereCondition, value: any) => {
+  const updateWhereCondition = (index: number, field: keyof WhereCondition, value: string | boolean) => {
     setQueryStructure(prev => ({
       ...prev,
       whereConditions: prev.whereConditions.map((condition, i) =>
@@ -380,14 +369,14 @@ const QueryBuilderPage: React.FC = () => {
                     .find(table => table.name === column.tableName)?.columns
                     ?.map(col => (
                       <option key={col.name} value={col.name}>
-                        {col.name} ({col.typeName})
+                        {col.name}
                       </option>
                     ))}
                 </select>
 
                 <select
                   value={column.aggregateFunction || ''}
-                  onChange={(e) => updateSelectColumn(index, 'aggregateFunction', e.target.value || undefined)}
+                  onChange={(e) => updateSelectColumn(index, 'aggregateFunction', e.target.value || '')}
                 >
                   <option value="">{t('queryBuilder.noFunction')}</option>
                   <option value="COUNT">COUNT</option>
@@ -468,7 +457,7 @@ const QueryBuilderPage: React.FC = () => {
               <div className="clause-item-content">
                 <select
                   value={condition.tableName || ''}
-                  onChange={(e) => updateWhereCondition(index, 'tableName', e.target.value || undefined)}
+                  onChange={(e) => updateWhereCondition(index, 'tableName', e.target.value || '')}
                 >
                   <option value="">{t('queryBuilder.selectTable')}</option>
                   {schemaInfo?.tables.map(table => (
@@ -487,7 +476,7 @@ const QueryBuilderPage: React.FC = () => {
                     .find(table => table.name === condition.tableName)?.columns
                     ?.map(col => (
                       <option key={col.name} value={col.name}>
-                        {col.name} ({col.typeName})
+                        {col.name}
                       </option>
                     ))}
                 </select>
@@ -580,7 +569,7 @@ const QueryBuilderPage: React.FC = () => {
                     .find(table => table.name === column.tableName)?.columns
                     ?.map(col => (
                       <option key={col.name} value={col.name}>
-                        {col.name} ({col.typeName})
+                        {col.name}
                       </option>
                     ))}
                 </select>

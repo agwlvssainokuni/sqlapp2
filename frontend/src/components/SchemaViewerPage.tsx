@@ -50,7 +50,7 @@ const SchemaViewerPage: React.FC = () => {
       const response = await apiRequest('/api/connections?activeOnly=true')
 
       if (response.ok) {
-        const data = response.data
+        const data = response.data as DatabaseConnection[]
         setConnections(data)
       } else {
         setError(t('schemaViewer.loadFailed'))
@@ -68,7 +68,7 @@ const SchemaViewerPage: React.FC = () => {
       const response = await apiRequest(`/api/schema/connections/${selectedConnectionId}`)
 
       if (response.ok) {
-        const data = response.data
+        const data = response.data as DatabaseInfo
         setSchemaInfo(data)
       } else {
         const errorData = response.error
@@ -93,7 +93,7 @@ const SchemaViewerPage: React.FC = () => {
       const response = await apiRequest(`/api/schema/connections/${selectedConnectionId}/tables?${params}`)
 
       if (response.ok) {
-        const data = response.data
+        const data = response.data as TableInfo[]
         setTables(data)
       } else {
         const errorData = response.error
@@ -118,7 +118,7 @@ const SchemaViewerPage: React.FC = () => {
       const response = await apiRequest(`/api/schema/connections/${selectedConnectionId}/tables/${tableName}?${params}`)
 
       if (response.ok) {
-        const data = response.data
+        const data = response.data as TableDetails
         setTableDetails(data)
         setSelectedTable(tableName)
       } else {

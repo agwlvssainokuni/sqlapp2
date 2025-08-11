@@ -71,6 +71,14 @@ export interface SqlValidationResult {
 }
 
 // SqlExecutionController - 統一されたSQL実行結果レスポンス
+export interface SqlExecutionRequest {
+  sql: string
+  connectionId: number
+  parameters?: Record<string, unknown>
+  parameterTypes?: Record<string, string>
+  savedQueryId?: number
+}
+
 export interface SqlExecutionResult {
   ok: boolean
   executedAt?: string
