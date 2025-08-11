@@ -41,12 +41,8 @@ public class QueryBuilderController {
             @Valid @RequestBody QueryBuilderRequest request,
             Authentication authentication) {
         
-        try {
-            QueryBuilderResponse response = queryBuilderService.buildQuery(request);
-            return ApiResponse.success(response);
-        } catch (Exception e) {
-            return ApiResponse.error(List.of("Failed to build query: " + e.getMessage()));
-        }
+        QueryBuilderResponse response = queryBuilderService.buildQuery(request);
+        return ApiResponse.success(response);
     }
 
     /**
@@ -58,24 +54,20 @@ public class QueryBuilderController {
             @Valid @RequestBody QueryBuilderRequest request,
             Authentication authentication) {
         
-        try {
-            // Set validation only mode
-            request.setValidateSyntax(true);
-            request.setFormatSql(false);
-            
-            QueryBuilderResponse response = queryBuilderService.buildQuery(request);
-            
-            // Clear generated SQL for validation-only response
-            if (response.isValid()) {
-                QueryBuilderResponse validationResponse = new QueryBuilderResponse();
-                validationResponse.setValid(true);
-                validationResponse.setBuildTimeMs(response.getBuildTimeMs());
-                return ApiResponse.success(validationResponse);
-            } else {
-                return ApiResponse.error(response.getValidationErrors());
-            }
-        } catch (Exception e) {
-            return ApiResponse.error(List.of("Validation failed: " + e.getMessage()));
+        // Set validation only mode
+        request.setValidateSyntax(true);
+        request.setFormatSql(false);
+        
+        QueryBuilderResponse response = queryBuilderService.buildQuery(request);
+        
+        // Clear generated SQL for validation-only response
+        if (response.isValid()) {
+            QueryBuilderResponse validationResponse = new QueryBuilderResponse();
+            validationResponse.setValid(true);
+            validationResponse.setBuildTimeMs(response.getBuildTimeMs());
+            return ApiResponse.success(validationResponse);
+        } else {
+            return ApiResponse.error(response.getValidationErrors());
         }
     }
 
@@ -88,15 +80,11 @@ public class QueryBuilderController {
             @RequestBody QuerySuggestionsRequest request,
             Authentication authentication) {
         
-        try {
-            // This would integrate with schema service to provide intelligent suggestions
-            // For now, return a placeholder response
-            QueryBuilderSuggestions suggestions = new QueryBuilderSuggestions();
-            
-            return ApiResponse.success(suggestions);
-        } catch (Exception e) {
-            return ApiResponse.error(List.of("Failed to get query suggestions: " + e.getMessage()));
-        }
+        // This would integrate with schema service to provide intelligent suggestions
+        // For now, return a placeholder response
+        QueryBuilderSuggestions suggestions = new QueryBuilderSuggestions();
+        
+        return ApiResponse.success(suggestions);
     }
 
     // Supporting classes for suggestions endpoint
