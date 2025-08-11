@@ -21,7 +21,7 @@ import java.time.LocalDateTime;
 /**
  * SQLクエリ検証APIのレスポンス
  */
-public record QueryValidationResponse(
+public record SqlValidationResult(
         Boolean valid,
         String message,
         String error,
@@ -30,12 +30,12 @@ public record QueryValidationResponse(
         String sql
 ) {
     // 成功時のコンストラクタ
-    public QueryValidationResponse(Boolean valid, String message, LocalDateTime validatedAt, String sql) {
+    public SqlValidationResult(Boolean valid, String message, LocalDateTime validatedAt, String sql) {
         this(valid, message, null, null, validatedAt, sql);
     }
     
     // エラー時のコンストラクタ
-    public QueryValidationResponse(Boolean valid, String error, String errorType, LocalDateTime validatedAt, String sql) {
+    public SqlValidationResult(Boolean valid, String error, String errorType, LocalDateTime validatedAt, String sql) {
         this(valid, null, error, errorType, validatedAt, sql);
     }
 }

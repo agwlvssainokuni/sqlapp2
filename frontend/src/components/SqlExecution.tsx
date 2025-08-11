@@ -17,7 +17,7 @@
 import React, {useState, useEffect} from 'react'
 import {useTranslation} from 'react-i18next'
 import {useAuth} from '../context/AuthContext'
-import type {QueryValidationResponse, QueryExecutionErrorResponse, DatabaseConnection} from '../types/api'
+import type {SqlValidationResult, QueryExecutionErrorResponse, DatabaseConnection} from '../types/api'
 import Layout from './Layout'
 
 
@@ -172,7 +172,7 @@ const SqlExecution: React.FC = () => {
         })
       })
 
-      const data: QueryValidationResponse = await response.json()
+      const data: SqlValidationResult = await response.json()
       if (!response.ok) {
         setError(data.error || 'SQL validation failed') // TODO: Add translation
         return false

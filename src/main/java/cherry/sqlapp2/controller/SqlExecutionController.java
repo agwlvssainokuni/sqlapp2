@@ -17,7 +17,7 @@ package cherry.sqlapp2.controller;
 
 import cherry.sqlapp2.dto.QueryExecutionErrorResponse;
 import cherry.sqlapp2.dto.SqlExecutionResult;
-import cherry.sqlapp2.dto.QueryValidationResponse;
+import cherry.sqlapp2.dto.SqlValidationResult;
 import cherry.sqlapp2.dto.SqlExecutionRequest;
 import cherry.sqlapp2.entity.SavedQuery;
 import cherry.sqlapp2.entity.User;
@@ -134,17 +134,17 @@ public class SqlExecutionController {
     }
 
     @PostMapping("/validate")
-    public ResponseEntity<QueryValidationResponse> validateQuery(@Valid @RequestBody SqlExecutionRequest request) {
+    public ResponseEntity<SqlValidationResult> validateQuery(@Valid @RequestBody SqlExecutionRequest request) {
         try {
             sqlExecutionService.validateQuery(request.getSql());
             
-            QueryValidationResponse response = new QueryValidationResponse(
+            SqlValidationResult response = new SqlValidationResult(
                     true, "SQL query is valid", LocalDateTime.now(), request.getSql());
             
             return ResponseEntity.ok(response);
             
         } catch (IllegalArgumentException e) {
-            QueryValidationResponse errorResponse = new QueryValidationResponse(
+            SqlValidationResult errorResponse = new SqlValidationResult(
                     false, e.getMessage(), "ValidationError", LocalDateTime.now(), request.getSql());
             
             return ResponseEntity.badRequest().body(errorResponse);

@@ -55,7 +55,7 @@ export interface UserStatisticsResponse {
 }
 
 // SqlExecutionController
-export interface QueryValidationResponse {
+export interface SqlValidationResult {
   valid: boolean
   message?: string
   error?: string
