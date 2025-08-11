@@ -20,6 +20,7 @@ import cherry.sqlapp2.entity.QueryHistory;
 import cherry.sqlapp2.entity.SavedQuery;
 import cherry.sqlapp2.entity.User;
 import cherry.sqlapp2.repository.DatabaseConnectionRepository;
+import cherry.sqlapp2.util.SqlParameterExtractor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -28,8 +29,6 @@ import java.sql.*;
 import java.sql.Date;
 import java.time.*;
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 @Service
 public class SqlExecutionService {
@@ -344,6 +343,7 @@ public class SqlExecutionService {
 
     /**
      * Convert named parameters (:param) to positioned parameters (?)
+     * Uses sophisticated parsing to avoid extracting parameters from string literals and comments
      */
     private ParameterizedQuery convertNamedParameters(String sql, Map<String, Object> parameters,
                                                       Map<String, String> parameterTypes) {
@@ -351,19 +351,18 @@ public class SqlExecutionService {
             return new ParameterizedQuery(sql, new ArrayList<>(), new ArrayList<>());
         }
 
-        // Pattern to match named parameters like :paramName
-        Pattern pattern = Pattern.compile(":(\\w+)");
-        Matcher matcher = pattern.matcher(sql);
-
+        // Extract parameters using the new sophisticated extractor
+        List<String> parameterNames = SqlParameterExtractor.extractParameters(sql);
+        
         List<Object> parameterValues = new ArrayList<>();
         List<String> parameterTypesList = new ArrayList<>();
         String convertedSql = sql;
 
-        while (matcher.find()) {
-            String paramName = matcher.group(1);
+        for (String paramName : parameterNames) {
             if (parameters.containsKey(paramName)) {
                 parameterValues.add(parameters.get(paramName));
                 parameterTypesList.add(parameterTypes != null ? parameterTypes.get(paramName) : null);
+                // Replace the first occurrence of this parameter name
                 convertedSql = convertedSql.replaceFirst(":" + paramName, "?");
             } else {
                 throw new IllegalArgumentException("Parameter not provided: " + paramName);
