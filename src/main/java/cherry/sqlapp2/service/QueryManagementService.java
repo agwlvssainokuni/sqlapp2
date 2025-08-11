@@ -208,6 +208,12 @@ public class QueryManagementService {
             }
         }
 
+        // Update saved query execution statistics if this execution is for a saved query
+        if (savedQuery != null && isSuccessful) {
+            savedQuery.incrementExecutionCount();
+            savedQueryRepository.save(savedQuery);
+        }
+
         return queryHistoryRepository.save(history);
     }
 
