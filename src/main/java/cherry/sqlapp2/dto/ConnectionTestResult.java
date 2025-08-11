@@ -19,57 +19,20 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.time.LocalDateTime;
 
-public class ConnectionTestResult {
-    
-    @JsonProperty("success")
-    private boolean success;
-    
-    @JsonProperty("message")
-    private String message;
-    
-    @JsonProperty("testedAt")
-    private LocalDateTime testedAt;
-
-    public ConnectionTestResult() {
-        this.testedAt = LocalDateTime.now();
-    }
-
+public record ConnectionTestResult(
+    @JsonProperty("success") boolean success,
+    @JsonProperty("message") String message,
+    @JsonProperty("testedAt") LocalDateTime testedAt
+) {
     public ConnectionTestResult(boolean success, String message) {
-        this();
-        this.success = success;
-        this.message = message;
+        this(success, message, LocalDateTime.now());
     }
 
-    public static ConnectionTestResult success() {
+    public static ConnectionTestResult createSuccess() {
         return new ConnectionTestResult(true, "Connection test successful");
     }
 
-    public static ConnectionTestResult failure(String message) {
+    public static ConnectionTestResult createFailure(String message) {
         return new ConnectionTestResult(false, message);
-    }
-
-    // Getters and setters
-    public boolean isSuccess() {
-        return success;
-    }
-
-    public void setSuccess(boolean success) {
-        this.success = success;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
-    }
-
-    public LocalDateTime getTestedAt() {
-        return testedAt;
-    }
-
-    public void setTestedAt(LocalDateTime testedAt) {
-        this.testedAt = testedAt;
     }
 }

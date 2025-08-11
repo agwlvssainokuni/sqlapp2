@@ -196,7 +196,7 @@ public class DatabaseConnectionService {
             
             return testConnection(connection);
         } catch (IllegalArgumentException e) {
-            return ConnectionTestResult.failure(e.getMessage());
+            return ConnectionTestResult.createFailure(e.getMessage());
         }
     }
 
@@ -231,16 +231,16 @@ public class DatabaseConnectionService {
                 
                 // Test if connection is valid with 5 second timeout
                 if (conn.isValid(5)) {
-                    return ConnectionTestResult.success();
+                    return ConnectionTestResult.createSuccess();
                 } else {
-                    return ConnectionTestResult.failure("Connection is not valid");
+                    return ConnectionTestResult.createFailure("Connection is not valid");
                 }
                 
             } catch (SQLException e) {
-                return ConnectionTestResult.failure("Database connection failed: " + e.getMessage());
+                return ConnectionTestResult.createFailure("Database connection failed: " + e.getMessage());
             }
         } catch (Exception e) {
-            return ConnectionTestResult.failure("Unexpected error during connection test: " + e.getMessage());
+            return ConnectionTestResult.createFailure("Unexpected error during connection test: " + e.getMessage());
         }
     }
 
@@ -256,16 +256,16 @@ public class DatabaseConnectionService {
                 
                 // Test if connection is valid with 5 second timeout
                 if (conn.isValid(5)) {
-                    return ConnectionTestResult.success();
+                    return ConnectionTestResult.createSuccess();
                 } else {
-                    return ConnectionTestResult.failure("Connection is not valid");
+                    return ConnectionTestResult.createFailure("Connection is not valid");
                 }
                 
             } catch (SQLException e) {
-                return ConnectionTestResult.failure("Database connection failed: " + e.getMessage());
+                return ConnectionTestResult.createFailure("Database connection failed: " + e.getMessage());
             }
         } catch (Exception e) {
-            return ConnectionTestResult.failure("Unexpected error during connection test: " + e.getMessage());
+            return ConnectionTestResult.createFailure("Unexpected error during connection test: " + e.getMessage());
         }
     }
 }

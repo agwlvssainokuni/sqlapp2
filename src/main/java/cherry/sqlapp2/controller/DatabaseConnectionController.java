@@ -216,7 +216,7 @@ public class DatabaseConnectionController {
             ConnectionTestResult result = connectionService.testConnection(currentUser, id);
             return ResponseEntity.ok(result);
         } catch (Exception e) {
-            ConnectionTestResult failureResult = ConnectionTestResult.failure("Error testing connection: " + e.getMessage());
+            ConnectionTestResult failureResult = ConnectionTestResult.createFailure("Error testing connection: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(failureResult);
         }
     }
@@ -228,7 +228,7 @@ public class DatabaseConnectionController {
             ConnectionTestResult result = connectionService.testConnection(request);
             return ResponseEntity.ok(result);
         } catch (Exception e) {
-            ConnectionTestResult failureResult = ConnectionTestResult.failure("Error testing connection: " + e.getMessage());
+            ConnectionTestResult failureResult = ConnectionTestResult.createFailure("Error testing connection: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(failureResult);
         }
     }
