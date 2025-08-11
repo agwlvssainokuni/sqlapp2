@@ -14,33 +14,16 @@
  * limitations under the License.
  */
 
-import React, {useState, useEffect} from 'react'
+import React, {useEffect, useState} from 'react'
 import {useTranslation} from 'react-i18next'
 import {useAuth} from '../context/AuthContext'
-import type {UserStatisticsResponse} from '../types/api'
+import type {QueryHistory, UserStatisticsResponse} from '../types/api'
 import Layout from './Layout'
-
-interface QueryHistoryItem {
-  id: number
-  sqlContent: string
-  parameterValues?: Record<string, any>
-  executionTimeMs: number
-  resultCount?: number
-  isSuccessful: boolean
-  errorMessage?: string
-  connectionName: string
-  databaseType: string
-  connectionId?: number
-  savedQueryId?: number
-  savedQueryName?: string
-  executedAt: string
-}
-
 
 const QueryHistory: React.FC = () => {
   const {t} = useTranslation()
   const {apiRequest} = useAuth()
-  const [history, setHistory] = useState<QueryHistoryItem[]>([])
+  const [history, setHistory] = useState<QueryHistory[]>([])
   const [statistics, setStatistics] = useState<UserStatisticsResponse | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -118,7 +101,7 @@ const QueryHistory: React.FC = () => {
     }
   }
 
-  const handleReExecute = (item: QueryHistoryItem) => {
+  const handleReExecute = (item: QueryHistory) => {
     // If this history item originated from a saved query, re-execute the saved query
     // Otherwise, re-execute as history
     if (item.savedQueryId) {
@@ -266,8 +249,8 @@ const QueryHistory: React.FC = () => {
 }
 
 interface HistoryCardProps {
-  item: QueryHistoryItem
-  onReExecute: (item: QueryHistoryItem) => void
+  item: QueryHistory
+  onReExecute: (item: QueryHistory) => void
 }
 
 const HistoryCard: React.FC<HistoryCardProps> = ({item, onReExecute}) => {

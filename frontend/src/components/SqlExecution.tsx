@@ -14,13 +14,11 @@
  * limitations under the License.
  */
 
-import React, {useState, useEffect} from 'react'
+import React, {useEffect, useState} from 'react'
 import {useTranslation} from 'react-i18next'
 import {useAuth} from '../context/AuthContext'
-import type {SqlValidationResult, QueryExecutionErrorResponse, DatabaseConnection, SqlExecutionResult} from '../types/api'
+import type {DatabaseConnection, SqlExecutionResult, SqlValidationResult} from '../types/api'
 import Layout from './Layout'
-
-
 
 interface ParameterDefinition {
   name: string
@@ -217,7 +215,7 @@ const SqlExecution: React.FC = () => {
         // Execution count is now automatically recorded on the backend
       } else {
         // Handle both API errors and SQL execution errors
-        const errorMessage = data.error || (data as QueryExecutionErrorResponse).error || 'SQL execution failed'
+        const errorMessage = data.error || 'SQL execution failed'
         setError(errorMessage) // TODO: Add translation
       }
     } catch (err) {

@@ -91,16 +91,6 @@ export interface SqlResultData {
   rowCount: number
 }
 
-export interface QueryExecutionErrorResponse {
-  success: boolean
-  error: string
-  errorType: string
-  executedAt: string
-  sql?: string
-  errorCode?: number
-  sqlState?: string
-}
-
 // QueryController
 export interface QueryHistory {
   id: number
