@@ -14,32 +14,11 @@
  * limitations under the License.
  */
 
-import React, {useState, useEffect} from 'react'
+import React, {useEffect, useState} from 'react'
 import {useTranslation} from 'react-i18next'
 import {useAuth} from '../context/AuthContext'
-import type {DatabaseConnection} from '../types/api'
+import type {DatabaseConnection, SavedQuery} from '../types/api'
 import Layout from './Layout'
-
-interface SavedQuery {
-  id: number
-  name: string
-  sqlContent: string
-  description: string
-  parameterDefinitions?: Record<string, string>
-  sharingScope: 'PRIVATE' | 'PUBLIC'
-  username: string
-  userId: number
-  defaultConnection?: {
-    id: number
-    connectionName: string
-    databaseType: string
-  }
-  createdAt: string
-  updatedAt: string
-  lastExecutedAt?: string
-  executionCount?: number
-}
-
 
 interface SavedQueryForm {
   name: string

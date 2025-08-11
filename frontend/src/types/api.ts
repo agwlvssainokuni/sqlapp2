@@ -92,6 +92,26 @@ export interface SqlResultData {
 }
 
 // QueryController
+export interface SavedQuery {
+  id: number
+  name: string
+  sqlContent: string
+  description: string
+  parameterDefinitions?: Record<string, string>
+  sharingScope: 'PRIVATE' | 'PUBLIC'
+  username: string
+  userId: number
+  defaultConnection?: {
+    id: number
+    connectionName: string
+    databaseType: string
+  }
+  createdAt: string
+  updatedAt: string
+  lastExecutedAt?: string
+  executionCount?: number
+}
+
 export interface QueryHistory {
   id: number
   sqlContent: string
@@ -189,7 +209,6 @@ export interface TableDetails {
   foreignKeys: ForeignKeyInfo[]
   indexes: IndexInfo[]
 }
-
 
 // AuthController
 export interface LoginResult {
