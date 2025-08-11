@@ -18,7 +18,7 @@ package cherry.sqlapp2.dto;
 
 import java.util.List;
 
-public record SchemaInfoResponse(
+public record DatabaseInfo(
     String databaseProductName,
     String databaseProductVersion,
     String driverName,

@@ -96,7 +96,7 @@ export interface DatabaseConnection {
 }
 
 // SchemaController
-export interface SchemaInfo {
+export interface DatabaseInfo {
   databaseProductName: string
   databaseProductVersion: string
   driverName: string

@@ -36,17 +36,17 @@ public class SchemaService {
     /**
      * Get database schema information including tables and views
      */
-    public SchemaInfoResponse getSchemaInfo(User user, Long connectionId) throws SQLException {
+    public DatabaseInfo getDatabaseInfo(User user, Long connectionId) throws SQLException {
         try (Connection connection = dynamicDataSourceService.getConnection(user, connectionId)) {
             DatabaseMetaData metaData = connection.getMetaData();
             
-            return new SchemaInfoResponse(
+            return new DatabaseInfo(
                 metaData.getDatabaseProductName(),
                 metaData.getDatabaseProductVersion(),
                 metaData.getDriverName(),
                 metaData.getDriverVersion(),
                 getCatalogs(metaData),
-                getSchemas(metaData)
+                getSchemaDetails(metaData)
             );
         }
     }
@@ -209,11 +209,11 @@ public class SchemaService {
         return catalogs;
     }
 
-    private List<SchemaInfoResponse.SchemaDetail> getSchemas(DatabaseMetaData metaData) throws SQLException {
-        List<SchemaInfoResponse.SchemaDetail> schemas = new ArrayList<>();
+    private List<DatabaseInfo.SchemaDetail> getSchemaDetails(DatabaseMetaData metaData) throws SQLException {
+        List<DatabaseInfo.SchemaDetail> schemas = new ArrayList<>();
         try (ResultSet rs = metaData.getSchemas()) {
             while (rs.next()) {
-                schemas.add(new SchemaInfoResponse.SchemaDetail(
+                schemas.add(new DatabaseInfo.SchemaDetail(
                     rs.getString("TABLE_SCHEM"),
                     rs.getString("TABLE_CATALOG")
                 ));

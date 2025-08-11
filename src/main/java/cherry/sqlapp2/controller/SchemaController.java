@@ -57,10 +57,10 @@ public class SchemaController {
      * Get database schema information
      */
     @GetMapping("/connections/{connectionId}")
-    public ResponseEntity<?> getSchemaInfo(@PathVariable Long connectionId) {
+    public ResponseEntity<?> getDatabaseInfo(@PathVariable Long connectionId) {
         try {
             User currentUser = getCurrentUser();
-            SchemaInfoResponse schemaInfo = schemaService.getSchemaInfo(currentUser, connectionId);
+            DatabaseInfo schemaInfo = schemaService.getDatabaseInfo(currentUser, connectionId);
             return ResponseEntity.ok(schemaInfo);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body("Schema info retrieval failed: " + e.getMessage());
