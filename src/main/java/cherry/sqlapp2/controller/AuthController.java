@@ -16,10 +16,7 @@
 
 package cherry.sqlapp2.controller;
 
-import cherry.sqlapp2.dto.LoginResult;
-import cherry.sqlapp2.dto.LoginRequest;
-import cherry.sqlapp2.dto.UserRegistrationRequest;
-import cherry.sqlapp2.dto.LoginUser;
+import cherry.sqlapp2.dto.*;
 import cherry.sqlapp2.entity.User;
 import cherry.sqlapp2.service.UserService;
 import cherry.sqlapp2.util.JwtUtil;
@@ -30,9 +27,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -43,71 +42,54 @@ public class AuthController {
     private final JwtUtil jwtUtil;
 
     @Autowired
-    public AuthController(UserService userService, AuthenticationManager authenticationManager, JwtUtil jwtUtil) {
+    public AuthController(
+            UserService userService,
+            AuthenticationManager authenticationManager,
+            JwtUtil jwtUtil
+    ) {
         this.userService = userService;
         this.authenticationManager = authenticationManager;
         this.jwtUtil = jwtUtil;
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@Valid @RequestBody LoginRequest request) {
-        try {
-            Authentication authentication = authenticationManager.authenticate(
+    public ApiResponse<LoginResult> login(@Valid @RequestBody LoginRequest request) {
+        Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
-            );
-            
-            User user = userService.findByUsername(request.getUsername())
-                .orElseThrow(() -> new RuntimeException("User not found"));
-            
-            String token = jwtUtil.generateToken(user.getUsername());
-            Long expiresIn = jwtUtil.getExpirationTime();
-            LoginUser userResponse = new LoginUser(user);
-            
-            LoginResult authResponse = new LoginResult(token, expiresIn, userResponse);
-            return ResponseEntity.ok(authResponse);
-            
-        } catch (AuthenticationException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid username or password");
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Login failed: " + e.getMessage());
-        }
+        );
+
+        User user = userService.findByUsername(request.getUsername()).get();
+
+        String token = jwtUtil.generateToken(user.getUsername());
+        Long expiresIn = jwtUtil.getExpirationTime();
+
+        LoginResult loginResult = new LoginResult(token, expiresIn, new LoginUser(user));
+        return ApiResponse.success(loginResult);
     }
 
     @PostMapping("/register")
-    public ResponseEntity<?> register(@Valid @RequestBody UserRegistrationRequest request) {
-        try {
-            User user = userService.createUser(request.getUsername(), request.getPassword(), request.getEmail());
-            LoginUser response = new LoginUser(user);
-            return ResponseEntity.status(HttpStatus.CREATED).body(response);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body("Registration failed: " + e.getMessage());
-        }
+    public ResponseEntity<ApiResponse<LoginUser>> register(@Valid @RequestBody UserRegistrationRequest request) {
+        User user = userService.createUser(
+                request.getUsername(),
+                request.getPassword(),
+                request.getEmail()
+        );
+        LoginUser loginUser = new LoginUser(user);
+        return ResponseEntity.status(HttpStatus.CREATED).body(
+                ApiResponse.success(loginUser)
+        );
     }
 
     @GetMapping("/me")
-    public ResponseEntity<?> getCurrentUser() {
-        try {
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            if (authentication == null || !authentication.isAuthenticated()) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-            }
-
-            String username = authentication.getName();
-            User user = userService.findByUsername(username)
-                    .orElseThrow(() -> new RuntimeException("User not found"));
-
-            LoginUser userResponse = new LoginUser(user);
-            return ResponseEntity.ok(userResponse);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
+    public ApiResponse<LoginUser> getCurrentUser() {
+        User user = Optional.of(SecurityContextHolder.getContext())
+                .map(SecurityContext::getAuthentication)
+                .filter(Authentication::isAuthenticated)
+                .map(Authentication::getName)
+                .flatMap(userService::findByUsername)
+                .get();
+        LoginUser loginUser = new LoginUser(user);
+        return ApiResponse.success(loginUser);
     }
 
-    @Deprecated
-    @GetMapping("/user/{username}")
-    public ResponseEntity<?> getUser(@PathVariable String username) {
-        return userService.findByUsername(username)
-                .map(user -> ResponseEntity.ok(new LoginUser(user)))
-                .orElse(ResponseEntity.notFound().build());
-    }
 }

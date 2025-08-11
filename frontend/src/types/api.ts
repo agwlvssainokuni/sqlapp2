@@ -17,9 +17,15 @@
 /**
  * Backend API Response Types
  * バックエンドAPI レスポンス型定義
- * 
+ *
  * Javaのrecordクラスに対応するTypeScript型定義
  */
+
+export interface ApiResponse<T> {
+  ok: boolean
+  data?: T
+  error?: string[]
+}
 
 // HealthController
 export interface HealthcheckResult {
@@ -29,21 +35,21 @@ export interface HealthcheckResult {
 }
 
 // DatabaseConnectionController
-export interface ConnectionCount {
-  activeConnections: number
+export interface NewConnection {
+  connectionName: string
+  databaseType: 'MYSQL' | 'POSTGRESQL' | 'MARIADB'
+  host: string
+  port: number
+  databaseName: string
+  username: string
+  password: string
+  additionalParams?: string
 }
 
-export interface DatabaseType {
-  name: string
-  displayName: string
-  defaultPort: number
-}
-
-export interface ConnectionStatus {
-  connectionId: number
-  available: boolean
-  error?: string
-  checkedAt: string
+export interface ConnectionTestResult {
+  success: boolean
+  message: string
+  responseTimeMs?: number
 }
 
 // QueryController

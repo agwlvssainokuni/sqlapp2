@@ -14,29 +14,11 @@
  * limitations under the License.
  */
 
-import React, {useState, useEffect} from 'react'
+import React, {useEffect, useState} from 'react'
 import {useTranslation} from 'react-i18next'
 import {useAuth} from '../context/AuthContext'
-import type {DatabaseConnection} from '../types/api'
+import type {ConnectionTestResult, DatabaseConnection, NewConnection} from '../types/api'
 import Layout from './Layout'
-
-
-interface NewConnection {
-  connectionName: string
-  databaseType: 'MYSQL' | 'POSTGRESQL' | 'MARIADB'
-  host: string
-  port: number
-  databaseName: string
-  username: string
-  password: string
-  additionalParams?: string
-}
-
-interface ConnectionTestResult {
-  success: boolean
-  message: string
-  responseTimeMs?: number
-}
 
 const ConnectionManagement: React.FC = () => {
   const {t} = useTranslation()
@@ -69,13 +51,11 @@ const ConnectionManagement: React.FC = () => {
       const response = await apiRequest('/api/connections')
 
       if (response.ok) {
-        const data = await response.json()
+        const data = response.data()
         setConnections(data)
       } else {
         setError('Failed to load connections') // TODO: Add translation
       }
-    } catch (err) {
-      setError('Error loading connections: ' + (err as Error).message) // TODO: Add translation
     } finally {
       setLoading(false)
     }
@@ -110,11 +90,9 @@ const ConnectionManagement: React.FC = () => {
         setShowCreateForm(false)
         resetForm()
       } else {
-        const errorData = await response.json()
-        setError(errorData.error || 'Failed to create connection')
+        const errorData = response.error?.join('\n')
+        setError(errorData || 'Failed to create connection')
       }
-    } catch (err) {
-      setError('Error creating connection: ' + (err as Error).message)
     } finally {
       setLoading(false)
     }
@@ -137,11 +115,9 @@ const ConnectionManagement: React.FC = () => {
         setEditingConnection(null)
         resetForm()
       } else {
-        const errorData = await response.json()
-        setError(errorData.error || 'Failed to update connection')
+        const errorData = response.error?.join('\n')
+        setError(errorData || 'Failed to update connection')
       }
-    } catch (err) {
-      setError('Error updating connection: ' + (err as Error).message)
     } finally {
       setLoading(false)
     }
@@ -159,11 +135,9 @@ const ConnectionManagement: React.FC = () => {
       if (response.ok) {
         await loadConnections()
       } else {
-        const errorData = await response.json()
-        setError(errorData.error || 'Failed to delete connection')
+        const errorData = response.error?.join('\n')
+        setError(errorData || 'Failed to delete connection')
       }
-    } catch (err) {
-      setError('Error deleting connection: ' + (err as Error).message)
     } finally {
       setLoading(false)
     }
@@ -178,16 +152,26 @@ const ConnectionManagement: React.FC = () => {
         method: 'POST'
       })
 
-      const result = await response.json()
-      setTestResults(prev => ({...prev, [connection.id]: result}))
-    } catch (err) {
-      setTestResults(prev => ({
-        ...prev,
-        [connection.id]: {
-          success: false,
-          message: t('connections.connectionFailed') + ': ' + (err as Error).message
+      if (response.ok) {
+        const result = response.data
+        if (result.success) {
+          setTestResults(prev => ({
+            ...prev,
+            [connection.id]: result
+          }))
+        } else {
+          setTestResults(prev => ({
+            ...prev,
+            [connection.id]: {
+              ...result,
+              message: t('connections.connectionFailed') + ': ' + result.message
+            }
+          }))
         }
-      }))
+      } else {
+        const errorData = response.error?.join('\n')
+        setError(errorData || 'Failed to delete connection')
+      }
     } finally {
       setTesting(prev => ({...prev, [connection.id]: false}))
     }

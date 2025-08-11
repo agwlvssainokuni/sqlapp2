@@ -15,12 +15,10 @@
  */
 package cherry.sqlapp2.controller;
 
-import cherry.sqlapp2.dto.ConnectionCount;
-import cherry.sqlapp2.dto.ConnectionStatus;
+import cherry.sqlapp2.dto.ApiResponse;
 import cherry.sqlapp2.dto.ConnectionTestResult;
-import cherry.sqlapp2.dto.DatabaseConnectionRequest;
 import cherry.sqlapp2.dto.DatabaseConnection;
-import cherry.sqlapp2.dto.DatabaseType;
+import cherry.sqlapp2.dto.DatabaseConnectionRequest;
 import cherry.sqlapp2.entity.User;
 import cherry.sqlapp2.service.DatabaseConnectionService;
 import cherry.sqlapp2.service.DynamicDataSourceService;
@@ -30,14 +28,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/connections")
@@ -48,222 +44,89 @@ public class DatabaseConnectionController {
     private final UserService userService;
 
     @Autowired
-    public DatabaseConnectionController(DatabaseConnectionService connectionService, 
-                                      DynamicDataSourceService dynamicDataSourceService,
-                                      UserService userService) {
+    public DatabaseConnectionController(
+            DatabaseConnectionService connectionService,
+            DynamicDataSourceService dynamicDataSourceService,
+            UserService userService
+    ) {
         this.connectionService = connectionService;
         this.dynamicDataSourceService = dynamicDataSourceService;
         this.userService = userService;
     }
 
     private User getCurrentUser() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || !authentication.isAuthenticated()) {
-            throw new RuntimeException("User not authenticated");
-        }
-
-        String username = authentication.getName();
-        return userService.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("User not found: " + username));
+        return Optional.of(SecurityContextHolder.getContext())
+                .map(SecurityContext::getAuthentication)
+                .filter(Authentication::isAuthenticated)
+                .map(Authentication::getName)
+                .flatMap(userService::findByUsername)
+                .get();
     }
 
     @GetMapping
-    public ResponseEntity<List<DatabaseConnection>> getAllConnections(
-            @RequestParam(defaultValue = "false") boolean activeOnly) {
-        try {
-            User currentUser = getCurrentUser();
-            List<DatabaseConnection> connections;
-            
-            if (activeOnly) {
-                connections = connectionService.getActiveConnectionsByUser(currentUser);
-            } else {
-                connections = connectionService.getAllConnectionsByUser(currentUser);
-            }
-            
-            return ResponseEntity.ok(connections);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    public ApiResponse<List<DatabaseConnection>> getAllConnections(
+            @RequestParam(defaultValue = "false") boolean activeOnly
+    ) {
+        User currentUser = getCurrentUser();
+        if (activeOnly) {
+            return ApiResponse.success(connectionService.getActiveConnectionsByUser(currentUser));
+        } else {
+            return ApiResponse.success(connectionService.getAllConnectionsByUser(currentUser));
         }
     }
 
     @Deprecated
     @GetMapping("/{id}")
-    public ResponseEntity<DatabaseConnection> getConnectionById(@PathVariable Long id) {
-        try {
-            User currentUser = getCurrentUser();
-            return connectionService.getConnectionById(currentUser, id)
-                    .map(connection -> ResponseEntity.ok(connection))
-                    .orElse(ResponseEntity.notFound().build());
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
+    public ApiResponse<DatabaseConnection> getConnectionById(@PathVariable Long id) {
+        User currentUser = getCurrentUser();
+        return connectionService.getConnectionById(currentUser, id)
+                .map(ApiResponse::success)
+                .get();
     }
 
     @PostMapping
-    public ResponseEntity<?> createConnection(@Valid @RequestBody DatabaseConnectionRequest request) {
-        try {
-            // 新規作成時はパスワードが必須
-            if (request.getPassword() == null || request.getPassword().trim().isEmpty()) {
-                return ResponseEntity.badRequest()
-                    .body("Connection creation failed: Password is required");
-            }
-            
-            User currentUser = getCurrentUser();
-            DatabaseConnection response = connectionService.createConnection(currentUser, request);
-            return ResponseEntity.status(HttpStatus.CREATED).body(response);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body("Connection creation failed: " + e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Connection creation failed: " + e.getMessage());
+    public ResponseEntity<ApiResponse<DatabaseConnection>> createConnection(
+            @Valid @RequestBody DatabaseConnectionRequest request
+    ) {
+        // 新規作成時はパスワードが必須
+        if (request.getPassword() == null || request.getPassword().trim().isEmpty()) {
+            return ResponseEntity.ok(
+                    ApiResponse.error(List.of("Connection creation failed: Password is required"))
+            );
         }
+
+        User currentUser = getCurrentUser();
+        DatabaseConnection connection = connectionService.createConnection(currentUser, request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(
+                ApiResponse.success(connection)
+        );
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateConnection(@PathVariable Long id, @Valid @RequestBody DatabaseConnectionRequest request) {
-        try {
-            User currentUser = getCurrentUser();
-            DatabaseConnection response = connectionService.updateConnection(currentUser, id, request);
-            return ResponseEntity.ok(response);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body("Connection update failed: " + e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Connection update failed: " + e.getMessage());
-        }
+    public ApiResponse<DatabaseConnection> updateConnection(
+            @PathVariable Long id,
+            @Valid @RequestBody DatabaseConnectionRequest request
+    ) {
+        User currentUser = getCurrentUser();
+        DatabaseConnection connection = connectionService.updateConnection(currentUser, id, request);
+        return ApiResponse.success(connection);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteConnection(@PathVariable Long id) {
-        try {
-            User currentUser = getCurrentUser();
-            connectionService.deleteConnection(currentUser, id);
-            return ResponseEntity.ok().body("Connection deleted successfully");
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body("Connection deletion failed: " + e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Connection deletion failed: " + e.getMessage());
-        }
-    }
-
-    @Deprecated
-    @PatchMapping("/{id}/toggle")
-    public ResponseEntity<?> toggleConnectionStatus(@PathVariable Long id) {
-        try {
-            User currentUser = getCurrentUser();
-            connectionService.toggleConnectionStatus(currentUser, id);
-            return ResponseEntity.ok().body("Connection status toggled successfully");
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body("Status toggle failed: " + e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Status toggle failed: " + e.getMessage());
-        }
-    }
-
-    @Deprecated
-    @GetMapping("/count")
-    public ResponseEntity<ConnectionCount> getConnectionCount() {
-        try {
-            User currentUser = getCurrentUser();
-            long activeCount = connectionService.getActiveConnectionCount(currentUser);
-            
-            ConnectionCount response = new ConnectionCount(activeCount);
-            return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
-    }
-
-    @Deprecated
-    @GetMapping("/types")
-    public ResponseEntity<List<DatabaseType>> getDatabaseTypes() {
-        try {
-            List<DatabaseType> types = Arrays.stream(cherry.sqlapp2.enums.DatabaseType.values())
-                    .map(type -> new DatabaseType(
-                            type.name(),
-                            type.getDisplayName(),
-                            type.getDefaultPort()))
-                    .collect(Collectors.toList());
-            return ResponseEntity.ok(types);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
-    }
-
-    @Deprecated
-    @GetMapping("/by-type/{databaseType}")
-    public ResponseEntity<List<DatabaseConnection>> getConnectionsByType(@PathVariable String databaseType) {
-        try {
-            User currentUser = getCurrentUser();
-            cherry.sqlapp2.enums.DatabaseType type = cherry.sqlapp2.enums.DatabaseType.fromString(databaseType);
-            if (type == null) {
-                return ResponseEntity.badRequest().build();
-            }
-            
-            List<DatabaseConnection> connections = connectionService.getConnectionsByType(currentUser, type);
-            return ResponseEntity.ok(connections);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
+    public ApiResponse<Void> deleteConnection(
+            @PathVariable Long id
+    ) {
+        User currentUser = getCurrentUser();
+        connectionService.deleteConnection(currentUser, id);
+        return ApiResponse.success(null);
     }
 
     @PostMapping("/{id}/test")
-    public ResponseEntity<ConnectionTestResult> testConnection(@PathVariable Long id) {
-        try {
-            User currentUser = getCurrentUser();
-            ConnectionTestResult result = connectionService.testConnection(currentUser, id);
-            return ResponseEntity.ok(result);
-        } catch (Exception e) {
-            ConnectionTestResult failureResult = ConnectionTestResult.createFailure("Error testing connection: " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(failureResult);
-        }
-    }
-
-    @Deprecated
-    @PostMapping("/test")
-    public ResponseEntity<ConnectionTestResult> testConnectionRequest(@Valid @RequestBody DatabaseConnectionRequest request) {
-        try {
-            ConnectionTestResult result = connectionService.testConnection(request);
-            return ResponseEntity.ok(result);
-        } catch (Exception e) {
-            ConnectionTestResult failureResult = ConnectionTestResult.createFailure("Error testing connection: " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(failureResult);
-        }
-    }
-
-    @Deprecated
-    @GetMapping("/{id}/info")
-    public ResponseEntity<?> getConnectionInfo(@PathVariable Long id) {
-        try {
-            User currentUser = getCurrentUser();
-            Map<String, Object> info = dynamicDataSourceService.getConnectionInfo(currentUser, id);
-            return ResponseEntity.ok(info);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body("Connection info retrieval failed: " + e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Connection info retrieval failed: " + e.getMessage());
-        }
-    }
-
-    @Deprecated
-    @GetMapping("/{id}/status")
-    public ResponseEntity<ConnectionStatus> getConnectionStatus(@PathVariable Long id) {
-        try {
-            User currentUser = getCurrentUser();
-            boolean available = dynamicDataSourceService.isConnectionAvailable(currentUser, id);
-            
-            ConnectionStatus response = new ConnectionStatus(
-                    id, available, LocalDateTime.now());
-            
-            return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            ConnectionStatus response = new ConnectionStatus(
-                    id, false, e.getMessage(), LocalDateTime.now());
-            
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
-        }
+    public ApiResponse<ConnectionTestResult> testConnection(
+            @PathVariable Long id
+    ) {
+        User currentUser = getCurrentUser();
+        ConnectionTestResult result = connectionService.testConnection(currentUser, id);
+        return ApiResponse.success(result);
     }
 }

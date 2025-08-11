@@ -14,22 +14,16 @@
  * limitations under the License.
  */
 
-export const apiRequest = async (url: string, options: RequestInit = {}): Promise<Response> => {
+import type {ApiResponse} from "../types/api.ts";
+
+export const apiRequest = async <T>(url: string, options: RequestInit = {}): Promise<ApiResponse<T>> => {
   const token = localStorage.getItem('token')
 
-  const defaultOptions: RequestInit = {
+  const finalOptions: RequestInit = {
+    ...options,
     headers: {
       'Content-Type': 'application/json',
       ...(token && {Authorization: `Bearer ${token}`}),
-      ...options.headers,
-    },
-  }
-
-  const finalOptions = {
-    ...defaultOptions,
-    ...options,
-    headers: {
-      ...defaultOptions.headers,
       ...options.headers,
     },
   }
@@ -42,7 +36,11 @@ export const apiRequest = async (url: string, options: RequestInit = {}): Promis
     window.location.href = '/login'
   }
 
-  return response
-}
+  if (!response.ok) {
+    const errorText = await response.text()
+    console.error(`API request failed: ${response.status} ${response.statusText}`, errorText)
+    throw new Error(`API request failed: ${response.status} ${response.statusText}`)
+  }
 
-export default apiRequest
+  return await response.json() as ApiResponse<T>
+}

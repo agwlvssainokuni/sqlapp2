@@ -16,8 +16,8 @@
 
 package cherry.sqlapp2.controller;
 
+import cherry.sqlapp2.dto.ApiResponse;
 import cherry.sqlapp2.dto.HealthcheckResult;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -30,12 +30,12 @@ public class HealthController {
 
     @Deprecated
     @GetMapping("/health")
-    public ResponseEntity<HealthcheckResult> health() {
+    public ApiResponse<HealthcheckResult> health() {
         HealthcheckResult response = new HealthcheckResult(
                 "UP",
                 LocalDateTime.now(),
                 "SqlApp2"
         );
-        return ResponseEntity.ok(response);
+        return ApiResponse.success(response);
     }
 }

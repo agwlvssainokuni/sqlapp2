@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import React, {createContext, useContext, useState, useEffect, type ReactNode} from 'react'
+import React, {createContext, type ReactNode, useContext, useEffect, useState} from 'react'
 import {apiRequest} from '../utils/api'
-import type {LoginResult, LoginUser} from "../types/api.ts";
+import type {ApiResponse, LoginResult, LoginUser} from "../types/api.ts";
 
 interface AuthContextType {
   user: LoginUser | null
@@ -25,7 +25,7 @@ interface AuthContextType {
   logout: () => void
   isLoading: boolean
   checkAuthStatus: () => Promise<boolean>
-  apiRequest: (url: string, options?: RequestInit) => Promise<any>
+  apiRequest: (url: string, options?: RequestInit) => Promise<ApiResponse<any>>
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
