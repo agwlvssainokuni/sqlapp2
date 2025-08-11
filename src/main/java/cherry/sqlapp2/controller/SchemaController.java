@@ -15,7 +15,7 @@
  */
 package cherry.sqlapp2.controller;
 
-import cherry.sqlapp2.dto.SchemaInfoResponse;
+import cherry.sqlapp2.dto.*;
 import cherry.sqlapp2.entity.User;
 import cherry.sqlapp2.service.SchemaService;
 import cherry.sqlapp2.service.UserService;
@@ -79,7 +79,7 @@ public class SchemaController {
                                      @RequestParam(required = false) String schema) {
         try {
             User currentUser = getCurrentUser();
-            List<Map<String, Object>> tables = schemaService.getTables(currentUser, connectionId, catalog, schema);
+            List<TableInfoResponse> tables = schemaService.getTables(currentUser, connectionId, catalog, schema);
             return ResponseEntity.ok(tables);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body("Table list retrieval failed: " + e.getMessage());
@@ -99,7 +99,7 @@ public class SchemaController {
                                            @RequestParam(required = false) String schema) {
         try {
             User currentUser = getCurrentUser();
-            Map<String, Object> tableDetails = schemaService.getTableDetails(currentUser, connectionId, catalog, schema, tableName);
+            TableDetailsResponse tableDetails = schemaService.getTableDetails(currentUser, connectionId, catalog, schema, tableName);
             return ResponseEntity.ok(tableDetails);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body("Table details retrieval failed: " + e.getMessage());
@@ -119,7 +119,7 @@ public class SchemaController {
                                            @RequestParam(required = false) String schema) {
         try {
             User currentUser = getCurrentUser();
-            List<Map<String, Object>> columns = schemaService.getTableColumns(currentUser, connectionId, catalog, schema, tableName);
+            List<ColumnInfoResponse> columns = schemaService.getTableColumns(currentUser, connectionId, catalog, schema, tableName);
             return ResponseEntity.ok(columns);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body("Column list retrieval failed: " + e.getMessage());
@@ -139,7 +139,7 @@ public class SchemaController {
                                           @RequestParam(required = false) String schema) {
         try {
             User currentUser = getCurrentUser();
-            List<Map<String, Object>> primaryKeys = schemaService.getPrimaryKeys(currentUser, connectionId, catalog, schema, tableName);
+            List<PrimaryKeyInfoResponse> primaryKeys = schemaService.getPrimaryKeys(currentUser, connectionId, catalog, schema, tableName);
             return ResponseEntity.ok(primaryKeys);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body("Primary key retrieval failed: " + e.getMessage());
@@ -159,7 +159,7 @@ public class SchemaController {
                                           @RequestParam(required = false) String schema) {
         try {
             User currentUser = getCurrentUser();
-            List<Map<String, Object>> foreignKeys = schemaService.getForeignKeys(currentUser, connectionId, catalog, schema, tableName);
+            List<ForeignKeyInfoResponse> foreignKeys = schemaService.getForeignKeys(currentUser, connectionId, catalog, schema, tableName);
             return ResponseEntity.ok(foreignKeys);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body("Foreign key retrieval failed: " + e.getMessage());
@@ -179,7 +179,7 @@ public class SchemaController {
                                       @RequestParam(required = false) String schema) {
         try {
             User currentUser = getCurrentUser();
-            List<Map<String, Object>> indexes = schemaService.getIndexes(currentUser, connectionId, catalog, schema, tableName);
+            List<IndexInfoResponse> indexes = schemaService.getIndexes(currentUser, connectionId, catalog, schema, tableName);
             return ResponseEntity.ok(indexes);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body("Index retrieval failed: " + e.getMessage());

@@ -15,7 +15,7 @@
  */
 package cherry.sqlapp2.service;
 
-import cherry.sqlapp2.dto.SchemaInfoResponse;
+import cherry.sqlapp2.dto.*;
 import cherry.sqlapp2.entity.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -54,21 +54,21 @@ public class SchemaService {
     /**
      * Get table list for a specific database/schema
      */
-    public List<Map<String, Object>> getTables(User user, Long connectionId, String catalog, String schema) throws SQLException {
+    public List<TableInfoResponse> getTables(User user, Long connectionId, String catalog, String schema) throws SQLException {
         try (Connection connection = dynamicDataSourceService.getConnection(user, connectionId)) {
             DatabaseMetaData metaData = connection.getMetaData();
-            List<Map<String, Object>> tables = new ArrayList<>();
+            List<TableInfoResponse> tables = new ArrayList<>();
             
             String[] tableTypes = {"TABLE", "VIEW"};
             try (ResultSet rs = metaData.getTables(catalog, schema, null, tableTypes)) {
                 while (rs.next()) {
-                    Map<String, Object> table = new LinkedHashMap<>();
-                    table.put("catalog", rs.getString("TABLE_CAT"));
-                    table.put("schema", rs.getString("TABLE_SCHEM"));
-                    table.put("name", rs.getString("TABLE_NAME"));
-                    table.put("type", rs.getString("TABLE_TYPE"));
-                    table.put("remarks", rs.getString("REMARKS"));
-                    tables.add(table);
+                    tables.add(new TableInfoResponse(
+                        rs.getString("TABLE_CAT"),
+                        rs.getString("TABLE_SCHEM"),
+                        rs.getString("TABLE_NAME"),
+                        rs.getString("TABLE_TYPE"),
+                        rs.getString("REMARKS")
+                    ));
                 }
             }
             
@@ -79,24 +79,24 @@ public class SchemaService {
     /**
      * Get column information for a specific table
      */
-    public List<Map<String, Object>> getTableColumns(User user, Long connectionId, String catalog, String schema, String tableName) throws SQLException {
+    public List<ColumnInfoResponse> getTableColumns(User user, Long connectionId, String catalog, String schema, String tableName) throws SQLException {
         try (Connection connection = dynamicDataSourceService.getConnection(user, connectionId)) {
             DatabaseMetaData metaData = connection.getMetaData();
-            List<Map<String, Object>> columns = new ArrayList<>();
+            List<ColumnInfoResponse> columns = new ArrayList<>();
             
             try (ResultSet rs = metaData.getColumns(catalog, schema, tableName, null)) {
                 while (rs.next()) {
-                    Map<String, Object> column = new LinkedHashMap<>();
-                    column.put("name", rs.getString("COLUMN_NAME"));
-                    column.put("dataType", rs.getInt("DATA_TYPE"));
-                    column.put("typeName", rs.getString("TYPE_NAME"));
-                    column.put("columnSize", rs.getInt("COLUMN_SIZE"));
-                    column.put("decimalDigits", rs.getInt("DECIMAL_DIGITS"));
-                    column.put("nullable", rs.getInt("NULLABLE") == DatabaseMetaData.columnNullable);
-                    column.put("defaultValue", rs.getString("COLUMN_DEF"));
-                    column.put("ordinalPosition", rs.getInt("ORDINAL_POSITION"));
-                    column.put("remarks", rs.getString("REMARKS"));
-                    columns.add(column);
+                    columns.add(new ColumnInfoResponse(
+                        rs.getString("COLUMN_NAME"),
+                        rs.getInt("DATA_TYPE"),
+                        rs.getString("TYPE_NAME"),
+                        rs.getInt("COLUMN_SIZE"),
+                        rs.getInt("DECIMAL_DIGITS"),
+                        rs.getInt("NULLABLE") == DatabaseMetaData.columnNullable,
+                        rs.getString("COLUMN_DEF"),
+                        rs.getInt("ORDINAL_POSITION"),
+                        rs.getString("REMARKS")
+                    ));
                 }
             }
             
@@ -107,18 +107,18 @@ public class SchemaService {
     /**
      * Get primary key information for a table
      */
-    public List<Map<String, Object>> getPrimaryKeys(User user, Long connectionId, String catalog, String schema, String tableName) throws SQLException {
+    public List<PrimaryKeyInfoResponse> getPrimaryKeys(User user, Long connectionId, String catalog, String schema, String tableName) throws SQLException {
         try (Connection connection = dynamicDataSourceService.getConnection(user, connectionId)) {
             DatabaseMetaData metaData = connection.getMetaData();
-            List<Map<String, Object>> primaryKeys = new ArrayList<>();
+            List<PrimaryKeyInfoResponse> primaryKeys = new ArrayList<>();
             
             try (ResultSet rs = metaData.getPrimaryKeys(catalog, schema, tableName)) {
                 while (rs.next()) {
-                    Map<String, Object> pk = new LinkedHashMap<>();
-                    pk.put("columnName", rs.getString("COLUMN_NAME"));
-                    pk.put("keySeq", rs.getShort("KEY_SEQ"));
-                    pk.put("pkName", rs.getString("PK_NAME"));
-                    primaryKeys.add(pk);
+                    primaryKeys.add(new PrimaryKeyInfoResponse(
+                        rs.getString("COLUMN_NAME"),
+                        rs.getShort("KEY_SEQ"),
+                        rs.getString("PK_NAME")
+                    ));
                 }
             }
             
@@ -129,25 +129,25 @@ public class SchemaService {
     /**
      * Get foreign key information for a table
      */
-    public List<Map<String, Object>> getForeignKeys(User user, Long connectionId, String catalog, String schema, String tableName) throws SQLException {
+    public List<ForeignKeyInfoResponse> getForeignKeys(User user, Long connectionId, String catalog, String schema, String tableName) throws SQLException {
         try (Connection connection = dynamicDataSourceService.getConnection(user, connectionId)) {
             DatabaseMetaData metaData = connection.getMetaData();
-            List<Map<String, Object>> foreignKeys = new ArrayList<>();
+            List<ForeignKeyInfoResponse> foreignKeys = new ArrayList<>();
             
             try (ResultSet rs = metaData.getImportedKeys(catalog, schema, tableName)) {
                 while (rs.next()) {
-                    Map<String, Object> fk = new LinkedHashMap<>();
-                    fk.put("pkTableCatalog", rs.getString("PKTABLE_CAT"));
-                    fk.put("pkTableSchema", rs.getString("PKTABLE_SCHEM"));
-                    fk.put("pkTableName", rs.getString("PKTABLE_NAME"));
-                    fk.put("pkColumnName", rs.getString("PKCOLUMN_NAME"));
-                    fk.put("fkTableCatalog", rs.getString("FKTABLE_CAT"));
-                    fk.put("fkTableSchema", rs.getString("FKTABLE_SCHEM"));
-                    fk.put("fkTableName", rs.getString("FKTABLE_NAME"));
-                    fk.put("fkColumnName", rs.getString("FKCOLUMN_NAME"));
-                    fk.put("keySeq", rs.getShort("KEY_SEQ"));
-                    fk.put("fkName", rs.getString("FK_NAME"));
-                    foreignKeys.add(fk);
+                    foreignKeys.add(new ForeignKeyInfoResponse(
+                        rs.getString("PKTABLE_CAT"),
+                        rs.getString("PKTABLE_SCHEM"),
+                        rs.getString("PKTABLE_NAME"),
+                        rs.getString("PKCOLUMN_NAME"),
+                        rs.getString("FKTABLE_CAT"),
+                        rs.getString("FKTABLE_SCHEM"),
+                        rs.getString("FKTABLE_NAME"),
+                        rs.getString("FKCOLUMN_NAME"),
+                        rs.getShort("KEY_SEQ"),
+                        rs.getString("FK_NAME")
+                    ));
                 }
             }
             
@@ -158,10 +158,10 @@ public class SchemaService {
     /**
      * Get index information for a table
      */
-    public List<Map<String, Object>> getIndexes(User user, Long connectionId, String catalog, String schema, String tableName) throws SQLException {
+    public List<IndexInfoResponse> getIndexes(User user, Long connectionId, String catalog, String schema, String tableName) throws SQLException {
         try (Connection connection = dynamicDataSourceService.getConnection(user, connectionId)) {
             DatabaseMetaData metaData = connection.getMetaData();
-            List<Map<String, Object>> indexes = new ArrayList<>();
+            List<IndexInfoResponse> indexes = new ArrayList<>();
             
             try (ResultSet rs = metaData.getIndexInfo(catalog, schema, tableName, false, false)) {
                 while (rs.next()) {
@@ -170,13 +170,13 @@ public class SchemaService {
                         continue;
                     }
                     
-                    Map<String, Object> index = new LinkedHashMap<>();
-                    index.put("indexName", rs.getString("INDEX_NAME"));
-                    index.put("unique", !rs.getBoolean("NON_UNIQUE"));
-                    index.put("columnName", rs.getString("COLUMN_NAME"));
-                    index.put("ordinalPosition", rs.getShort("ORDINAL_POSITION"));
-                    index.put("ascOrDesc", rs.getString("ASC_OR_DESC"));
-                    indexes.add(index);
+                    indexes.add(new IndexInfoResponse(
+                        rs.getString("INDEX_NAME"),
+                        !rs.getBoolean("NON_UNIQUE"),
+                        rs.getString("COLUMN_NAME"),
+                        rs.getShort("ORDINAL_POSITION"),
+                        rs.getString("ASC_OR_DESC")
+                    ));
                 }
             }
             
@@ -187,18 +187,16 @@ public class SchemaService {
     /**
      * Get complete table information including columns, primary keys, foreign keys, and indexes
      */
-    public Map<String, Object> getTableDetails(User user, Long connectionId, String catalog, String schema, String tableName) throws SQLException {
-        Map<String, Object> tableDetails = new LinkedHashMap<>();
-        
-        tableDetails.put("tableName", tableName);
-        tableDetails.put("catalog", catalog);
-        tableDetails.put("schema", schema);
-        tableDetails.put("columns", getTableColumns(user, connectionId, catalog, schema, tableName));
-        tableDetails.put("primaryKeys", getPrimaryKeys(user, connectionId, catalog, schema, tableName));
-        tableDetails.put("foreignKeys", getForeignKeys(user, connectionId, catalog, schema, tableName));
-        tableDetails.put("indexes", getIndexes(user, connectionId, catalog, schema, tableName));
-        
-        return tableDetails;
+    public TableDetailsResponse getTableDetails(User user, Long connectionId, String catalog, String schema, String tableName) throws SQLException {
+        return new TableDetailsResponse(
+            tableName,
+            catalog,
+            schema,
+            getTableColumns(user, connectionId, catalog, schema, tableName),
+            getPrimaryKeys(user, connectionId, catalog, schema, tableName),
+            getForeignKeys(user, connectionId, catalog, schema, tableName),
+            getIndexes(user, connectionId, catalog, schema, tableName)
+        );
     }
 
     private List<String> getCatalogs(DatabaseMetaData metaData) throws SQLException {
