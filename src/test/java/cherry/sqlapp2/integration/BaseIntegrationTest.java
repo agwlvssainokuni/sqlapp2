@@ -101,7 +101,7 @@ public abstract class BaseIntegrationTest {
 
         return JsonPath.read(
                 result.getResponse().getContentAsString(),
-                "$.data.accessToken"
+                "$.data.access_token"
         );
     }
 
