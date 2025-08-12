@@ -15,6 +15,7 @@
  */
 package cherry.sqlapp2.service;
 
+import cherry.sqlapp2.exception.DatabaseConnectionException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -83,7 +84,7 @@ public class EncryptionService {
             return Base64.getEncoder().encodeToString(encryptedWithIv);
 
         } catch (Exception e) {
-            throw new RuntimeException("Failed to encrypt data", e);
+            throw new DatabaseConnectionException("Failed to encrypt data", e);
         }
     }
 
@@ -111,7 +112,7 @@ public class EncryptionService {
             return new String(decryptedData, StandardCharsets.UTF_8);
 
         } catch (Exception e) {
-            throw new RuntimeException("Failed to decrypt data", e);
+            throw new DatabaseConnectionException("Failed to decrypt data", e);
         }
     }
 
@@ -122,7 +123,7 @@ public class EncryptionService {
             SecretKey secretKey = keyGenerator.generateKey();
             return Base64.getEncoder().encodeToString(secretKey.getEncoded());
         } catch (Exception e) {
-            throw new RuntimeException("Failed to generate encryption key", e);
+            throw new DatabaseConnectionException("Failed to generate encryption key", e);
         }
     }
 }

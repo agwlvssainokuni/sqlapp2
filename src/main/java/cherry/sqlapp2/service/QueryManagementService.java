@@ -20,6 +20,8 @@ import cherry.sqlapp2.entity.DatabaseConnection;
 import cherry.sqlapp2.entity.QueryHistory;
 import cherry.sqlapp2.entity.SavedQuery;
 import cherry.sqlapp2.entity.User;
+import cherry.sqlapp2.exception.ResourceNotFoundException;
+import cherry.sqlapp2.exception.ValidationException;
 import cherry.sqlapp2.repository.QueryHistoryRepository;
 import cherry.sqlapp2.repository.SavedQueryRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -77,7 +79,7 @@ public class QueryManagementService {
             try {
                 savedQuery.setParameterDefinitions(objectMapper.writeValueAsString(parameterDefinitions));
             } catch (JsonProcessingException e) {
-                throw new RuntimeException("Failed to serialize parameter definitions", e);
+                throw new ValidationException("Failed to serialize parameter definitions", e);
             }
         }
 
@@ -90,10 +92,10 @@ public class QueryManagementService {
                                        DatabaseConnection defaultConnection, User user) {
 
         SavedQuery savedQuery = savedQueryRepository.findById(queryId)
-                .orElseThrow(() -> new RuntimeException("Saved query not found: " + queryId));
+                .orElseThrow(() -> new ResourceNotFoundException("Saved query not found: " + queryId));
 
         if (!savedQuery.getUser().getId().equals(user.getId())) {
-            throw new RuntimeException("Access denied: You can only update your own queries");
+            throw new ValidationException("Access denied: You can only update your own queries");
         }
 
         if (!savedQuery.getName().equals(name) && savedQueryRepository.existsByUserAndName(user, name)) {
@@ -110,7 +112,7 @@ public class QueryManagementService {
             try {
                 savedQuery.setParameterDefinitions(objectMapper.writeValueAsString(parameterDefinitions));
             } catch (JsonProcessingException e) {
-                throw new RuntimeException("Failed to serialize parameter definitions", e);
+                throw new ValidationException("Failed to serialize parameter definitions", e);
             }
         } else {
             savedQuery.setParameterDefinitions(null);
@@ -136,10 +138,10 @@ public class QueryManagementService {
 
     public void deleteSavedQuery(Long queryId, User user) {
         SavedQuery savedQuery = savedQueryRepository.findById(queryId)
-                .orElseThrow(() -> new RuntimeException("Saved query not found: " + queryId));
+                .orElseThrow(() -> new ResourceNotFoundException("Saved query not found: " + queryId));
 
         if (!savedQuery.getUser().getId().equals(user.getId())) {
-            throw new RuntimeException("Access denied: You can only delete your own queries");
+            throw new ValidationException("Access denied: You can only delete your own queries");
         }
 
         savedQueryRepository.delete(savedQuery);
@@ -158,7 +160,7 @@ public class QueryManagementService {
         try {
             return objectMapper.readValue(savedQuery.getParameterDefinitions(), Map.class);
         } catch (JsonProcessingException e) {
-            throw new RuntimeException("Failed to deserialize parameter definitions", e);
+            throw new ValidationException("Failed to deserialize parameter definitions", e);
         }
     }
 
@@ -183,7 +185,7 @@ public class QueryManagementService {
             try {
                 history.setParameterValues(objectMapper.writeValueAsString(parameterValues));
             } catch (JsonProcessingException e) {
-                throw new RuntimeException("Failed to serialize parameter values", e);
+                throw new ValidationException("Failed to serialize parameter values", e);
             }
         }
 

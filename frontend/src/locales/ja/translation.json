@@ -16,6 +16,14 @@
     "passwordsMismatch": "パスワードが一致しません",
     "registrationSuccess": "登録が完了しました！ログインしてください。"
   },
+  "error": {
+    "boundary": {
+      "title": "エラーが発生しました",
+      "message": "予期しないエラーが発生しました。ページを再読み込みして再度お試しください。",
+      "details": "エラー詳細",
+      "reload": "ページ再読み込み"
+    }
+  },
   "navigation": {
     "dashboard": "ダッシュボード",
     "connections": "データベース接続",

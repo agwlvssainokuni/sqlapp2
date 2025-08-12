@@ -17,6 +17,7 @@ package cherry.sqlapp2.service;
 
 import cherry.sqlapp2.dto.*;
 import cherry.sqlapp2.entity.User;
+import cherry.sqlapp2.exception.DatabaseConnectionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -42,7 +43,7 @@ public class SchemaService {
     /**
      * Get database schema information including tables and views
      */
-    public DatabaseInfo getDatabaseInfo(User user, Long connectionId) throws SQLException {
+    public DatabaseInfo getDatabaseInfo(User user, Long connectionId) {
         try (Connection connection = dynamicDataSourceService.getConnection(user, connectionId)) {
             DatabaseMetaData metaData = connection.getMetaData();
 
@@ -54,13 +55,15 @@ public class SchemaService {
                     getCatalogs(metaData),
                     getSchemaDetails(metaData)
             );
+        } catch (SQLException e) {
+            throw new DatabaseConnectionException("Database operation failed", e);
         }
     }
 
     /**
      * Get table list for a specific database/schema
      */
-    public List<TableInfo> getTables(User user, Long connectionId, String catalog, String schema) throws SQLException {
+    public List<TableInfo> getTables(User user, Long connectionId, String catalog, String schema) {
         try (Connection connection = dynamicDataSourceService.getConnection(user, connectionId)) {
             DatabaseMetaData metaData = connection.getMetaData();
             List<TableInfo> tables = new ArrayList<>();
@@ -79,13 +82,15 @@ public class SchemaService {
             }
 
             return tables;
+        } catch (SQLException e) {
+            throw new DatabaseConnectionException("Database operation failed", e);
         }
     }
 
     /**
      * Get column information for a specific table
      */
-    public List<ColumnInfo> getTableColumns(User user, Long connectionId, String catalog, String schema, String tableName) throws SQLException {
+    public List<ColumnInfo> getTableColumns(User user, Long connectionId, String catalog, String schema, String tableName) {
         try (Connection connection = dynamicDataSourceService.getConnection(user, connectionId)) {
             DatabaseMetaData metaData = connection.getMetaData();
             List<ColumnInfo> columns = new ArrayList<>();
@@ -107,13 +112,15 @@ public class SchemaService {
             }
 
             return columns;
+        } catch (SQLException e) {
+            throw new DatabaseConnectionException("Database operation failed", e);
         }
     }
 
     /**
      * Get primary key information for a table
      */
-    public List<PrimaryKeyInfo> getPrimaryKeys(User user, Long connectionId, String catalog, String schema, String tableName) throws SQLException {
+    public List<PrimaryKeyInfo> getPrimaryKeys(User user, Long connectionId, String catalog, String schema, String tableName) {
         try (Connection connection = dynamicDataSourceService.getConnection(user, connectionId)) {
             DatabaseMetaData metaData = connection.getMetaData();
             List<PrimaryKeyInfo> primaryKeys = new ArrayList<>();
@@ -129,13 +136,15 @@ public class SchemaService {
             }
 
             return primaryKeys;
+        } catch (SQLException e) {
+            throw new DatabaseConnectionException("Database operation failed", e);
         }
     }
 
     /**
      * Get foreign key information for a table
      */
-    public List<ForeignKeyInfo> getForeignKeys(User user, Long connectionId, String catalog, String schema, String tableName) throws SQLException {
+    public List<ForeignKeyInfo> getForeignKeys(User user, Long connectionId, String catalog, String schema, String tableName) {
         try (Connection connection = dynamicDataSourceService.getConnection(user, connectionId)) {
             DatabaseMetaData metaData = connection.getMetaData();
             List<ForeignKeyInfo> foreignKeys = new ArrayList<>();
@@ -158,13 +167,15 @@ public class SchemaService {
             }
 
             return foreignKeys;
+        } catch (SQLException e) {
+            throw new DatabaseConnectionException("Database operation failed", e);
         }
     }
 
     /**
      * Get index information for a table
      */
-    public List<IndexInfo> getIndexes(User user, Long connectionId, String catalog, String schema, String tableName) throws SQLException {
+    public List<IndexInfo> getIndexes(User user, Long connectionId, String catalog, String schema, String tableName) {
         try (Connection connection = dynamicDataSourceService.getConnection(user, connectionId)) {
             DatabaseMetaData metaData = connection.getMetaData();
             List<IndexInfo> indexes = new ArrayList<>();
@@ -187,13 +198,15 @@ public class SchemaService {
             }
 
             return indexes;
+        } catch (SQLException e) {
+            throw new DatabaseConnectionException("Database operation failed", e);
         }
     }
 
     /**
      * Get complete table information including columns, primary keys, foreign keys, and indexes
      */
-    public TableDetails getTableDetails(User user, Long connectionId, String catalog, String schema, String tableName) throws SQLException {
+    public TableDetails getTableDetails(User user, Long connectionId, String catalog, String schema, String tableName) {
         return new TableDetails(
                 tableName,
                 catalog,

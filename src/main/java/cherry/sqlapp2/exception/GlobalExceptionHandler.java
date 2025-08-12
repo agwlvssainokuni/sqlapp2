@@ -17,6 +17,8 @@
 package cherry.sqlapp2.exception;
 
 import cherry.sqlapp2.dto.ApiResponse;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -24,15 +26,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.BindException;
-import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import jakarta.validation.ConstraintViolation;
-import jakarta.validation.ConstraintViolationException;
-import java.util.ArrayList;
+import java.sql.SQLException;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
 /**
@@ -114,6 +114,50 @@ public class GlobalExceptionHandler {
     }
 
     /**
+     * Handle custom validation errors
+     * カスタムバリデーションエラー処理
+     */
+    @ExceptionHandler(ValidationException.class)
+    public ResponseEntity<ApiResponse<Void>> handleValidationException(ValidationException ex) {
+        logger.debug("Validation error: {}", ex.getMessage());
+        return ResponseEntity.badRequest()
+                .body(ApiResponse.error(List.of(ex.getMessage())));
+    }
+
+    /**
+     * Handle resource not found errors
+     * リソース未発見エラー処理
+     */
+    @ExceptionHandler({ResourceNotFoundException.class, NoSuchElementException.class})
+    public ResponseEntity<ApiResponse<Void>> handleResourceNotFoundException(Exception ex) {
+        logger.debug("Resource not found: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(ApiResponse.error(List.of(ex.getMessage())));
+    }
+
+    /**
+     * Handle database connection errors
+     * データベース接続エラー処理
+     */
+    @ExceptionHandler({DatabaseConnectionException.class, SQLException.class})
+    public ResponseEntity<ApiResponse<Void>> handleDatabaseException(Exception ex) {
+        logger.error("Database error: {}", ex.getMessage(), ex);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(ApiResponse.error(List.of("Database operation failed")));
+    }
+
+    /**
+     * Handle invalid query errors
+     * 無効なクエリエラー処理
+     */
+    @ExceptionHandler(InvalidQueryException.class)
+    public ResponseEntity<ApiResponse<Void>> handleInvalidQueryException(InvalidQueryException ex) {
+        logger.debug("Invalid query: {}", ex.getMessage());
+        return ResponseEntity.badRequest()
+                .body(ApiResponse.error(List.of(ex.getMessage())));
+    }
+
+    /**
      * Handle business logic errors
      * ビジネスロジックエラー処理
      */
@@ -125,23 +169,14 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * Handle resource not found errors
-     * リソース未発見エラー処理
+     * Handle other runtime errors
+     * その他のランタイムエラー処理
      */
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<ApiResponse<Void>> handleRuntimeException(RuntimeException ex) {
-        // Check if it's a "not found" type message
-        String message = ex.getMessage();
-        if (message != null && (message.contains("not found") || message.contains("not accessible"))) {
-            logger.debug("Resource not found: {}", message);
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(ApiResponse.error(List.of(message)));
-        }
-        
-        // For other RuntimeExceptions, treat as bad request
-        logger.debug("Runtime error: {}", message);
+        logger.debug("Runtime error: {}", ex.getMessage());
         return ResponseEntity.badRequest()
-                .body(ApiResponse.error(List.of(message != null ? message : "Request processing failed")));
+                .body(ApiResponse.error(List.of(ex.getMessage() != null ? ex.getMessage() : "Request processing failed")));
     }
 
     /**

@@ -17,6 +17,7 @@ package cherry.sqlapp2.service;
 
 import cherry.sqlapp2.entity.DatabaseConnection;
 import cherry.sqlapp2.entity.User;
+import cherry.sqlapp2.exception.DatabaseConnectionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -81,7 +82,7 @@ public class DynamicDataSourceService {
                     decryptedPassword
             );
         } catch (SQLException e) {
-            throw new SQLException(
+            throw new DatabaseConnectionException(
                     "Failed to connect to database '" + dbConfig.getConnectionName() + "': " + e.getMessage(),
                     e
             );

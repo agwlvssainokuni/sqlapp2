@@ -57,7 +57,7 @@ public class SchemaController {
     public ApiResponse<DatabaseInfo> getDatabaseInfo(
             @PathVariable Long connectionId,
             Authentication authentication
-    ) throws SQLException {
+    ) {
         User currentUser = getCurrentUser(authentication);
         DatabaseInfo databaseInfo = schemaService.getDatabaseInfo(currentUser, connectionId);
         return ApiResponse.success(databaseInfo);
@@ -72,7 +72,7 @@ public class SchemaController {
             @RequestParam(required = false) String catalog,
             @RequestParam(required = false) String schema,
             Authentication authentication
-    ) throws SQLException {
+    ) {
         User currentUser = getCurrentUser(authentication);
         List<TableInfo> tables = schemaService.getTables(currentUser, connectionId, catalog, schema);
         return ApiResponse.success(tables);
@@ -88,7 +88,7 @@ public class SchemaController {
             @RequestParam(required = false) String catalog,
             @RequestParam(required = false) String schema,
             Authentication authentication
-    ) throws SQLException {
+    ) {
         User currentUser = getCurrentUser(authentication);
         TableDetails tableDetails = schemaService.getTableDetails(currentUser, connectionId, catalog, schema, tableName);
         return ApiResponse.success(tableDetails);
@@ -104,7 +104,7 @@ public class SchemaController {
             @RequestParam(required = false) String catalog,
             @RequestParam(required = false) String schema,
             Authentication authentication
-    ) throws SQLException {
+    ) {
         User currentUser = getCurrentUser(authentication);
         List<ColumnInfo> columns = schemaService.getTableColumns(currentUser, connectionId, catalog, schema, tableName);
         return ApiResponse.success(columns);

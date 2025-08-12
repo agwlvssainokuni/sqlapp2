@@ -16,6 +16,14 @@
     "passwordsMismatch": "Passwords do not match",
     "registrationSuccess": "Registration successful! Please login."
   },
+  "error": {
+    "boundary": {
+      "title": "Something went wrong",
+      "message": "An unexpected error occurred. Please refresh the page and try again.",
+      "details": "Error Details",
+      "reload": "Reload Page"
+    }
+  },
   "navigation": {
     "dashboard": "Dashboard",
     "connections": "Database Connections",

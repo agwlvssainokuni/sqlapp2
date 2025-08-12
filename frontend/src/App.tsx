@@ -26,75 +26,78 @@ import QueryHistoryPage from './components/QueryHistoryPage'
 import QueryBuilderPage from './components/QueryBuilderPage'
 import {AuthProvider} from './context/AuthContext'
 import ProtectedRoute from './components/ProtectedRoute'
+import ErrorBoundary from './components/ErrorBoundary'
 import './App.css'
 
 function App() {
   return (
-    <AuthProvider>
-      <Router>
-        <Routes>
-          <Route path="/login" element={<Login/>}/>
-          <Route path="/register" element={<Register/>}/>
-          <Route
-            path="/dashboard"
-            element={
-              <ProtectedRoute>
-                <Dashboard/>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/sql"
-            element={
-              <ProtectedRoute>
-                <SqlExecutionPage/>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/connections"
-            element={
-              <ProtectedRoute>
-                <ConnectionManagementPage/>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/schema"
-            element={
-              <ProtectedRoute>
-                <SchemaViewerPage/>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/queries"
-            element={
-              <ProtectedRoute>
-                <SavedQueriesPage/>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/history"
-            element={
-              <ProtectedRoute>
-                <QueryHistoryPage/>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/builder"
-            element={
-              <ProtectedRoute>
-                <QueryBuilderPage/>
-              </ProtectedRoute>
-            }
-          />
-          <Route path="/" element={<Navigate to="/dashboard" replace/>}/>
-        </Routes>
-      </Router>
-    </AuthProvider>
+    <ErrorBoundary>
+      <AuthProvider>
+        <Router>
+          <Routes>
+            <Route path="/login" element={<Login/>}/>
+            <Route path="/register" element={<Register/>}/>
+            <Route
+              path="/dashboard"
+              element={
+                <ProtectedRoute>
+                  <Dashboard/>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/sql"
+              element={
+                <ProtectedRoute>
+                  <SqlExecutionPage/>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/connections"
+              element={
+                <ProtectedRoute>
+                  <ConnectionManagementPage/>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/schema"
+              element={
+                <ProtectedRoute>
+                  <SchemaViewerPage/>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/queries"
+              element={
+                <ProtectedRoute>
+                  <SavedQueriesPage/>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/history"
+              element={
+                <ProtectedRoute>
+                  <QueryHistoryPage/>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/builder"
+              element={
+                <ProtectedRoute>
+                  <QueryBuilderPage/>
+                </ProtectedRoute>
+              }
+            />
+            <Route path="/" element={<Navigate to="/dashboard" replace/>}/>
+          </Routes>
+        </Router>
+      </AuthProvider>
+    </ErrorBoundary>
   )
 }
 
