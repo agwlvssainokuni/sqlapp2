@@ -276,6 +276,7 @@ class AuthControllerIntegrationTest extends BaseIntegrationTest {
             );
 
             // Step 3: 再度ログイン
+            Thread.sleep(1500L); // リフレッシュトークンのunique制約違反を回避するため
             var loginResult2 = mockMvc.perform(post("/api/auth/login")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(toJson(loginRequest)))

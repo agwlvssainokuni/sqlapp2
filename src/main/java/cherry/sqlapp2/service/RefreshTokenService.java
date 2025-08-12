@@ -45,11 +45,11 @@ public class RefreshTokenService {
      */
     public RefreshToken createRefreshToken(User user) {
         // Revoke existing active tokens for security (optional, but recommended for single session)
-        // revokeAllUserTokens(user);
-        
+        revokeAllUserTokens(user);
+
         String tokenValue = jwtUtil.generateRefreshToken(user.getUsername());
         LocalDateTime expiresAt = LocalDateTime.now().plusSeconds(jwtUtil.getRefreshTokenExpiration());
-        
+
         RefreshToken refreshToken = new RefreshToken(tokenValue, user, expiresAt);
         return refreshTokenRepository.save(refreshToken);
     }
@@ -75,20 +75,20 @@ public class RefreshTokenService {
      */
     public Optional<RefreshToken> useRefreshToken(String token) {
         Optional<RefreshToken> refreshTokenOpt = validateRefreshToken(token);
-        
+
         if (refreshTokenOpt.isPresent()) {
             RefreshToken refreshToken = refreshTokenOpt.get();
             refreshToken.updateLastUsed();
-            
+
             // If sliding expiration is enabled, extend the refresh token expiration
             if (jwtUtil.isSlidingRefreshExpiration()) {
                 LocalDateTime newExpiresAt = LocalDateTime.now().plusSeconds(jwtUtil.getRefreshTokenExpiration());
                 refreshToken.setExpiresAt(newExpiresAt);
             }
-            
+
             return Optional.of(refreshTokenRepository.save(refreshToken));
         }
-        
+
         return Optional.empty();
     }
 

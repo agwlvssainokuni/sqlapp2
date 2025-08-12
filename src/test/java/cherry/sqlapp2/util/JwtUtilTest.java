@@ -27,7 +27,8 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.Date;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @DisplayName("JwtUtil - JWTトークン操作")
 class JwtUtilTest {
@@ -58,7 +59,7 @@ class JwtUtilTest {
             assertThat(token).isNotNull()
                     .isNotBlank()
                     .contains(".");
-            
+
             // トークンはドットで区切られた3つの部分を持つべき (header.payload.signature)
             String[] tokenParts = token.split("\\.");
             assertThat(tokenParts).hasSize(3);
@@ -164,7 +165,7 @@ class JwtUtilTest {
             ReflectionTestUtils.setField(differentKeyUtil, "accessTokenExpiration", testExpiration);
             ReflectionTestUtils.setField(differentKeyUtil, "refreshTokenExpiration", testExpiration * 24);
             ReflectionTestUtils.setField(differentKeyUtil, "slidingRefreshExpiration", false);
-            
+
             String tokenWithDifferentKey = differentKeyUtil.generateAccessToken(testUsername);
 
             assertThatThrownBy(() -> jwtUtil.extractUsername(tokenWithDifferentKey))
@@ -215,7 +216,7 @@ class JwtUtilTest {
 
         @Test
         @DisplayName("期限切れトークンを拒否する")
-        void shouldRejectExpiredToken() {
+        void shouldRejectExpiredToken() throws InterruptedException {
             // 非常に短い有効期限のutilを作成
             JwtUtil shortExpirationUtil = new JwtUtil();
             ReflectionTestUtils.setField(shortExpirationUtil, "secret", testSecret);
@@ -224,13 +225,9 @@ class JwtUtilTest {
             ReflectionTestUtils.setField(shortExpirationUtil, "slidingRefreshExpiration", false);
 
             String expiredToken = shortExpirationUtil.generateAccessToken(testUsername);
-            
+
             // トークンの有効期限切れを待つ
-            try {
-                Thread.sleep(10);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
+            Thread.sleep(1500L); // 1.5秒待機
 
             Boolean isValid = jwtUtil.validateAccessToken(expiredToken, testUsername);
 
@@ -297,7 +294,7 @@ class JwtUtilTest {
 
         @Test
         @DisplayName("期限切れトークンを正しく検出する")
-        void shouldDetectExpiredTokenCorrectly() {
+        void shouldDetectExpiredTokenCorrectly() throws InterruptedException {
             // 非常に短い有効期限のutilを作成
             JwtUtil shortExpirationUtil = new JwtUtil();
             ReflectionTestUtils.setField(shortExpirationUtil, "secret", testSecret);
@@ -306,13 +303,9 @@ class JwtUtilTest {
             ReflectionTestUtils.setField(shortExpirationUtil, "slidingRefreshExpiration", false);
 
             String token = shortExpirationUtil.generateAccessToken(testUsername);
-            
+
             // トークンの有効期限切れを待つ
-            try {
-                Thread.sleep(10);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
+            Thread.sleep(1500L); // 1.5秒待機
 
             // クレームを抽出しようとするとExpiredJwtExceptionがスローされるべき
             assertThatThrownBy(() -> jwtUtil.extractUsername(token))
