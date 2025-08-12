@@ -28,6 +28,9 @@ import {AuthProvider} from './context/AuthContext'
 import ProtectedRoute from './components/ProtectedRoute'
 import './App.css'
 
+// Import test utilities for console testing
+import './test/jwtUtilities.test'
+
 function App() {
   return (
     <AuthProvider>
