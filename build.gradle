@@ -1,5 +1,5 @@
 plugins {
-    id 'java'
+    id 'java-library'
     id 'war'
     id 'org.springframework.boot' version '3.5.4'
     id 'io.spring.dependency-management' version '1.1.7'
@@ -7,18 +7,40 @@ plugins {
     id 'org.owasp.dependencycheck' version '10.0.4'
 }
 
-group = 'com.sqlapp2'
-version = '1.0.0'
-java.sourceCompatibility = JavaVersion.VERSION_21
-
-configurations {
-    compileOnly {
-        extendsFrom annotationProcessor
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
     }
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
 }
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+    options.compilerArgs += ['-Xlint:unchecked', '-Xlint:deprecation']
+}
+
+tasks.withType(Test).configureEach {
+    useJUnitPlatform()
+    jvmArgs += "-javaagent:${configurations.javaagent.asPath}"
+}
+
+configurations { javaagent }
 
 repositories {
     mavenCentral()
+}
+
+dependencyManagement {
+    imports {
+        mavenBom 'org.springframework.boot:spring-boot-dependencies:3.5.4'
+    }
+    dependencies {
+        // Ensure we use the latest stable versions of JJWT
+        dependency 'io.jsonwebtoken:jjwt-api:0.12.6'
+        dependency 'io.jsonwebtoken:jjwt-impl:0.12.6'
+        dependency 'io.jsonwebtoken:jjwt-jackson:0.12.6'
+    }
 }
 
 dependencies {
@@ -27,45 +49,41 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
-    
+
     // Database
     runtimeOnly 'com.h2database:h2'
-    
+
     // JDBC Drivers for external databases
     runtimeOnly 'com.mysql:mysql-connector-j'
     runtimeOnly 'org.postgresql:postgresql'
     runtimeOnly 'org.mariadb.jdbc:mariadb-java-client'
-    
+
     // Password Encryption
     implementation 'org.springframework.security:spring-security-crypto'
-    
+
     // JWT (Updated to latest 0.12.x for security fixes)
-    implementation 'io.jsonwebtoken:jjwt-api:0.12.6'
-    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.6'
-    runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.6'
-    
+    implementation 'io.jsonwebtoken:jjwt-api'
+    runtimeOnly 'io.jsonwebtoken:jjwt-impl'
+    runtimeOnly 'io.jsonwebtoken:jjwt-jackson'
+
     // JSON Processing
     implementation 'com.fasterxml.jackson.core:jackson-databind'
-    
+
     // Development Tools
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
-    
+
     // WAR packaging
     providedRuntime 'org.springframework.boot:spring-boot-starter-tomcat'
-    
+
     // Testing
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test'
-}
-
-tasks.named('test') {
-    useJUnitPlatform()
+    javaagent('org.mockito:mockito-core') { transitive = false }
 }
 
 // Frontend build integration
-task buildFrontend(type: Exec) {
+tasks.register('buildFrontend', Exec) {
     workingDir 'frontend'
-    
     // Use shell to properly resolve npm from PATH (handles Volta/nvm/etc)
     if (System.getProperty('os.name').toLowerCase().contains('windows')) {
         commandLine 'cmd', '/c', 'npm', 'run', 'build'
@@ -74,7 +92,7 @@ task buildFrontend(type: Exec) {
     }
 }
 
-task copyFrontendBuild(type: Copy) {
+tasks.register('copyFrontendBuild', Copy) {
     dependsOn buildFrontend
     from 'frontend/dist'
     into 'src/main/resources/static'
@@ -82,19 +100,15 @@ task copyFrontendBuild(type: Copy) {
 
 processResources.dependsOn copyFrontendBuild
 
-war {
-    archiveFileName = 'sqlapp2.war'
-}
-
 // Dependency Updates Plugin Configuration
 dependencyUpdates {
     rejectVersionIf {
-        candidate.version.contains('alpha') || 
-        candidate.version.contains('beta') || 
-        candidate.version.contains('rc') ||
-        candidate.version.contains('CR') ||
-        candidate.version.contains('M') ||
-        candidate.version.contains('SNAPSHOT')
+        candidate.version.contains('alpha') ||
+                candidate.version.contains('beta') ||
+                candidate.version.contains('rc') ||
+                candidate.version.contains('CR') ||
+                candidate.version.contains('M') ||
+                candidate.version.contains('SNAPSHOT')
     }
 }
 

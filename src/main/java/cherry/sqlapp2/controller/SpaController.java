@@ -22,7 +22,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @Controller
 public class SpaController {
 
-    @RequestMapping(value = {"/", "/login", "/register", "/dashboard"})
+    @RequestMapping(value = {
+            "/",
+            "/login", "/register",
+            "/dashboard",
+            "/sql", "/connections", "/schema",
+            "/queries", "/history", "/builder"
+    })
     public String spa() {
         return "forward:/index.html";
     }
