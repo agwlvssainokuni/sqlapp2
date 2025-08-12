@@ -9,9 +9,9 @@ INSERT INTO users (id, username, password, email, created_at, updated_at) VALUES
 
 -- Test Database Connections (encrypted passwords using test key)
 INSERT INTO database_connections (id, user_id, connection_name, database_type, host, port, database_name, username, encrypted_password, created_at, updated_at, is_active) VALUES
-(1, 1, 'Test MySQL Connection', 'MYSQL', 'localhost', 3306, 'testdb', 'testuser', 'encrypted_test_password_1', '2024-01-01 10:30:00', '2024-01-01 10:30:00', true),
-(2, 1, 'Test PostgreSQL Connection', 'POSTGRESQL', 'localhost', 5432, 'testdb', 'testuser', 'encrypted_test_password_2', '2024-01-01 10:45:00', '2024-01-01 10:45:00', true),
-(3, 2, 'Test MariaDB Connection', 'MARIADB', 'localhost', 3306, 'testdb', 'testuser', 'encrypted_test_password_3', '2024-01-01 11:30:00', '2024-01-01 11:30:00', true);
+(1, 1, 'MySQL Connection', 'MYSQL', 'localhost', 3306, 'testdb', 'testuser', 'encrypted_test_password_1', '2024-01-01 10:30:00', '2024-01-01 10:30:00', true),
+(2, 1, 'PostgreSQL Connection', 'POSTGRESQL', 'localhost', 5432, 'testdb', 'testuser', 'encrypted_test_password_2', '2024-01-01 10:45:00', '2024-01-01 10:45:00', true),
+(3, 2, 'MariaDB Connection', 'MARIADB', 'localhost', 3306, 'testdb', 'testuser', 'encrypted_test_password_3', '2024-01-01 11:30:00', '2024-01-01 11:30:00', true);
 
 -- Test Saved Queries
 INSERT INTO saved_queries (id, user_id, connection_id, name, description, sql_content, sharing_scope, execution_count, last_executed_at, created_at, updated_at, parameter_definitions) VALUES
