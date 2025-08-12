@@ -31,9 +31,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static org.hamcrest.Matchers.*;
 
 /**
  * QueryController統合テスト
@@ -60,12 +60,12 @@ public class QueryControllerIntegrationTest extends BaseIntegrationTest {
         request.setSqlContent("SELECT * FROM users WHERE id = :userId");
         request.setDescription("Test description");
         request.setSharingScope(SavedQuery.SharingScope.PRIVATE);
-        
+
         // パラメータ定義
         Map<String, String> params = new HashMap<>();
         params.put("userId", "INTEGER");
         request.setParameterDefinitions(params);
-        
+
         return request;
     }
 
@@ -82,21 +82,21 @@ public class QueryControllerIntegrationTest extends BaseIntegrationTest {
             var authHeader = getTestUser1AuthHeader();
 
             mockMvc.perform(post("/api/queries/saved")
-                        .header("Authorization", authHeader)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(toJson(request)))
-                .andExpect(status().isCreated())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.ok").value(true))
-                .andExpect(jsonPath("$.error").doesNotExist())
-                .andExpect(jsonPath("$.data").exists())
-                .andExpect(jsonPath("$.data.id").isNumber())
-                .andExpect(jsonPath("$.data.name").value("Test Query"))
-                .andExpect(jsonPath("$.data.sqlContent").value("SELECT * FROM users WHERE id = :userId"))
-                .andExpect(jsonPath("$.data.description").value("Test description"))
-                .andExpect(jsonPath("$.data.sharingScope").value("PRIVATE"))
-                .andExpect(jsonPath("$.data.username").value("testuser1"))
-                .andExpect(jsonPath("$.data.parameterDefinitions.userId").value("INTEGER"));
+                            .header("Authorization", authHeader)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(toJson(request)))
+                    .andExpect(status().isCreated())
+                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(jsonPath("$.ok").value(true))
+                    .andExpect(jsonPath("$.error").doesNotExist())
+                    .andExpect(jsonPath("$.data").exists())
+                    .andExpect(jsonPath("$.data.id").isNumber())
+                    .andExpect(jsonPath("$.data.name").value("Test Query"))
+                    .andExpect(jsonPath("$.data.sqlContent").value("SELECT * FROM users WHERE id = :userId"))
+                    .andExpect(jsonPath("$.data.description").value("Test description"))
+                    .andExpect(jsonPath("$.data.sharingScope").value("PRIVATE"))
+                    .andExpect(jsonPath("$.data.username").value("testuser1"))
+                    .andExpect(jsonPath("$.data.parameterDefinitions.userId").value("INTEGER"));
         }
 
         @Test
@@ -109,27 +109,27 @@ public class QueryControllerIntegrationTest extends BaseIntegrationTest {
 
             // まずクエリを保存
             var createResult = mockMvc.perform(post("/api/queries/saved")
-                        .header("Authorization", authHeader)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(toJson(request)))
-                .andExpect(status().isCreated())
-                .andReturn();
+                            .header("Authorization", authHeader)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(toJson(request)))
+                    .andExpect(status().isCreated())
+                    .andReturn();
 
             // クエリIDを抽出（IntegerからLongに変換）
             Integer queryIdInt = com.jayway.jsonpath.JsonPath.read(
-                createResult.getResponse().getContentAsString(), 
-                "$.data.id"
+                    createResult.getResponse().getContentAsString(),
+                    "$.data.id"
             );
             Long queryId = queryIdInt.longValue();
 
             // クエリを取得
             mockMvc.perform(get("/api/queries/saved/{queryId}", queryId)
-                        .header("Authorization", authHeader))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.ok").value(true))
-                .andExpect(jsonPath("$.data.id").value(queryId.intValue()))
-                .andExpect(jsonPath("$.data.name").value("Test Query"))
-                .andExpect(jsonPath("$.data.sqlContent").value("SELECT * FROM users WHERE id = :userId"));
+                            .header("Authorization", authHeader))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.ok").value(true))
+                    .andExpect(jsonPath("$.data.id").value(queryId.intValue()))
+                    .andExpect(jsonPath("$.data.name").value("Test Query"))
+                    .andExpect(jsonPath("$.data.sqlContent").value("SELECT * FROM users WHERE id = :userId"));
         }
 
         @Test
@@ -142,15 +142,15 @@ public class QueryControllerIntegrationTest extends BaseIntegrationTest {
 
             // まずクエリを保存
             var createResult = mockMvc.perform(post("/api/queries/saved")
-                        .header("Authorization", authHeader)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(toJson(request)))
-                .andExpect(status().isCreated())
-                .andReturn();
+                            .header("Authorization", authHeader)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(toJson(request)))
+                    .andExpect(status().isCreated())
+                    .andReturn();
 
             Integer queryIdInt = com.jayway.jsonpath.JsonPath.read(
-                createResult.getResponse().getContentAsString(), 
-                "$.data.id"
+                    createResult.getResponse().getContentAsString(),
+                    "$.data.id"
             );
             Long queryId = queryIdInt.longValue();
 
@@ -160,15 +160,15 @@ public class QueryControllerIntegrationTest extends BaseIntegrationTest {
             request.setSharingScope(SavedQuery.SharingScope.PUBLIC);
 
             mockMvc.perform(put("/api/queries/saved/{queryId}", queryId)
-                        .header("Authorization", authHeader)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(toJson(request)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.ok").value(true))
-                .andExpect(jsonPath("$.data.id").value(queryId.intValue()))
-                .andExpect(jsonPath("$.data.name").value("Updated Test Query"))
-                .andExpect(jsonPath("$.data.description").value("Updated description"))
-                .andExpect(jsonPath("$.data.sharingScope").value("PUBLIC"));
+                            .header("Authorization", authHeader)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(toJson(request)))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.ok").value(true))
+                    .andExpect(jsonPath("$.data.id").value(queryId.intValue()))
+                    .andExpect(jsonPath("$.data.name").value("Updated Test Query"))
+                    .andExpect(jsonPath("$.data.description").value("Updated description"))
+                    .andExpect(jsonPath("$.data.sharingScope").value("PUBLIC"));
         }
 
         @Test
@@ -181,30 +181,30 @@ public class QueryControllerIntegrationTest extends BaseIntegrationTest {
 
             // まずクエリを保存
             var createResult = mockMvc.perform(post("/api/queries/saved")
-                        .header("Authorization", authHeader)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(toJson(request)))
-                .andExpect(status().isCreated())
-                .andReturn();
+                            .header("Authorization", authHeader)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(toJson(request)))
+                    .andExpect(status().isCreated())
+                    .andReturn();
 
             Integer queryIdInt = com.jayway.jsonpath.JsonPath.read(
-                createResult.getResponse().getContentAsString(), 
-                "$.data.id"
+                    createResult.getResponse().getContentAsString(),
+                    "$.data.id"
             );
             Long queryId = queryIdInt.longValue();
 
             // クエリを削除
             mockMvc.perform(delete("/api/queries/saved/{queryId}", queryId)
-                        .header("Authorization", authHeader))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.ok").value(true));
+                            .header("Authorization", authHeader))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.ok").value(true));
 
             // 削除後は取得できないことを確認（400エラーが返される）
             mockMvc.perform(get("/api/queries/saved/{queryId}", queryId)
-                        .header("Authorization", authHeader))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.ok").value(false))
-                .andExpect(jsonPath("$.error").exists());
+                            .header("Authorization", authHeader))
+                    .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.ok").value(false))
+                    .andExpect(jsonPath("$.error").exists());
         }
 
         @Test
@@ -218,21 +218,21 @@ public class QueryControllerIntegrationTest extends BaseIntegrationTest {
             for (int i = 1; i <= 3; i++) {
                 var request = createTestQueryRequest();
                 request.setName("Test Query " + i);
-                
+
                 mockMvc.perform(post("/api/queries/saved")
-                            .header("Authorization", authHeader)
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(toJson(request)))
-                    .andExpect(status().isCreated());
+                                .header("Authorization", authHeader)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(toJson(request)))
+                        .andExpect(status().isCreated());
             }
 
             // クエリ一覧を取得（少なくとも3つ以上のクエリが存在することを確認）
             mockMvc.perform(get("/api/queries/saved")
-                        .header("Authorization", authHeader))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.ok").value(true))
-                .andExpect(jsonPath("$.data").isArray())
-                .andExpect(jsonPath("$.data.length()").value(greaterThanOrEqualTo(3)));
+                            .header("Authorization", authHeader))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.ok").value(true))
+                    .andExpect(jsonPath("$.data").isArray())
+                    .andExpect(jsonPath("$.data.length()").value(greaterThanOrEqualTo(3)));
         }
     }
 
@@ -250,12 +250,12 @@ public class QueryControllerIntegrationTest extends BaseIntegrationTest {
             var authHeader = getTestUser1AuthHeader();
 
             mockMvc.perform(post("/api/queries/saved")
-                        .header("Authorization", authHeader)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(toJson(request)))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.ok").value(false))
-                .andExpect(jsonPath("$.error").exists());
+                            .header("Authorization", authHeader)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(toJson(request)))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.ok").value(false))
+                    .andExpect(jsonPath("$.error").exists());
         }
 
         @Test
@@ -268,12 +268,12 @@ public class QueryControllerIntegrationTest extends BaseIntegrationTest {
             var authHeader = getTestUser1AuthHeader();
 
             mockMvc.perform(post("/api/queries/saved")
-                        .header("Authorization", authHeader)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(toJson(request)))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.ok").value(false))
-                .andExpect(jsonPath("$.error").exists());
+                            .header("Authorization", authHeader)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(toJson(request)))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.ok").value(false))
+                    .andExpect(jsonPath("$.error").exists());
         }
 
         @Test
@@ -286,12 +286,12 @@ public class QueryControllerIntegrationTest extends BaseIntegrationTest {
             var authHeader = getTestUser1AuthHeader();
 
             mockMvc.perform(post("/api/queries/saved")
-                        .header("Authorization", authHeader)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(toJson(request)))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.ok").value(false))
-                .andExpect(jsonPath("$.error").exists());
+                            .header("Authorization", authHeader)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(toJson(request)))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.ok").value(false))
+                    .andExpect(jsonPath("$.error").exists());
         }
     }
 
@@ -307,9 +307,9 @@ public class QueryControllerIntegrationTest extends BaseIntegrationTest {
             var request = createTestQueryRequest();
 
             mockMvc.perform(post("/api/queries/saved")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(toJson(request)))
-                .andExpect(status().isForbidden());
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(toJson(request)))
+                    .andExpect(status().isForbidden());
         }
 
         @Test
@@ -323,23 +323,23 @@ public class QueryControllerIntegrationTest extends BaseIntegrationTest {
 
             // user1でクエリを作成
             var createResult = mockMvc.perform(post("/api/queries/saved")
-                        .header("Authorization", user1AuthHeader)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(toJson(request)))
-                .andExpect(status().isCreated())
-                .andReturn();
+                            .header("Authorization", user1AuthHeader)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(toJson(request)))
+                    .andExpect(status().isCreated())
+                    .andReturn();
 
             Integer queryIdInt = com.jayway.jsonpath.JsonPath.read(
-                createResult.getResponse().getContentAsString(), 
-                "$.data.id"
+                    createResult.getResponse().getContentAsString(),
+                    "$.data.id"
             );
             Long queryId = queryIdInt.longValue();
 
             // user2で同じクエリにアクセス試行（403 or 400エラーを許可）
             mockMvc.perform(get("/api/queries/saved/{queryId}", queryId)
-                        .header("Authorization", user2AuthHeader))
-                .andExpect(status().is4xxClientError())
-                .andExpect(jsonPath("$.ok").value(false));
+                            .header("Authorization", user2AuthHeader))
+                    .andExpect(status().is4xxClientError())
+                    .andExpect(jsonPath("$.ok").value(false));
         }
     }
 }
