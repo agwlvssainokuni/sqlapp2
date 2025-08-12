@@ -16,6 +16,7 @@
 package cherry.sqlapp2.controller;
 
 import cherry.sqlapp2.dto.ApiResponse;
+import cherry.sqlapp2.dto.PagingRequest;
 import cherry.sqlapp2.dto.SqlExecutionRequest;
 import cherry.sqlapp2.dto.SqlExecutionResult;
 import cherry.sqlapp2.dto.SqlValidationResult;
@@ -24,6 +25,7 @@ import cherry.sqlapp2.entity.User;
 import cherry.sqlapp2.service.QueryManagementService;
 import cherry.sqlapp2.service.SqlExecutionService;
 import cherry.sqlapp2.service.UserService;
+import cherry.sqlapp2.util.SqlAnalyzer;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -97,6 +99,12 @@ public class SqlExecutionController {
                         queryManagementService.getAccessibleQuery(savedQueryId, currentUser)
                 ).orElse(null);
 
+        // Extract pagination request if provided
+        PagingRequest pagingRequest = null;
+        if (request.getPagingRequest() != null) {
+            pagingRequest = request.getPagingRequest();
+        }
+
         // Check if this is a parameterized query
         if (request.getParameters() != null && !request.getParameters().isEmpty()) {
             result = sqlExecutionService.executeParameterizedQuery(
@@ -105,14 +113,16 @@ public class SqlExecutionController {
                     request.getSql(),
                     request.getParameters(),
                     request.getParameterTypes(),
-                    savedQuery
+                    savedQuery,
+                    pagingRequest
             );
         } else {
             result = sqlExecutionService.executeQuery(
                     currentUser,
                     request.getConnectionId(),
                     request.getSql(),
-                    savedQuery
+                    savedQuery,
+                    pagingRequest
             );
         }
 

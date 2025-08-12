@@ -15,11 +15,15 @@
  */
 package cherry.sqlapp2.service;
 
+import cherry.sqlapp2.dto.PagedResult;
+import cherry.sqlapp2.dto.PagingRequest;
 import cherry.sqlapp2.dto.SqlExecutionResult;
 import cherry.sqlapp2.entity.QueryHistory;
 import cherry.sqlapp2.entity.SavedQuery;
 import cherry.sqlapp2.entity.User;
+import cherry.sqlapp2.exception.InvalidQueryException;
 import cherry.sqlapp2.repository.DatabaseConnectionRepository;
+import cherry.sqlapp2.util.SqlAnalyzer;
 import cherry.sqlapp2.util.SqlParameterExtractor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -43,6 +47,12 @@ public class SqlExecutionService {
     
     @Value("${app.sql.execution.max-rows:10000}")
     private int maxRows;
+    
+    @Value("${app.sql.execution.default-page-size:100}")
+    private int defaultPageSize;
+    
+    @Value("${app.sql.execution.max-page-size:1000}")
+    private int maxPageSize;
 
     @Autowired
     public SqlExecutionService(
@@ -64,15 +74,27 @@ public class SqlExecutionService {
             String sql,
             SavedQuery savedQuery
     ) {
+        return executeQuery(user, connectionId, sql, savedQuery, null);
+    }
+
+    /**
+     * Execute SQL query with optional pagination support
+     */
+    public SqlExecutionResult executeQuery(
+            User user,
+            Long connectionId,
+            String sql,
+            SavedQuery savedQuery,
+            PagingRequest pagingRequest
+    ) {
+
+        // Validate pagination request if provided
+        if (pagingRequest != null && pagingRequest.enabled()) {
+            validatePagingRequest(sql, pagingRequest);
+        }
 
         // Determine if this is a SELECT query or other operation
-        String trimmedSql = sql.trim().toLowerCase();
-        boolean isSelect = trimmedSql.startsWith("select") ||
-                trimmedSql.startsWith("with") ||
-                trimmedSql.startsWith("show") ||
-                trimmedSql.startsWith("describe") ||
-                trimmedSql.startsWith("desc") ||
-                trimmedSql.startsWith("explain");
+        boolean isSelect = SqlAnalyzer.isSelectQuery(sql);
 
         long startTime = System.currentTimeMillis();
 
@@ -88,8 +110,11 @@ public class SqlExecutionService {
             }
 
             SqlExecutionResult.SqlResultData data = null;
-            if (isSelect) {
-                // Execute SELECT query
+            if (isSelect && pagingRequest != null && pagingRequest.enabled()) {
+                // Execute with pagination
+                data = executeSelectWithPagination(connection, sql, pagingRequest);
+            } else if (isSelect) {
+                // Execute SELECT query without pagination
                 try (ResultSet resultSet = statement.executeQuery(sql)) {
                     data = processResultSet(resultSet);
                 }
@@ -200,72 +225,91 @@ public class SqlExecutionService {
             Map<String, String> parameterTypes,
             SavedQuery savedQuery
     ) {
+        return executeParameterizedQuery(user, connectionId, sql, parameters, parameterTypes, savedQuery, null);
+    }
+
+    /**
+     * Execute parameterized SQL query with optional pagination support
+     */
+    public SqlExecutionResult executeParameterizedQuery(
+            User user,
+            Long connectionId,
+            String sql,
+            Map<String, Object> parameters,
+            Map<String, String> parameterTypes,
+            SavedQuery savedQuery,
+            PagingRequest pagingRequest
+    ) {
+
+        // Validate pagination request if provided
+        if (pagingRequest != null && pagingRequest.enabled()) {
+            validatePagingRequest(sql, pagingRequest);
+        }
 
         // Determine if this is a SELECT query or other operation
-        String trimmedSql = sql.trim().toLowerCase();
-        boolean isSelect = trimmedSql.startsWith("select") ||
-                trimmedSql.startsWith("with") ||
-                trimmedSql.startsWith("show") ||
-                trimmedSql.startsWith("describe") ||
-                trimmedSql.startsWith("desc") ||
-                trimmedSql.startsWith("explain");
+        boolean isSelect = SqlAnalyzer.isSelectQuery(sql);
 
         long startTime = System.currentTimeMillis();
 
         try (Connection connection = dataSourceService.getConnection(user, connectionId)) {
 
-            // Convert named parameters to positioned parameters
-            ParameterizedQuery paramQuery = convertNamedParameters(sql, parameters, parameterTypes);
+            SqlExecutionResult.SqlResultData data = null;
+            if (isSelect && pagingRequest != null && pagingRequest.enabled()) {
+                // Execute with pagination
+                data = executeParameterizedSelectWithPagination(connection, sql, parameters, parameterTypes, pagingRequest);
+            } else {
+                // Convert named parameters to positioned parameters
+                ParameterizedQuery paramQuery = convertNamedParameters(sql, parameters, parameterTypes);
 
-            try (PreparedStatement statement = connection.prepareStatement(paramQuery.sql())) {
+                try (PreparedStatement statement = connection.prepareStatement(paramQuery.sql())) {
 
-                // Set query timeout
-                statement.setQueryTimeout(queryTimeoutMs / 1000); // Convert to seconds
-                
-                // Set max rows for SELECT queries
-                if (isSelect) {
-                    statement.setMaxRows(maxRows);
-                }
-
-                // Set parameters
-                setParameters(statement, paramQuery.parameters(), paramQuery.parameterTypes());
-
-                SqlExecutionResult.SqlResultData data = null;
-                if (isSelect) {
-                    // Execute SELECT query
-                    try (ResultSet resultSet = statement.executeQuery()) {
-                        data = processResultSet(resultSet);
+                    // Set query timeout
+                    statement.setQueryTimeout(queryTimeoutMs / 1000); // Convert to seconds
+                    
+                    // Set max rows for SELECT queries
+                    if (isSelect) {
+                        statement.setMaxRows(maxRows);
                     }
-                } else {
-                    // Execute UPDATE/INSERT/DELETE/DDL
-                    @SuppressWarnings("unused")
-                    int affectedRows = statement.executeUpdate();
+
+                    // Set parameters
+                    setParameters(statement, paramQuery.parameters(), paramQuery.parameterTypes());
+
+                    if (isSelect) {
+                        // Execute SELECT query
+                        try (ResultSet resultSet = statement.executeQuery()) {
+                            data = processResultSet(resultSet);
+                        }
+                    } else {
+                        // Execute UPDATE/INSERT/DELETE/DDL
+                        @SuppressWarnings("unused")
+                        int affectedRows = statement.executeUpdate();
+                    }
                 }
-                long executionTime = System.currentTimeMillis() - startTime;
-                LocalDateTime executedAt = LocalDateTime.now();
-
-                // Record query execution in history
-                cherry.sqlapp2.entity.QueryHistory queryHistory = recordQueryExecution(
-                        user,
-                        connectionId,
-                        sql,
-                        parameters,
-                        executionTime,
-                        Optional.ofNullable(data).map(SqlExecutionResult.SqlResultData::rowCount).orElse(null),
-                        true,
-                        null,
-                        savedQuery
-                );
-
-                return SqlExecutionResult.success(
-                        executedAt,
-                        executionTime,
-                        sql,
-                        data,
-                        Optional.ofNullable(queryHistory).map(QueryHistory::getId).orElse(null),
-                        Optional.ofNullable(savedQuery).map(SavedQuery::getId).orElse(null)
-                );
             }
+            long executionTime = System.currentTimeMillis() - startTime;
+            LocalDateTime executedAt = LocalDateTime.now();
+
+            // Record query execution in history
+            cherry.sqlapp2.entity.QueryHistory queryHistory = recordQueryExecution(
+                    user,
+                    connectionId,
+                    sql,
+                    parameters,
+                    executionTime,
+                    Optional.ofNullable(data).map(SqlExecutionResult.SqlResultData::rowCount).orElse(null),
+                    true,
+                    null,
+                    savedQuery
+            );
+
+            return SqlExecutionResult.success(
+                    executedAt,
+                    executionTime,
+                    sql,
+                    data,
+                    Optional.ofNullable(queryHistory).map(QueryHistory::getId).orElse(null),
+                    Optional.ofNullable(savedQuery).map(SavedQuery::getId).orElse(null)
+            );
 
         } catch (SQLException ex) {
             long executionTime = System.currentTimeMillis() - startTime;
@@ -360,7 +404,244 @@ public class SqlExecutionService {
                 columns,
                 columnDetails,
                 rows,
-                rowCount
+                rowCount,
+                null // No pagination info for regular processing
+        );
+    }
+
+    /**
+     * Validate pagination request
+     */
+    private void validatePagingRequest(String sql, PagingRequest pagingRequest) {
+        // Check page and pageSize parameters
+        if (pagingRequest.page() < 0) {
+            throw new InvalidQueryException("Page number must be non-negative");
+        }
+        
+        if (pagingRequest.pageSize() <= 0 || pagingRequest.pageSize() > maxPageSize) {
+            throw new InvalidQueryException("Page size must be between 1 and " + maxPageSize);
+        }
+
+        // Check SQL compatibility
+        SqlAnalyzer.PagingCompatibility compatibility = SqlAnalyzer.getPagingCompatibility(sql);
+        
+        switch (compatibility) {
+            case NOT_SELECT:
+                throw new InvalidQueryException("Pagination is only supported for SELECT queries");
+            case HAS_LIMIT_OFFSET:
+                throw new InvalidQueryException("Cannot apply pagination: SQL already contains LIMIT/OFFSET clause");
+            case NO_ORDER_BY:
+                if (!pagingRequest.ignoreOrderByWarning()) {
+                    throw new InvalidQueryException("Pagination without ORDER BY may produce inconsistent results. " +
+                            "Add ORDER BY clause or set ignoreOrderByWarning=true");
+                }
+                break;
+            case COMPATIBLE:
+                // All good
+                break;
+        }
+    }
+
+    /**
+     * Execute SELECT query with pagination using LIMIT/OFFSET
+     */
+    private SqlExecutionResult.SqlResultData executeSelectWithPagination(
+            Connection connection, 
+            String sql, 
+            PagingRequest pagingRequest) throws SQLException {
+        
+        // Calculate offset
+        int offset = pagingRequest.page() * pagingRequest.pageSize();
+        
+        // Modify SQL to add LIMIT and OFFSET
+        String paginatedSql = sql + " LIMIT " + pagingRequest.pageSize() + " OFFSET " + offset;
+        
+        try (Statement statement = connection.createStatement()) {
+            statement.setQueryTimeout(queryTimeoutMs / 1000);
+            
+            try (ResultSet resultSet = statement.executeQuery(paginatedSql)) {
+                SqlExecutionResult.SqlResultData baseResult = processResultSetWithoutPaging(resultSet);
+                
+                // Get total count for pagination info
+                long totalCount = getTotalCount(connection, sql);
+                
+                // Create paged result
+                PagedResult<List<Object>> pagedResult = PagedResult.of(
+                    baseResult.rows(),
+                    pagingRequest.page(),
+                    pagingRequest.pageSize(),
+                    totalCount
+                );
+                
+                // Return enhanced result with pagination info
+                return new SqlExecutionResult.SqlResultData(
+                    baseResult.columns(),
+                    baseResult.columnDetails(),
+                    baseResult.rows(),
+                    baseResult.rowCount(),
+                    pagedResult
+                );
+            }
+        }
+    }
+
+    /**
+     * Execute parameterized SELECT query with pagination using LIMIT/OFFSET
+     */
+    private SqlExecutionResult.SqlResultData executeParameterizedSelectWithPagination(
+            Connection connection,
+            String sql,
+            Map<String, Object> parameters,
+            Map<String, String> parameterTypes,
+            PagingRequest pagingRequest) throws SQLException {
+        
+        // Calculate offset
+        int offset = pagingRequest.page() * pagingRequest.pageSize();
+        
+        // Modify SQL to add LIMIT and OFFSET
+        String paginatedSql = sql + " LIMIT " + pagingRequest.pageSize() + " OFFSET " + offset;
+        
+        // Convert named parameters to positioned parameters for paginated SQL
+        ParameterizedQuery paramQuery = convertNamedParameters(paginatedSql, parameters, parameterTypes);
+        
+        try (PreparedStatement statement = connection.prepareStatement(paramQuery.sql())) {
+            statement.setQueryTimeout(queryTimeoutMs / 1000);
+            
+            // Set parameters
+            setParameters(statement, paramQuery.parameters(), paramQuery.parameterTypes());
+            
+            try (ResultSet resultSet = statement.executeQuery()) {
+                SqlExecutionResult.SqlResultData baseResult = processResultSetWithoutPaging(resultSet);
+                
+                // Get total count for pagination info (without parameters to keep it simple)
+                long totalCount = getParameterizedTotalCount(connection, sql, parameters, parameterTypes);
+                
+                // Create paged result
+                PagedResult<List<Object>> pagedResult = PagedResult.of(
+                    baseResult.rows(),
+                    pagingRequest.page(),
+                    pagingRequest.pageSize(),
+                    totalCount
+                );
+                
+                // Return enhanced result with pagination info
+                return new SqlExecutionResult.SqlResultData(
+                    baseResult.columns(),
+                    baseResult.columnDetails(),
+                    baseResult.rows(),
+                    baseResult.rowCount(),
+                    pagedResult
+                );
+            }
+        }
+    }
+
+    /**
+     * Get total count for parameterized pagination
+     */
+    private long getParameterizedTotalCount(Connection connection, String originalSql, 
+                                          Map<String, Object> parameters, 
+                                          Map<String, String> parameterTypes) throws SQLException {
+        // Create count query by wrapping original SQL
+        String countSql = "SELECT COUNT(*) FROM (" + originalSql + ") AS count_query";
+        
+        // Convert named parameters to positioned parameters for count query
+        ParameterizedQuery paramQuery = convertNamedParameters(countSql, parameters, parameterTypes);
+        
+        try (PreparedStatement statement = connection.prepareStatement(paramQuery.sql())) {
+            // Set parameters
+            setParameters(statement, paramQuery.parameters(), paramQuery.parameterTypes());
+            
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    return resultSet.getLong(1);
+                }
+                return 0;
+            }
+        }
+    }
+
+    /**
+     * Get total count for pagination
+     */
+    private long getTotalCount(Connection connection, String originalSql) throws SQLException {
+        // Create count query by wrapping original SQL
+        String countSql = "SELECT COUNT(*) FROM (" + originalSql + ") AS count_query";
+        
+        try (Statement statement = connection.createStatement();
+             ResultSet resultSet = statement.executeQuery(countSql)) {
+            
+            if (resultSet.next()) {
+                return resultSet.getLong(1);
+            }
+            return 0;
+        }
+    }
+
+    /**
+     * Process ResultSet without pagination logic (used for paginated queries)
+     */
+    private SqlExecutionResult.SqlResultData processResultSetWithoutPaging(ResultSet resultSet) throws SQLException {
+        // Get column metadata
+        ResultSetMetaData metaData = resultSet.getMetaData();
+        int columnCount = metaData.getColumnCount();
+
+        // Get column names and detailed information for frontend
+        List<String> columns = new ArrayList<>();
+        List<SqlExecutionResult.ColumnDetail> columnDetails = new ArrayList<>();
+        for (int i = 1; i <= columnCount; i++) {
+            String columnName = metaData.getColumnName(i);
+            columns.add(columnName);
+
+            // Create column detail information
+            SqlExecutionResult.ColumnDetail columnDetail = new SqlExecutionResult.ColumnDetail(
+                    columnName,
+                    metaData.getColumnLabel(i),
+                    metaData.getColumnTypeName(i),
+                    metaData.getColumnClassName(i),
+                    metaData.isNullable(i) == ResultSetMetaData.columnNullable,
+                    metaData.getPrecision(i),
+                    metaData.getScale(i)
+            );
+            columnDetails.add(columnDetail);
+        }
+
+        // Process all rows (no maxRows limit for paginated queries)
+        List<List<Object>> rows = new ArrayList<>();
+        int rowCount = 0;
+
+        while (resultSet.next()) {
+            List<Object> row = new ArrayList<>(columnCount);
+
+            for (int i = 1; i <= columnCount; i++) {
+                Object value = resultSet.getObject(i);
+
+                // Handle special cases for better JSON serialization
+                switch (value) {
+                    case Clob clob -> row.add(clob.getSubString(1, (int) clob.length()));
+                    case Blob blob -> row.add("[BLOB data]");
+                    case Date date -> row.add(date.toLocalDate());
+                    case Time time -> row.add(
+                            LocalDateTime.ofInstant(
+                                    Instant.ofEpochMilli(time.getTime()),
+                                    ZoneId.systemDefault()
+                            ).toLocalTime()
+                    );
+                    case Timestamp timestamp -> row.add(timestamp.toLocalDateTime());
+                    case null, default -> row.add(value);
+                }
+            }
+
+            rows.add(row);
+            rowCount++;
+        }
+
+        return new SqlExecutionResult.SqlResultData(
+                columns,
+                columnDetails,
+                rows,
+                rowCount,
+                null
         );
     }
 

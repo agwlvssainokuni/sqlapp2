@@ -86,7 +86,14 @@ public record SqlExecutionResult(
             List<String> columns,
             List<ColumnDetail> columnDetails,
             List<List<Object>> rows,
-            int rowCount
+            int rowCount,
+            @JsonInclude(JsonInclude.Include.NON_NULL)
+            PagedResult<List<Object>> paging
     ) {
+        // Constructor for non-paged results (backward compatibility)
+        public SqlResultData(List<String> columns, List<ColumnDetail> columnDetails, 
+                           List<List<Object>> rows, int rowCount) {
+            this(columns, columnDetails, rows, rowCount, null);
+        }
     }
 }

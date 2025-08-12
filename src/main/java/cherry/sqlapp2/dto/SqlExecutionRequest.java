@@ -49,6 +49,9 @@ public class SqlExecutionRequest {
     @JsonProperty("savedQueryId")
     private Long savedQueryId;
 
+    @JsonProperty("pagingRequest")
+    private PagingRequest pagingRequest;
+
     // Default constructor
     public SqlExecutionRequest() {}
 
@@ -112,5 +115,13 @@ public class SqlExecutionRequest {
 
     public void setSavedQueryId(Long savedQueryId) {
         this.savedQueryId = savedQueryId;
+    }
+
+    public PagingRequest getPagingRequest() {
+        return pagingRequest;
+    }
+
+    public void setPagingRequest(PagingRequest pagingRequest) {
+        this.pagingRequest = pagingRequest;
     }
 }
