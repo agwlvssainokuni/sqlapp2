@@ -23,11 +23,12 @@ SqlApp2 is a secure, modern web application that provides an intuitive interface
 - **PostgreSQL** - Complete compatibility and features
 - **MariaDB** - Native integration and performance
 
-### 📊 SQL Execution Engine
+### 📊 Advanced SQL Execution Engine
+- **Sophisticated Parameter Processing**: State-based parsing ignoring strings and comments
 - **Parameterized Queries**: Named parameter support (`:param`) with automatic type conversion
 - **Real-time Validation**: SQL syntax checking before execution
-- **Result Display**: Tabular data presentation with metadata
-- **Performance Monitoring**: Execution time tracking and statistics
+- **Result Display**: Tabular data presentation with rich column metadata
+- **Security**: Advanced SQL injection prevention through precise parameter extraction
 
 ### 📚 Query Management System
 - **Save & Share Queries**: Store frequently used SQL queries with parameter templates
