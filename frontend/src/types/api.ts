@@ -242,9 +242,23 @@ export interface TableDetails {
 // AuthController
 export interface LoginResult {
   access_token: string
+  refresh_token: string
   token_type: string
   expires_in: number
+  refresh_expires_in: number
   user: LoginUser
+}
+
+export interface RefreshTokenResult {
+  access_token: string
+  refresh_token: string
+  token_type: string
+  expires_in: number
+  refresh_expires_in: number
+}
+
+export interface RefreshTokenRequest {
+  refresh_token: string
 }
 
 export interface LoginUser {
