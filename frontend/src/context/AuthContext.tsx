@@ -51,10 +51,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
             setUser(userData)
           } else {
             localStorage.removeItem('token')
+            localStorage.removeItem('refreshToken')
             localStorage.removeItem('user')
           }
         } catch {
           localStorage.removeItem('token')
+          localStorage.removeItem('refreshToken')
           localStorage.removeItem('user')
         }
       }
@@ -81,6 +83,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
     const data = apiResponse.data as LoginResult
     setUser(data.user)
     localStorage.setItem('token', data.access_token)
+    localStorage.setItem('refreshToken', data.refresh_token)
     localStorage.setItem('user', JSON.stringify(data.user))
   }
 
@@ -96,6 +99,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
   const logout = () => {
     setUser(null)
     localStorage.removeItem('token')
+    localStorage.removeItem('refreshToken')
     localStorage.removeItem('user')
   }
 
