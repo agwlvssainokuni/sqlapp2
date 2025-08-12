@@ -297,6 +297,153 @@ class AuthControllerTest {
     }
 
     @Nested
+    @DisplayName("リフレッシュトークン処理")
+    class RefreshTokenHandling {
+
+        @Test
+        @DisplayName("有効なリフレッシュトークンで新しいアクセストークンを取得する")
+        void shouldRefreshAccessTokenWithValidRefreshToken() {
+            // Given
+            User user = new User(testUsername, "hashedPassword", testEmail);
+            user.setId(1L);
+            
+            cherry.sqlapp2.dto.RefreshTokenRequest refreshRequest = 
+                new cherry.sqlapp2.dto.RefreshTokenRequest(testRefreshToken);
+            
+            cherry.sqlapp2.entity.RefreshToken refreshTokenEntity = 
+                new cherry.sqlapp2.entity.RefreshToken(testRefreshToken, user, 
+                    java.time.LocalDateTime.now().plusDays(1));
+            
+            cherry.sqlapp2.entity.RefreshToken newRefreshTokenEntity = 
+                new cherry.sqlapp2.entity.RefreshToken("new.refresh.token", user, 
+                    java.time.LocalDateTime.now().plusDays(1));
+            
+            String newAccessToken = "new.access.token";
+            
+            when(refreshTokenService.useRefreshToken(testRefreshToken))
+                .thenReturn(Optional.of(refreshTokenEntity));
+            when(refreshTokenService.canRefreshToken(user)).thenReturn(true);
+            when(jwtUtil.validateRefreshToken(testRefreshToken, testUsername)).thenReturn(true);
+            when(jwtUtil.generateAccessToken(testUsername)).thenReturn(newAccessToken);
+            when(jwtUtil.getAccessTokenExpiration()).thenReturn(testAccessExpirationTime);
+            when(jwtUtil.getRefreshTokenExpiration()).thenReturn(testRefreshExpirationTime);
+            when(jwtUtil.isSlidingRefreshExpiration()).thenReturn(false);
+            when(refreshTokenService.createRefreshToken(user)).thenReturn(newRefreshTokenEntity);
+
+            // When
+            cherry.sqlapp2.dto.ApiResponse<cherry.sqlapp2.dto.RefreshTokenResult> response = 
+                authController.refresh(refreshRequest);
+
+            // Then
+            assertThat(response.ok()).isTrue();
+            assertThat(response.data()).isNotNull();
+            assertThat(response.data().accessToken()).isEqualTo(newAccessToken);
+            assertThat(response.data().refreshToken()).isEqualTo("new.refresh.token");
+            assertThat(response.data().expiresIn()).isEqualTo(testAccessExpirationTime);
+            assertThat(response.data().refreshExpiresIn()).isEqualTo(testRefreshExpirationTime);
+
+            verify(refreshTokenService).useRefreshToken(testRefreshToken);
+            verify(refreshTokenService).canRefreshToken(user);
+            verify(jwtUtil).validateRefreshToken(testRefreshToken, testUsername);
+            verify(jwtUtil).generateAccessToken(testUsername);
+            verify(refreshTokenService).createRefreshToken(user);
+            verify(refreshTokenService).revokeToken(refreshTokenEntity);
+        }
+
+        @Test
+        @DisplayName("無効なリフレッシュトークンでエラーを返す")
+        void shouldReturnErrorForInvalidRefreshToken() {
+            // Given
+            cherry.sqlapp2.dto.RefreshTokenRequest refreshRequest = 
+                new cherry.sqlapp2.dto.RefreshTokenRequest("invalid.refresh.token");
+            
+            when(refreshTokenService.useRefreshToken("invalid.refresh.token"))
+                .thenReturn(Optional.empty());
+
+            // When
+            cherry.sqlapp2.dto.ApiResponse<cherry.sqlapp2.dto.RefreshTokenResult> response = 
+                authController.refresh(refreshRequest);
+
+            // Then
+            assertThat(response.ok()).isFalse();
+            assertThat(response.error()).contains("Invalid or expired refresh token");
+
+            verify(refreshTokenService).useRefreshToken("invalid.refresh.token");
+            verify(refreshTokenService, never()).canRefreshToken(any());
+        }
+
+        @Test
+        @DisplayName("リフレッシュが許可されていないユーザーでエラーを返す")
+        void shouldReturnErrorWhenRefreshNotAllowedForUser() {
+            // Given
+            User user = new User(testUsername, "hashedPassword", testEmail);
+            user.setId(1L);
+            
+            cherry.sqlapp2.dto.RefreshTokenRequest refreshRequest = 
+                new cherry.sqlapp2.dto.RefreshTokenRequest(testRefreshToken);
+            
+            cherry.sqlapp2.entity.RefreshToken refreshTokenEntity = 
+                new cherry.sqlapp2.entity.RefreshToken(testRefreshToken, user, 
+                    java.time.LocalDateTime.now().plusDays(1));
+            
+            when(refreshTokenService.useRefreshToken(testRefreshToken))
+                .thenReturn(Optional.of(refreshTokenEntity));
+            when(refreshTokenService.canRefreshToken(user)).thenReturn(false);
+
+            // When
+            cherry.sqlapp2.dto.ApiResponse<cherry.sqlapp2.dto.RefreshTokenResult> response = 
+                authController.refresh(refreshRequest);
+
+            // Then
+            assertThat(response.ok()).isFalse();
+            assertThat(response.error()).contains("Token refresh not allowed for this user");
+
+            verify(refreshTokenService).useRefreshToken(testRefreshToken);
+            verify(refreshTokenService).canRefreshToken(user);
+        }
+    }
+
+    @Nested
+    @DisplayName("ログアウト処理")
+    class LogoutHandling {
+
+        @Test
+        @DisplayName("有効なリフレッシュトークンでログアウトが成功する")
+        void shouldLogoutSuccessfullyWithValidRefreshToken() {
+            // Given
+            cherry.sqlapp2.dto.RefreshTokenRequest logoutRequest = 
+                new cherry.sqlapp2.dto.RefreshTokenRequest(testRefreshToken);
+            
+            when(refreshTokenService.revokeToken(testRefreshToken)).thenReturn(true);
+
+            // When
+            cherry.sqlapp2.dto.ApiResponse<Void> response = authController.logout(logoutRequest);
+
+            // Then
+            assertThat(response.ok()).isTrue();
+            verify(refreshTokenService).revokeToken(testRefreshToken);
+        }
+
+        @Test
+        @DisplayName("無効なリフレッシュトークンでログアウトがエラーを返す")
+        void shouldReturnErrorForInvalidRefreshTokenOnLogout() {
+            // Given
+            cherry.sqlapp2.dto.RefreshTokenRequest logoutRequest = 
+                new cherry.sqlapp2.dto.RefreshTokenRequest("invalid.token");
+            
+            when(refreshTokenService.revokeToken("invalid.token")).thenReturn(false);
+
+            // When
+            cherry.sqlapp2.dto.ApiResponse<Void> response = authController.logout(logoutRequest);
+
+            // Then
+            assertThat(response.ok()).isFalse();
+            assertThat(response.error()).contains("Invalid refresh token");
+            verify(refreshTokenService).revokeToken("invalid.token");
+        }
+    }
+
+    @Nested
     @DisplayName("現在のユーザー情報取得")
     class CurrentUser {
 
