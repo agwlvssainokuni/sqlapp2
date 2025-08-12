@@ -22,6 +22,7 @@ import cherry.sqlapp2.entity.User;
 import cherry.sqlapp2.repository.DatabaseConnectionRepository;
 import cherry.sqlapp2.util.SqlParameterExtractor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -36,6 +37,12 @@ public class SqlExecutionService {
     private final DynamicDataSourceService dataSourceService;
     private final QueryManagementService queryManagementService;
     private final DatabaseConnectionRepository connectionRepository;
+    
+    @Value("${app.sql.execution.timeout:300000}")
+    private int queryTimeoutMs;
+    
+    @Value("${app.sql.execution.max-rows:10000}")
+    private int maxRows;
 
     @Autowired
     public SqlExecutionService(
@@ -71,6 +78,14 @@ public class SqlExecutionService {
 
         try (Connection connection = dataSourceService.getConnection(user, connectionId);
              Statement statement = connection.createStatement()) {
+
+            // Set query timeout
+            statement.setQueryTimeout(queryTimeoutMs / 1000); // Convert to seconds
+            
+            // Set max rows for SELECT queries
+            if (isSelect) {
+                statement.setMaxRows(maxRows);
+            }
 
             SqlExecutionResult.SqlResultData data = null;
             if (isSelect) {
@@ -204,6 +219,14 @@ public class SqlExecutionService {
 
             try (PreparedStatement statement = connection.prepareStatement(paramQuery.sql())) {
 
+                // Set query timeout
+                statement.setQueryTimeout(queryTimeoutMs / 1000); // Convert to seconds
+                
+                // Set max rows for SELECT queries
+                if (isSelect) {
+                    statement.setMaxRows(maxRows);
+                }
+
                 // Set parameters
                 setParameters(statement, paramQuery.parameters(), paramQuery.parameterTypes());
 
@@ -307,7 +330,7 @@ public class SqlExecutionService {
         List<List<Object>> rows = new ArrayList<>();
         int rowCount = 0;
 
-        while (resultSet.next() && rowCount < 1000) { // Limit to 1000 rows for now
+        while (resultSet.next() && rowCount < maxRows) { // Use configurable max rows limit
             List<Object> row = new ArrayList<>(columnCount);
 
             for (int i = 1; i <= columnCount; i++) {
