@@ -73,12 +73,5 @@ CREATE TABLE IF NOT EXISTS query_history (
     FOREIGN KEY (connection_id) REFERENCES database_connections(id) ON DELETE CASCADE
 );
 
--- Create indexes for performance
-CREATE INDEX idx_users_username ON users(username);
-CREATE INDEX idx_database_connections_user_id ON database_connections(user_id);
-CREATE INDEX idx_saved_queries_user_id ON saved_queries(user_id);
-CREATE INDEX idx_saved_queries_sharing_scope ON saved_queries(sharing_scope);
-CREATE INDEX idx_query_parameters_saved_query_id ON query_parameters(saved_query_id);
-CREATE INDEX idx_query_history_user_id ON query_history(user_id);
-CREATE INDEX idx_query_history_executed_at ON query_history(executed_at);
-CREATE INDEX idx_query_history_saved_query_id ON query_history(saved_query_id);
+-- Note: Indexes are automatically created by Hibernate based on entity annotations
+-- No manual index creation needed to avoid conflicts with Hibernate DDL
