@@ -3,9 +3,9 @@
 
 -- Test Users (password is 'password123' hashed with BCrypt strength 10)
 INSERT INTO users (id, username, password, email, created_at, updated_at) VALUES
-(1, 'testuser1', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'testuser1@example.com', '2024-01-01 10:00:00', '2024-01-01 10:00:00'),
-(2, 'testuser2', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'testuser2@example.com', '2024-01-01 11:00:00', '2024-01-01 11:00:00'),
-(3, 'testuser3', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'testuser3@example.com', '2024-01-01 12:00:00', '2024-01-01 12:00:00');
+(1, 'testuser1', '$2a$10$kC3jOpKyffh082s69PFsg.d964pH13k8BUUsPLi0za9VD1/XFdAVa', 'testuser1@example.com', '2024-01-01 10:00:00', '2024-01-01 10:00:00'),
+(2, 'testuser2', '$2a$10$kC3jOpKyffh082s69PFsg.d964pH13k8BUUsPLi0za9VD1/XFdAVa', 'testuser2@example.com', '2024-01-01 11:00:00', '2024-01-01 11:00:00'),
+(3, 'testuser3', '$2a$10$kC3jOpKyffh082s69PFsg.d964pH13k8BUUsPLi0za9VD1/XFdAVa', 'testuser3@example.com', '2024-01-01 12:00:00', '2024-01-01 12:00:00');
 
 -- Test Database Connections (encrypted passwords using test key)
 INSERT INTO database_connections (id, user_id, connection_name, database_type, host, port, database_name, username, encrypted_password, created_at, updated_at, is_active) VALUES
@@ -29,3 +29,7 @@ INSERT INTO query_history (id, user_id, saved_query_id, connection_id, sql_conte
 (5, 2, NULL, 3, 'INVALID SQL QUERY', NULL, 50, 0, false, 'SQL syntax error near INVALID', '2024-01-02 14:00:00', 'Test MariaDB Connection', 'MARIADB');
 
 -- Note: Using auto-increment for primary keys, starting from higher values to avoid conflicts with test data
+ALTER TABLE users ALTER COLUMN id RESTART WITH 100;
+ALTER TABLE database_connections ALTER COLUMN id RESTART WITH 100;
+ALTER TABLE saved_queries ALTER COLUMN id RESTART WITH 100;
+ALTER TABLE query_history ALTER COLUMN id RESTART WITH 100;

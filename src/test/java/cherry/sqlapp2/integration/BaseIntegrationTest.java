@@ -17,27 +17,25 @@
 package cherry.sqlapp2.integration;
 
 import cherry.sqlapp2.dto.LoginRequest;
-import cherry.sqlapp2.dto.LoginResult;
 import cherry.sqlapp2.util.JwtUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jayway.jsonpath.JsonPath;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /**
  * 統合テスト基底クラス
@@ -70,39 +68,46 @@ public abstract class BaseIntegrationTest {
     @BeforeEach
     void setUp() {
         mockMvc = MockMvcBuilders
-            .webAppContextSetup(webApplicationContext)
-            .apply(springSecurity())
-            .build();
-            
+                .webAppContextSetup(webApplicationContext)
+                .apply(springSecurity())
+                .build();
+
         // セキュリティコンテキストをクリア
         SecurityContextHolder.clearContext();
     }
 
     /**
      * テストユーザーでログインしてJWTトークンを取得
-     * 
+     *
      * @param username ユーザー名
      * @return JWTトークン
      * @throws Exception ログイン処理でエラーが発生した場合
      */
     protected String loginAndGetToken(String username) throws Exception {
         var loginRequest = new LoginRequest(username, TEST_PASSWORD);
-        
-        MvcResult result = mockMvc.perform(post("/api/auth/login")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(loginRequest)))
+
+        var result = mockMvc.perform(post("/api/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(loginRequest)))
+                // レスポンス確認
                 .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                // 電文確認
+                .andExpect(jsonPath("$.ok").value(true))
+                .andExpect(jsonPath("$.error").doesNotExist())
+                .andExpect(jsonPath("$.data").exists())
+                .andExpect(jsonPath("$.data.user.username").value(username))
                 .andReturn();
-        
-        String responseContent = result.getResponse().getContentAsString();
-        LoginResult loginResult = objectMapper.readValue(responseContent, LoginResult.class);
-        
-        return loginResult.accessToken();
+
+        return JsonPath.read(
+                result.getResponse().getContentAsString(),
+                "$.data.accessToken"
+        );
     }
 
     /**
      * JWTトークンからAuthorizationヘッダー値を生成
-     * 
+     *
      * @param token JWTトークン
      * @return Authorizationヘッダー値（"Bearer {token}"形式）
      */
@@ -112,7 +117,7 @@ public abstract class BaseIntegrationTest {
 
     /**
      * テストユーザー1でログインしてAuthorizationヘッダー値を取得
-     * 
+     *
      * @return Authorizationヘッダー値
      * @throws Exception ログイン処理でエラーが発生した場合
      */
@@ -123,7 +128,7 @@ public abstract class BaseIntegrationTest {
 
     /**
      * テストユーザー2でログインしてAuthorizationヘッダー値を取得
-     * 
+     *
      * @return Authorizationヘッダー値
      * @throws Exception ログイン処理でエラーが発生した場合
      */
@@ -134,7 +139,7 @@ public abstract class BaseIntegrationTest {
 
     /**
      * テストユーザー3でログインしてAuthorizationヘッダー値を取得
-     * 
+     *
      * @return Authorizationヘッダー値
      * @throws Exception ログイン処理でエラーが発生した場合
      */
@@ -145,9 +150,9 @@ public abstract class BaseIntegrationTest {
 
     /**
      * JSONレスポンスをオブジェクトに変換
-     * 
-     * @param <T> 変換先の型
-     * @param json JSON文字列
+     *
+     * @param <T>   変換先の型
+     * @param json  JSON文字列
      * @param clazz 変換先のクラス
      * @return 変換されたオブジェクト
      * @throws Exception JSON解析エラーが発生した場合
@@ -155,12 +160,12 @@ public abstract class BaseIntegrationTest {
     protected <T> T parseJsonResponse(String json, Class<T> clazz) throws Exception {
         return objectMapper.readValue(json, clazz);
     }
-    
+
     /**
      * JSONレスポンスをオブジェクトに変換（TypeReference版）
-     * 
-     * @param <T> 変換先の型
-     * @param json JSON文字列
+     *
+     * @param <T>     変換先の型
+     * @param json    JSON文字列
      * @param typeRef TypeReference
      * @return 変換されたオブジェクト
      * @throws Exception JSON解析エラーが発生した場合
@@ -171,7 +176,7 @@ public abstract class BaseIntegrationTest {
 
     /**
      * オブジェクトをJSON文字列に変換
-     * 
+     *
      * @param object 変換対象のオブジェクト
      * @return JSON文字列
      * @throws Exception JSON生成エラーが発生した場合

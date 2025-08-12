@@ -16,20 +16,18 @@
 
 package cherry.sqlapp2.integration;
 
-import cherry.sqlapp2.dto.ApiResponse;
 import cherry.sqlapp2.dto.LoginRequest;
-import cherry.sqlapp2.dto.LoginResult;
 import cherry.sqlapp2.dto.UserRegistrationRequest;
 import cherry.sqlapp2.entity.User;
 import cherry.sqlapp2.repository.UserRepository;
-import com.fasterxml.jackson.core.type.TypeReference;
+import com.jayway.jsonpath.JsonPath;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.test.web.servlet.MvcResult;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -44,7 +42,7 @@ class AuthControllerIntegrationTest extends BaseIntegrationTest {
 
     @Autowired
     private UserRepository userRepository;
-    
+
     @Autowired
     private PasswordEncoder passwordEncoder;
 
@@ -56,24 +54,27 @@ class AuthControllerIntegrationTest extends BaseIntegrationTest {
         @DisplayName("正常なユーザー登録ができる")
         void shouldSuccessfullyRegisterNewUser() throws Exception {
             // Given
-            var registerRequest = new UserRegistrationRequest("newuser", "newpassword123", "newuser@example.com");
+            var registerRequest = new UserRegistrationRequest(
+                    "newuser",
+                    "newpassword123",
+                    "newuser@example.com"
+            );
 
             // When & Then
-            MvcResult result = mockMvc.perform(post("/api/auth/register")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(toJson(registerRequest)))
+            mockMvc.perform(post("/api/auth/register")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(toJson(registerRequest)))
+                    // レスポンス確認
                     .andExpect(status().isCreated())
                     .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                    .andReturn();
-
-            // レスポンス確認
-            String responseContent = result.getResponse().getContentAsString();
-            ApiResponse<LoginResult> response = parseJsonResponse(responseContent, new TypeReference<ApiResponse<LoginResult>>() {});
-            
-            assertThat(response.ok()).isTrue();
-            assertThat(response.data()).isNotNull();
-            assertThat(response.data().user().username()).isEqualTo("newuser");
-            assertThat(response.data().accessToken()).isNotEmpty();
+                    // 電文確認
+                    .andExpect(jsonPath("$.ok").value(true))
+                    .andExpect(jsonPath("$.error").doesNotExist())
+                    .andExpect(jsonPath("$.data").exists())
+                    .andExpect(jsonPath("$.data.id").isNumber())
+                    .andExpect(jsonPath("$.data.username").value("newuser"))
+                    .andExpect(jsonPath("$.data.email").value("newuser@example.com"))
+                    .andExpect(jsonPath("$.data.createdAt").isString());
 
             // データベース確認
             User savedUser = userRepository.findByUsername("newuser").orElse(null);
@@ -87,36 +88,53 @@ class AuthControllerIntegrationTest extends BaseIntegrationTest {
         @DisplayName("重複ユーザー名での登録は失敗する")
         void shouldFailToRegisterDuplicateUsername() throws Exception {
             // Given
-            var registerRequest = new UserRegistrationRequest("testuser1", "password123", "duplicate@example.com");
+            var registerRequest = new UserRegistrationRequest(
+                    "testuser1",
+                    "password123",
+                    "duplicate@example.com"
+            );
 
             // When & Then
-            MvcResult result = mockMvc.perform(post("/api/auth/register")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(toJson(registerRequest)))
+            mockMvc.perform(post("/api/auth/register")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(toJson(registerRequest)))
+                    // レスポンス確認
                     .andExpect(status().isBadRequest())
                     .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                    .andReturn();
-
-            // レスポンス確認
-            String responseContent = result.getResponse().getContentAsString();
-            ApiResponse<LoginResult> response = parseJsonResponse(responseContent, new TypeReference<ApiResponse<LoginResult>>() {});
-            
-            assertThat(response.ok()).isFalse();
-            assertThat(response.error()).contains("Username already exists");
+                    // 電文確認
+                    .andExpect(jsonPath("$.ok").value(false))
+                    .andExpect(jsonPath("$.data").doesNotExist())
+                    .andExpect(jsonPath("$.error").isArray())
+                    .andExpect(jsonPath("$.error[*]").value(
+                            "Username already exists"
+                    ));
         }
 
         @Test
         @DisplayName("無効な入力での登録は失敗する")
         void shouldFailToRegisterWithInvalidInput() throws Exception {
             // Given - 空のユーザー名
-            var registerRequest = new UserRegistrationRequest("", "password123", "invalid@example.com");
+            var registerRequest = new UserRegistrationRequest(
+                    "",
+                    "password123",
+                    "invalid@example.com"
+            );
 
             // When & Then
             mockMvc.perform(post("/api/auth/register")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(toJson(registerRequest)))
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(toJson(registerRequest)))
+                    // レスポンス確認
                     .andExpect(status().isBadRequest())
-                    .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                    // 電文確認
+                    .andExpect(jsonPath("$.ok").value(false))
+                    .andExpect(jsonPath("$.data").doesNotExist())
+                    .andExpect(jsonPath("$.error").isArray())
+                    .andExpect(jsonPath("$.error[*]").value(Matchers.containsInAnyOrder(
+                            "username: Username is required",
+                            "username: Username must be between 3 and 50 characters"
+                    )));
         }
     }
 
@@ -128,54 +146,87 @@ class AuthControllerIntegrationTest extends BaseIntegrationTest {
         @DisplayName("正しい認証情報でログインできる")
         void shouldSuccessfullyLoginWithCorrectCredentials() throws Exception {
             // Given
-            var loginRequest = new LoginRequest("testuser1", "password123");
+            var loginRequest = new LoginRequest(
+                    "testuser1",
+                    "password123"
+            );
 
             // When & Then
-            MvcResult result = mockMvc.perform(post("/api/auth/login")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(toJson(loginRequest)))
+            var result = mockMvc.perform(post("/api/auth/login")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(toJson(loginRequest)))
+                    // レスポンス確認
                     .andExpect(status().isOk())
                     .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                    // 電文確認
+                    .andExpect(jsonPath("$.ok").value(true))
+                    .andExpect(jsonPath("$.error").doesNotExist())
+                    .andExpect(jsonPath("$.data").exists())
+                    .andExpect(jsonPath("$.data.access_token").isString())
+                    .andExpect(jsonPath("$.data.token_type").value("Bearer"))
+                    .andExpect(jsonPath("$.data.expires_in").isNumber())
+                    .andExpect(jsonPath("$.data.user.id").value(1))
+                    .andExpect(jsonPath("$.data.user.username").value("testuser1"))
+                    .andExpect(jsonPath("$.data.user.email").value("testuser1@example.com"))
                     .andReturn();
 
             // レスポンス確認
-            String responseContent = result.getResponse().getContentAsString();
-            LoginResult loginResult = parseJsonResponse(responseContent, LoginResult.class);
-            
-            assertThat(loginResult.user().username()).isEqualTo("testuser1");
-            assertThat(loginResult.accessToken()).isNotEmpty();
-            
+            String accessToken = JsonPath.read(
+                    result.getResponse().getContentAsString(),
+                    "$.data.access_token"
+            );
             // JWTトークンの検証
-            assertThat(jwtUtil.validateToken(loginResult.accessToken(), "testuser1")).isTrue();
-            assertThat(jwtUtil.extractUsername(loginResult.accessToken())).isEqualTo("testuser1");
+            assertThat(jwtUtil.validateToken(accessToken, "testuser1")).isTrue();
         }
 
         @Test
         @DisplayName("間違ったパスワードでログイン失敗する")
         void shouldFailToLoginWithWrongPassword() throws Exception {
             // Given
-            var loginRequest = new LoginRequest("testuser1", "wrongpassword");
+            var loginRequest = new LoginRequest(
+                    "testuser1",
+                    "wrongpassword"
+            );
 
             // When & Then
             mockMvc.perform(post("/api/auth/login")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(toJson(loginRequest)))
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(toJson(loginRequest)))
+                    // レスポンス確認
                     .andExpect(status().isUnauthorized())
-                    .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                    // 電文確認
+                    .andExpect(jsonPath("$.ok").value(false))
+                    .andExpect(jsonPath("$.data").doesNotExist())
+                    .andExpect(jsonPath("$.error").isArray())
+                    .andExpect(jsonPath("$.error[*]").value(
+                            "Invalid username or password"
+                    ));
         }
 
         @Test
         @DisplayName("存在しないユーザーでログイン失敗する")
         void shouldFailToLoginWithNonExistentUser() throws Exception {
             // Given
-            var loginRequest = new LoginRequest("nonexistentuser", "password123");
+            var loginRequest = new LoginRequest(
+                    "nonexistentuser",
+                    "password123"
+            );
 
             // When & Then
             mockMvc.perform(post("/api/auth/login")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(toJson(loginRequest)))
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(toJson(loginRequest)))
+                    // レスポンス確認
                     .andExpect(status().isUnauthorized())
-                    .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                    // 電文確認
+                    .andExpect(jsonPath("$.ok").value(false))
+                    .andExpect(jsonPath("$.data").doesNotExist())
+                    .andExpect(jsonPath("$.error").isArray())
+                    .andExpect(jsonPath("$.error[*]").value(
+                            "Invalid username or password"
+                    ));
         }
     }
 
@@ -193,35 +244,52 @@ class AuthControllerIntegrationTest extends BaseIntegrationTest {
 
             // Step 1: ユーザー登録
             var registerRequest = new UserRegistrationRequest(username, password, email);
-            MvcResult registerResult = mockMvc.perform(post("/api/auth/register")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(toJson(registerRequest)))
+            mockMvc.perform(post("/api/auth/register")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(toJson(registerRequest)))
+                    // レスポンス確認
                     .andExpect(status().isCreated())
+                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                    // 電文確認
+                    .andExpect(jsonPath("$.ok").value(true))
+                    .andExpect(jsonPath("$.error").doesNotExist())
+                    .andExpect(jsonPath("$.data").exists())
+                    .andExpect(jsonPath("$.data.username").value(username));
+
+            // Step 2: 初回ログイン
+            var loginRequest = new LoginRequest(username, password);
+            var loginResult1 = mockMvc.perform(post("/api/auth/login")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(toJson(loginRequest)))
+                    // レスポンス確認
+                    .andExpect(status().isOk())
+                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                    // 電文確認
+                    .andExpect(jsonPath("$.ok").value(true))
+                    .andExpect(jsonPath("$.error").doesNotExist())
+                    .andExpect(jsonPath("$.data").exists())
+                    .andExpect(jsonPath("$.data.user.username").value(username))
                     .andReturn();
-
-            String registerContent = registerResult.getResponse().getContentAsString();
-            ApiResponse<LoginResult> registerResponse = parseJsonResponse(registerContent, new TypeReference<ApiResponse<LoginResult>>() {});
-            String registrationToken = registerResponse.data().accessToken();
-
-            // Step 2: 登録時のトークンを検証
-            assertThat(jwtUtil.validateToken(registrationToken, username)).isTrue();
-            assertThat(jwtUtil.extractUsername(registrationToken)).isEqualTo(username);
+            String accessToken1 = JsonPath.read(
+                    loginResult1.getResponse().getContentAsString(),
+                    "$.data.access_token"
+            );
 
             // Step 3: 再度ログイン
-            var loginRequest = new LoginRequest(username, password);
-            MvcResult loginResult = mockMvc.perform(post("/api/auth/login")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(toJson(loginRequest)))
+            var loginResult2 = mockMvc.perform(post("/api/auth/login")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(toJson(loginRequest)))
+                    // レスポンス確認
                     .andExpect(status().isOk())
                     .andReturn();
+            String accessToken2 = JsonPath.read(
+                    loginResult2.getResponse().getContentAsString(),
+                    "$.data.access_token"
+            );
 
-            String loginContent = loginResult.getResponse().getContentAsString();
-            LoginResult loginResponse = parseJsonResponse(loginContent, LoginResult.class);
-            String loginToken = loginResponse.accessToken();
-
-            // Step 4: ログイン時のトークンを検証
-            assertThat(jwtUtil.validateToken(loginToken, username)).isTrue();
-            assertThat(jwtUtil.extractUsername(loginToken)).isEqualTo(username);
+            // Step 4: アクセストークンを検証
+            assertThat(jwtUtil.validateToken(accessToken1, username)).isTrue();
+            assertThat(jwtUtil.validateToken(accessToken2, username)).isTrue();
 
             // Step 5: データベース状態確認
             User user = userRepository.findByUsername(username).orElse(null);
@@ -241,33 +309,34 @@ class AuthControllerIntegrationTest extends BaseIntegrationTest {
             for (String username : usernames) {
                 var registerRequest = new UserRegistrationRequest(username, password, username + "@example.com");
                 mockMvc.perform(post("/api/auth/register")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(toJson(registerRequest)))
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(toJson(registerRequest)))
                         .andExpect(status().isCreated());
             }
 
             // Step 2: 全ユーザーでログインし、各トークンを検証
             for (String username : usernames) {
                 var loginRequest = new LoginRequest(username, password);
-                MvcResult result = mockMvc.perform(post("/api/auth/login")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(toJson(loginRequest)))
+                var result = mockMvc.perform(post("/api/auth/login")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(toJson(loginRequest)))
                         .andExpect(status().isOk())
                         .andReturn();
 
-                String responseContent = result.getResponse().getContentAsString();
-                LoginResult loginResult = parseJsonResponse(responseContent, LoginResult.class);
-                
-                assertThat(loginResult.user().username()).isEqualTo(username);
-                assertThat(jwtUtil.validateToken(loginResult.accessToken(), username)).isTrue();
-                assertThat(jwtUtil.extractUsername(loginResult.accessToken())).isEqualTo(username);
+                String accessToken = JsonPath.read(
+                        result.getResponse().getContentAsString(),
+                        "$.data.access_token"
+                );
+
+                assertThat(jwtUtil.validateToken(accessToken, username)).isTrue();
             }
 
             // Step 3: データベースの状態確認
             for (String username : usernames) {
                 User user = userRepository.findByUsername(username).orElse(null);
                 assertThat(user).isNotNull();
-                assertThat(user.getUsername()).isEqualTo(username);
+                assertThat(user.getEmail()).isEqualTo(username + "@example.com");
+                assertThat(passwordEncoder.matches(password, user.getPassword())).isTrue();
             }
         }
     }
