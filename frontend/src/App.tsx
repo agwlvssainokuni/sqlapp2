@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {BrowserRouter as Router, Routes, Route, Navigate} from 'react-router-dom'
+import {BrowserRouter as Router, Navigate, Route, Routes} from 'react-router-dom'
 import Login from './components/Login'
 import Dashboard from './components/Dashboard'
 import Register from './components/Register'
@@ -27,9 +27,6 @@ import QueryBuilderPage from './components/QueryBuilderPage'
 import {AuthProvider} from './context/AuthContext'
 import ProtectedRoute from './components/ProtectedRoute'
 import './App.css'
-
-// Import test utilities for console testing
-import './test/jwtUtilities.test'
 
 function App() {
   return (

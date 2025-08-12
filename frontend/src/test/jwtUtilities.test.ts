@@ -15,94 +15,88 @@
  */
 
 // Simple test for JWT utilities
-import { 
-  decodeJwt, 
-  isTokenExpired, 
-  getUsernameFromToken,
-  isAccessToken,
-  isRefreshToken 
-} from '../utils/jwtUtils.ts';
+import {decodeJwt, getUsernameFromToken, isAccessToken, isRefreshToken, isTokenExpired} from '../utils/jwtUtils'
 
 // Test the JWT utilities
 export const testJwtUtilities = () => {
-  console.log('Testing JWT utilities...');
+  console.log('Testing JWT utilities...')
 
   // Sample token that expires in the future (this is a mock token for testing)
-  const mockAccessToken = 'eyJhbGciOiJIUzUxMiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwic3ViIjoidGVzdHVzZXIiLCJpYXQiOjE3NTUwMTYwMTEsImV4cCI6OTk5OTk5OTk5OX0.mock-signature';
-  const mockRefreshToken = 'eyJhbGciOiJIUzUxMiJ9.eyJ0b2tlbl90eXBlIjoicmVmcmVzaCIsInN1YiI6InRlc3R1c2VyIiwiaWF0IjoxNzU1MDE2MDExLCJleHAiOjk5OTk5OTk5OTl9.mock-signature';
-  const mockExpiredToken = 'eyJhbGciOiJIUzUxMiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwic3ViIjoidGVzdHVzZXIiLCJpYXQiOjE3NTUwMTYwMTEsImV4cCI6MTU1NTAwMDAwMH0.mock-signature';
+  const mockAccessToken = 'eyJhbGciOiJIUzUxMiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwic3ViIjoidGVzdHVzZXIiLCJpYXQiOjE3NTUwMTYwMTEsImV4cCI6OTk5OTk5OTk5OX0.mock-signature'
+  const mockRefreshToken = 'eyJhbGciOiJIUzUxMiJ9.eyJ0b2tlbl90eXBlIjoicmVmcmVzaCIsInN1YiI6InRlc3R1c2VyIiwiaWF0IjoxNzU1MDE2MDExLCJleHAiOjk5OTk5OTk5OTl9.mock-signature'
+  const mockExpiredToken = 'eyJhbGciOiJIUzUxMiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwic3ViIjoidGVzdHVzZXIiLCJpYXQiOjE3NTUwMTYwMTEsImV4cCI6MTU1NTAwMDAwMH0.mock-signature'
 
   const tests = [
     {
       name: 'Decode valid token',
       test: () => {
-        const decoded = decodeJwt(mockAccessToken);
-        return decoded && decoded.sub === 'testuser' && decoded.token_type === 'access';
+        const decoded = decodeJwt(mockAccessToken)
+        return decoded && decoded.sub === 'testuser' && decoded.token_type === 'access'
       }
     },
     {
       name: 'Detect expired token',
       test: () => {
-        const expired = isTokenExpired(mockExpiredToken);
-        return expired === true;
+        const expired = isTokenExpired(mockExpiredToken)
+        return expired === true
       }
     },
     {
       name: 'Detect valid token',
       test: () => {
-        const expired = isTokenExpired(mockAccessToken);
-        return expired === false;
+        const expired = isTokenExpired(mockAccessToken)
+        return expired === false
       }
     },
     {
       name: 'Get username from token',
       test: () => {
-        const username = getUsernameFromToken(mockAccessToken);
-        return username === 'testuser';
+        const username = getUsernameFromToken(mockAccessToken)
+        return username === 'testuser'
       }
     },
     {
       name: 'Identify access token',
       test: () => {
-        return isAccessToken(mockAccessToken) === true;
+        return isAccessToken(mockAccessToken) === true
       }
     },
     {
       name: 'Identify refresh token',
       test: () => {
-        return isRefreshToken(mockRefreshToken) === true;
+        return isRefreshToken(mockRefreshToken) === true
       }
     },
     {
       name: 'Handle invalid token',
       test: () => {
-        const decoded = decodeJwt('invalid.token');
-        return decoded === null;
+        const decoded = decodeJwt('invalid.token')
+        return decoded === null
       }
     }
-  ];
+  ]
 
-  let passed = 0;
-  let failed = 0;
+  let passed = 0
+  let failed = 0
 
   tests.forEach(test => {
     try {
       if (test.test()) {
-        console.log(`✅ ${test.name}`);
-        passed++;
+        console.log(`✅ ${test.name}`)
+        passed++
       } else {
-        console.log(`❌ ${test.name}`);
-        failed++;
+        console.log(`❌ ${test.name}`)
+        failed++
       }
     } catch (error) {
-      console.log(`❌ ${test.name} - Error: ${error}`);
-      failed++;
+      console.log(`❌ ${test.name} - Error: ${error}`)
+      failed++
     }
-  });
+  })
 
-  console.log(`\nTest Results: ${passed} passed, ${failed} failed`);
-  return { passed, failed };
-};
+  console.log(`\nTest Results: ${passed} passed, ${failed} failed`)
+  return {passed, failed}
+}
 
 // Export for console testing
-(window as any).testJwtUtilities = testJwtUtilities;
+(window as any).testJwtUtilities = testJwtUtilities

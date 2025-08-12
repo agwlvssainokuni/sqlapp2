@@ -16,7 +16,7 @@
 
 import React, {createContext, type ReactNode, useContext, useEffect, useState} from 'react'
 import {apiRequest} from '../utils/api'
-import type {ApiResponse, LoginResult, LoginUser} from "../types/api.ts";
+import type {ApiResponse, LoginResult, LoginUser} from '../types/api.ts'
 
 interface AuthContextType {
   user: LoginUser | null
