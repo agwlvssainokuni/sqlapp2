@@ -18,6 +18,7 @@ import React, {useEffect, useState} from 'react'
 import {useTranslation} from 'react-i18next'
 import {useAuth} from '../context/AuthContext'
 import type {DatabaseConnection, SavedQuery, SqlExecutionResult, SqlValidationResult, QueryHistory, SqlExecutionRequest} from '../types/api'
+import {extractParameters} from '../utils/SqlParameterExtractor'
 import Layout from './Layout'
 
 interface ParameterDefinition {
@@ -103,7 +104,7 @@ const SqlExecutionPage: React.FC = () => {
   }
 
   useEffect(() => {
-    extractParameters()
+    extractParametersFromSql()
   }, [sql])
 
   const loadConnections = async () => {
@@ -124,11 +125,11 @@ const SqlExecutionPage: React.FC = () => {
     }
   }
 
-  const extractParameters = () => {
-    const paramPattern = /:([\w]+)/g
-    const matches = sql.match(paramPattern)
-    if (matches) {
-      const paramNames = [...new Set(matches.map(m => m.substring(1)))]
+  const extractParametersFromSql = () => {
+    // Use the sophisticated parameter extractor that ignores parameters in strings and comments
+    const paramNames = extractParameters(sql)
+    
+    if (paramNames.length > 0) {
       const newParams = paramNames.map(name => {
         const existing = parameters.find(p => p.name === name)
         return existing || {name, type: 'string', value: ''}
