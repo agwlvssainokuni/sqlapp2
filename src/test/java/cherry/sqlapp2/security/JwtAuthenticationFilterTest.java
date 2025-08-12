@@ -98,7 +98,7 @@ class JwtAuthenticationFilterTest {
             when(jwtUtil.extractUsername(validToken)).thenReturn(testUsername);
             when(securityContext.getAuthentication()).thenReturn(null);
             when(userDetailsService.loadUserByUsername(testUsername)).thenReturn(userDetails);
-            when(jwtUtil.validateToken(validToken, testUsername)).thenReturn(true);
+            when(jwtUtil.validateAccessToken(validToken, testUsername)).thenReturn(true);
 
             // When
             jwtAuthenticationFilter.doFilterInternal(request, response, filterChain);
@@ -106,7 +106,7 @@ class JwtAuthenticationFilterTest {
             // Then
             verify(jwtUtil).extractUsername(validToken);
             verify(userDetailsService).loadUserByUsername(testUsername);
-            verify(jwtUtil).validateToken(validToken, testUsername);
+            verify(jwtUtil).validateAccessToken(validToken, testUsername);
             verify(securityContext).setAuthentication(any(Authentication.class));
             verify(filterChain).doFilter(request, response);
         }
@@ -123,7 +123,7 @@ class JwtAuthenticationFilterTest {
             when(jwtUtil.extractUsername(validToken)).thenReturn(testUsername);
             when(securityContext.getAuthentication()).thenReturn(null);
             when(userDetailsService.loadUserByUsername(testUsername)).thenReturn(userDetails);
-            when(jwtUtil.validateToken(validToken, testUsername)).thenReturn(true);
+            when(jwtUtil.validateAccessToken(validToken, testUsername)).thenReturn(true);
 
             // When
             jwtAuthenticationFilter.doFilterInternal(request, response, filterChain);
@@ -151,7 +151,7 @@ class JwtAuthenticationFilterTest {
             when(jwtUtil.extractUsername(validToken)).thenReturn(testUsername);
             when(securityContext.getAuthentication()).thenReturn(null);
             when(userDetailsService.loadUserByUsername(testUsername)).thenReturn(userDetails);
-            when(jwtUtil.validateToken(validToken, testUsername)).thenReturn(true);
+            when(jwtUtil.validateAccessToken(validToken, testUsername)).thenReturn(true);
 
             // When
             jwtAuthenticationFilter.doFilterInternal(request, response, filterChain);
@@ -180,13 +180,13 @@ class JwtAuthenticationFilterTest {
             when(securityContext.getAuthentication()).thenReturn(null);
             when(userDetailsService.loadUserByUsername(testUsername)).thenReturn(
                     new User(testUsername, "password", Collections.emptyList()));
-            when(jwtUtil.validateToken(invalidToken, testUsername)).thenReturn(false);
+            when(jwtUtil.validateAccessToken(invalidToken, testUsername)).thenReturn(false);
 
             // When
             jwtAuthenticationFilter.doFilterInternal(request, response, filterChain);
 
             // Then
-            verify(jwtUtil).validateToken(invalidToken, testUsername);
+            verify(jwtUtil).validateAccessToken(invalidToken, testUsername);
             verify(securityContext, never()).setAuthentication(any());
             verify(filterChain).doFilter(request, response);
         }
@@ -228,7 +228,7 @@ class JwtAuthenticationFilterTest {
                     .hasMessage("User not found");
 
             verify(userDetailsService).loadUserByUsername(testUsername);
-            verify(jwtUtil, never()).validateToken(anyString(), anyString());
+            verify(jwtUtil, never()).validateAccessToken(anyString(), anyString());
             verify(securityContext, never()).setAuthentication(any());
         }
 
@@ -328,14 +328,14 @@ class JwtAuthenticationFilterTest {
             when(securityContext.getAuthentication()).thenReturn(null);
             when(userDetailsService.loadUserByUsername(testUsername)).thenReturn(
                     new User(testUsername, "password", Collections.emptyList()));
-            when(jwtUtil.validateToken(longToken, testUsername)).thenReturn(true);
+            when(jwtUtil.validateAccessToken(longToken, testUsername)).thenReturn(true);
 
             // When
             jwtAuthenticationFilter.doFilterInternal(request, response, filterChain);
 
             // Then
             verify(jwtUtil).extractUsername(longToken);
-            verify(jwtUtil).validateToken(longToken, testUsername);
+            verify(jwtUtil).validateAccessToken(longToken, testUsername);
         }
     }
 
@@ -359,7 +359,7 @@ class JwtAuthenticationFilterTest {
 
             // Then
             verify(userDetailsService, never()).loadUserByUsername(anyString());
-            verify(jwtUtil, never()).validateToken(anyString(), anyString());
+            verify(jwtUtil, never()).validateAccessToken(anyString(), anyString());
             verify(securityContext, never()).setAuthentication(any());
             verify(filterChain).doFilter(request, response);
         }
@@ -378,7 +378,7 @@ class JwtAuthenticationFilterTest {
 
             // Then
             verify(userDetailsService, never()).loadUserByUsername(anyString());
-            verify(jwtUtil, never()).validateToken(anyString(), anyString());
+            verify(jwtUtil, never()).validateAccessToken(anyString(), anyString());
             verify(securityContext, never()).setAuthentication(any());
             verify(filterChain).doFilter(request, response);
         }
@@ -395,7 +395,7 @@ class JwtAuthenticationFilterTest {
             when(jwtUtil.extractUsername(validToken)).thenReturn(testUsername);
             when(securityContext.getAuthentication()).thenReturn(null);
             when(userDetailsService.loadUserByUsername(testUsername)).thenReturn(userDetails);
-            when(jwtUtil.validateToken(validToken, testUsername)).thenReturn(true);
+            when(jwtUtil.validateAccessToken(validToken, testUsername)).thenReturn(true);
 
             // When
             jwtAuthenticationFilter.doFilterInternal(request, response, filterChain);
@@ -456,14 +456,14 @@ class JwtAuthenticationFilterTest {
             when(jwtUtil.extractUsername(validToken)).thenReturn(specialUsername);
             when(securityContext.getAuthentication()).thenReturn(null);
             when(userDetailsService.loadUserByUsername(specialUsername)).thenReturn(userDetails);
-            when(jwtUtil.validateToken(validToken, specialUsername)).thenReturn(true);
+            when(jwtUtil.validateAccessToken(validToken, specialUsername)).thenReturn(true);
 
             // When
             jwtAuthenticationFilter.doFilterInternal(request, response, filterChain);
 
             // Then
             verify(userDetailsService).loadUserByUsername(specialUsername);
-            verify(jwtUtil).validateToken(validToken, specialUsername);
+            verify(jwtUtil).validateAccessToken(validToken, specialUsername);
             verify(securityContext).setAuthentication(any());
         }
 
@@ -479,7 +479,7 @@ class JwtAuthenticationFilterTest {
             when(jwtUtil.extractUsername(validToken)).thenReturn(unicodeUsername);
             when(securityContext.getAuthentication()).thenReturn(null);
             when(userDetailsService.loadUserByUsername(unicodeUsername)).thenReturn(userDetails);
-            when(jwtUtil.validateToken(validToken, unicodeUsername)).thenReturn(true);
+            when(jwtUtil.validateAccessToken(validToken, unicodeUsername)).thenReturn(true);
 
             // When
             jwtAuthenticationFilter.doFilterInternal(request, response, filterChain);

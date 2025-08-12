@@ -52,17 +52,22 @@ class AuthControllerTest {
     @Mock
     private JwtUtil jwtUtil;
 
+    @Mock
+    private cherry.sqlapp2.service.RefreshTokenService refreshTokenService;
+
     private AuthController authController;
 
     private final String testUsername = "testUser";
     private final String testPassword = "testPassword123";
     private final String testEmail = "test@example.com";
-    private final String testToken = "test.jwt.token";
-    private final Long testExpirationTime = 3600000L;
+    private final String testAccessToken = "test.access.token";
+    private final String testRefreshToken = "test.refresh.token";
+    private final Long testAccessExpirationTime = 300L;
+    private final Long testRefreshExpirationTime = 86400L;
 
     @BeforeEach
     void setUp() {
-        authController = new AuthController(userService, authenticationManager, jwtUtil);
+        authController = new AuthController(userService, authenticationManager, jwtUtil, refreshTokenService);
     }
 
     @Nested
@@ -75,13 +80,19 @@ class AuthControllerTest {
             // Given
             LoginRequest loginRequest = new LoginRequest(testUsername, testPassword);
             User user = new User(testUsername, "hashedPassword", testEmail);
+            user.setId(1L);
             Authentication mockAuth = mock(Authentication.class);
+            cherry.sqlapp2.entity.RefreshToken refreshToken = new cherry.sqlapp2.entity.RefreshToken(
+                testRefreshToken, user, java.time.LocalDateTime.now().plusDays(1)
+            );
 
             when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
                     .thenReturn(mockAuth);
             when(userService.findByUsername(testUsername)).thenReturn(Optional.of(user));
-            when(jwtUtil.generateToken(testUsername)).thenReturn(testToken);
-            when(jwtUtil.getExpirationTime()).thenReturn(testExpirationTime);
+            when(jwtUtil.generateAccessToken(testUsername)).thenReturn(testAccessToken);
+            when(jwtUtil.getAccessTokenExpiration()).thenReturn(testAccessExpirationTime);
+            when(jwtUtil.getRefreshTokenExpiration()).thenReturn(testRefreshExpirationTime);
+            when(refreshTokenService.createRefreshToken(user)).thenReturn(refreshToken);
 
             // When
             ApiResponse<LoginResult> response = authController.login(loginRequest);
@@ -89,15 +100,19 @@ class AuthControllerTest {
             // Then
             assertThat(response.ok()).isTrue();
             assertThat(response.data()).isNotNull();
-            assertThat(response.data().accessToken()).isEqualTo(testToken);
-            assertThat(response.data().expiresIn()).isEqualTo(testExpirationTime);
+            assertThat(response.data().accessToken()).isEqualTo(testAccessToken);
+            assertThat(response.data().refreshToken()).isEqualTo(testRefreshToken);
+            assertThat(response.data().expiresIn()).isEqualTo(testAccessExpirationTime);
+            assertThat(response.data().refreshExpiresIn()).isEqualTo(testRefreshExpirationTime);
             assertThat(response.data().user().username()).isEqualTo(testUsername);
             assertThat(response.data().user().email()).isEqualTo(testEmail);
 
             verify(authenticationManager).authenticate(any(UsernamePasswordAuthenticationToken.class));
             verify(userService).findByUsername(testUsername);
-            verify(jwtUtil).generateToken(testUsername);
-            verify(jwtUtil).getExpirationTime();
+            verify(jwtUtil).generateAccessToken(testUsername);
+            verify(jwtUtil).getAccessTokenExpiration();
+            verify(jwtUtil).getRefreshTokenExpiration();
+            verify(refreshTokenService).createRefreshToken(user);
         }
 
         @Test
@@ -116,7 +131,7 @@ class AuthControllerTest {
 
             verify(authenticationManager).authenticate(any(UsernamePasswordAuthenticationToken.class));
             verify(userService, never()).findByUsername(anyString());
-            verify(jwtUtil, never()).generateToken(anyString());
+            verify(jwtUtil, never()).generateAccessToken(anyString());
         }
 
         @Test
@@ -136,7 +151,7 @@ class AuthControllerTest {
 
             verify(authenticationManager).authenticate(any(UsernamePasswordAuthenticationToken.class));
             verify(userService).findByUsername(testUsername);
-            verify(jwtUtil, never()).generateToken(anyString());
+            verify(jwtUtil, never()).generateAccessToken(anyString());
         }
 
         @Test
@@ -146,13 +161,19 @@ class AuthControllerTest {
             String specialUsername = "user@domain.com+test!#$%";
             LoginRequest loginRequest = new LoginRequest(specialUsername, testPassword);
             User user = new User(specialUsername, "hashedPassword", testEmail);
+            user.setId(2L);
             Authentication mockAuth = mock(Authentication.class);
+            cherry.sqlapp2.entity.RefreshToken refreshToken = new cherry.sqlapp2.entity.RefreshToken(
+                testRefreshToken, user, java.time.LocalDateTime.now().plusDays(1)
+            );
 
             when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
                     .thenReturn(mockAuth);
             when(userService.findByUsername(specialUsername)).thenReturn(Optional.of(user));
-            when(jwtUtil.generateToken(specialUsername)).thenReturn(testToken);
-            when(jwtUtil.getExpirationTime()).thenReturn(testExpirationTime);
+            when(jwtUtil.generateAccessToken(specialUsername)).thenReturn(testAccessToken);
+            when(jwtUtil.getAccessTokenExpiration()).thenReturn(testAccessExpirationTime);
+            when(jwtUtil.getRefreshTokenExpiration()).thenReturn(testRefreshExpirationTime);
+            when(refreshTokenService.createRefreshToken(user)).thenReturn(refreshToken);
 
             // When
             ApiResponse<LoginResult> response = authController.login(loginRequest);
@@ -318,7 +339,7 @@ class AuthControllerTest {
             when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
                     .thenReturn(mockAuth);
             when(userService.findByUsername(testUsername)).thenReturn(Optional.of(user));
-            when(jwtUtil.generateToken(testUsername)).thenThrow(new RuntimeException("JWT generation failed"));
+            when(jwtUtil.generateAccessToken(testUsername)).thenThrow(new RuntimeException("JWT generation failed"));
 
             // When & Then
             assertThatThrownBy(() -> authController.login(loginRequest))
