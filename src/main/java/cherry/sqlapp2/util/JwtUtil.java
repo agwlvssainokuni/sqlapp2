@@ -26,6 +26,7 @@ import javax.crypto.SecretKey;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import java.util.function.Function;
 
 @Component
@@ -84,12 +85,16 @@ public class JwtUtil {
     public String generateAccessToken(String username) {
         Map<String, Object> claims = new HashMap<>();
         claims.put(TOKEN_TYPE_CLAIM, ACCESS_TOKEN_TYPE);
+        // Add a unique identifier to ensure uniqueness even for simultaneous token creation
+        claims.put("jti", UUID.randomUUID().toString());
         return createToken(claims, username, accessTokenExpiration);
     }
 
     public String generateRefreshToken(String username) {
         Map<String, Object> claims = new HashMap<>();
         claims.put(TOKEN_TYPE_CLAIM, REFRESH_TOKEN_TYPE);
+        // Add a unique identifier to ensure uniqueness even for simultaneous token creation
+        claims.put("jti", UUID.randomUUID().toString());
         return createToken(claims, username, refreshTokenExpiration);
     }
 
