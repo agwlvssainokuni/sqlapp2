@@ -176,7 +176,7 @@ class AuthControllerIntegrationTest extends BaseIntegrationTest {
                     "$.data.access_token"
             );
             // JWTトークンの検証
-            assertThat(jwtUtil.validateToken(accessToken, "testuser1")).isTrue();
+            assertThat(jwtUtil.validateAccessToken(accessToken, "testuser1")).isTrue();
         }
 
         @Test
@@ -288,8 +288,8 @@ class AuthControllerIntegrationTest extends BaseIntegrationTest {
             );
 
             // Step 4: アクセストークンを検証
-            assertThat(jwtUtil.validateToken(accessToken1, username)).isTrue();
-            assertThat(jwtUtil.validateToken(accessToken2, username)).isTrue();
+            assertThat(jwtUtil.validateAccessToken(accessToken1, username)).isTrue();
+            assertThat(jwtUtil.validateAccessToken(accessToken2, username)).isTrue();
 
             // Step 5: データベース状態確認
             User user = userRepository.findByUsername(username).orElse(null);
@@ -328,7 +328,7 @@ class AuthControllerIntegrationTest extends BaseIntegrationTest {
                         "$.data.access_token"
                 );
 
-                assertThat(jwtUtil.validateToken(accessToken, username)).isTrue();
+                assertThat(jwtUtil.validateAccessToken(accessToken, username)).isTrue();
             }
 
             // Step 3: データベースの状態確認

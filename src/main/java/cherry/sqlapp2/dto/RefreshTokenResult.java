@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 SqlApp2
+ * Copyright 2025 agwlvssainokuni
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,28 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package cherry.sqlapp2.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public record LoginResult(
+public record RefreshTokenResult(
     @JsonProperty("access_token") String accessToken,
     @JsonProperty("refresh_token") String refreshToken,
     @JsonProperty("token_type") String tokenType,
     @JsonProperty("expires_in") Long expiresIn,
-    @JsonProperty("refresh_expires_in") Long refreshExpiresIn,
-    LoginUser user
+    @JsonProperty("refresh_expires_in") Long refreshExpiresIn
 ) {
-    public LoginResult(String accessToken, String refreshToken, Long expiresIn, Long refreshExpiresIn, LoginUser user) {
-        this(accessToken, refreshToken, "Bearer", expiresIn, refreshExpiresIn, user);
-    }
-
-    /**
-     * Legacy constructor for backward compatibility
-     * @deprecated Use constructor with refresh token
-     */
-    @Deprecated
-    public LoginResult(String accessToken, Long expiresIn, LoginUser user) {
-        this(accessToken, null, "Bearer", expiresIn, null, user);
+    public RefreshTokenResult(String accessToken, String refreshToken, Long expiresIn, Long refreshExpiresIn) {
+        this(accessToken, refreshToken, "Bearer", expiresIn, refreshExpiresIn);
     }
 }

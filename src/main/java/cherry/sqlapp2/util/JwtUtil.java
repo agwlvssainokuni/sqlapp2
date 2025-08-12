@@ -34,8 +34,18 @@ public class JwtUtil {
     @Value("${app.jwt.secret}")
     private String secret;
 
-    @Value("${app.jwt.expiration}")
-    private Long expiration;
+    @Value("${app.jwt.access-token-expiration}")
+    private Long accessTokenExpiration;
+
+    @Value("${app.jwt.refresh-token-expiration}")
+    private Long refreshTokenExpiration;
+
+    @Value("${app.jwt.refresh-token-sliding-expiration}")
+    private Boolean slidingRefreshExpiration;
+
+    private static final String TOKEN_TYPE_CLAIM = "token_type";
+    private static final String ACCESS_TOKEN_TYPE = "access";
+    private static final String REFRESH_TOKEN_TYPE = "refresh";
 
     private SecretKey getSigningKey() {
         byte[] keyBytes = secret.getBytes();
@@ -48,6 +58,10 @@ public class JwtUtil {
 
     public Date extractExpiration(String token) {
         return extractClaim(token, Claims::getExpiration);
+    }
+
+    public String extractTokenType(String token) {
+        return extractClaim(token, claims -> claims.get(TOKEN_TYPE_CLAIM, String.class));
     }
 
     public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
@@ -67,14 +81,30 @@ public class JwtUtil {
         return extractExpiration(token).before(new Date());
     }
 
-    public String generateToken(String username) {
+    public String generateAccessToken(String username) {
         Map<String, Object> claims = new HashMap<>();
-        return createToken(claims, username);
+        claims.put(TOKEN_TYPE_CLAIM, ACCESS_TOKEN_TYPE);
+        return createToken(claims, username, accessTokenExpiration);
     }
 
-    private String createToken(Map<String, Object> claims, String subject) {
+    public String generateRefreshToken(String username) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put(TOKEN_TYPE_CLAIM, REFRESH_TOKEN_TYPE);
+        return createToken(claims, username, refreshTokenExpiration);
+    }
+
+    /**
+     * Legacy method for backward compatibility
+     * @deprecated Use generateAccessToken instead
+     */
+    @Deprecated
+    public String generateToken(String username) {
+        return generateAccessToken(username);
+    }
+
+    private String createToken(Map<String, Object> claims, String subject, Long expiration) {
         Date now = new Date();
-        Date expiryDate = new Date(now.getTime() + expiration);
+        Date expiryDate = new Date(now.getTime() + expiration * 1000);
 
         return Jwts.builder()
                 .claims(claims)
@@ -85,16 +115,73 @@ public class JwtUtil {
                 .compact();
     }
 
-    public Boolean validateToken(String token, String username) {
+    public Boolean validateAccessToken(String token, String username) {
         try {
             final String tokenUsername = extractUsername(token);
-            return (tokenUsername.equals(username) && !isTokenExpired(token));
+            final String tokenType = extractTokenType(token);
+            return (tokenUsername.equals(username) && 
+                    ACCESS_TOKEN_TYPE.equals(tokenType) && 
+                    !isTokenExpired(token));
         } catch (Exception e) {
             return false;
         }
     }
 
+    public Boolean validateRefreshToken(String token, String username) {
+        try {
+            final String tokenUsername = extractUsername(token);
+            final String tokenType = extractTokenType(token);
+            return (tokenUsername.equals(username) && 
+                    REFRESH_TOKEN_TYPE.equals(tokenType) && 
+                    !isTokenExpired(token));
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    /**
+     * Legacy method for backward compatibility
+     * @deprecated Use validateAccessToken instead
+     */
+    @Deprecated
+    public Boolean validateToken(String token, String username) {
+        return validateAccessToken(token, username);
+    }
+
+    public Long getAccessTokenExpiration() {
+        return accessTokenExpiration;
+    }
+
+    public Long getRefreshTokenExpiration() {
+        return refreshTokenExpiration;
+    }
+
+    /**
+     * Legacy method for backward compatibility
+     * @deprecated Use getAccessTokenExpiration instead
+     */
+    @Deprecated
     public Long getExpirationTime() {
-        return expiration;
+        return accessTokenExpiration;
+    }
+
+    public Boolean isSlidingRefreshExpiration() {
+        return slidingRefreshExpiration;
+    }
+
+    public boolean isAccessToken(String token) {
+        try {
+            return ACCESS_TOKEN_TYPE.equals(extractTokenType(token));
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    public boolean isRefreshToken(String token) {
+        try {
+            return REFRESH_TOKEN_TYPE.equals(extractTokenType(token));
+        } catch (Exception e) {
+            return false;
+        }
     }
 }
