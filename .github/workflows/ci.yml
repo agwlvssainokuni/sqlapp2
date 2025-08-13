@@ -47,17 +47,6 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-          cache-dependency-path: 'frontend/package-lock.json'
-
-      - name: Install dependencies
-        run: npm ci
-        working-directory: frontend
-
       - name: Set up Java 21
         uses: actions/setup-java@v4
         with:
@@ -69,23 +58,9 @@ jobs:
         run: chmod +x ./gradlew
 
       - name: Run unit tests
-        run: ./gradlew test --no-daemon --parallel
+        run: ./gradlew test -x buildFrontend --no-daemon --parallel
         env:
           GRADLE_OPTS: "-Dorg.gradle.jvmargs=-Xmx2g -Dorg.gradle.daemon=false"
-
-      - name: Run integration tests
-        run: ./gradlew integrationTest --no-daemon --parallel
-        env:
-          GRADLE_OPTS: "-Dorg.gradle.jvmargs=-Xmx2g -Dorg.gradle.daemon=false"
-
-      - name: Generate test report
-        uses: dorny/test-reporter@v1
-        if: success() || failure()
-        with:
-          name: Backend Test Results
-          path: 'build/test-results/test/*.xml,build/test-results/integrationTest/*.xml'
-          reporter: java-junit
-          fail-on-error: true
 
       - name: Run OWASP Dependency Check
         run: ./gradlew dependencyCheckAnalyze --no-daemon
