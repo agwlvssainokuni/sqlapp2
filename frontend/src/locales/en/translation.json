@@ -95,10 +95,15 @@
     "sqlEditable": "SQL can be edited",
     "enterQueryError": "Please enter SQL query",
     "selectConnectionError": "Please select a database connection",
+    "selectConnectionAndSql": "Please select a database connection and enter SQL query",
     "validationFailed": "SQL validation failed",
     "validationError": "Validation error",
     "executionFailed": "SQL execution failed",
-    "executionError": "Execution error"
+    "executionError": "Execution error",
+    "exportResults": "Export Results",
+    "exportFilename": "Export filename (optional)",
+    "exportFailed": "Export failed",
+    "exportError": "An error occurred while exporting"
   },
   "savedQueries": {
     "title": "Saved Queries",
