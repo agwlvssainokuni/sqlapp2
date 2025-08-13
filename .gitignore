@@ -57,3 +57,5 @@ src/main/resources/static/
 
 # Application logs
 app.log
+# Environment variables
+/.env

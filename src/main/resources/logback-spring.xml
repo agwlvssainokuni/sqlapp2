@@ -118,8 +118,9 @@
     </springProfile>
 
     <springProfile name="staging,prod">
-        <logger name="org.springframework" level="WARN"/>
-        <logger name="org.springframework.security" level="WARN"/>
+        <logger name="org.springframework" level="INFO"/>
+        <logger name="org.springframework.web" level="INFO"/>
+        <logger name="org.springframework.security" level="INFO"/>
     </springProfile>
 
     <!-- Database loggers -->
@@ -128,21 +129,18 @@
     </springProfile>
 
     <springProfile name="staging,prod">
-        <logger name="org.hibernate.SQL" level="WARN"/>
+        <logger name="org.hibernate.SQL" level="INFO"/>
     </springProfile>
-
-    <!-- HikariCP logger -->
-    <logger name="com.zaxxer.hikari" level="WARN"/>
 
     <!-- Root logger configuration -->
     <springProfile name="default">
-        <root level="TRACE">
+        <root level="WARN">
             <appender-ref ref="CONSOLE"/>
         </root>
     </springProfile>
 
     <springProfile name="dev">
-        <root level="INFO">
+        <root level="WARN">
             <appender-ref ref="CONSOLE"/>
             <appender-ref ref="FILE"/>
         </root>
