@@ -69,7 +69,7 @@ dependencies {
 
     // JSON Processing
     implementation 'com.fasterxml.jackson.core:jackson-databind'
-    
+
     // Structured Logging
     implementation 'net.logstash.logback:logstash-logback-encoder:8.0'
 
@@ -113,6 +113,72 @@ dependencyUpdates {
                 candidate.version.contains('CR') ||
                 candidate.version.contains('M') ||
                 candidate.version.contains('SNAPSHOT')
+    }
+}
+
+// Integration Test Configuration
+sourceSets {
+    integrationTest {
+        java {
+            compileClasspath += sourceSets.main.output + sourceSets.test.output
+            runtimeClasspath += sourceSets.main.output + sourceSets.test.output
+            srcDir file('src/test/java')
+        }
+        resources.srcDir file('src/test/resources')
+    }
+}
+
+configurations {
+    integrationTestImplementation.extendsFrom testImplementation
+    integrationTestRuntimeOnly.extendsFrom testRuntimeOnly
+}
+
+tasks.register('integrationTest', Test) {
+    description = 'Runs integration tests.'
+    group = 'verification'
+
+    testClassesDirs = sourceSets.integrationTest.output.classesDirs
+    classpath = sourceSets.integrationTest.runtimeClasspath
+
+    include '**/integration/**/*Test.class'
+
+    useJUnitPlatform()
+    jvmArgs += "-javaagent:${configurations.javaagent.asPath}"
+
+    // Test configuration
+    systemProperty 'spring.profiles.active', 'integrationtest'
+    testLogging {
+        events "passed", "skipped", "failed"
+        exceptionFormat "full"
+    }
+
+    reports {
+        html.required = true
+        junitXml.required = true
+    }
+
+    // Ensure integration tests run after unit tests
+    shouldRunAfter test
+}
+
+// CI/CD Configuration
+tasks.named('check') {
+    dependsOn integrationTest
+}
+
+// SonarQube Configuration for CI
+plugins.withId('org.sonarqube') {
+    sonar {
+        properties {
+            property 'sonar.projectKey', 'sqlapp2'
+            property 'sonar.projectName', 'SqlApp2'
+            property 'sonar.sources', 'src/main/java'
+            property 'sonar.tests', 'src/test/java'
+            property 'sonar.java.binaries', 'build/classes/java/main'
+            property 'sonar.java.test.binaries', 'build/classes/java/test'
+            property 'sonar.junit.reportPaths', 'build/test-results/test,build/test-results/integrationTest'
+            property 'sonar.coverage.jacoco.xmlReportPaths', 'build/reports/jacoco/test/jacocoTestReport.xml'
+        }
     }
 }
 
