@@ -17,6 +17,8 @@ package cherry.sqlapp2.controller;
 
 import cherry.sqlapp2.dto.*;
 import cherry.sqlapp2.entity.User;
+import cherry.sqlapp2.service.MetricsService;
+import cherry.sqlapp2.service.RefreshTokenService;
 import cherry.sqlapp2.service.UserService;
 import cherry.sqlapp2.util.JwtUtil;
 import org.junit.jupiter.api.BeforeEach;
@@ -35,8 +37,10 @@ import org.springframework.security.core.Authentication;
 
 import java.util.Optional;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -53,7 +57,10 @@ class AuthControllerTest {
     private JwtUtil jwtUtil;
 
     @Mock
-    private cherry.sqlapp2.service.RefreshTokenService refreshTokenService;
+    private RefreshTokenService refreshTokenService;
+
+    @Mock
+    private MetricsService metricsService;
 
     private AuthController authController;
 
@@ -67,7 +74,13 @@ class AuthControllerTest {
 
     @BeforeEach
     void setUp() {
-        authController = new AuthController(userService, authenticationManager, jwtUtil, refreshTokenService);
+        authController = new AuthController(
+                userService,
+                authenticationManager,
+                jwtUtil,
+                refreshTokenService,
+                metricsService
+        );
     }
 
     @Nested
@@ -83,7 +96,7 @@ class AuthControllerTest {
             user.setId(1L);
             Authentication mockAuth = mock(Authentication.class);
             cherry.sqlapp2.entity.RefreshToken refreshToken = new cherry.sqlapp2.entity.RefreshToken(
-                testRefreshToken, user, java.time.LocalDateTime.now().plusDays(1)
+                    testRefreshToken, user, java.time.LocalDateTime.now().plusDays(1)
             );
 
             when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
@@ -164,7 +177,7 @@ class AuthControllerTest {
             user.setId(2L);
             Authentication mockAuth = mock(Authentication.class);
             cherry.sqlapp2.entity.RefreshToken refreshToken = new cherry.sqlapp2.entity.RefreshToken(
-                testRefreshToken, user, java.time.LocalDateTime.now().plusDays(1)
+                    testRefreshToken, user, java.time.LocalDateTime.now().plusDays(1)
             );
 
             when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
@@ -306,22 +319,22 @@ class AuthControllerTest {
             // Given
             User user = new User(testUsername, "hashedPassword", testEmail);
             user.setId(1L);
-            
-            cherry.sqlapp2.dto.RefreshTokenRequest refreshRequest = 
-                new cherry.sqlapp2.dto.RefreshTokenRequest(testRefreshToken);
-            
-            cherry.sqlapp2.entity.RefreshToken refreshTokenEntity = 
-                new cherry.sqlapp2.entity.RefreshToken(testRefreshToken, user, 
-                    java.time.LocalDateTime.now().plusDays(1));
-            
-            cherry.sqlapp2.entity.RefreshToken newRefreshTokenEntity = 
-                new cherry.sqlapp2.entity.RefreshToken("new.refresh.token", user, 
-                    java.time.LocalDateTime.now().plusDays(1));
-            
+
+            cherry.sqlapp2.dto.RefreshTokenRequest refreshRequest =
+                    new cherry.sqlapp2.dto.RefreshTokenRequest(testRefreshToken);
+
+            cherry.sqlapp2.entity.RefreshToken refreshTokenEntity =
+                    new cherry.sqlapp2.entity.RefreshToken(testRefreshToken, user,
+                            java.time.LocalDateTime.now().plusDays(1));
+
+            cherry.sqlapp2.entity.RefreshToken newRefreshTokenEntity =
+                    new cherry.sqlapp2.entity.RefreshToken("new.refresh.token", user,
+                            java.time.LocalDateTime.now().plusDays(1));
+
             String newAccessToken = "new.access.token";
-            
+
             when(refreshTokenService.useRefreshToken(testRefreshToken))
-                .thenReturn(Optional.of(refreshTokenEntity));
+                    .thenReturn(Optional.of(refreshTokenEntity));
             when(refreshTokenService.canRefreshToken(user)).thenReturn(true);
             when(jwtUtil.validateRefreshToken(testRefreshToken, testUsername)).thenReturn(true);
             when(jwtUtil.generateAccessToken(testUsername)).thenReturn(newAccessToken);
@@ -331,8 +344,8 @@ class AuthControllerTest {
             when(refreshTokenService.createRefreshToken(user)).thenReturn(newRefreshTokenEntity);
 
             // When
-            cherry.sqlapp2.dto.ApiResponse<cherry.sqlapp2.dto.RefreshTokenResult> response = 
-                authController.refresh(refreshRequest);
+            cherry.sqlapp2.dto.ApiResponse<cherry.sqlapp2.dto.RefreshTokenResult> response =
+                    authController.refresh(refreshRequest);
 
             // Then
             assertThat(response.ok()).isTrue();
@@ -354,15 +367,15 @@ class AuthControllerTest {
         @DisplayName("無効なリフレッシュトークンでエラーを返す")
         void shouldReturnErrorForInvalidRefreshToken() {
             // Given
-            cherry.sqlapp2.dto.RefreshTokenRequest refreshRequest = 
-                new cherry.sqlapp2.dto.RefreshTokenRequest("invalid.refresh.token");
-            
+            cherry.sqlapp2.dto.RefreshTokenRequest refreshRequest =
+                    new cherry.sqlapp2.dto.RefreshTokenRequest("invalid.refresh.token");
+
             when(refreshTokenService.useRefreshToken("invalid.refresh.token"))
-                .thenReturn(Optional.empty());
+                    .thenReturn(Optional.empty());
 
             // When
-            cherry.sqlapp2.dto.ApiResponse<cherry.sqlapp2.dto.RefreshTokenResult> response = 
-                authController.refresh(refreshRequest);
+            cherry.sqlapp2.dto.ApiResponse<cherry.sqlapp2.dto.RefreshTokenResult> response =
+                    authController.refresh(refreshRequest);
 
             // Then
             assertThat(response.ok()).isFalse();
@@ -378,21 +391,21 @@ class AuthControllerTest {
             // Given
             User user = new User(testUsername, "hashedPassword", testEmail);
             user.setId(1L);
-            
-            cherry.sqlapp2.dto.RefreshTokenRequest refreshRequest = 
-                new cherry.sqlapp2.dto.RefreshTokenRequest(testRefreshToken);
-            
-            cherry.sqlapp2.entity.RefreshToken refreshTokenEntity = 
-                new cherry.sqlapp2.entity.RefreshToken(testRefreshToken, user, 
-                    java.time.LocalDateTime.now().plusDays(1));
-            
+
+            cherry.sqlapp2.dto.RefreshTokenRequest refreshRequest =
+                    new cherry.sqlapp2.dto.RefreshTokenRequest(testRefreshToken);
+
+            cherry.sqlapp2.entity.RefreshToken refreshTokenEntity =
+                    new cherry.sqlapp2.entity.RefreshToken(testRefreshToken, user,
+                            java.time.LocalDateTime.now().plusDays(1));
+
             when(refreshTokenService.useRefreshToken(testRefreshToken))
-                .thenReturn(Optional.of(refreshTokenEntity));
+                    .thenReturn(Optional.of(refreshTokenEntity));
             when(refreshTokenService.canRefreshToken(user)).thenReturn(false);
 
             // When
-            cherry.sqlapp2.dto.ApiResponse<cherry.sqlapp2.dto.RefreshTokenResult> response = 
-                authController.refresh(refreshRequest);
+            cherry.sqlapp2.dto.ApiResponse<cherry.sqlapp2.dto.RefreshTokenResult> response =
+                    authController.refresh(refreshRequest);
 
             // Then
             assertThat(response.ok()).isFalse();
@@ -411,9 +424,9 @@ class AuthControllerTest {
         @DisplayName("有効なリフレッシュトークンでログアウトが成功する")
         void shouldLogoutSuccessfullyWithValidRefreshToken() {
             // Given
-            cherry.sqlapp2.dto.RefreshTokenRequest logoutRequest = 
-                new cherry.sqlapp2.dto.RefreshTokenRequest(testRefreshToken);
-            
+            cherry.sqlapp2.dto.RefreshTokenRequest logoutRequest =
+                    new cherry.sqlapp2.dto.RefreshTokenRequest(testRefreshToken);
+
             when(refreshTokenService.revokeToken(testRefreshToken)).thenReturn(true);
 
             // When
@@ -428,9 +441,9 @@ class AuthControllerTest {
         @DisplayName("無効なリフレッシュトークンでログアウトがエラーを返す")
         void shouldReturnErrorForInvalidRefreshTokenOnLogout() {
             // Given
-            cherry.sqlapp2.dto.RefreshTokenRequest logoutRequest = 
-                new cherry.sqlapp2.dto.RefreshTokenRequest("invalid.token");
-            
+            cherry.sqlapp2.dto.RefreshTokenRequest logoutRequest =
+                    new cherry.sqlapp2.dto.RefreshTokenRequest("invalid.token");
+
             when(refreshTokenService.revokeToken("invalid.token")).thenReturn(false);
 
             // When

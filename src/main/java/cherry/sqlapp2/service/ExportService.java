@@ -18,8 +18,9 @@ package cherry.sqlapp2.service;
 
 import cherry.sqlapp2.dto.ExportFormat;
 import cherry.sqlapp2.dto.SqlExecutionResult;
-import cherry.sqlapp2.entity.DatabaseConnection;
+import cherry.sqlapp2.entity.SavedQuery;
 import cherry.sqlapp2.entity.User;
+import cherry.sqlapp2.exception.ResourceNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +29,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.io.StringWriter;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -38,33 +40,49 @@ public class ExportService {
 
     private static final Logger logger = LoggerFactory.getLogger(ExportService.class);
 
-    @Autowired
-    private SqlExecutionService sqlExecutionService;
+    private final SqlExecutionService sqlExecutionService;
+    private final DatabaseConnectionService connectionService;
 
     @Autowired
-    private DatabaseConnectionService connectionService;
+    public ExportService(
+            SqlExecutionService sqlExecutionService,
+            DatabaseConnectionService connectionService
+    ) {
+        this.sqlExecutionService = sqlExecutionService;
+        this.connectionService = connectionService;
+    }
 
     /**
      * Export SQL execution result to CSV/TSV format
      */
     public ResponseEntity<byte[]> exportSqlResult(
+            User user,
+            Long connectionId,
             String sql,
             Map<String, Object> parameters,
-            Long connectionId,
+            Map<String, String> parameterTypes,
+            SavedQuery savedQuery,
             ExportFormat format,
-            String filename,
-            User user
+            String filename
     ) {
         try {
             // Get database connection
-            DatabaseConnection connection = connectionService.getConnectionById(user, connectionId);
-            if (connection == null) {
-                throw new RuntimeException("Database connection not found");
+            var connection = connectionService.getConnectionEntityById(
+                    user,
+                    connectionId
+            );
+            if (connection.isEmpty()) {
+                throw new ResourceNotFoundException("Database connection not found");
             }
 
             // Execute SQL query
-            SqlExecutionResult result = sqlExecutionService.executeParameterizedSql(
-                    sql, parameters, connection
+            SqlExecutionResult result = sqlExecutionService.executeParameterizedQuery(
+                    user,
+                    connectionId,
+                    sql,
+                    parameters,
+                    parameterTypes,
+                    savedQuery
             );
 
             // Generate export data
@@ -79,14 +97,14 @@ public class ExportService {
 
             // Prepare response
             HttpHeaders headers = new HttpHeaders();
-            headers.add(HttpHeaders.CONTENT_DISPOSITION, 
+            headers.add(HttpHeaders.CONTENT_DISPOSITION,
                     "attachment; filename=\"" + filename + "\"");
-            headers.add(HttpHeaders.CONTENT_TYPE, 
+            headers.add(HttpHeaders.CONTENT_TYPE,
                     format.getContentType() + "; charset=UTF-8");
 
             return ResponseEntity.ok()
                     .headers(headers)
-                    .body(exportData.getBytes("UTF-8"));
+                    .body(exportData.getBytes(StandardCharsets.UTF_8));
 
         } catch (Exception e) {
             logger.error("Error exporting SQL result", e);
@@ -103,20 +121,16 @@ public class ExportService {
 
         try {
             // Write header row
-            if (result.getData() != null && result.getData().getColumns() != null) {
-                List<String> columnNames = result.getData().getColumns().stream()
-                        .map(col -> col.getName())
-                        .toList();
-                
-                writer.write(String.join(delimiter, 
-                        columnNames.stream()
+            if (result.data() != null && result.data().columns() != null) {
+                writer.write(String.join(delimiter,
+                        result.data().columns().stream()
                                 .map(this::escapeValue)
                                 .toArray(String[]::new)));
                 writer.write("\n");
 
                 // Write data rows
-                if (result.getData().getRows() != null) {
-                    for (List<Object> row : result.getData().getRows()) {
+                if (result.data().rows() != null) {
+                    for (List<Object> row : result.data().rows()) {
                         String[] values = new String[row.size()];
                         for (int i = 0; i < row.size(); i++) {
                             Object value = row.get(i);
@@ -143,14 +157,14 @@ public class ExportService {
         if (value == null) {
             return "";
         }
-        
+
         // If value contains delimiter, quotes, or newlines, wrap in quotes
         if (value.contains(",") || value.contains("\t") || value.contains("\"") || value.contains("\n")) {
             // Escape existing quotes by doubling them
             String escaped = value.replace("\"", "\"\"");
             return "\"" + escaped + "\"";
         }
-        
+
         return value;
     }
 

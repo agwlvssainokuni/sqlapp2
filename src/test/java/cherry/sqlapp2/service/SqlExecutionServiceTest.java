@@ -55,6 +55,9 @@ class SqlExecutionServiceTest {
     private DatabaseConnectionRepository connectionRepository;
 
     @Mock
+    private MetricsService metricsService;
+
+    @Mock
     private Connection connection;
 
     @Mock
@@ -85,7 +88,7 @@ class SqlExecutionServiceTest {
     @BeforeEach
     void setUp() {
         sqlExecutionService = new SqlExecutionService(
-                dataSourceService, queryManagementService, connectionRepository,
+                dataSourceService, queryManagementService, connectionRepository, metricsService,
                 300000, 1000, 100, 1000
         );
 

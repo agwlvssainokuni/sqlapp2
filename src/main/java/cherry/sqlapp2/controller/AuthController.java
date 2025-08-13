@@ -19,6 +19,7 @@ package cherry.sqlapp2.controller;
 import cherry.sqlapp2.dto.*;
 import cherry.sqlapp2.entity.RefreshToken;
 import cherry.sqlapp2.entity.User;
+import cherry.sqlapp2.service.MetricsService;
 import cherry.sqlapp2.service.RefreshTokenService;
 import cherry.sqlapp2.service.UserService;
 import cherry.sqlapp2.util.JwtUtil;
@@ -52,7 +53,7 @@ public class AuthController {
     private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
     private final RefreshTokenService refreshTokenService;
-    private final cherry.sqlapp2.service.MetricsService metricsService;
+    private final MetricsService metricsService;
 
     @Autowired
     public AuthController(
@@ -60,7 +61,7 @@ public class AuthController {
             AuthenticationManager authenticationManager,
             JwtUtil jwtUtil,
             RefreshTokenService refreshTokenService,
-            cherry.sqlapp2.service.MetricsService metricsService
+            MetricsService metricsService
     ) {
         this.userService = userService;
         this.authenticationManager = authenticationManager;

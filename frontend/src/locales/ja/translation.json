@@ -95,15 +95,10 @@
     "sqlEditable": "SQLを編集できます",
     "enterQueryError": "SQLクエリを入力してください",
     "selectConnectionError": "データベース接続を選択してください",
-    "selectConnectionAndSql": "データベース接続を選択してSQLクエリを入力してください",
     "validationFailed": "SQL検証に失敗しました",
     "validationError": "検証エラー",
     "executionFailed": "SQL実行に失敗しました",
-    "executionError": "実行エラー",
-    "exportResults": "結果をエクスポート",
-    "exportFilename": "エクスポートファイル名（任意）",
-    "exportFailed": "エクスポートに失敗しました",
-    "exportError": "エクスポート中にエラーが発生しました"
+    "executionError": "実行エラー"
   },
   "savedQueries": {
     "title": "保存済みクエリ",

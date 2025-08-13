@@ -28,8 +28,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Optional;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -42,6 +44,9 @@ class UserServiceTest {
     @Mock
     private PasswordEncoder passwordEncoder;
 
+    @Mock
+    private MetricsService metricsService;
+
     private UserService userService;
 
     private final String testUsername = "testUser";
@@ -51,7 +56,11 @@ class UserServiceTest {
 
     @BeforeEach
     void setUp() {
-        userService = new UserService(userRepository, passwordEncoder);
+        userService = new UserService(
+                userRepository,
+                passwordEncoder,
+                metricsService
+        );
     }
 
     @Nested
@@ -65,7 +74,7 @@ class UserServiceTest {
             when(userRepository.existsByUsername(testUsername)).thenReturn(false);
             when(userRepository.existsByEmail(testEmail)).thenReturn(false);
             when(passwordEncoder.encode(testPassword)).thenReturn(encodedPassword);
-            
+
             User expectedUser = new User(testUsername, encodedPassword, testEmail);
             when(userRepository.save(any(User.class))).thenReturn(expectedUser);
 

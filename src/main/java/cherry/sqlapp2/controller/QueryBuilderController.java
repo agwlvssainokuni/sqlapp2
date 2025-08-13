@@ -23,13 +23,11 @@ import cherry.sqlapp2.service.QueryBuilderService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -47,7 +45,7 @@ public class QueryBuilderController {
     @Operation(
             summary = "Build SQL query from structure",
             description = "Generate SQL query from structured query components (SELECT, FROM, WHERE, etc.)",
-            requestBody = @RequestBody(
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     description = "Query structure with SELECT, FROM, WHERE, and other SQL clauses",
                     required = true,
                     content = @Content(
@@ -82,8 +80,8 @@ public class QueryBuilderController {
     })
     @PostMapping("/build")
     public ApiResponse<QueryBuilderResponse> buildQuery(
-            @Valid @RequestBody QueryBuilderRequest request,
-            Authentication authentication) {
+            @Valid @RequestBody QueryBuilderRequest request
+    ) {
 
         QueryBuilderResponse response = queryBuilderService.buildQuery(request);
         return ApiResponse.success(response);

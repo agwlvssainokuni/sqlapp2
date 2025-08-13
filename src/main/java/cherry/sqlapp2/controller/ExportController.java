@@ -21,7 +21,6 @@ import cherry.sqlapp2.entity.User;
 import cherry.sqlapp2.service.ExportService;
 import cherry.sqlapp2.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
@@ -32,7 +31,9 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Map;
 import java.util.Optional;
@@ -71,11 +72,11 @@ public class ExportController {
                                                     {
                                                         "sql": "SELECT id, name FROM users WHERE active = :active",
                                                         "connectionId": 1,
-                                                        "format": "CSV",
-                                                        "filename": "active_users.csv",
                                                         "parameters": {
                                                             "active": true
-                                                        }
+                                                        },
+                                                        "format": "CSV",
+                                                        "filename": "active_users.csv"
                                                     }
                                                     """
                                     ),
@@ -85,11 +86,11 @@ public class ExportController {
                                                     {
                                                         "sql": "SELECT * FROM products WHERE category = :category",
                                                         "connectionId": 2,
-                                                        "format": "TSV",
-                                                        "filename": "electronics_products.tsv",
                                                         "parameters": {
                                                             "category": "Electronics"
-                                                        }
+                                                        },
+                                                        "format": "TSV",
+                                                        "filename": "electronics_products.tsv"
                                                     }
                                                     """
                                     )
@@ -128,12 +129,14 @@ public class ExportController {
         User user = getCurrentUser(authentication);
 
         return exportService.exportSqlResult(
+                user,
+                request.getConnectionId(),
                 request.getSql(),
                 request.getParameters(),
-                request.getConnectionId(),
+                request.getParameterTypes(),
+                null,
                 request.getFormat(),
-                request.getFilename(),
-                user
+                request.getFilename()
         );
     }
 
@@ -142,6 +145,8 @@ public class ExportController {
      */
     public static class ExportRequestWithParameters extends ExportRequest {
         private Map<String, Object> parameters;
+
+        private Map<String, String> parameterTypes;
 
         public ExportRequestWithParameters() {
             super();
@@ -153,6 +158,14 @@ public class ExportController {
 
         public void setParameters(Map<String, Object> parameters) {
             this.parameters = parameters;
+        }
+
+        public Map<String, String> getParameterTypes() {
+            return parameterTypes;
+        }
+
+        public void setParameterTypes(Map<String, String> parameterTypes) {
+            this.parameterTypes = parameterTypes;
         }
     }
 }

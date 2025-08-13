@@ -49,8 +49,6 @@ const SqlExecutionPage: React.FC = () => {
     pageSize: 100,
     ignoreOrderByWarning: false
   })
-  const [exportFormat, setExportFormat] = useState<'CSV' | 'TSV'>('CSV')
-  const [exportFilename, setExportFilename] = useState('')
 
   useEffect(() => {
     loadConnections()
@@ -269,78 +267,6 @@ const SqlExecutionPage: React.FC = () => {
     executeSql()
   }
 
-  const handleExport = async () => {
-    if (!selectedConnectionId || !sql.trim()) {
-      setError(t('sqlExecution.selectConnectionAndSql'))
-      return
-    }
-
-    try {
-      setLoading(true)
-      setError(null)
-
-      const parametersObj: Record<string, any> = {}
-      parameters.forEach(param => {
-        if (param.value.trim() !== '') {
-          switch (param.type) {
-            case 'int':
-              parametersObj[param.name] = parseInt(param.value)
-              break
-            case 'long':
-              parametersObj[param.name] = parseInt(param.value)
-              break
-            case 'double':
-              parametersObj[param.name] = parseFloat(param.value)
-              break
-            case 'boolean':
-              parametersObj[param.name] = param.value.toLowerCase() === 'true'
-              break
-            default:
-              parametersObj[param.name] = param.value
-          }
-        }
-      })
-
-      const response = await apiRequest('/api/export', 'POST', {
-        sql,
-        connectionId: selectedConnectionId,
-        format: exportFormat,
-        filename: exportFilename.trim() || undefined,
-        parameters: parametersObj
-      })
-
-      if (response.ok) {
-        const blob = await response.blob()
-        const url = window.URL.createObjectURL(blob)
-        const a = document.createElement('a')
-        a.style.display = 'none'
-        a.href = url
-        
-        const contentDisposition = response.headers.get('Content-Disposition')
-        let filename = `export.${exportFormat.toLowerCase()}`
-        if (contentDisposition) {
-          const match = contentDisposition.match(/filename="(.+)"/)
-          if (match) {
-            filename = match[1]
-          }
-        }
-        
-        a.download = filename
-        document.body.appendChild(a)
-        a.click()
-        window.URL.revokeObjectURL(url)
-        document.body.removeChild(a)
-      } else {
-        const errorData = await response.json()
-        setError(errorData.error ? errorData.error.join(', ') : t('sqlExecution.exportFailed'))
-      }
-    } catch (err) {
-      console.error('Export error:', err)
-      setError(t('sqlExecution.exportError'))
-    } finally {
-      setLoading(false)
-    }
-  }
 
   const sqlContainsOrderBy = hasOrderByClause(sql)
 
@@ -474,33 +400,6 @@ const SqlExecutionPage: React.FC = () => {
                 <span>{t('sqlExecution.rows')}: {result.data?.rowCount || 0}</span>
                 <span>{t('sqlExecution.executionTime')}: {result.executionTime}{t('sqlExecution.ms')}</span>
               </div>
-              
-              {result.success && result.data?.columns && result.data.columns.length > 0 && (
-                <div className="export-controls">
-                  <select 
-                    value={exportFormat} 
-                    onChange={(e) => setExportFormat(e.target.value as 'CSV' | 'TSV')}
-                    className="export-format-select"
-                  >
-                    <option value="CSV">CSV</option>
-                    <option value="TSV">TSV</option>
-                  </select>
-                  <input
-                    type="text"
-                    value={exportFilename}
-                    onChange={(e) => setExportFilename(e.target.value)}
-                    placeholder={t('sqlExecution.exportFilename')}
-                    className="export-filename-input"
-                  />
-                  <button 
-                    onClick={handleExport}
-                    disabled={!result || !result.success || loading}
-                    className="export-button"
-                  >
-                    📥 {t('sqlExecution.exportResults')}
-                  </button>
-                </div>
-              )}
             </div>
 
 
