@@ -19,16 +19,24 @@ import cherry.sqlapp2.dto.*;
 import cherry.sqlapp2.entity.User;
 import cherry.sqlapp2.service.SchemaService;
 import cherry.sqlapp2.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
-import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/schema")
+@Tag(name = "Database Schema", description = "Database schema information and metadata operations")
+@SecurityRequirement(name = "bearerAuth")
 public class SchemaController {
 
     private final SchemaService schemaService;
@@ -50,12 +58,39 @@ public class SchemaController {
                 .get();
     }
 
-    /**
-     * Get database schema information
-     */
+    @Operation(
+            summary = "Get database information",
+            description = "Retrieve database metadata including catalogs and schemas for a specific connection"
+    )
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "200",
+                    description = "Database information retrieved successfully",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ApiResponse.class)
+                    )
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "401",
+                    description = "User not authenticated",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ApiResponse.class)
+                    )
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "500",
+                    description = "Database connection error",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ApiResponse.class)
+                    )
+            )
+    })
     @GetMapping("/connections/{connectionId}")
     public ApiResponse<DatabaseInfo> getDatabaseInfo(
-            @PathVariable Long connectionId,
+            @Parameter(description = "Database connection ID", required = true) @PathVariable Long connectionId,
             Authentication authentication
     ) {
         User currentUser = getCurrentUser(authentication);
@@ -63,14 +98,41 @@ public class SchemaController {
         return ApiResponse.success(databaseInfo);
     }
 
-    /**
-     * Get tables for a specific catalog/schema
-     */
+    @Operation(
+            summary = "Get database tables",
+            description = "Retrieve list of tables for a specific catalog/schema in the database"
+    )
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "200",
+                    description = "Tables retrieved successfully",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ApiResponse.class)
+                    )
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "401",
+                    description = "User not authenticated",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ApiResponse.class)
+                    )
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "500",
+                    description = "Database connection error",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ApiResponse.class)
+                    )
+            )
+    })
     @GetMapping("/connections/{connectionId}/tables")
     public ApiResponse<List<TableInfo>> getTables(
-            @PathVariable Long connectionId,
-            @RequestParam(required = false) String catalog,
-            @RequestParam(required = false) String schema,
+            @Parameter(description = "Database connection ID", required = true) @PathVariable Long connectionId,
+            @Parameter(description = "Database catalog name") @RequestParam(required = false) String catalog,
+            @Parameter(description = "Database schema name") @RequestParam(required = false) String schema,
             Authentication authentication
     ) {
         User currentUser = getCurrentUser(authentication);
@@ -78,15 +140,50 @@ public class SchemaController {
         return ApiResponse.success(tables);
     }
 
-    /**
-     * Get table details including columns, primary keys, foreign keys, and indexes
-     */
+    @Operation(
+            summary = "Get table details",
+            description = "Retrieve detailed table information including columns, primary keys, foreign keys, and indexes"
+    )
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "200",
+                    description = "Table details retrieved successfully",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ApiResponse.class)
+                    )
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "401",
+                    description = "User not authenticated",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ApiResponse.class)
+                    )
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "404",
+                    description = "Table not found",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ApiResponse.class)
+                    )
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "500",
+                    description = "Database connection error",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ApiResponse.class)
+                    )
+            )
+    })
     @GetMapping("/connections/{connectionId}/tables/{tableName}")
     public ApiResponse<TableDetails> getTableDetails(
-            @PathVariable Long connectionId,
-            @PathVariable String tableName,
-            @RequestParam(required = false) String catalog,
-            @RequestParam(required = false) String schema,
+            @Parameter(description = "Database connection ID", required = true) @PathVariable Long connectionId,
+            @Parameter(description = "Table name", required = true) @PathVariable String tableName,
+            @Parameter(description = "Database catalog name") @RequestParam(required = false) String catalog,
+            @Parameter(description = "Database schema name") @RequestParam(required = false) String schema,
             Authentication authentication
     ) {
         User currentUser = getCurrentUser(authentication);
@@ -94,15 +191,50 @@ public class SchemaController {
         return ApiResponse.success(tableDetails);
     }
 
-    /**
-     * Get columns for a specific table
-     */
+    @Operation(
+            summary = "Get table columns",
+            description = "Retrieve column information for a specific table including data types and constraints"
+    )
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "200",
+                    description = "Table columns retrieved successfully",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ApiResponse.class)
+                    )
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "401",
+                    description = "User not authenticated",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ApiResponse.class)
+                    )
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "404",
+                    description = "Table not found",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ApiResponse.class)
+                    )
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "500",
+                    description = "Database connection error",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ApiResponse.class)
+                    )
+            )
+    })
     @GetMapping("/connections/{connectionId}/tables/{tableName}/columns")
     public ApiResponse<List<ColumnInfo>> getTableColumns(
-            @PathVariable Long connectionId,
-            @PathVariable String tableName,
-            @RequestParam(required = false) String catalog,
-            @RequestParam(required = false) String schema,
+            @Parameter(description = "Database connection ID", required = true) @PathVariable Long connectionId,
+            @Parameter(description = "Table name", required = true) @PathVariable String tableName,
+            @Parameter(description = "Database catalog name") @RequestParam(required = false) String catalog,
+            @Parameter(description = "Database schema name") @RequestParam(required = false) String schema,
             Authentication authentication
     ) {
         User currentUser = getCurrentUser(authentication);

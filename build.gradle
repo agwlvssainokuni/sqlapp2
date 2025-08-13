@@ -33,12 +33,19 @@ repositories {
 dependencyManagement {
     imports {
         mavenBom 'org.springframework.boot:spring-boot-dependencies:3.5.4'
+        mavenBom 'io.micrometer:micrometer-bom:1.15.1'
     }
     dependencies {
         // Ensure we use the latest stable versions of JJWT
         dependency 'io.jsonwebtoken:jjwt-api:0.12.6'
         dependency 'io.jsonwebtoken:jjwt-impl:0.12.6'
         dependency 'io.jsonwebtoken:jjwt-jackson:0.12.6'
+
+        // Structured Logging
+        dependency 'net.logstash.logback:logstash-logback-encoder:8.1'
+
+        // API Documentation (OpenAPI/Swagger)
+        dependency 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.9'
     }
 }
 
@@ -71,12 +78,16 @@ dependencies {
 
     // Monitoring and Metrics
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
-    implementation 'io.micrometer:micrometer-registry-prometheus'
-    implementation 'io.micrometer:micrometer-tracing-bridge-otel'
-    implementation 'io.opentelemetry:opentelemetry-exporter-zipkin'
+    runtimeOnly 'io.micrometer:micrometer-tracing-bridge-brave'
+    //runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
+    //runtimeOnly 'io.micrometer:micrometer-tracing-bridge-otel'
+    //runtimeOnly 'io.opentelemetry:opentelemetry-exporter-zipkin'
 
     // Structured Logging
-    implementation 'net.logstash.logback:logstash-logback-encoder:8.0'
+    implementation 'net.logstash.logback:logstash-logback-encoder'
+
+    // API Documentation (OpenAPI/Swagger)
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui'
 
     // Development Tools
     developmentOnly 'org.springframework.boot:spring-boot-devtools'

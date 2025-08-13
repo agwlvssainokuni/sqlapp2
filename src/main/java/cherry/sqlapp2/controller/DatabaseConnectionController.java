@@ -21,8 +21,9 @@ import cherry.sqlapp2.dto.DatabaseConnection;
 import cherry.sqlapp2.dto.DatabaseConnectionRequest;
 import cherry.sqlapp2.entity.User;
 import cherry.sqlapp2.service.DatabaseConnectionService;
-import cherry.sqlapp2.service.DynamicDataSourceService;
 import cherry.sqlapp2.service.UserService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -35,20 +36,19 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/connections")
+@Tag(name = "Database Connection", description = "Database connection management operations")
+@SecurityRequirement(name = "bearerAuth")
 public class DatabaseConnectionController {
 
     private final DatabaseConnectionService connectionService;
-    private final DynamicDataSourceService dynamicDataSourceService;
     private final UserService userService;
 
     @Autowired
     public DatabaseConnectionController(
             DatabaseConnectionService connectionService,
-            DynamicDataSourceService dynamicDataSourceService,
             UserService userService
     ) {
         this.connectionService = connectionService;
-        this.dynamicDataSourceService = dynamicDataSourceService;
         this.userService = userService;
     }
 

@@ -1,16 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
     <!-- Property definitions -->
+    <springProfile name="default">
+        <property name="LOG_LEVEL" value="DEBUG"/>
+        <property name="LOG_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%thread] %logger{36} - %msg%n"/>
+    </springProfile>
+
     <springProfile name="dev">
         <property name="LOG_LEVEL" value="DEBUG"/>
         <property name="LOG_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%thread] %logger{36} - %msg%n"/>
     </springProfile>
-    
+
     <springProfile name="staging">
         <property name="LOG_LEVEL" value="INFO"/>
         <property name="LOG_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%thread] %logger{36} - %msg%n"/>
     </springProfile>
-    
+
     <springProfile name="prod">
         <property name="LOG_LEVEL" value="WARN"/>
         <property name="LOG_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%thread] %logger{36} - %msg%n"/>
@@ -18,16 +23,8 @@
 
     <!-- Console Appender -->
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
-        <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
-            <providers>
-                <timestamp/>
-                <logLevel/>
-                <loggerName/>
-                <message/>
-                <mdc/>
-                <arguments/>
-                <stackTrace/>
-            </providers>
+        <encoder>
+            <pattern>${LOG_PATTERN}</pattern>
         </encoder>
     </appender>
 
@@ -109,37 +106,41 @@
     </springProfile>
 
     <!-- Logger configurations -->
-    
+
     <!-- Application logger -->
     <logger name="cherry.sqlapp2" level="${LOG_LEVEL}"/>
-    
+
     <!-- Spring Framework loggers -->
-    <springProfile name="dev">
+    <springProfile name="default,dev">
         <logger name="org.springframework" level="INFO"/>
         <logger name="org.springframework.web" level="DEBUG"/>
         <logger name="org.springframework.security" level="DEBUG"/>
     </springProfile>
-    
+
     <springProfile name="staging,prod">
         <logger name="org.springframework" level="WARN"/>
         <logger name="org.springframework.security" level="WARN"/>
     </springProfile>
 
     <!-- Database loggers -->
-    <springProfile name="dev">
+    <springProfile name="default,dev">
         <logger name="org.hibernate.SQL" level="DEBUG"/>
-        <logger name="org.hibernate.type.descriptor.sql.BasicBinder" level="TRACE"/>
     </springProfile>
-    
+
     <springProfile name="staging,prod">
         <logger name="org.hibernate.SQL" level="WARN"/>
-        <logger name="org.hibernate.type.descriptor.sql.BasicBinder" level="WARN"/>
     </springProfile>
 
     <!-- HikariCP logger -->
     <logger name="com.zaxxer.hikari" level="WARN"/>
 
     <!-- Root logger configuration -->
+    <springProfile name="default">
+        <root level="TRACE">
+            <appender-ref ref="CONSOLE"/>
+        </root>
+    </springProfile>
+
     <springProfile name="dev">
         <root level="INFO">
             <appender-ref ref="CONSOLE"/>

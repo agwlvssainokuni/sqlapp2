@@ -105,7 +105,7 @@ public class SecurityConfig {
         configuration.setAllowedHeaders(Arrays.asList(allowedHeaders));
         configuration.setAllowCredentials(allowCredentials);
         configuration.setExposedHeaders(List.of("Authorization"));
-        
+
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
@@ -146,6 +146,12 @@ public class SecurityConfig {
                         // ヘルスチェックやH2コンソールは認証不要
                         .requestMatchers("/api/health").permitAll()
                         .requestMatchers("/h2-console/**").permitAll()
+                        // OpenAPI/Swagger UIは認証不要（開発・テスト用）
+                        .requestMatchers(
+                                "/api/v3/api-docs/**",
+                                "/api/swagger-ui/**",
+                                "/api/swagger-ui.html"
+                        ).permitAll()
                         // 静的コンテンツ(SPA)は認証不要
                         .requestMatchers(
                                 "/", "/index.html", "/assets/**",

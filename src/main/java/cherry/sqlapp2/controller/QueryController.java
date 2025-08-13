@@ -25,6 +25,8 @@ import cherry.sqlapp2.service.QueryManagementService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -42,6 +44,8 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/queries")
+@Tag(name = "Query Management", description = "SQL query execution, saving, and management operations")
+@SecurityRequirement(name = "bearerAuth")
 public class QueryController {
 
     private final QueryManagementService queryManagementService;

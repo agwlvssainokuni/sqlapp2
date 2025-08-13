@@ -15,17 +15,19 @@
  */
 package cherry.sqlapp2.controller;
 
-import cherry.sqlapp2.dto.ApiResponse;
-import cherry.sqlapp2.dto.PagingRequest;
-import cherry.sqlapp2.dto.SqlExecutionRequest;
-import cherry.sqlapp2.dto.SqlExecutionResult;
-import cherry.sqlapp2.dto.SqlValidationResult;
+import cherry.sqlapp2.dto.*;
 import cherry.sqlapp2.entity.SavedQuery;
 import cherry.sqlapp2.entity.User;
 import cherry.sqlapp2.service.QueryManagementService;
 import cherry.sqlapp2.service.SqlExecutionService;
 import cherry.sqlapp2.service.UserService;
-import cherry.sqlapp2.util.SqlAnalyzer;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -39,6 +41,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/sql")
+@Tag(name = "SQL Execution", description = "SQL query execution and validation operations")
 public class SqlExecutionController {
 
     private final SqlExecutionService sqlExecutionService;
@@ -63,6 +66,48 @@ public class SqlExecutionController {
                 .get();
     }
 
+    @Operation(
+            summary = "Execute SQL query",
+            description = "Execute SQL query with optional parameters and pagination support",
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "SQL execution request with query, connection, and optional parameters",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = SqlExecutionRequest.class),
+                            examples = @ExampleObject(
+                                    name = "SQL Execution Example",
+                                    value = "{\"sql\": \"SELECT * FROM users WHERE id = :userId\", \"connectionId\": 1, \"parameters\": {\"userId\": \"123\"}, \"parameterTypes\": {\"userId\": \"INTEGER\"}}"
+                            )
+                    )
+            )
+    )
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "200",
+                    description = "SQL query executed successfully",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ApiResponse.class)
+                    )
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "400",
+                    description = "Invalid SQL query or parameters",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ApiResponse.class)
+                    )
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "401",
+                    description = "User not authenticated",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ApiResponse.class)
+                    )
+            )
+    })
+    @SecurityRequirement(name = "bearerAuth")
     @PostMapping("/execute")
     public ApiResponse<SqlExecutionResult> executeQuery(
             @Valid @RequestBody SqlExecutionRequest request,
@@ -129,6 +174,39 @@ public class SqlExecutionController {
         return ApiResponse.success(result);
     }
 
+    @Operation(
+            summary = "Validate SQL query",
+            description = "Validate SQL query syntax without execution",
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "SQL validation request with query to validate",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = SqlExecutionRequest.class),
+                            examples = @ExampleObject(
+                                    name = "SQL Validation Example",
+                                    value = "{\"sql\": \"SELECT * FROM users WHERE id = :userId\", \"validateOnly\": true}"
+                            )
+                    )
+            )
+    )
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "200",
+                    description = "SQL validation completed",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ApiResponse.class)
+                    )
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "400",
+                    description = "Invalid request body",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ApiResponse.class)
+                    )
+            )
+    })
     @PostMapping("/validate")
     public ApiResponse<SqlValidationResult> validateQuery(
             @Valid @RequestBody SqlExecutionRequest request

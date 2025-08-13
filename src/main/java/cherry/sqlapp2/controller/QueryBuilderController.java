@@ -20,11 +20,13 @@ import cherry.sqlapp2.dto.ApiResponse;
 import cherry.sqlapp2.dto.QueryBuilderRequest;
 import cherry.sqlapp2.dto.QueryBuilderResponse;
 import cherry.sqlapp2.service.QueryBuilderService;
-import java.util.List;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/query-builder")
@@ -40,7 +42,7 @@ public class QueryBuilderController {
     public ApiResponse<QueryBuilderResponse> buildQuery(
             @Valid @RequestBody QueryBuilderRequest request,
             Authentication authentication) {
-        
+
         QueryBuilderResponse response = queryBuilderService.buildQuery(request);
         return ApiResponse.success(response);
     }

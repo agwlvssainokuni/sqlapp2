@@ -22,6 +22,13 @@ import cherry.sqlapp2.entity.User;
 import cherry.sqlapp2.service.RefreshTokenService;
 import cherry.sqlapp2.service.UserService;
 import cherry.sqlapp2.util.JwtUtil;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -38,6 +45,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/auth")
+@Tag(name = "Authentication", description = "User authentication and authorization operations")
 public class AuthController {
 
     private final UserService userService;
@@ -61,6 +69,39 @@ public class AuthController {
         this.metricsService = metricsService;
     }
 
+    @Operation(
+            summary = "User login",
+            description = "Authenticate user and return access token",
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "Login credentials",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = LoginRequest.class),
+                            examples = @ExampleObject(
+                                    name = "Login Example",
+                                    value = "{\"username\": \"admin\", \"password\": \"password123\"}"
+                            )
+                    )
+            )
+    )
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "200",
+                    description = "Login successful",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ApiResponse.class)
+                    )
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "401",
+                    description = "Invalid credentials",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ApiResponse.class)
+                    )
+            )
+    })
     @PostMapping("/login")
     public ApiResponse<LoginResult> login(@Valid @RequestBody LoginRequest request) {
         Authentication authentication = authenticationManager.authenticate(
@@ -82,13 +123,27 @@ public class AuthController {
                 refreshExpiresIn,
                 new LoginUser(user)
         );
-        
+
         // Record successful login metric
         metricsService.recordUserLogin(user.getUsername());
-        
+
         return ApiResponse.success(loginResult);
     }
 
+    @Operation(
+            summary = "Refresh access token",
+            description = "Generate a new access token using a refresh token"
+    )
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "200",
+                    description = "Token refreshed successfully"
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "401",
+                    description = "Invalid or expired refresh token"
+            )
+    })
     @PostMapping("/refresh")
     public ApiResponse<RefreshTokenResult> refresh(@Valid @RequestBody RefreshTokenRequest request) {
         Optional<RefreshToken> refreshTokenOpt = refreshTokenService.useRefreshToken(request.refreshToken());
@@ -134,6 +189,20 @@ public class AuthController {
         return ApiResponse.success(result);
     }
 
+    @Operation(
+            summary = "User logout",
+            description = "Logout user and invalidate refresh token"
+    )
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "200",
+                    description = "Logout successful"
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "400",
+                    description = "Invalid refresh token"
+            )
+    })
     @PostMapping("/logout")
     public ApiResponse<Void> logout(@Valid @RequestBody RefreshTokenRequest request) {
         // Revoke the refresh token
@@ -146,6 +215,11 @@ public class AuthController {
         return ApiResponse.success(null);
     }
 
+    @Operation(
+            summary = "Logout from all devices",
+            description = "Logout user from all devices by invalidating all refresh tokens"
+    )
+    @SecurityRequirement(name = "bearerAuth")
     @PostMapping("/logout-all")
     public ApiResponse<Void> logoutAll(Authentication authentication) {
         User user = Optional.of(SecurityContextHolder.getContext())
@@ -159,6 +233,39 @@ public class AuthController {
         return ApiResponse.success(null);
     }
 
+    @Operation(
+            summary = "User registration",
+            description = "Register a new user account",
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "User registration data",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = UserRegistrationRequest.class),
+                            examples = @ExampleObject(
+                                    name = "Registration Example",
+                                    value = "{\"username\": \"newuser\", \"password\": \"password123\", \"email\": \"user@example.com\"}"
+                            )
+                    )
+            )
+    )
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "201",
+                    description = "User created successfully",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ApiResponse.class)
+                    )
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "400",
+                    description = "Invalid registration data or username already exists",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ApiResponse.class)
+                    )
+            )
+    })
     @PostMapping("/register")
     public ResponseEntity<ApiResponse<LoginUser>> register(@Valid @RequestBody UserRegistrationRequest request) {
         User user = userService.createUser(
@@ -172,6 +279,29 @@ public class AuthController {
         );
     }
 
+    @Operation(
+            summary = "Get current user information",
+            description = "Retrieve authenticated user's profile information"
+    )
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "200",
+                    description = "User information retrieved successfully",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ApiResponse.class)
+                    )
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "401",
+                    description = "User not authenticated",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ApiResponse.class)
+                    )
+            )
+    })
+    @SecurityRequirement(name = "bearerAuth")
     @GetMapping("/me")
     public ApiResponse<LoginUser> getCurrentUser() {
         User user = Optional.of(SecurityContextHolder.getContext())

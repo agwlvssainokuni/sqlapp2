@@ -18,6 +18,11 @@ package cherry.sqlapp2.controller;
 
 import cherry.sqlapp2.dto.ApiResponse;
 import cherry.sqlapp2.dto.HealthcheckResult;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -26,8 +31,23 @@ import java.time.LocalDateTime;
 
 @RestController
 @RequestMapping("/api")
+@Tag(name = "Health Check", description = "Application health monitoring endpoints")
 public class HealthController {
 
+    @Operation(
+            summary = "Health check",
+            description = "Check application health status"
+    )
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "200",
+                    description = "Application is healthy",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ApiResponse.class)
+                    )
+            )
+    })
     @GetMapping("/health")
     public ApiResponse<HealthcheckResult> health() {
         HealthcheckResult response = new HealthcheckResult(
