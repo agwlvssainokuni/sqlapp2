@@ -69,6 +69,9 @@ dependencies {
 
     // JSON Processing
     implementation 'com.fasterxml.jackson.core:jackson-databind'
+    
+    // Structured Logging
+    implementation 'net.logstash.logback:logstash-logback-encoder:8.0'
 
     // Development Tools
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
