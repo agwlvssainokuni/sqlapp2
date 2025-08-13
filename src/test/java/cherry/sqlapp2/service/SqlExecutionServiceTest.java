@@ -19,8 +19,8 @@ import cherry.sqlapp2.dto.SqlExecutionResult;
 import cherry.sqlapp2.entity.QueryHistory;
 import cherry.sqlapp2.entity.SavedQuery;
 import cherry.sqlapp2.entity.User;
-import cherry.sqlapp2.repository.DatabaseConnectionRepository;
 import cherry.sqlapp2.enums.DatabaseType;
+import cherry.sqlapp2.repository.DatabaseConnectionRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -85,7 +85,8 @@ class SqlExecutionServiceTest {
     @BeforeEach
     void setUp() {
         sqlExecutionService = new SqlExecutionService(
-                dataSourceService, queryManagementService, connectionRepository
+                dataSourceService, queryManagementService, connectionRepository,
+                300000, 1000, 100, 1000
         );
 
         testUser = new User(testUsername, testPassword, testEmail);
@@ -241,7 +242,7 @@ class SqlExecutionServiceTest {
             verify(dataSourceService).getConnection(testUser, testConnectionId);
             verify(statement).executeQuery(testSql);
             verify(queryManagementService).recordExecution(
-                    any(String.class), any(), anyLong(), any(Integer.class), any(Boolean.class), any(), 
+                    any(String.class), any(), anyLong(), any(Integer.class), any(Boolean.class), any(),
                     any(User.class), any(cherry.sqlapp2.entity.DatabaseConnection.class), any()
             );
         }
@@ -268,7 +269,7 @@ class SqlExecutionServiceTest {
 
             verify(statement).executeUpdate(updateSql);
             verify(queryManagementService).recordExecution(
-                    any(String.class), any(), anyLong(), any(), any(Boolean.class), any(), 
+                    any(String.class), any(), anyLong(), any(), any(Boolean.class), any(),
                     any(User.class), any(cherry.sqlapp2.entity.DatabaseConnection.class), any()
             );
         }
@@ -316,9 +317,9 @@ class SqlExecutionServiceTest {
             // Then
             assertThat(result.ok()).isTrue();
             assertThat(result.savedQueryId()).isEqualTo(testSavedQuery.getId());
-            
+
             verify(queryManagementService).recordExecution(
-                    any(String.class), any(), anyLong(), any(Integer.class), any(Boolean.class), any(), 
+                    any(String.class), any(), anyLong(), any(Integer.class), any(Boolean.class), any(),
                     any(User.class), any(cherry.sqlapp2.entity.DatabaseConnection.class), any(SavedQuery.class)
             );
         }
@@ -347,7 +348,7 @@ class SqlExecutionServiceTest {
             assertThat(result.sqlState()).isEqualTo("42S02");
 
             verify(queryManagementService).recordExecution(
-                    any(String.class), any(), anyLong(), any(), any(Boolean.class), any(String.class), 
+                    any(String.class), any(), anyLong(), any(), any(Boolean.class), any(String.class),
                     any(User.class), any(cherry.sqlapp2.entity.DatabaseConnection.class), any()
             );
         }
@@ -387,7 +388,7 @@ class SqlExecutionServiceTest {
             verify(preparedStatement).setString(2, "John%");
             verify(preparedStatement).executeQuery();
             verify(queryManagementService).recordExecution(
-                    any(String.class), any(), anyLong(), any(Integer.class), any(Boolean.class), any(), 
+                    any(String.class), any(), anyLong(), any(Integer.class), any(Boolean.class), any(),
                     any(User.class), any(cherry.sqlapp2.entity.DatabaseConnection.class), any()
             );
         }
@@ -409,11 +410,11 @@ class SqlExecutionServiceTest {
             );
             Map<String, String> parameterTypes = Map.of(
                     "intVal", "int",
-                    "longVal", "long", 
+                    "longVal", "long",
                     "doubleVal", "double",
                     "boolVal", "boolean",
                     "dateVal", "date",
-                    "timeVal", "time", 
+                    "timeVal", "time",
                     "datetimeVal", "datetime",
                     "decimalVal", "decimal"
             );
@@ -627,11 +628,11 @@ class SqlExecutionServiceTest {
 
             Blob mockBlob = mock(Blob.class);
 
-            setupMockResultSet(1, Arrays.asList("text_col", "blob_col", "date_col", "time_col", "timestamp_col"), 
-                             Arrays.asList(Arrays.asList(mockClob, mockBlob, 
-                                 java.sql.Date.valueOf(LocalDate.of(2025, 1, 15)),
-                                 Time.valueOf(LocalTime.of(14, 30, 0)),
-                                 Timestamp.valueOf(LocalDateTime.of(2025, 1, 15, 14, 30, 0)))));
+            setupMockResultSet(1, Arrays.asList("text_col", "blob_col", "date_col", "time_col", "timestamp_col"),
+                    Arrays.asList(Arrays.asList(mockClob, mockBlob,
+                            java.sql.Date.valueOf(LocalDate.of(2025, 1, 15)),
+                            Time.valueOf(LocalTime.of(14, 30, 0)),
+                            Timestamp.valueOf(LocalDateTime.of(2025, 1, 15, 14, 30, 0)))));
 
             // When
             SqlExecutionResult result = sqlExecutionService.executeQuery(testUser, testConnectionId, testSql, null);

@@ -41,28 +41,29 @@ public class SqlExecutionService {
     private final DynamicDataSourceService dataSourceService;
     private final QueryManagementService queryManagementService;
     private final DatabaseConnectionRepository connectionRepository;
-    
-    @Value("${app.sql.execution.timeout:300000}")
-    private int queryTimeoutMs;
-    
-    @Value("${app.sql.execution.max-rows:10000}")
-    private int maxRows;
-    
-    @Value("${app.sql.execution.default-page-size:100}")
-    private int defaultPageSize;
-    
-    @Value("${app.sql.execution.max-page-size:1000}")
-    private int maxPageSize;
+
+    private final int queryTimeoutMs;
+    private final int maxRows;
+    private final int defaultPageSize;
+    private final int maxPageSize;
 
     @Autowired
     public SqlExecutionService(
             DynamicDataSourceService dataSourceService,
             QueryManagementService queryManagementService,
-            DatabaseConnectionRepository connectionRepository
+            DatabaseConnectionRepository connectionRepository,
+            @Value("${app.sql.execution.timeout:300000}") int queryTimeoutMs,
+            @Value("${app.sql.execution.max-rows:10000}") int maxRows,
+            @Value("${app.sql.execution.default-page-size:100}") int defaultPageSize,
+            @Value("${app.sql.execution.max-page-size:1000}") int maxPageSize
     ) {
         this.dataSourceService = dataSourceService;
         this.queryManagementService = queryManagementService;
         this.connectionRepository = connectionRepository;
+        this.queryTimeoutMs = queryTimeoutMs;
+        this.maxRows = maxRows;
+        this.defaultPageSize = defaultPageSize;
+        this.maxPageSize = maxPageSize;
     }
 
     /**
@@ -103,7 +104,7 @@ public class SqlExecutionService {
 
             // Set query timeout
             statement.setQueryTimeout(queryTimeoutMs / 1000); // Convert to seconds
-            
+
             // Set max rows for SELECT queries
             if (isSelect) {
                 statement.setMaxRows(maxRows);
@@ -265,7 +266,7 @@ public class SqlExecutionService {
 
                     // Set query timeout
                     statement.setQueryTimeout(queryTimeoutMs / 1000); // Convert to seconds
-                    
+
                     // Set max rows for SELECT queries
                     if (isSelect) {
                         statement.setMaxRows(maxRows);
@@ -417,14 +418,14 @@ public class SqlExecutionService {
         if (pagingRequest.page() < 0) {
             throw new InvalidQueryException("Page number must be non-negative");
         }
-        
+
         if (pagingRequest.pageSize() <= 0 || pagingRequest.pageSize() > maxPageSize) {
             throw new InvalidQueryException("Page size must be between 1 and " + maxPageSize);
         }
 
         // Check SQL compatibility
         SqlAnalyzer.PagingCompatibility compatibility = SqlAnalyzer.getPagingCompatibility(sql);
-        
+
         switch (compatibility) {
             case NOT_SELECT:
                 throw new InvalidQueryException("Pagination is only supported for SELECT queries");
@@ -446,40 +447,40 @@ public class SqlExecutionService {
      * Execute SELECT query with pagination using LIMIT/OFFSET
      */
     private SqlExecutionResult.SqlResultData executeSelectWithPagination(
-            Connection connection, 
-            String sql, 
+            Connection connection,
+            String sql,
             PagingRequest pagingRequest) throws SQLException {
-        
+
         // Calculate offset
         int offset = pagingRequest.page() * pagingRequest.pageSize();
-        
+
         // Modify SQL to add LIMIT and OFFSET
         String paginatedSql = sql + " LIMIT " + pagingRequest.pageSize() + " OFFSET " + offset;
-        
+
         try (Statement statement = connection.createStatement()) {
             statement.setQueryTimeout(queryTimeoutMs / 1000);
-            
+
             try (ResultSet resultSet = statement.executeQuery(paginatedSql)) {
                 SqlExecutionResult.SqlResultData baseResult = processResultSetWithoutPaging(resultSet);
-                
+
                 // Get total count for pagination info
                 long totalCount = getTotalCount(connection, sql);
-                
+
                 // Create paged result
                 PagedResult<List<Object>> pagedResult = PagedResult.of(
-                    baseResult.rows(),
-                    pagingRequest.page(),
-                    pagingRequest.pageSize(),
-                    totalCount
+                        baseResult.rows(),
+                        pagingRequest.page(),
+                        pagingRequest.pageSize(),
+                        totalCount
                 );
-                
+
                 // Return enhanced result with pagination info
                 return new SqlExecutionResult.SqlResultData(
-                    baseResult.columns(),
-                    baseResult.columnDetails(),
-                    baseResult.rows(),
-                    baseResult.rowCount(),
-                    pagedResult
+                        baseResult.columns(),
+                        baseResult.columnDetails(),
+                        baseResult.rows(),
+                        baseResult.rowCount(),
+                        pagedResult
                 );
             }
         }
@@ -494,43 +495,43 @@ public class SqlExecutionService {
             Map<String, Object> parameters,
             Map<String, String> parameterTypes,
             PagingRequest pagingRequest) throws SQLException {
-        
+
         // Calculate offset
         int offset = pagingRequest.page() * pagingRequest.pageSize();
-        
+
         // Modify SQL to add LIMIT and OFFSET
         String paginatedSql = sql + " LIMIT " + pagingRequest.pageSize() + " OFFSET " + offset;
-        
+
         // Convert named parameters to positioned parameters for paginated SQL
         ParameterizedQuery paramQuery = convertNamedParameters(paginatedSql, parameters, parameterTypes);
-        
+
         try (PreparedStatement statement = connection.prepareStatement(paramQuery.sql())) {
             statement.setQueryTimeout(queryTimeoutMs / 1000);
-            
+
             // Set parameters
             setParameters(statement, paramQuery.parameters(), paramQuery.parameterTypes());
-            
+
             try (ResultSet resultSet = statement.executeQuery()) {
                 SqlExecutionResult.SqlResultData baseResult = processResultSetWithoutPaging(resultSet);
-                
+
                 // Get total count for pagination info (without parameters to keep it simple)
                 long totalCount = getParameterizedTotalCount(connection, sql, parameters, parameterTypes);
-                
+
                 // Create paged result
                 PagedResult<List<Object>> pagedResult = PagedResult.of(
-                    baseResult.rows(),
-                    pagingRequest.page(),
-                    pagingRequest.pageSize(),
-                    totalCount
+                        baseResult.rows(),
+                        pagingRequest.page(),
+                        pagingRequest.pageSize(),
+                        totalCount
                 );
-                
+
                 // Return enhanced result with pagination info
                 return new SqlExecutionResult.SqlResultData(
-                    baseResult.columns(),
-                    baseResult.columnDetails(),
-                    baseResult.rows(),
-                    baseResult.rowCount(),
-                    pagedResult
+                        baseResult.columns(),
+                        baseResult.columnDetails(),
+                        baseResult.rows(),
+                        baseResult.rowCount(),
+                        pagedResult
                 );
             }
         }
@@ -539,19 +540,19 @@ public class SqlExecutionService {
     /**
      * Get total count for parameterized pagination
      */
-    private long getParameterizedTotalCount(Connection connection, String originalSql, 
-                                          Map<String, Object> parameters, 
-                                          Map<String, String> parameterTypes) throws SQLException {
+    private long getParameterizedTotalCount(Connection connection, String originalSql,
+                                            Map<String, Object> parameters,
+                                            Map<String, String> parameterTypes) throws SQLException {
         // Create count query by wrapping original SQL
         String countSql = "SELECT COUNT(*) FROM (" + originalSql + ") AS count_query";
-        
+
         // Convert named parameters to positioned parameters for count query
         ParameterizedQuery paramQuery = convertNamedParameters(countSql, parameters, parameterTypes);
-        
+
         try (PreparedStatement statement = connection.prepareStatement(paramQuery.sql())) {
             // Set parameters
             setParameters(statement, paramQuery.parameters(), paramQuery.parameterTypes());
-            
+
             try (ResultSet resultSet = statement.executeQuery()) {
                 if (resultSet.next()) {
                     return resultSet.getLong(1);
@@ -567,10 +568,10 @@ public class SqlExecutionService {
     private long getTotalCount(Connection connection, String originalSql) throws SQLException {
         // Create count query by wrapping original SQL
         String countSql = "SELECT COUNT(*) FROM (" + originalSql + ") AS count_query";
-        
+
         try (Statement statement = connection.createStatement();
              ResultSet resultSet = statement.executeQuery(countSql)) {
-            
+
             if (resultSet.next()) {
                 return resultSet.getLong(1);
             }
@@ -656,21 +657,21 @@ public class SqlExecutionService {
         }
 
         // Extract parameters with positions using the sophisticated extractor
-        List<SqlParameterExtractor.ParameterPosition> parameterPositions = 
+        List<SqlParameterExtractor.ParameterPosition> parameterPositions =
                 SqlParameterExtractor.extractParametersWithPositions(sql);
-        
+
         List<Object> parameterValues = new ArrayList<>();
         List<String> parameterTypesList = new ArrayList<>();
-        
+
         // Build the converted SQL by replacing parameters from right to left
         // to avoid position shifts during replacement
         StringBuilder convertedSqlBuilder = new StringBuilder(sql);
-        
+
         // Process parameters in reverse order to maintain position accuracy
         for (int i = parameterPositions.size() - 1; i >= 0; i--) {
             SqlParameterExtractor.ParameterPosition paramPos = parameterPositions.get(i);
             String paramName = paramPos.name();
-            
+
             if (parameters.containsKey(paramName)) {
                 // Replace the specific parameter at its exact position
                 convertedSqlBuilder.replace(paramPos.start(), paramPos.end(), "?");
@@ -678,7 +679,7 @@ public class SqlExecutionService {
                 throw new IllegalArgumentException("Parameter not provided: " + paramName);
             }
         }
-        
+
         // Build parameter lists in original order (not reverse)
         Set<String> addedParams = new LinkedHashSet<>();
         for (SqlParameterExtractor.ParameterPosition paramPos : parameterPositions) {
