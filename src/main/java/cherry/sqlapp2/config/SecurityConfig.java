@@ -24,6 +24,8 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -117,7 +119,7 @@ public class SecurityConfig {
                     .ignoringRequestMatchers("/h2-console/**")
             );
         } else {
-            http.csrf(csrf -> csrf.disable());
+            http.csrf(AbstractHttpConfigurer::disable);
         }
 
         // CORS Configuration
@@ -125,7 +127,8 @@ public class SecurityConfig {
 
         // HTTPS Redirect
         if (requireHttps) {
-            http.requiresChannel(channel -> channel.anyRequest().requiresSecure());
+            http.redirectToHttps(https -> {
+            });
         }
 
         http
@@ -133,9 +136,17 @@ public class SecurityConfig {
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .authorizeHttpRequests(authz -> authz
-                        .requestMatchers("/api/auth/register", "/api/auth/login", "/api/auth/refresh", "/api/auth/logout").permitAll()
+                        // 認証系APIは認証不要
+                        .requestMatchers(
+                                "/api/auth/register",
+                                "/api/auth/login",
+                                "/api/auth/refresh",
+                                "/api/auth/logout"
+                        ).permitAll()
+                        // ヘルスチェックやH2コンソールは認証不要
                         .requestMatchers("/api/health").permitAll()
                         .requestMatchers("/h2-console/**").permitAll()
+                        // 静的コンテンツ(SPA)は認証不要
                         .requestMatchers(
                                 "/", "/index.html", "/assets/**",
                                 "/*.png", "/*.ico", "/*.svg",
@@ -144,46 +155,50 @@ public class SecurityConfig {
                                 "/sql", "/connections", "/schema",
                                 "/queries", "/history", "/builder"
                         ).permitAll()
+                        // その他のリクエストは認証が必要
                         .anyRequest().authenticated()
                 )
                 .headers(headers -> {
                     // Frame Options
                     if ("DENY".equalsIgnoreCase(frameOptions)) {
-                        headers.frameOptions(frameOptionsConfig -> frameOptionsConfig.deny());
+                        headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::deny);
                     } else {
-                        headers.frameOptions(frameOptionsConfig -> frameOptionsConfig.sameOrigin());
+                        headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin);
                     }
-                    
+
                     // Content Type Options
                     if ("nosniff".equalsIgnoreCase(contentTypeOptions)) {
-                        headers.contentTypeOptions(contentTypeConfig -> {});
+                        headers.contentTypeOptions(contentTypeConfig -> {
+                        });
                     }
-                    
+
                     // XSS Protection
                     if (!xssProtection.isEmpty()) {
-                        headers.and().addHeaderWriter((request, response) -> {
+                        headers.addHeaderWriter((request, response) -> {
                             response.setHeader("X-XSS-Protection", xssProtection);
                         });
                     }
-                    
+
                     // Referrer Policy
                     if (!referrerPolicy.isEmpty()) {
-                        headers.referrerPolicy(ReferrerPolicyHeaderWriter.ReferrerPolicy.valueOf(
-                                referrerPolicy.toUpperCase().replace("-", "_")));
+                        headers.referrerPolicy(referrerPolicyConfig -> {
+                            referrerPolicyConfig.policy(ReferrerPolicyHeaderWriter.ReferrerPolicy.valueOf(
+                                    referrerPolicy.toUpperCase().replace("-", "_")));
+                        });
                     }
-                    
+
                     // Strict Transport Security
                     if (!strictTransportSecurity.isEmpty()) {
-                        headers.and().addHeaderWriter((request, response) -> {
+                        headers.addHeaderWriter((request, response) -> {
                             if (request.isSecure()) {
                                 response.setHeader("Strict-Transport-Security", strictTransportSecurity);
                             }
                         });
                     }
-                    
+
                     // Content Security Policy
                     if (!contentSecurityPolicy.isEmpty()) {
-                        headers.and().addHeaderWriter((request, response) -> {
+                        headers.addHeaderWriter((request, response) -> {
                             response.setHeader("Content-Security-Policy", contentSecurityPolicy);
                         });
                     }
