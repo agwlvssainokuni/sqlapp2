@@ -87,6 +87,24 @@ export interface SqlExecutionRequest {
   parameters?: Record<string, unknown>
   parameterTypes?: Record<string, string>
   savedQueryId?: number
+  pagingRequest?: PagingRequest
+}
+
+export interface PagingRequest {
+  enabled: boolean
+  page: number
+  pageSize: number
+  ignoreOrderByWarning: boolean
+}
+
+export interface PagedResult<T> {
+  data: T[]
+  page: number
+  pageSize: number
+  totalElements: number
+  totalPages: number
+  hasNext: boolean
+  hasPrevious: boolean
 }
 
 export interface SqlExecutionResult {
@@ -108,6 +126,7 @@ export interface SqlResultData {
   columnDetails: ColumnDetail[]
   rows: unknown[][]
   rowCount: number
+  paging?: PagedResult<unknown[]>
 }
 
 export interface ColumnDetail {

@@ -243,5 +243,27 @@
     "close": "閉じる",
     "refresh": "更新",
     "clear": "クリア"
+  },
+  "pagination": {
+    "enablePagination": "ページネーションを有効にする",
+    "pageSize": "ページサイズ",
+    "showing": "表示中",
+    "of": "/",
+    "results": "件",
+    "rowsPerPage": "1ページあたりの行数",
+    "currentPage": "現在のページ",
+    "firstPage": "最初のページ",
+    "previousPage": "前のページ",
+    "nextPage": "次のページ",
+    "lastPage": "最後のページ",
+    "orderByWarning": "警告: SQLクエリにORDER BY句が含まれていません。ページネーションで一貫性のない結果が生成される可能性があります。",
+    "showAdvanced": "詳細オプションを表示",
+    "hideAdvanced": "詳細オプションを非表示", 
+    "ignoreOrderByWarning": "ORDER BY警告を無視して続行",
+    "ignoreOrderByHelp": "ORDER BYなしのページネーションがページ間で一貫性のない結果を返す可能性があることを理解している場合のみ、このオプションを有効にしてください。",
+    "pageInfo": "{{totalPages}}ページ中{{page}}ページ（合計{{totalElements}}レコード）",
+    "noResults": "表示する結果がありません",
+    "loadingResults": "結果を読み込み中...",
+    "paginationError": "ページネーション結果の読み込みエラー"
   }
 }

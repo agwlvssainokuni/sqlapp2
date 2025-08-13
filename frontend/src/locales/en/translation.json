@@ -243,5 +243,27 @@
     "close": "Close",
     "refresh": "Refresh",
     "clear": "Clear"
+  },
+  "pagination": {
+    "enablePagination": "Enable Pagination",
+    "pageSize": "Page Size",
+    "showing": "Showing",
+    "of": "of",
+    "results": "results",
+    "rowsPerPage": "Rows per page",
+    "currentPage": "Current Page",
+    "firstPage": "First Page",
+    "previousPage": "Previous Page",
+    "nextPage": "Next Page",
+    "lastPage": "Last Page",
+    "orderByWarning": "Warning: SQL query does not contain ORDER BY clause. Pagination may produce inconsistent results.",
+    "showAdvanced": "Show Advanced Options",
+    "hideAdvanced": "Hide Advanced Options", 
+    "ignoreOrderByWarning": "Ignore ORDER BY warning and proceed anyway",
+    "ignoreOrderByHelp": "Enable this option only if you understand that pagination without ORDER BY may return inconsistent results across pages.",
+    "pageInfo": "Page {{page}} of {{totalPages}} ({{totalElements}} total records)",
+    "noResults": "No results to display",
+    "loadingResults": "Loading results...",
+    "paginationError": "Error loading paginated results"
   }
 }

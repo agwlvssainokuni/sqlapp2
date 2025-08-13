@@ -17,9 +17,12 @@
 import React, {useEffect, useState} from 'react'
 import {useTranslation} from 'react-i18next'
 import {useAuth} from '../context/AuthContext'
-import type {DatabaseConnection, SavedQuery, SqlExecutionResult, SqlValidationResult, QueryHistory, SqlExecutionRequest} from '../types/api'
+import type {DatabaseConnection, SavedQuery, SqlExecutionResult, SqlValidationResult, QueryHistory, SqlExecutionRequest, PagingRequest} from '../types/api'
 import {extractParameters} from '../utils/SqlParameterExtractor'
+import {hasOrderByClause} from '../utils/SqlAnalyzer'
 import Layout from './Layout'
+import PaginationSettings from './PaginationSettings'
+import Pagination from './Pagination'
 
 interface ParameterDefinition {
   name: string
@@ -40,6 +43,12 @@ const SqlExecutionPage: React.FC = () => {
   const [currentQueryId, setCurrentQueryId] = useState<number | null>(null)
   const [executionMode, setExecutionMode] = useState<'new' | 'saved_query' | 'history' | null>(null)
   const [currentQueryName, setCurrentQueryName] = useState<string>('')
+  const [paging, setPaging] = useState<PagingRequest>({
+    enabled: false,
+    page: 0,
+    pageSize: 100,
+    ignoreOrderByWarning: false
+  })
 
   useEffect(() => {
     loadConnections()
@@ -200,6 +209,11 @@ const SqlExecutionPage: React.FC = () => {
         requestBody.savedQueryId = currentQueryId
       }
 
+      // Include pagination if enabled
+      if (paging.enabled) {
+        requestBody.pagingRequest = paging
+      }
+
       if (hasParameters) {
         requestBody.parameters = {}
         requestBody.parameterTypes = {}
@@ -236,6 +250,25 @@ const SqlExecutionPage: React.FC = () => {
     newParams[index] = {...newParams[index], [field]: value}
     setParameters(newParams)
   }
+
+  const handlePagingChange = (newPaging: PagingRequest) => {
+    setPaging(newPaging)
+  }
+
+  const handlePageChange = (page: number) => {
+    setPaging(prev => ({...prev, page}))
+    // Re-execute query with new page
+    executeSql()
+  }
+
+  const handlePageSizeChange = (pageSize: number) => {
+    setPaging(prev => ({...prev, pageSize, page: 0}))
+    // Re-execute query with new page size
+    executeSql()
+  }
+
+
+  const sqlContainsOrderBy = hasOrderByClause(sql)
 
   return (
     <Layout title={t('sqlExecution.title')}>
@@ -330,6 +363,12 @@ const SqlExecutionPage: React.FC = () => {
           </div>
         )}
 
+        <PaginationSettings
+          paging={paging}
+          onPagingChange={handlePagingChange}
+          sqlContainsOrderBy={sqlContainsOrderBy}
+        />
+
         <div className="execution-controls">
           <button
             onClick={executeSql}
@@ -365,30 +404,40 @@ const SqlExecutionPage: React.FC = () => {
 
 
             {result.data?.columns && result.data.columns.length > 0 && (
-              <div className="result-table-container">
-                <table className="result-table">
-                  <thead>
-                  <tr>
-                    {result.data!.columns.map((column, index) => (
-                      <th key={index}>{column}</th>
-                    ))}
-                  </tr>
-                  </thead>
-                  <tbody>
-                  {result.data!.rows.map((row, rowIndex) => (
-                    <tr key={rowIndex}>
-                      {result.data!.columns.map((_, colIndex) => (
-                        <td key={colIndex}>
-                          {row[colIndex] !== null && row[colIndex] !== undefined
-                            ? String(row[colIndex])
-                            : 'NULL'}
-                        </td>
+              <>
+                <div className="result-table-container">
+                  <table className="result-table">
+                    <thead>
+                    <tr>
+                      {result.data!.columns.map((column, index) => (
+                        <th key={index}>{column}</th>
                       ))}
                     </tr>
-                  ))}
-                  </tbody>
-                </table>
-              </div>
+                    </thead>
+                    <tbody>
+                    {result.data!.rows.map((row, rowIndex) => (
+                      <tr key={rowIndex}>
+                        {result.data!.columns.map((_, colIndex) => (
+                          <td key={colIndex}>
+                            {row[colIndex] !== null && row[colIndex] !== undefined
+                              ? String(row[colIndex])
+                              : 'NULL'}
+                          </td>
+                        ))}
+                      </tr>
+                    ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                {result.data.paging && (
+                  <Pagination
+                    paging={result.data.paging}
+                    onPageChange={handlePageChange}
+                    onPageSizeChange={handlePageSizeChange}
+                  />
+                )}
+              </>
             )}
           </div>
         )}
