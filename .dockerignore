@@ -1,6 +1,7 @@
 # Build artifacts
 .gradle/
 build/
+!build/libs/*.war
 frontend/node_modules/
 frontend/dist/
 

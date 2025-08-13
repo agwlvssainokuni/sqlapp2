@@ -1,26 +1,26 @@
 # Build stage
-FROM node:18-alpine AS frontend-build
+FROM node:22-alpine AS frontend-build
 
 WORKDIR /app/frontend
-COPY frontend/package*.json ./
-RUN npm ci --only=production
 
 COPY frontend/ ./
-RUN npm run build
+
+RUN npm ci --only=production && \
+    npm run build
 
 # Application stage
-FROM openjdk:21-jdk-slim
+FROM eclipse-temurin:21-jdk-alpine
 
 LABEL maintainer="SqlApp2 Development Team"
 LABEL description="SqlApp2 - Web-based SQL execution tool"
 
 # Create app user
-RUN useradd -r -s /bin/false sqlapp2
+RUN addgroup -S sqlapp2 && \
+    adduser -S -s /bin/false -G sqlapp2 sqlapp2
 
 # Install dependencies
-RUN apt-get update && \
-    apt-get install -y curl && \
-    rm -rf /var/lib/apt/lists/*
+RUN apk update && \
+    apk add curl
 
 WORKDIR /app
 
