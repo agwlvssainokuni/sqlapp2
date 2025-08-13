@@ -44,18 +44,21 @@ public class AuthController {
     private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
     private final RefreshTokenService refreshTokenService;
+    private final cherry.sqlapp2.service.MetricsService metricsService;
 
     @Autowired
     public AuthController(
             UserService userService,
             AuthenticationManager authenticationManager,
             JwtUtil jwtUtil,
-            RefreshTokenService refreshTokenService
+            RefreshTokenService refreshTokenService,
+            cherry.sqlapp2.service.MetricsService metricsService
     ) {
         this.userService = userService;
         this.authenticationManager = authenticationManager;
         this.jwtUtil = jwtUtil;
         this.refreshTokenService = refreshTokenService;
+        this.metricsService = metricsService;
     }
 
     @PostMapping("/login")
@@ -79,6 +82,10 @@ public class AuthController {
                 refreshExpiresIn,
                 new LoginUser(user)
         );
+        
+        // Record successful login metric
+        metricsService.recordUserLogin(user.getUsername());
+        
         return ApiResponse.success(loginResult);
     }
 

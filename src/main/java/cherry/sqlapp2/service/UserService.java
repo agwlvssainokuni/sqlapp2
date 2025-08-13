@@ -31,11 +31,13 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final MetricsService metricsService;
 
     @Autowired
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, MetricsService metricsService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.metricsService = metricsService;
     }
 
     public User createUser(String username, String password, String email) {
@@ -48,7 +50,12 @@ public class UserService {
 
         String encodedPassword = passwordEncoder.encode(password);
         User user = new User(username, encodedPassword, email);
-        return userRepository.save(user);
+        User savedUser = userRepository.save(user);
+        
+        // Record user registration metric
+        metricsService.recordUserRegistration();
+        
+        return savedUser;
     }
 
     @Transactional(readOnly = true)

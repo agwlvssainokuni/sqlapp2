@@ -41,6 +41,7 @@ public class SqlExecutionService {
     private final DynamicDataSourceService dataSourceService;
     private final QueryManagementService queryManagementService;
     private final DatabaseConnectionRepository connectionRepository;
+    private final MetricsService metricsService;
 
     private final int queryTimeoutMs;
     private final int maxRows;
@@ -52,6 +53,7 @@ public class SqlExecutionService {
             DynamicDataSourceService dataSourceService,
             QueryManagementService queryManagementService,
             DatabaseConnectionRepository connectionRepository,
+            MetricsService metricsService,
             @Value("${app.sql.execution.timeout:300000}") int queryTimeoutMs,
             @Value("${app.sql.execution.max-rows:10000}") int maxRows,
             @Value("${app.sql.execution.default-page-size:100}") int defaultPageSize,
@@ -60,6 +62,7 @@ public class SqlExecutionService {
         this.dataSourceService = dataSourceService;
         this.queryManagementService = queryManagementService;
         this.connectionRepository = connectionRepository;
+        this.metricsService = metricsService;
         this.queryTimeoutMs = queryTimeoutMs;
         this.maxRows = maxRows;
         this.defaultPageSize = defaultPageSize;
@@ -98,6 +101,7 @@ public class SqlExecutionService {
         boolean isSelect = SqlAnalyzer.isSelectQuery(sql);
 
         long startTime = System.currentTimeMillis();
+        var timerSample = metricsService.startSqlExecutionTimer();
 
         try (Connection connection = dataSourceService.getConnection(user, connectionId);
              Statement statement = connection.createStatement()) {
@@ -140,6 +144,10 @@ public class SqlExecutionService {
                     savedQuery
             );
 
+            // Record success metrics
+            int resultRows = Optional.ofNullable(data).map(SqlExecutionResult.SqlResultData::rowCount).orElse(0);
+            metricsService.recordSqlExecutionComplete(timerSample, resultRows, false);
+
             return SqlExecutionResult.success(
                     executedAt,
                     executionTime,
@@ -165,6 +173,9 @@ public class SqlExecutionService {
                     ex.getMessage(),
                     savedQuery
             );
+
+            // Record error metrics
+            metricsService.recordSqlExecutionComplete(timerSample, 0, true);
 
             return SqlExecutionResult.error(
                     executedAt,
@@ -251,6 +262,7 @@ public class SqlExecutionService {
         boolean isSelect = SqlAnalyzer.isSelectQuery(sql);
 
         long startTime = System.currentTimeMillis();
+        var timerSample = metricsService.startSqlExecutionTimer();
 
         try (Connection connection = dataSourceService.getConnection(user, connectionId)) {
 
@@ -303,6 +315,10 @@ public class SqlExecutionService {
                     savedQuery
             );
 
+            // Record success metrics
+            int resultRows = Optional.ofNullable(data).map(SqlExecutionResult.SqlResultData::rowCount).orElse(0);
+            metricsService.recordSqlExecutionComplete(timerSample, resultRows, false);
+
             return SqlExecutionResult.success(
                     executedAt,
                     executionTime,
@@ -328,6 +344,9 @@ public class SqlExecutionService {
                     ex.getMessage(),
                     savedQuery
             );
+
+            // Record error metrics
+            metricsService.recordSqlExecutionComplete(timerSample, 0, true);
 
             return SqlExecutionResult.error(
                     executedAt,
