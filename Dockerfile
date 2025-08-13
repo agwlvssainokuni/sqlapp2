@@ -9,7 +9,7 @@ COPY frontend/ ./
 RUN npm run build
 
 # Application stage
-FROM openjdk:21-jre-slim
+FROM openjdk:21-jdk-slim
 
 LABEL maintainer="SqlApp2 Development Team"
 LABEL description="SqlApp2 - Web-based SQL execution tool"
