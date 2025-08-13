@@ -40,9 +40,3 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
 EXPOSE 8080
 
 ENTRYPOINT ["java", "-jar", "app.war"]
-
-# Default environment variables
-ENV SPRING_PROFILES_ACTIVE=production
-ENV SERVER_PORT=8080
-ENV SPRING_DATASOURCE_URL=jdbc:h2:file:/app/data/sqlapp2db
-ENV LOGGING_FILE_PATH=/app/logs
