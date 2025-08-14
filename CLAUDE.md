@@ -319,7 +319,7 @@ sqlapp2/
    - Complete UI/UX implementation with responsive design
    - Real-time statistics dashboard and re-execution functionality
 
-10. **SQL Query Builder System (Phase 3.2 - Complete)**:
+10. **SQL Query Builder System (Phase 3.2 + 18.1++ - Complete)**:
    - Comprehensive QueryStructure DTO for representing SQL query components
    - QueryBuilderService for generating SQL from structured data
    - REST API endpoints for query building, validation, and suggestions (/api/query-builder/*)
@@ -329,6 +329,8 @@ sqlapp2/
    - Component-based SQL clause building UI with drag-and-drop functionality
    - Real-time SQL generation and validation with error handling
    - Responsive design with mobile support and intuitive UX
+   - **SQL Standards Compliance**: Alias-aware table reference system ensuring valid SQL generation for all RDBMS
+   - **Auto-synchronization**: Dynamic reference updates across all query clauses when table aliases change
 
 11. **Query Management UI/UX Improvements (Phase 3.3 - Complete)**:
    - Fixed query execution history display issues with proper API response parsing
@@ -696,7 +698,36 @@ sqlapp2/
      - **Dependency Management**: Alpine package manager optimization
      - **Build Artifact Handling**: Streamlined WAR file deployment process
 
-**Total Implementation Achievement**: 30 major implementation phases with 100% completion rate
+31. **QueryBuilder SQL Standards Compliance Fix (Phase 18.1++ - Complete)**:
+   - **CRITICAL SQL Standards Violation Fix**: Resolved table alias reference issue in generated SQL
+     - **Problem**: Generated invalid SQL like `SELECT users.name FROM users AS u` (standards violation)
+     - **Solution**: Now generates valid SQL like `SELECT u.name FROM users AS u` (all RDBMS compliant)
+   
+   - **Alias-Aware Table Reference System**:
+     - **getAvailableTableReferences()**: Dynamic detection of available table references from FROM/JOIN clauses
+     - **Alias Prioritization**: When table aliases exist, prioritize aliases over table names in dropdowns
+     - **Reference Display Format**: Shows "alias (tableName)" format for clarity in UI
+   
+   - **Dynamic Column Resolution System**:
+     - **getColumnsForTableReference()**: Resolves table aliases to actual table names for schema metadata
+     - **Intelligent Mapping**: Correctly maps alias references to actual table columns from schema info
+   
+   - **Auto-Update Synchronization System**:
+     - **Real-time Updates**: FROM clause changes automatically update SELECT, WHERE, and ORDER BY references
+     - **Reference Consistency**: Maintains query structure consistency when table names or aliases change
+     - **Cross-clause Coordination**: Ensures all query clauses use consistent table references
+   
+   - **Comprehensive Testing & Validation**:
+     - **Unit Test Coverage**: 7 comprehensive unit tests for alias resolution logic
+     - **SQL Standards Compliance**: Verified against MySQL, PostgreSQL, MariaDB, and H2 standards
+     - **Edge Case Handling**: Empty aliases, whitespace handling, mixed alias scenarios
+   
+   - **Impact & Benefits**:
+     - **Universal RDBMS Compatibility**: All supported databases now receive valid SQL
+     - **User Experience**: Intelligent dropdowns show appropriate table references
+     - **Development Quality**: Comprehensive test coverage prevents regression
+
+**Total Implementation Achievement**: 31 major implementation phases with 100% completion rate
 
 ### 🔄 Next Phase (Phase 18+ - Documentation & Advanced Features)
 
