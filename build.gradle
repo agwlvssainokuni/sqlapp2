@@ -110,12 +110,14 @@ tasks.register('buildFrontend', Exec) {
     } else {
         commandLine 'sh', '-c', 'npm run build'
     }
+    onlyIf { findProperty('frontend') != 'no' }
 }
 
 tasks.register('copyFrontendBuild', Copy) {
     dependsOn buildFrontend
     from 'frontend/dist'
     into 'src/main/resources/static'
+    onlyIf { findProperty('frontend') != 'no' }
 }
 
 processResources.dependsOn copyFrontendBuild
