@@ -202,7 +202,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v4
         with:
-          images: ghcr.io/${{ github.repository_id }}
+          images: ghcr.io/sqlapp2
           tags: |
             type=raw,value=latest
             type=schedule,pattern={{date 'YYYYMMDD-HHmmss' tz='Asia/Tokyo'}}
