@@ -224,7 +224,7 @@ class QueryBuilderServiceTest {
             join.setTableName("profiles");
             join.setAlias("p");
             
-            QueryStructure.JoinClause.JoinCondition condition = new QueryStructure.JoinClause.JoinCondition();
+            QueryStructure.JoinCondition condition = new QueryStructure.JoinCondition();
             condition.setLeftTable("u");
             condition.setLeftColumn("id");
             condition.setOperator("=");
@@ -263,7 +263,7 @@ class QueryBuilderServiceTest {
             join.setJoinType("LEFT");
             join.setTableName("orders");
             
-            QueryStructure.JoinClause.JoinCondition condition = new QueryStructure.JoinClause.JoinCondition();
+            QueryStructure.JoinCondition condition = new QueryStructure.JoinCondition();
             condition.setLeftTable("users");
             condition.setLeftColumn("id");
             condition.setOperator("=");
@@ -935,7 +935,7 @@ class QueryBuilderServiceTest {
             join.setJoinType("LEFT");
             join.setTableName("profiles");
             join.setAlias("p");
-            QueryStructure.JoinClause.JoinCondition joinCondition = new QueryStructure.JoinClause.JoinCondition();
+            QueryStructure.JoinCondition joinCondition = new QueryStructure.JoinCondition();
             joinCondition.setLeftTable("u");
             joinCondition.setLeftColumn("id");
             joinCondition.setOperator("=");

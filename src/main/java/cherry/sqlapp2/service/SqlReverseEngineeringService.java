@@ -137,8 +137,9 @@ public class SqlReverseEngineeringService {
         List<Join> joins = plainSelect.getJoins();
         builder.joins(parseJoins(joins));
 
-        // Parse WHERE conditions (basic implementation)
-        builder.whereConditions(new ArrayList<>());
+        // Parse WHERE conditions
+        Expression whereExpression = plainSelect.getWhere();
+        builder.whereConditions(parseWhereConditions(whereExpression));
 
         // Parse ORDER BY
         List<OrderByElement> orderByElements = plainSelect.getOrderByElements();
@@ -150,11 +151,18 @@ public class SqlReverseEngineeringService {
 
         // Parse LIMIT/OFFSET (if available)
         Limit limit = plainSelect.getLimit();
-        if (limit != null && limit.getRowCount() != null) {
-            builder.limit(Integer.parseInt(limit.getRowCount().toString()));
+        if (limit != null) {
+            if (limit.getRowCount() != null) {
+                builder.limit(Integer.parseInt(limit.getRowCount().toString()));
+            }
+            if (limit.getOffset() != null) {
+                builder.offset(Integer.parseInt(limit.getOffset().toString()));
+            }
         }
-        if (limit != null && limit.getOffset() != null) {
-            builder.offset(Integer.parseInt(limit.getOffset().toString()));
+        
+        // Also check for OFFSET in a different way if not found above
+        if (plainSelect.getOffset() != null) {
+            builder.offset(Integer.parseInt(plainSelect.getOffset().getOffset().toString()));
         }
 
         return builder.build();
@@ -298,10 +306,13 @@ public class SqlReverseEngineeringService {
         }
         
         if (onExpressionString != null) {
-            // Parse simple equality conditions like "v.field_id = m.id"
-            JoinCondition condition = parseSimpleJoinCondition(onExpressionString);
-            if (condition != null) {
-                conditions.add(condition);
+            // Parse multiple conditions separated by AND
+            String[] andParts = onExpressionString.split("(?i)\\s+AND\\s+");
+            for (String conditionPart : andParts) {
+                JoinCondition condition = parseSimpleJoinCondition(conditionPart.trim());
+                if (condition != null) {
+                    conditions.add(condition);
+                }
             }
         }
         
@@ -351,6 +362,85 @@ public class SqlReverseEngineeringService {
                     condition.setOperator(operator);
                     condition.setRightTable(rightTable);
                     condition.setRightColumn(rightColumn);
+                    
+                    return condition;
+                }
+            }
+        }
+        
+        return null;
+    }
+
+    /**
+     * Parse WHERE conditions from JSqlParser Expression.
+     */
+    private List<WhereCondition> parseWhereConditions(Expression whereExpression) {
+        List<WhereCondition> conditions = new ArrayList<>();
+        
+        if (whereExpression != null) {
+            // For now, use string parsing as a fallback
+            String whereString = whereExpression.toString();
+            WhereCondition condition = parseSimpleWhereCondition(whereString);
+            if (condition != null) {
+                conditions.add(condition);
+            }
+        }
+        
+        return conditions;
+    }
+    
+    /**
+     * Parse a simple WHERE condition string like "m.id = 'job_id'".
+     */
+    private WhereCondition parseSimpleWhereCondition(String conditionString) {
+        if (conditionString == null || conditionString.trim().isEmpty()) {
+            return null;
+        }
+        
+        // Handle common operators
+        String[] operators = {"=", "<>", "!=", "<=", ">=", "<", ">", "LIKE", "IN"};
+        
+        for (String operator : operators) {
+            if (conditionString.contains(" " + operator + " ")) {
+                String regex;
+                if (operator.equals("=")) {
+                    regex = "\\s+=\\s+";
+                } else if (operator.equals("<>") || operator.equals("!=")) {
+                    regex = "\\s+" + operator.replace("<", "\\<").replace(">", "\\>").replace("!", "\\!") + "\\s+";
+                } else if (operator.equals("<=") || operator.equals(">=")) {
+                    regex = "\\s+" + operator.replace("<", "\\<").replace(">", "\\>") + "\\s+";
+                } else if (operator.equals("<") || operator.equals(">")) {
+                    regex = "\\s+" + operator.replace("<", "\\<").replace(">", "\\>") + "\\s+";
+                } else {
+                    regex = "\\s+" + operator + "\\s+";
+                }
+                
+                String[] parts = conditionString.split(regex, 2);
+                if (parts.length == 2) {
+                    String leftSide = parts[0].trim();
+                    String rightSide = parts[1].trim();
+                    
+                    // Parse left side (e.g., "m.id")
+                    String tableName = "";
+                    String columnName = leftSide;
+                    if (leftSide.contains(".")) {
+                        String[] leftParts = leftSide.split("\\.", 2);
+                        tableName = leftParts[0];
+                        columnName = leftParts[1];
+                    }
+                    
+                    // Parse right side (remove quotes if present)
+                    String value = rightSide;
+                    if (value.startsWith("'") && value.endsWith("'")) {
+                        value = value.substring(1, value.length() - 1);
+                    }
+                    
+                    // Create WHERE condition
+                    WhereCondition condition = new WhereCondition();
+                    condition.setTableName(tableName);
+                    condition.setColumnName(columnName);
+                    condition.setOperator(operator);
+                    condition.setValue(value);
                     
                     return condition;
                 }

@@ -124,7 +124,7 @@ public class QueryBuilderControllerIntegrationTest extends BaseIntegrationTest {
             var joinClause = new QueryStructure.JoinClause("INNER JOIN", "posts");
             joinClause.setAlias("p");
             joinClause.setConditions(Arrays.asList(
-                new QueryStructure.JoinClause.JoinCondition("u", "id", "=", "p", "user_id")
+                new QueryStructure.JoinCondition("u", "id", "=", "p", "user_id")
             ));
             queryStructure.setJoins(Arrays.asList(joinClause));
 

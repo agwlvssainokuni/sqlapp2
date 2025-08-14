@@ -68,7 +68,7 @@ class QueryBuilderControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(requestJson))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.ok").value(true))
                 .andExpect(jsonPath("$.data.success").value(true));
     }
 
@@ -87,7 +87,7 @@ class QueryBuilderControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(requestJson))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.ok").value(true))
                 .andExpect(jsonPath("$.data.success").value(false))
                 .andExpect(jsonPath("$.data.errorMessage").value("Invalid SQL syntax"));
     }
