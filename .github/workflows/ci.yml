@@ -209,7 +209,6 @@ jobs:
           tags: |
             type=schedule,pattern={{date 'YYYYMMDD-HHmmss' tz='Asia/Tokyo'}},priority=100
             type=raw,value=${{ github.sha }},priority=200
-            type=raw,value=latest,priority=300
 
       - name: Build Docker image
         uses: docker/build-push-action@v5
