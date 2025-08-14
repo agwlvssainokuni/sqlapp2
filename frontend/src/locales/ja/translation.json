@@ -98,7 +98,8 @@
     "validationFailed": "SQL検証に失敗しました",
     "validationError": "検証エラー",
     "executionFailed": "SQL実行に失敗しました",
-    "executionError": "実行エラー"
+    "executionError": "実行エラー",
+    "editInQueryBuilder": "クエリビルダーで編集"
   },
   "savedQueries": {
     "title": "保存済みクエリ",
@@ -119,6 +120,7 @@
     "cancel": "キャンセル",
     "execute": "実行",
     "edit": "編集",
+    "editInBuilder": "ビルダーで編集",
     "delete": "削除",
     "createdBy": "作成者",
     "connection": "接続",
@@ -206,7 +208,9 @@
     "validationErrors": "検証エラー",
     "generatedSQL": "生成されたSQL",
     "pleaseSelectConnection": "データベース接続を選択してください",
-    "pleaseGenerateFirst": "実行前にSQLを生成してください"
+    "pleaseGenerateFirst": "実行前にSQLを生成してください",
+    "parseError": "SQLの解析に失敗しました",
+    "manualEdit": "手動で編集を続けるか、新しいクエリを作成してください"
   },
   "schemaViewer": {
     "title": "データベーススキーマビューアー",

@@ -15,7 +15,7 @@
  */
 
 import React, {useCallback, useEffect, useState} from 'react'
-import {useLocation} from 'react-router-dom'
+import {useLocation, useNavigate} from 'react-router-dom'
 import {useTranslation} from 'react-i18next'
 import {useAuth} from '../context/AuthContext'
 import type {DatabaseConnection, SavedQuery} from '../types/api'
@@ -33,6 +33,7 @@ const SavedQueriesPage: React.FC = () => {
   const {t} = useTranslation()
   const {apiRequest} = useAuth()
   const location = useLocation()
+  const navigate = useNavigate()
   const [savedQueries, setSavedQueries] = useState<SavedQuery[]>([])
   const [publicQueries, setPublicQueries] = useState<SavedQuery[]>([])
   const [connections, setConnections] = useState<DatabaseConnection[]>([])
@@ -166,6 +167,22 @@ const SavedQueriesPage: React.FC = () => {
     window.location.href = sqlExecutionUrl
   }
 
+  const handleEditInBuilder = (query: SavedQuery) => {
+    if (!query.sqlContent?.trim() || !query.defaultConnection?.id) {
+      return
+    }
+
+    navigate('/builder', {
+      state: {
+        sql: query.sqlContent.trim(),
+        connectionId: query.defaultConnection.id,
+        mode: 'edit',
+        savedQueryId: query.id,
+        savedQueryName: query.name
+      }
+    })
+  }
+
   const resetForm = () => {
     setShowForm(false)
     setEditingQuery(null)
@@ -254,6 +271,7 @@ const SavedQueriesPage: React.FC = () => {
                   onEdit={handleEdit}
                   onDelete={handleDelete}
                   onExecute={handleExecute}
+                  onEditInBuilder={handleEditInBuilder}
                 />
               ))
             )
@@ -267,6 +285,7 @@ const SavedQueriesPage: React.FC = () => {
                   query={query}
                   isOwner={false}
                   onExecute={handleExecute}
+                  onEditInBuilder={handleEditInBuilder}
                 />
               ))
             )
@@ -369,9 +388,10 @@ interface QueryCardProps {
   onEdit?: (query: SavedQuery) => void
   onDelete?: (queryId: number) => void
   onExecute: (query: SavedQuery) => void
+  onEditInBuilder?: (query: SavedQuery) => void
 }
 
-const QueryCard: React.FC<QueryCardProps> = ({query, isOwner, onEdit, onDelete, onExecute}) => {
+const QueryCard: React.FC<QueryCardProps> = ({query, isOwner, onEdit, onDelete, onExecute, onEditInBuilder}) => {
   const {t} = useTranslation()
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleString('ja-JP')
@@ -391,6 +411,11 @@ const QueryCard: React.FC<QueryCardProps> = ({query, isOwner, onEdit, onDelete, 
             <button className="btn-execute" onClick={() => onExecute(query)}>
               {t('savedQueries.execute')}
             </button>
+            {onEditInBuilder && (
+              <button className="btn-edit-builder" onClick={() => onEditInBuilder(query)}>
+                {t('savedQueries.editInBuilder')}
+              </button>
+            )}
             {isOwner && onEdit && (
               <button className="btn-edit" onClick={() => onEdit(query)}>
                 {t('savedQueries.edit')}

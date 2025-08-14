@@ -15,7 +15,7 @@
  */
 
 import React, {useCallback, useEffect, useState} from 'react'
-import {useNavigate} from 'react-router-dom'
+import {useLocation, useNavigate} from 'react-router-dom'
 import {useTranslation} from 'react-i18next'
 import {useAuth} from '../context/AuthContext'
 import type {DatabaseConnection, TableInfo as ApiTableInfo} from '../types/api'
@@ -106,6 +106,7 @@ interface QueryBuilderResponse {
 const QueryBuilderPage: React.FC = () => {
   const {t} = useTranslation()
   const {apiRequest} = useAuth()
+  const location = useLocation()
   const navigate = useNavigate()
   const [connections, setConnections] = useState<DatabaseConnection[]>([])
   const [selectedConnectionId, setSelectedConnectionId] = useState<number | null>(null)
@@ -230,6 +231,72 @@ const QueryBuilderPage: React.FC = () => {
       loadSchema(selectedConnectionId)
     }
   }, [selectedConnectionId, loadSchema])
+
+  // Handle SQL parsing from other pages (React Router state)
+  useEffect(() => {
+    const state = (location as any).state as { sql?: string; connectionId?: number; mode?: string; savedQueryId?: number; savedQueryName?: string } | null
+    console.log('QueryBuilderPage: location.state =', state) // Debug log
+    console.log('QueryBuilderPage: location.pathname =', location.pathname) // Debug log
+    
+    if (state?.mode === 'edit' && state?.sql && state?.connectionId) {
+      console.log('QueryBuilderPage: Starting SQL parsing for:', state.sql) // Debug log
+      parseAndLoadSQL(state.sql, state.connectionId)
+      
+      // Don't clear state immediately to ensure it's processed
+      setTimeout(() => {
+        if ((location as any).state) {
+          window.history.replaceState({}, '', location.pathname)
+        }
+      }, 100)
+    }
+  }, [location]) // Listen to the entire location object changes
+
+  const parseAndLoadSQL = async (sql: string, connectionId: number) => {
+    try {
+      console.log('parseAndLoadSQL: Starting with SQL:', sql, 'connectionId:', connectionId) // Debug log
+      setIsBuilding(true)
+      setValidationErrors([])
+      
+      // Set connection first
+      setSelectedConnectionId(connectionId)
+      
+      // Parse SQL using the new API
+      console.log('parseAndLoadSQL: Making API request to /api/query-builder/parse') // Debug log
+      const response = await apiRequest('/api/query-builder/parse', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ sql })
+      })
+
+      console.log('parseAndLoadSQL: API response:', response) // Debug log
+      const result = response.data as { success: boolean; queryStructure?: QueryStructure; errorMessage?: string }
+      
+      if (result.success && result.queryStructure) {
+        // Successfully parsed - load the structure
+        console.log('parseAndLoadSQL: Successfully parsed, loading structure:', result.queryStructure) // Debug log
+        setQueryStructure(result.queryStructure)
+        setGeneratedSql(sql)
+        setValidationErrors([])
+      } else {
+        // Parsing failed - show error and keep original SQL for reference
+        console.log('parseAndLoadSQL: Parsing failed:', result.errorMessage) // Debug log
+        setValidationErrors([
+          t('queryBuilder.parseError') + ': ' + (result.errorMessage || 'Unknown error'),
+          t('queryBuilder.manualEdit')
+        ])
+        setGeneratedSql(sql)
+      }
+    } catch (error) {
+      console.error('parseAndLoadSQL: Error:', error)
+      setValidationErrors([
+        t('queryBuilder.parseError') + ': ' + (error instanceof Error ? error.message : 'Unknown error'),
+        t('queryBuilder.manualEdit')
+      ])
+      setGeneratedSql(sql)
+    } finally {
+      setIsBuilding(false)
+    }
+  }
 
   const buildQuery = async () => {
     if (!selectedConnectionId) {

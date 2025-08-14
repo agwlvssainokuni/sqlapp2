@@ -98,7 +98,8 @@
     "validationFailed": "SQL validation failed",
     "validationError": "Validation error",
     "executionFailed": "SQL execution failed",
-    "executionError": "Execution error"
+    "executionError": "Execution error",
+    "editInQueryBuilder": "Edit in Query Builder"
   },
   "savedQueries": {
     "title": "Saved Queries",
@@ -119,6 +120,7 @@
     "cancel": "Cancel",
     "execute": "Execute",
     "edit": "Edit",
+    "editInBuilder": "Edit in Builder",
     "delete": "Delete",
     "createdBy": "Created By",
     "connection": "Connection",
@@ -206,7 +208,9 @@
     "validationErrors": "Validation Errors",
     "generatedSQL": "Generated SQL",
     "pleaseSelectConnection": "Please select a database connection",
-    "pleaseGenerateFirst": "Please generate SQL first before executing"
+    "pleaseGenerateFirst": "Please generate SQL first before executing",
+    "parseError": "Failed to parse SQL",
+    "manualEdit": "You can continue editing manually or try building a new query"
   },
   "schemaViewer": {
     "title": "Database Schema Viewer",

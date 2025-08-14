@@ -19,7 +19,9 @@ package cherry.sqlapp2.controller;
 import cherry.sqlapp2.dto.ApiResponse;
 import cherry.sqlapp2.dto.QueryBuilderRequest;
 import cherry.sqlapp2.dto.QueryBuilderResponse;
+import cherry.sqlapp2.dto.SqlParseResult;
 import cherry.sqlapp2.service.QueryBuilderService;
+import cherry.sqlapp2.service.SqlReverseEngineeringService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
@@ -41,6 +43,9 @@ public class QueryBuilderController {
 
     @Autowired
     private QueryBuilderService queryBuilderService;
+
+    @Autowired
+    private SqlReverseEngineeringService sqlReverseEngineeringService;
 
     @Operation(
             summary = "Build SQL query from structure",
@@ -86,5 +91,50 @@ public class QueryBuilderController {
         QueryBuilderResponse response = queryBuilderService.buildQuery(request);
         return ApiResponse.success(response);
     }
+
+    @Operation(
+            summary = "Parse SQL query into structure",
+            description = "Reverse engineer SQL SELECT statement into visual query builder structure",
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "SQL query to parse",
+                    required = true,
+                    content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(
+                                    value = """
+                                            {
+                                                "sql": "SELECT u.id, u.name, p.title FROM users u LEFT JOIN posts p ON u.id = p.user_id WHERE u.active = true ORDER BY u.created_date DESC LIMIT 10"
+                                            }
+                                            """
+                            )
+                    )
+            )
+    )
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "200",
+                    description = "SQL parsed successfully or parsing failed with error details"
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "400",
+                    description = "Invalid request format"
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "401",
+                    description = "Authentication required"
+            )
+    })
+    @PostMapping("/parse")
+    public ApiResponse<SqlParseResult> parseSQL(
+            @RequestBody SqlParseRequest request
+    ) {
+        SqlParseResult result = sqlReverseEngineeringService.parseSQL(request.sql());
+        return ApiResponse.success(result);
+    }
+
+    /**
+     * Request DTO for SQL parsing endpoint.
+     */
+    public record SqlParseRequest(String sql) {}
 
 }

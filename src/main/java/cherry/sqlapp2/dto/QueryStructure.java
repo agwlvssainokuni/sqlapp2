@@ -22,6 +22,7 @@ import java.util.List;
 public class QueryStructure {
     
     private List<SelectColumn> selectColumns = new ArrayList<>();
+    private boolean distinct = false;
     private List<FromTable> fromTables = new ArrayList<>();
     private List<JoinClause> joins = new ArrayList<>();
     private List<WhereCondition> whereConditions = new ArrayList<>();
@@ -266,4 +267,70 @@ public class QueryStructure {
     
     public Integer getOffset() { return offset; }
     public void setOffset(Integer offset) { this.offset = offset; }
+    
+    public boolean isDistinct() { return distinct; }
+    public void setDistinct(boolean distinct) { this.distinct = distinct; }
+
+    // Builder pattern for convenience
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static class Builder {
+        private QueryStructure queryStructure = new QueryStructure();
+
+        public Builder selectColumns(List<SelectColumn> selectColumns) {
+            queryStructure.selectColumns = selectColumns;
+            return this;
+        }
+
+        public Builder distinct(boolean distinct) {
+            queryStructure.distinct = distinct;
+            return this;
+        }
+
+        public Builder fromTables(List<FromTable> fromTables) {
+            queryStructure.fromTables = fromTables;
+            return this;
+        }
+
+        public Builder joins(List<JoinClause> joins) {
+            queryStructure.joins = joins;
+            return this;
+        }
+
+        public Builder whereConditions(List<WhereCondition> whereConditions) {
+            queryStructure.whereConditions = whereConditions;
+            return this;
+        }
+
+        public Builder groupByColumns(List<GroupByColumn> groupByColumns) {
+            queryStructure.groupByColumns = groupByColumns;
+            return this;
+        }
+
+        public Builder havingConditions(List<WhereCondition> havingConditions) {
+            queryStructure.havingConditions = havingConditions;
+            return this;
+        }
+
+        public Builder orderByColumns(List<OrderByColumn> orderByColumns) {
+            queryStructure.orderByColumns = orderByColumns;
+            return this;
+        }
+
+        public Builder limit(Integer limit) {
+            queryStructure.limit = limit;
+            return this;
+        }
+
+        public Builder offset(Integer offset) {
+            queryStructure.offset = offset;
+            return this;
+        }
+
+        public QueryStructure build() {
+            return queryStructure;
+        }
+    }
 }

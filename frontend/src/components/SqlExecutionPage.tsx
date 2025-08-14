@@ -15,7 +15,7 @@
  */
 
 import React, {useCallback, useEffect, useRef, useState} from 'react'
-import {useLocation} from 'react-router-dom'
+import {useLocation, useNavigate} from 'react-router-dom'
 import {useTranslation} from 'react-i18next'
 import {useAuth} from '../context/AuthContext'
 import type {
@@ -43,6 +43,7 @@ const SqlExecutionPage: React.FC = () => {
   const {t} = useTranslation()
   const {apiRequest} = useAuth()
   const location = useLocation()
+  const navigate = useNavigate()
   const [connections, setConnections] = useState<DatabaseConnection[]>([])
   const [selectedConnectionId, setSelectedConnectionId] = useState<number | null>(null)
   const [sql, setSql] = useState('')
@@ -305,6 +306,19 @@ const SqlExecutionPage: React.FC = () => {
     executeSql()
   }
 
+  const editInQueryBuilder = () => {
+    if (!sql.trim() || !selectedConnectionId) {
+      return
+    }
+
+    navigate('/builder', {
+      state: {
+        sql: sql.trim(),
+        connectionId: selectedConnectionId,
+        mode: 'edit'
+      }
+    })
+  }
 
   const sqlContainsOrderBy = hasOrderByClause(sql)
 
@@ -421,6 +435,14 @@ const SqlExecutionPage: React.FC = () => {
             className="validate-btn"
           >
             {t('sqlExecution.validateSQL')}
+          </button>
+          <button
+            onClick={editInQueryBuilder}
+            disabled={loading || !selectedConnectionId || !sql.trim()}
+            className="edit-builder-btn"
+            title={t('sqlExecution.editInQueryBuilder')}
+          >
+            {t('sqlExecution.editInQueryBuilder')}
           </button>
         </div>
 
