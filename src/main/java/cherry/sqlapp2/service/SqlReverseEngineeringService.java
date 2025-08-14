@@ -167,27 +167,45 @@ public class SqlReverseEngineeringService {
             for (SelectItem<?> item : selectItems) {
                 SelectColumn selectColumn = new SelectColumn();
                 
-                // Use toString() to parse the item (simple but effective approach)
+                // Use toString() to parse the item (improved approach with alias handling)
                 String itemString = item.toString();
                 
-                if (itemString.equals("*")) {
+                // Handle alias first (AS keyword)
+                String expression = itemString;
+                String alias = null;
+                
+                if (itemString.toUpperCase().contains(" AS ")) {
+                    String[] aliasParts = itemString.split("(?i)\\s+AS\\s+", 2);
+                    if (aliasParts.length == 2) {
+                        expression = aliasParts[0].trim();
+                        alias = aliasParts[1].trim();
+                    }
+                }
+                
+                // Parse the expression part (without alias)
+                if (expression.equals("*")) {
                     // SELECT *
                     selectColumn.setTableName("");
                     selectColumn.setColumnName("*");
-                } else if (itemString.contains(".*")) {
+                } else if (expression.contains(".*")) {
                     // SELECT table.*
-                    String tableName = itemString.replace(".*", "");
+                    String tableName = expression.replace(".*", "");
                     selectColumn.setTableName(tableName);
                     selectColumn.setColumnName("*");
-                } else if (itemString.contains(".")) {
+                } else if (expression.contains(".")) {
                     // SELECT table.column
-                    String[] parts = itemString.split("\\.", 2);
+                    String[] parts = expression.split("\\.", 2);
                     selectColumn.setTableName(parts[0]);
                     selectColumn.setColumnName(parts[1]);
                 } else {
                     // SELECT column
                     selectColumn.setTableName("");
-                    selectColumn.setColumnName(itemString);
+                    selectColumn.setColumnName(expression);
+                }
+                
+                // Set alias if present
+                if (alias != null) {
+                    selectColumn.setAlias(alias);
                 }
                 
                 selectColumns.add(selectColumn);
@@ -215,12 +233,12 @@ public class SqlReverseEngineeringService {
         return fromTables;
     }
 
-    private List<cherry.sqlapp2.dto.QueryStructure.JoinClause> parseJoins(List<Join> joins) {
-        List<cherry.sqlapp2.dto.QueryStructure.JoinClause> joinClauses = new ArrayList<>();
+    private List<JoinClause> parseJoins(List<Join> joins) {
+        List<JoinClause> joinClauses = new ArrayList<>();
         
         if (joins != null) {
             for (Join join : joins) {
-                cherry.sqlapp2.dto.QueryStructure.JoinClause joinClause = new cherry.sqlapp2.dto.QueryStructure.JoinClause();
+                JoinClause joinClause = new JoinClause();
                 
                 // Determine join type
                 if (join.isInner()) {
@@ -244,8 +262,9 @@ public class SqlReverseEngineeringService {
                     }
                 }
                 
-                // Parse join conditions (simplified - only handles basic ON conditions)
-                joinClause.setConditions(new ArrayList<>());
+                // Parse join conditions (ON clause)
+                List<JoinCondition> joinConditions = parseJoinConditions(join);
+                joinClause.setConditions(joinConditions);
                 
                 joinClauses.add(joinClause);
             }
@@ -254,13 +273,99 @@ public class SqlReverseEngineeringService {
         return joinClauses;
     }
 
-    private List<cherry.sqlapp2.dto.QueryStructure.OrderByColumn> parseOrderBy(List<OrderByElement> orderByElements) {
-        List<cherry.sqlapp2.dto.QueryStructure.OrderByColumn> orderByColumns = new ArrayList<>();
+    /**
+     * Parse JOIN ON conditions from JSqlParser Join object.
+     */
+    private List<JoinCondition> parseJoinConditions(Join join) {
+        List<JoinCondition> conditions = new ArrayList<>();
+        
+        // Try to get ON conditions using different methods for JSqlParser 5.3
+        String onExpressionString = null;
+        
+        // Method 1: Try getOnExpressions() (newer API)
+        if (join.getOnExpressions() != null && !join.getOnExpressions().isEmpty()) {
+            onExpressionString = join.getOnExpressions().iterator().next().toString();
+        }
+        // Method 2: Fall back to toString parsing if no ON expression found
+        else {
+            String joinString = join.toString();
+            if (joinString.toUpperCase().contains(" ON ")) {
+                String[] parts = joinString.split("(?i)\\s+ON\\s+", 2);
+                if (parts.length == 2) {
+                    onExpressionString = parts[1].trim();
+                }
+            }
+        }
+        
+        if (onExpressionString != null) {
+            // Parse simple equality conditions like "v.field_id = m.id"
+            JoinCondition condition = parseSimpleJoinCondition(onExpressionString);
+            if (condition != null) {
+                conditions.add(condition);
+            }
+        }
+        
+        return conditions;
+    }
+
+    /**
+     * Parse a simple JOIN condition string like "v.field_id = m.id".
+     */
+    private JoinCondition parseSimpleJoinCondition(String conditionString) {
+        if (conditionString == null || conditionString.trim().isEmpty()) {
+            return null;
+        }
+        
+        // Handle common operators
+        String[] operators = {"=", "<>", "!=", "<", ">", "<=", ">="};
+        
+        for (String operator : operators) {
+            if (conditionString.contains(" " + operator + " ")) {
+                String[] parts = conditionString.split("\\s+" + operator.replace("=", "\\=").replace("<", "\\<").replace(">", "\\>") + "\\s+", 2);
+                if (parts.length == 2) {
+                    String leftSide = parts[0].trim();
+                    String rightSide = parts[1].trim();
+                    
+                    // Parse left side (e.g., "v.field_id")
+                    String leftTable = "";
+                    String leftColumn = leftSide;
+                    if (leftSide.contains(".")) {
+                        String[] leftParts = leftSide.split("\\.", 2);
+                        leftTable = leftParts[0];
+                        leftColumn = leftParts[1];
+                    }
+                    
+                    // Parse right side (e.g., "m.id")
+                    String rightTable = "";
+                    String rightColumn = rightSide;
+                    if (rightSide.contains(".")) {
+                        String[] rightParts = rightSide.split("\\.", 2);
+                        rightTable = rightParts[0];
+                        rightColumn = rightParts[1];
+                    }
+                    
+                    // Create JOIN condition
+                    JoinCondition condition = new JoinCondition();
+                    condition.setLeftTable(leftTable);
+                    condition.setLeftColumn(leftColumn);
+                    condition.setOperator(operator);
+                    condition.setRightTable(rightTable);
+                    condition.setRightColumn(rightColumn);
+                    
+                    return condition;
+                }
+            }
+        }
+        
+        return null;
+    }
+
+    private List<OrderByColumn> parseOrderBy(List<OrderByElement> orderByElements) {
+        List<OrderByColumn> orderByColumns = new ArrayList<>();
         
         if (orderByElements != null) {
             for (OrderByElement element : orderByElements) {
-                cherry.sqlapp2.dto.QueryStructure.OrderByColumn orderByColumn = 
-                    new cherry.sqlapp2.dto.QueryStructure.OrderByColumn();
+                OrderByColumn orderByColumn = new OrderByColumn();
                 
                 String expression = element.getExpression().toString();
                 if (expression.contains(".")) {

@@ -202,7 +202,7 @@ public class QueryBuilderService {
         }
     }
 
-    private String formatJoinCondition(QueryStructure.JoinClause.JoinCondition condition) {
+    private String formatJoinCondition(QueryStructure.JoinCondition condition) {
         StringBuilder formatted = new StringBuilder();
         
         if (condition.getLeftTable() != null && !condition.getLeftTable().trim().isEmpty()) {

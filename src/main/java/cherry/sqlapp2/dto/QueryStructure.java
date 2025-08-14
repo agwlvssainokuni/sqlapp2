@@ -99,41 +99,6 @@ public class QueryStructure {
         private String alias;
         private List<JoinCondition> conditions = new ArrayList<>();
 
-        public static class JoinCondition {
-            private String leftTable;
-            private String leftColumn;
-            private String operator; // =, <>, <, >, <=, >=
-            private String rightTable;
-            private String rightColumn;
-
-            public JoinCondition() {}
-
-            public JoinCondition(String leftTable, String leftColumn, String operator, 
-                                String rightTable, String rightColumn) {
-                this.leftTable = leftTable;
-                this.leftColumn = leftColumn;
-                this.operator = operator;
-                this.rightTable = rightTable;
-                this.rightColumn = rightColumn;
-            }
-
-            // Getters and Setters
-            public String getLeftTable() { return leftTable; }
-            public void setLeftTable(String leftTable) { this.leftTable = leftTable; }
-            
-            public String getLeftColumn() { return leftColumn; }
-            public void setLeftColumn(String leftColumn) { this.leftColumn = leftColumn; }
-            
-            public String getOperator() { return operator; }
-            public void setOperator(String operator) { this.operator = operator; }
-            
-            public String getRightTable() { return rightTable; }
-            public void setRightTable(String rightTable) { this.rightTable = rightTable; }
-            
-            public String getRightColumn() { return rightColumn; }
-            public void setRightColumn(String rightColumn) { this.rightColumn = rightColumn; }
-        }
-
         // Constructors
         public JoinClause() {}
 
@@ -154,6 +119,41 @@ public class QueryStructure {
         
         public List<JoinCondition> getConditions() { return conditions; }
         public void setConditions(List<JoinCondition> conditions) { this.conditions = conditions; }
+    }
+
+    public static class JoinCondition {
+        private String leftTable;
+        private String leftColumn;
+        private String operator; // =, <>, <, >, <=, >=
+        private String rightTable;
+        private String rightColumn;
+
+        public JoinCondition() {}
+
+        public JoinCondition(String leftTable, String leftColumn, String operator, 
+                            String rightTable, String rightColumn) {
+            this.leftTable = leftTable;
+            this.leftColumn = leftColumn;
+            this.operator = operator;
+            this.rightTable = rightTable;
+            this.rightColumn = rightColumn;
+        }
+
+        // Getters and Setters
+        public String getLeftTable() { return leftTable; }
+        public void setLeftTable(String leftTable) { this.leftTable = leftTable; }
+        
+        public String getLeftColumn() { return leftColumn; }
+        public void setLeftColumn(String leftColumn) { this.leftColumn = leftColumn; }
+        
+        public String getOperator() { return operator; }
+        public void setOperator(String operator) { this.operator = operator; }
+        
+        public String getRightTable() { return rightTable; }
+        public void setRightTable(String rightTable) { this.rightTable = rightTable; }
+        
+        public String getRightColumn() { return rightColumn; }
+        public void setRightColumn(String rightColumn) { this.rightColumn = rightColumn; }
     }
 
     public static class WhereCondition {
