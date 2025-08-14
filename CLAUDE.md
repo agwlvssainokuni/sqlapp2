@@ -172,6 +172,8 @@ docker-compose -f docker-compose.yml -f docker-compose.monitoring.yml up -d
 - **CORS Errors**: Update SecurityConfig for new origins
 - **i18n Missing Keys**: Add translations to both en/ and ja/ files
 - **Test Failures**: Check database state isolation, mock configurations
+- **SQL Standards Violation**: Ensure QueryBuilder uses proper table alias references (e.g., `SELECT u.name FROM users AS u` not `SELECT users.name FROM users AS u`)
+- **React Hooks Warnings**: Use useCallback for functions, useRef for parameter state management to prevent infinite loops
 
 ### Development Tools
 - **H2 Console**: Available at `/h2-console` (dev environment only)
