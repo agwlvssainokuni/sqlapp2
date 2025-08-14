@@ -99,7 +99,6 @@
   border-radius: 4px;
   cursor: pointer;
   font-size: 14px;
-  transition: all 0.2s ease;
   /* リンクの下線を削除 */
   text-decoration: none !important;
 }
@@ -249,7 +248,6 @@ button {
   border-radius: 4px;
   font-size: 16px;
   cursor: pointer;
-  transition: background-color 0.2s;
 }
 
 button:hover {
@@ -327,7 +325,6 @@ button:disabled {
   text-decoration: none;
   border-radius: 4px;
   font-size: 14px;
-  transition: background-color 0.2s;
 }
 
 .feature-link:hover {
@@ -979,7 +976,6 @@ a:hover {
   border: 1px solid #e1e5e9;
   border-radius: 6px;
   cursor: pointer;
-  transition: all 0.2s ease;
   background: #f8f9fa;
 }
 
@@ -1213,7 +1209,6 @@ a:hover {
   border-radius: 4px;
   cursor: pointer;
   font-size: 14px;
-  transition: background-color 0.2s;
 }
 
 .query-builder .add-btn:hover, .query-builder .build-btn:hover {
@@ -1231,7 +1226,6 @@ a:hover {
   min-width: auto;
   width: auto;
   opacity: 0.7;
-  transition: all 0.2s ease;
 }
 
 .query-builder .remove-btn:hover {
@@ -1691,46 +1685,81 @@ a:hover {
 }
 
 .saved-queries .tabs {
-  border-bottom: 2px solid #e9ecef;
-  margin-bottom: 20px;
+  display: flex;
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 8px 8px 0 0;
+  margin-bottom: 0;
+  overflow: hidden;
 }
 
 .saved-queries .tab {
-  background: none;
+  background-color: #e9ecef;
   border: none;
-  padding: 10px 20px;
+  border-right: 1px solid #dee2e6;
+  padding: 12px 24px;
   cursor: pointer;
-  border-bottom: 2px solid transparent;
-  margin-right: 10px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #6c757d;
+  position: relative;
+}
+
+.saved-queries .tab:last-child {
+  border-right: none;
+}
+
+.saved-queries .tab:hover {
+  background-color: #dee2e6;
+  color: #495057;
 }
 
 .saved-queries .tab.active {
-  border-bottom-color: #007bff;
-  color: #007bff;
-  font-weight: bold;
+  background-color: #007bff;
+  color: white;
+  font-weight: 600;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .saved-queries .search-container {
-  margin-bottom: 20px;
+  background-color: white;
+  border: 1px solid #dee2e6;
+  border-top: none;
+  padding: 16px;
+  margin-bottom: 0;
 }
 
 .saved-queries .search-input {
   width: 100%;
   max-width: 400px;
   padding: 10px;
-  border: 1px solid #ccc;
+  border: 1px solid #ced4da;
   border-radius: 5px;
+  font-size: 14px;
+}
+
+.saved-queries .search-input:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
 }
 
 .saved-queries .query-list {
   display: grid;
   gap: 20px;
+  background-color: white;
+  border: 1px solid #dee2e6;
+  border-top: none;
+  border-radius: 0 0 8px 8px;
+  padding: 20px;
+  min-height: 200px;
 }
 
 .saved-queries .no-data {
   text-align: center;
   color: #6c757d;
-  padding: 40px;
+  padding: 40px 20px;
+  font-style: italic;
 }
 
 .saved-queries .loading {
@@ -2202,7 +2231,6 @@ a:hover {
   cursor: pointer;
   font-size: 1rem;
   color: #495057;
-  transition: all 0.2s;
 }
 
 .nav-btn:hover:not(:disabled) {
@@ -2230,7 +2258,6 @@ a:hover {
   cursor: pointer;
   font-size: 0.9rem;
   color: #495057;
-  transition: all 0.2s;
   min-width: 40px;
 }
 
