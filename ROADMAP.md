@@ -6,7 +6,7 @@ SqlApp2は、複数のRDBMSに対応したWebベースのSQL実行ツールで�
 
 ### 技術スタック
 - **Backend**: Java 21 + Spring Boot 3.5.4, Spring Security, JPA/Hibernate, H2 Database
-- **Frontend**: React 18 + TypeScript, Vite, React Router, react-i18next
+- **Frontend**: React 19 + TypeScript, Vite, React Router, react-i18next
 - **Database**: MySQL, PostgreSQL, MariaDB サポート
 - **Deployment**: Docker + Docker Compose, GitHub Actions CI/CD
 
@@ -117,7 +117,7 @@ SqlApp2は、複数のRDBMSに対応したWebベースのSQL実行ツールで�
 
 ### 技術実装規模
 - **バックエンド**: Java 21・Spring Boot 3.5.4・20+サービスクラス・完全REST API
-- **フロントエンド**: React 18・TypeScript・8ページコンポーネント・590+翻訳キー  
+- **フロントエンド**: React 19・TypeScript・8ページコンポーネント・590+翻訳キー  
 - **デプロイメント**: Docker・GitHub Actions・Prometheus/Grafana・完全自動化
 
 ### エンタープライズ品質達成

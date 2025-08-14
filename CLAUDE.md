@@ -8,7 +8,7 @@ SqlApp2 is a production-ready web-based SQL execution tool with enterprise-grade
 
 ### Technology Stack
 - **Backend**: Java 21 + Spring Boot 3.5.4, Spring Security, JPA/Hibernate, H2 Database
-- **Frontend**: React 18 + TypeScript, Vite 7.1.1, React Router, react-i18next v15.6.1
+- **Frontend**: React 19 + TypeScript, Vite 7.1.1, React Router, react-i18next v15.6.1
 - **Database Support**: MySQL, PostgreSQL, MariaDB (via JDBC)
 - **Deployment**: Docker + Docker Compose, GitHub Actions CI/CD, Prometheus/Grafana monitoring
 

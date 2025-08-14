@@ -6,7 +6,7 @@
 
 ### 技術スタック
 - **Backend**: Java 21 + Spring Boot 3.5.4, Spring Security, JPA/Hibernate
-- **Frontend**: React 18 + TypeScript, Vite 7.1.1, React Router, react-i18next v15.6.1
+- **Frontend**: React 19 + TypeScript, Vite 7.1.1, React Router, react-i18next v15.6.1
 - **Database**: H2 (内部) + MySQL/PostgreSQL/MariaDB (外部接続)
 - **Deployment**: Docker + Docker Compose, GitHub Actions CI/CD
 - **Monitoring**: Prometheus + Grafana + Spring Boot Actuator
