@@ -15,6 +15,7 @@
  */
 
 import React, {useCallback, useEffect, useState} from 'react'
+import {useLocation} from 'react-router-dom'
 import {useTranslation} from 'react-i18next'
 import {useAuth} from '../context/AuthContext'
 import type {DatabaseConnection, SavedQuery} from '../types/api'
@@ -31,6 +32,7 @@ interface SavedQueryForm {
 const SavedQueriesPage: React.FC = () => {
   const {t} = useTranslation()
   const {apiRequest} = useAuth()
+  const location = useLocation()
   const [savedQueries, setSavedQueries] = useState<SavedQuery[]>([])
   const [publicQueries, setPublicQueries] = useState<SavedQuery[]>([])
   const [connections, setConnections] = useState<DatabaseConnection[]>([])
@@ -80,6 +82,19 @@ const SavedQueriesPage: React.FC = () => {
   useEffect(() => {
     loadData()
   }, [loadData])
+
+  // Handle React Router state from QueryBuilder
+  useEffect(() => {
+    const state = location.state as { sql?: string; connectionId?: number; mode?: string } | null
+    if (state?.mode === 'create' && state?.sql) {
+      setFormData(prev => ({
+        ...prev,
+        sqlContent: state.sql || '',
+        defaultConnectionId: state.connectionId
+      }))
+      setShowForm(true)
+    }
+  }, [location.state])
 
   const handleSave = async () => {
     try {

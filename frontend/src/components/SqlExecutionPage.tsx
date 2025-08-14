@@ -15,6 +15,7 @@
  */
 
 import React, {useCallback, useEffect, useRef, useState} from 'react'
+import {useLocation} from 'react-router-dom'
 import {useTranslation} from 'react-i18next'
 import {useAuth} from '../context/AuthContext'
 import type {
@@ -41,6 +42,7 @@ interface ParameterDefinition {
 const SqlExecutionPage: React.FC = () => {
   const {t} = useTranslation()
   const {apiRequest} = useAuth()
+  const location = useLocation()
   const [connections, setConnections] = useState<DatabaseConnection[]>([])
   const [selectedConnectionId, setSelectedConnectionId] = useState<number | null>(null)
   const [sql, setSql] = useState('')
@@ -172,6 +174,18 @@ const SqlExecutionPage: React.FC = () => {
   useEffect(() => {
     extractParametersFromSql()
   }, [extractParametersFromSql])
+
+  // Handle React Router state from QueryBuilder
+  useEffect(() => {
+    const state = location.state as { sql?: string; connectionId?: number } | null
+    if (state?.sql) {
+      setSql(state.sql)
+      setExecutionMode('new')
+    }
+    if (state?.connectionId) {
+      setSelectedConnectionId(state.connectionId)
+    }
+  }, [location.state])
 
   const validateSql = async () => {
     if (!sql.trim()) {

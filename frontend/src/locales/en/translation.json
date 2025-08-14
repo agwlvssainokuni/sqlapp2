@@ -181,6 +181,7 @@
     "limitClause": "LIMIT Clause",
     "generateSQL": "Generate SQL",
     "executeQuery": "Execute Query",
+    "saveQuery": "Save Query",
     "validationFailed": "Validation failed",
     "databaseConnection": "Database Connection",
     "selectConnection": "Select a connection...",
@@ -204,7 +205,8 @@
     "building": "Building...",
     "validationErrors": "Validation Errors",
     "generatedSQL": "Generated SQL",
-    "pleaseSelectConnection": "Please select a database connection"
+    "pleaseSelectConnection": "Please select a database connection",
+    "pleaseGenerateFirst": "Please generate SQL first before executing"
   },
   "schemaViewer": {
     "title": "Database Schema Viewer",

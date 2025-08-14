@@ -15,6 +15,7 @@
  */
 
 import React, {useCallback, useEffect, useState} from 'react'
+import {useNavigate} from 'react-router-dom'
 import {useTranslation} from 'react-i18next'
 import {useAuth} from '../context/AuthContext'
 import type {DatabaseConnection, TableInfo as ApiTableInfo} from '../types/api'
@@ -105,6 +106,7 @@ interface QueryBuilderResponse {
 const QueryBuilderPage: React.FC = () => {
   const {t} = useTranslation()
   const {apiRequest} = useAuth()
+  const navigate = useNavigate()
   const [connections, setConnections] = useState<DatabaseConnection[]>([])
   const [selectedConnectionId, setSelectedConnectionId] = useState<number | null>(null)
   const [schemaInfo, setSchemaInfo] = useState<SchemaInfo | null>(null)
@@ -263,6 +265,43 @@ const QueryBuilderPage: React.FC = () => {
     } finally {
       setIsBuilding(false)
     }
+  }
+
+  const executeGeneratedQuery = () => {
+    if (!generatedSql || !selectedConnectionId) {
+      setValidationErrors([
+        !selectedConnectionId 
+          ? t('queryBuilder.pleaseSelectConnection')
+          : t('queryBuilder.pleaseGenerateFirst')
+      ])
+      return
+    }
+
+    navigate('/sql', {
+      state: {
+        sql: generatedSql,
+        connectionId: selectedConnectionId
+      }
+    })
+  }
+
+  const saveGeneratedQuery = () => {
+    if (!generatedSql || !selectedConnectionId) {
+      setValidationErrors([
+        !selectedConnectionId 
+          ? t('queryBuilder.pleaseSelectConnection')
+          : t('queryBuilder.pleaseGenerateFirst')
+      ])
+      return
+    }
+
+    navigate('/queries', {
+      state: {
+        sql: generatedSql,
+        connectionId: selectedConnectionId,
+        mode: 'create'
+      }
+    })
   }
 
   const addSelectColumn = () => {
@@ -932,15 +971,33 @@ const QueryBuilderPage: React.FC = () => {
           />
         </div>
 
-        {/* Build Button */}
+        {/* Build Buttons */}
         <div className="section">
-          <button
-            onClick={buildQuery}
-            disabled={isBuilding}
-            className="build-btn"
-          >
-            {isBuilding ? t('queryBuilder.building') : t('queryBuilder.generateSQL')}
-          </button>
+          <div className="button-group">
+            <button
+              onClick={buildQuery}
+              disabled={isBuilding}
+              className="build-btn"
+            >
+              {isBuilding ? t('queryBuilder.building') : t('queryBuilder.generateSQL')}
+            </button>
+            
+            <button
+              onClick={executeGeneratedQuery}
+              disabled={!generatedSql || !selectedConnectionId}
+              className="execute-btn"
+            >
+              {t('queryBuilder.executeQuery')}
+            </button>
+            
+            <button
+              onClick={saveGeneratedQuery}
+              disabled={!generatedSql || !selectedConnectionId}
+              className="save-btn"
+            >
+              {t('queryBuilder.saveQuery')}
+            </button>
+          </div>
         </div>
 
         {/* Validation Errors */}

@@ -1915,6 +1915,56 @@ a:hover {
   background: #218838;
 }
 
+/* Button group for Generate SQL and Execute Query */
+.query-builder .button-group {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.query-builder .execute-btn {
+  background: #28a745;
+  color: white;
+  border: none;
+  padding: 12px 30px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background 0.2s ease;
+}
+
+.query-builder .execute-btn:hover:not(:disabled) {
+  background: #218838;
+}
+
+.query-builder .execute-btn:disabled {
+  background: #6c757d;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.query-builder .save-btn {
+  background: #17a2b8;
+  color: white;
+  border: none;
+  padding: 12px 30px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background 0.2s ease;
+}
+
+.query-builder .save-btn:hover:not(:disabled) {
+  background: #138496;
+}
+
+.query-builder .save-btn:disabled {
+  background: #6c757d;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
 .saved-queries .query-header {
   display: flex;
   justify-content: space-between;

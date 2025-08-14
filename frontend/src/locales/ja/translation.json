@@ -181,6 +181,7 @@
     "limitClause": "LIMIT句",
     "generateSQL": "SQL生成",
     "executeQuery": "クエリ実行",
+    "saveQuery": "クエリ保存",
     "validationFailed": "検証に失敗しました",
     "databaseConnection": "データベース接続",
     "selectConnection": "接続を選択してください...",
@@ -204,7 +205,8 @@
     "building": "構築中...",
     "validationErrors": "検証エラー",
     "generatedSQL": "生成されたSQL",
-    "pleaseSelectConnection": "データベース接続を選択してください"
+    "pleaseSelectConnection": "データベース接続を選択してください",
+    "pleaseGenerateFirst": "実行前にSQLを生成してください"
   },
   "schemaViewer": {
     "title": "データベーススキーマビューアー",
