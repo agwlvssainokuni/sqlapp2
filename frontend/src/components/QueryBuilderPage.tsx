@@ -127,6 +127,7 @@ const QueryBuilderPage: React.FC = () => {
   const [generatedSql, setGeneratedSql] = useState('')
   const [validationErrors, setValidationErrors] = useState<string[]>([])
   const [isBuilding, setIsBuilding] = useState(false)
+  const [aliasWarnings, setAliasWarnings] = useState<string[]>([])
 
   // Helper function to get available table references (table names + aliases)
   const getAvailableTableReferences = (): { value: string; label: string }[] => {
@@ -158,6 +159,55 @@ const QueryBuilderPage: React.FC = () => {
 
     return references
   }
+
+  // Helper function to check for alias conflicts
+  const checkAliasConflicts = useCallback(() => {
+    const warnings: string[] = []
+    const usedAliases = new Set<string>()
+    const usedTableNames = new Set<string>()
+
+    // Check FROM table aliases
+    queryStructure.fromTables.forEach((table, index) => {
+      if (table.alias) {
+        const alias = table.alias.trim()
+        if (alias) {
+          if (usedAliases.has(alias) || usedTableNames.has(alias)) {
+            warnings.push(t('queryBuilder.duplicateAlias', { alias, location: `FROM[${index + 1}]` }))
+          }
+          usedAliases.add(alias)
+        }
+      }
+      if (table.tableName) {
+        usedTableNames.add(table.tableName)
+      }
+    })
+
+    // Check JOIN table aliases
+    queryStructure.joins.forEach((join, index) => {
+      if (join.alias) {
+        const alias = join.alias.trim()
+        if (alias) {
+          if (usedAliases.has(alias) || usedTableNames.has(alias)) {
+            warnings.push(t('queryBuilder.duplicateAlias', { alias, location: `JOIN[${index + 1}]` }))
+          }
+          usedAliases.add(alias)
+        }
+      }
+      if (join.tableName && !join.alias) {
+        if (usedTableNames.has(join.tableName) || usedAliases.has(join.tableName)) {
+          warnings.push(t('queryBuilder.duplicateTable', { table: join.tableName, location: `JOIN[${index + 1}]` }))
+        }
+        usedTableNames.add(join.tableName)
+      }
+    })
+
+    setAliasWarnings(warnings)
+  }, [queryStructure.fromTables, queryStructure.joins, t])
+
+  // Check alias conflicts when structure changes
+  useEffect(() => {
+    checkAliasConflicts()
+  }, [checkAliasConflicts])
 
   // Helper function to get columns for a specific table reference
   const getColumnsForTableReference = (tableReference: string): { name: string }[] => {
@@ -411,6 +461,7 @@ const QueryBuilderPage: React.FC = () => {
       let updatedSelectColumns = prev.selectColumns
       let updatedWhereConditions = prev.whereConditions
       let updatedOrderByColumns = prev.orderByColumns
+      let updatedJoinConditions = prev.joins
 
       if (field === 'alias' || field === 'tableName') {
         const oldTable = prev.fromTables[index]
@@ -436,6 +487,16 @@ const QueryBuilderPage: React.FC = () => {
             updatedOrderByColumns = prev.orderByColumns.map(col =>
               col.tableName === oldReference ? {...col, tableName: newReference} : col
             )
+
+            // Update JOIN conditions
+            updatedJoinConditions = prev.joins.map(join => ({
+              ...join,
+              conditions: join.conditions.map(condition => ({
+                ...condition,
+                leftTable: condition.leftTable === oldReference ? newReference : condition.leftTable,
+                rightTable: condition.rightTable === oldReference ? newReference : condition.rightTable
+              }))
+            }))
           }
         }
       }
@@ -445,7 +506,8 @@ const QueryBuilderPage: React.FC = () => {
         fromTables: updatedTables,
         selectColumns: updatedSelectColumns,
         whereConditions: updatedWhereConditions,
-        orderByColumns: updatedOrderByColumns
+        orderByColumns: updatedOrderByColumns,
+        joins: updatedJoinConditions
       }
     })
   }
@@ -499,12 +561,63 @@ const QueryBuilderPage: React.FC = () => {
   }
 
   const updateJoin = (index: number, field: keyof JoinClause, value: string) => {
-    setQueryStructure(prev => ({
-      ...prev,
-      joins: prev.joins.map((join, i) =>
+    setQueryStructure(prev => {
+      const updatedJoins = prev.joins.map((join, i) =>
         i === index ? {...join, [field]: value || undefined} : join
       )
-    }))
+
+      // Auto-update table references when JOIN table aliases change
+      let updatedSelectColumns = prev.selectColumns
+      let updatedWhereConditions = prev.whereConditions
+      let updatedOrderByColumns = prev.orderByColumns
+      let updatedJoinConditions = updatedJoins
+
+      if (field === 'alias' || field === 'tableName') {
+        const oldJoin = prev.joins[index]
+        const newJoin = updatedJoins[index]
+
+        // If alias changed or table name changed, update all references
+        if (oldJoin && newJoin) {
+          const oldReference = oldJoin.alias || oldJoin.tableName
+          const newReference = newJoin.alias || newJoin.tableName
+
+          if (oldReference && newReference && oldReference !== newReference) {
+            // Update SELECT columns
+            updatedSelectColumns = prev.selectColumns.map(col =>
+              col.tableName === oldReference ? {...col, tableName: newReference} : col
+            )
+
+            // Update WHERE conditions
+            updatedWhereConditions = prev.whereConditions.map(condition =>
+              condition.tableName === oldReference ? {...condition, tableName: newReference} : condition
+            )
+
+            // Update ORDER BY columns
+            updatedOrderByColumns = prev.orderByColumns.map(col =>
+              col.tableName === oldReference ? {...col, tableName: newReference} : col
+            )
+
+            // Update other JOIN conditions (both left and right table references)
+            updatedJoinConditions = updatedJoins.map(join => ({
+              ...join,
+              conditions: join.conditions.map(condition => ({
+                ...condition,
+                leftTable: condition.leftTable === oldReference ? newReference : condition.leftTable,
+                rightTable: condition.rightTable === oldReference ? newReference : condition.rightTable
+              }))
+            }))
+          }
+        }
+      }
+
+      return {
+        ...prev,
+        joins: updatedJoinConditions,
+        selectColumns: updatedSelectColumns,
+        whereConditions: updatedWhereConditions,
+        orderByColumns: updatedOrderByColumns
+      }
+    })
   }
 
   const removeJoin = (index: number) => {
@@ -1066,6 +1179,18 @@ const QueryBuilderPage: React.FC = () => {
             </button>
           </div>
         </div>
+
+        {/* Alias Warnings */}
+        {aliasWarnings.length > 0 && (
+          <div className="alias-warnings" style={{backgroundColor: '#fff3cd', border: '1px solid #ffeaa7', padding: '10px', margin: '10px 0', borderRadius: '4px'}}>
+            <h3 style={{color: '#856404'}}>{t('queryBuilder.aliasWarnings')}:</h3>
+            <ul style={{color: '#856404', margin: '5px 0'}}>
+              {aliasWarnings.map((warning, index) => (
+                <li key={index}>{warning}</li>
+              ))}
+            </ul>
+          </div>
+        )}
 
         {/* Validation Errors */}
         {validationErrors.length > 0 && (

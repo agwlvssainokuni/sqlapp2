@@ -210,7 +210,10 @@
     "pleaseSelectConnection": "Please select a database connection",
     "pleaseGenerateFirst": "Please generate SQL first before executing",
     "parseError": "Failed to parse SQL",
-    "manualEdit": "You can continue editing manually or try building a new query"
+    "manualEdit": "You can continue editing manually or try building a new query",
+    "aliasWarnings": "Alias Warnings",
+    "duplicateAlias": "Duplicate alias '{{alias}}' found in {{location}}",
+    "duplicateTable": "Duplicate table reference '{{table}}' found in {{location}}"
   },
   "schemaViewer": {
     "title": "Database Schema Viewer",

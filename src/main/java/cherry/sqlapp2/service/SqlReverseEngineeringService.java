@@ -378,15 +378,65 @@ public class SqlReverseEngineeringService {
         List<WhereCondition> conditions = new ArrayList<>();
         
         if (whereExpression != null) {
-            // For now, use string parsing as a fallback
-            String whereString = whereExpression.toString();
-            WhereCondition condition = parseSimpleWhereCondition(whereString);
-            if (condition != null) {
-                conditions.add(condition);
-            }
+            // Try to parse complex expressions with AND/OR
+            parseComplexWhereExpression(whereExpression, conditions, null);
         }
         
         return conditions;
+    }
+    
+    /**
+     * Parse complex WHERE expressions with AND/OR support.
+     */
+    private void parseComplexWhereExpression(Expression expression, List<WhereCondition> conditions, String logicalOperator) {
+        if (expression == null) {
+            return;
+        }
+        
+        String expressionString = expression.toString();
+        
+        // Handle AND expressions
+        if (expressionString.toUpperCase().contains(" AND ")) {
+            String[] andParts = expressionString.split("(?i)\\s+AND\\s+");
+            for (int i = 0; i < andParts.length; i++) {
+                String part = andParts[i].trim();
+                WhereCondition condition = parseSimpleWhereCondition(part);
+                if (condition != null) {
+                    if (i > 0) {
+                        condition.setLogicalOperator("AND");
+                    } else if (logicalOperator != null) {
+                        condition.setLogicalOperator(logicalOperator);
+                    }
+                    conditions.add(condition);
+                }
+            }
+        }
+        // Handle OR expressions
+        else if (expressionString.toUpperCase().contains(" OR ")) {
+            String[] orParts = expressionString.split("(?i)\\s+OR\\s+");
+            for (int i = 0; i < orParts.length; i++) {
+                String part = orParts[i].trim();
+                WhereCondition condition = parseSimpleWhereCondition(part);
+                if (condition != null) {
+                    if (i > 0) {
+                        condition.setLogicalOperator("OR");
+                    } else if (logicalOperator != null) {
+                        condition.setLogicalOperator(logicalOperator);
+                    }
+                    conditions.add(condition);
+                }
+            }
+        }
+        // Single condition
+        else {
+            WhereCondition condition = parseSimpleWhereCondition(expressionString);
+            if (condition != null) {
+                if (logicalOperator != null) {
+                    condition.setLogicalOperator(logicalOperator);
+                }
+                conditions.add(condition);
+            }
+        }
     }
     
     /**
@@ -397,7 +447,18 @@ public class SqlReverseEngineeringService {
             return null;
         }
         
-        // Handle common operators
+        // Handle NULL operators first (they have no right-hand value)
+        if (conditionString.toUpperCase().contains(" IS NULL")) {
+            String leftSide = conditionString.replaceAll("(?i)\\s+IS\\s+NULL", "").trim();
+            return createWhereCondition(leftSide, "IS NULL", null);
+        }
+        
+        if (conditionString.toUpperCase().contains(" IS NOT NULL")) {
+            String leftSide = conditionString.replaceAll("(?i)\\s+IS\\s+NOT\\s+NULL", "").trim();
+            return createWhereCondition(leftSide, "IS NOT NULL", null);
+        }
+        
+        // Handle common operators with values
         String[] operators = {"=", "<>", "!=", "<=", ">=", "<", ">", "LIKE", "IN"};
         
         for (String operator : operators) {
@@ -420,34 +481,41 @@ public class SqlReverseEngineeringService {
                     String leftSide = parts[0].trim();
                     String rightSide = parts[1].trim();
                     
-                    // Parse left side (e.g., "m.id")
-                    String tableName = "";
-                    String columnName = leftSide;
-                    if (leftSide.contains(".")) {
-                        String[] leftParts = leftSide.split("\\.", 2);
-                        tableName = leftParts[0];
-                        columnName = leftParts[1];
-                    }
-                    
                     // Parse right side (remove quotes if present)
                     String value = rightSide;
                     if (value.startsWith("'") && value.endsWith("'")) {
                         value = value.substring(1, value.length() - 1);
                     }
                     
-                    // Create WHERE condition
-                    WhereCondition condition = new WhereCondition();
-                    condition.setTableName(tableName);
-                    condition.setColumnName(columnName);
-                    condition.setOperator(operator);
-                    condition.setValue(value);
-                    
-                    return condition;
+                    return createWhereCondition(leftSide, operator, value);
                 }
             }
         }
         
         return null;
+    }
+    
+    /**
+     * Helper method to create WhereCondition from left side, operator, and value.
+     */
+    private WhereCondition createWhereCondition(String leftSide, String operator, String value) {
+        // Parse left side (e.g., "m.id")
+        String tableName = "";
+        String columnName = leftSide;
+        if (leftSide.contains(".")) {
+            String[] leftParts = leftSide.split("\\.", 2);
+            tableName = leftParts[0];
+            columnName = leftParts[1];
+        }
+        
+        // Create WHERE condition
+        WhereCondition condition = new WhereCondition();
+        condition.setTableName(tableName);
+        condition.setColumnName(columnName);
+        condition.setOperator(operator);
+        condition.setValue(value);
+        
+        return condition;
     }
 
     private List<OrderByColumn> parseOrderBy(List<OrderByElement> orderByElements) {
