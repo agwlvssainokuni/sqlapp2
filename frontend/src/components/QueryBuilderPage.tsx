@@ -125,6 +125,63 @@ const QueryBuilderPage: React.FC = () => {
   const [validationErrors, setValidationErrors] = useState<string[]>([])
   const [isBuilding, setIsBuilding] = useState(false)
 
+  // Helper function to get available table references (table names + aliases)
+  const getAvailableTableReferences = (): { value: string; label: string }[] => {
+    const references: { value: string; label: string }[] = []
+    
+    // Add FROM table references (prioritize aliases when available)
+    queryStructure.fromTables.forEach(table => {
+      if (table.tableName) {
+        if (table.alias && table.alias.trim()) {
+          // Use alias when available
+          references.push({ value: table.alias.trim(), label: `${table.alias} (${table.tableName})` })
+        } else {
+          // Use table name when no alias
+          references.push({ value: table.tableName, label: table.tableName })
+        }
+      }
+    })
+    
+    // Add JOIN table references (when JOINs are implemented)
+    queryStructure.joins.forEach(join => {
+      if (join.tableName) {
+        if (join.alias && join.alias.trim()) {
+          references.push({ value: join.alias.trim(), label: `${join.alias} (${join.tableName})` })
+        } else {
+          references.push({ value: join.tableName, label: join.tableName })
+        }
+      }
+    })
+    
+    return references
+  }
+
+  // Helper function to get columns for a specific table reference
+  const getColumnsForTableReference = (tableReference: string): { name: string }[] => {
+    // Find the actual table name for this reference
+    let actualTableName = tableReference
+    
+    // Check if reference is an alias
+    const fromTableWithAlias = queryStructure.fromTables.find(table => 
+      table.alias && table.alias.trim() === tableReference
+    )
+    if (fromTableWithAlias) {
+      actualTableName = fromTableWithAlias.tableName
+    }
+    
+    // Check JOIN tables (when implemented)
+    const joinTableWithAlias = queryStructure.joins.find(join => 
+      join.alias && join.alias.trim() === tableReference
+    )
+    if (joinTableWithAlias) {
+      actualTableName = joinTableWithAlias.tableName
+    }
+    
+    // Return columns for the actual table
+    const table = schemaInfo?.tables.find(t => t.name === actualTableName)
+    return table?.columns || []
+  }
+
   // Load database connections
   useEffect(() => {
     loadConnections()
@@ -239,12 +296,52 @@ const QueryBuilderPage: React.FC = () => {
   }
 
   const updateFromTable = (index: number, field: keyof FromTable, value: string) => {
-    setQueryStructure(prev => ({
-      ...prev,
-      fromTables: prev.fromTables.map((table, i) =>
+    setQueryStructure(prev => {
+      const updatedTables = prev.fromTables.map((table, i) =>
         i === index ? {...table, [field]: value || undefined} : table
       )
-    }))
+      
+      // Auto-update table references when FROM table aliases change
+      let updatedSelectColumns = prev.selectColumns
+      let updatedWhereConditions = prev.whereConditions
+      let updatedOrderByColumns = prev.orderByColumns
+      
+      if (field === 'alias' || field === 'tableName') {
+        const oldTable = prev.fromTables[index]
+        const newTable = updatedTables[index]
+        
+        // If alias changed or table name changed, update all references
+        if (oldTable && newTable) {
+          const oldReference = oldTable.alias || oldTable.tableName
+          const newReference = newTable.alias || newTable.tableName
+          
+          if (oldReference && newReference && oldReference !== newReference) {
+            // Update SELECT columns
+            updatedSelectColumns = prev.selectColumns.map(col => 
+              col.tableName === oldReference ? {...col, tableName: newReference} : col
+            )
+            
+            // Update WHERE conditions
+            updatedWhereConditions = prev.whereConditions.map(condition => 
+              condition.tableName === oldReference ? {...condition, tableName: newReference} : condition
+            )
+            
+            // Update ORDER BY columns
+            updatedOrderByColumns = prev.orderByColumns.map(col => 
+              col.tableName === oldReference ? {...col, tableName: newReference} : col
+            )
+          }
+        }
+      }
+      
+      return {
+        ...prev,
+        fromTables: updatedTables,
+        selectColumns: updatedSelectColumns,
+        whereConditions: updatedWhereConditions,
+        orderByColumns: updatedOrderByColumns
+      }
+    })
   }
 
   const removeFromTable = (index: number) => {
@@ -352,9 +449,9 @@ const QueryBuilderPage: React.FC = () => {
                   onChange={(e) => updateSelectColumn(index, 'tableName', e.target.value)}
                 >
                   <option value="">{t('queryBuilder.selectTable')}</option>
-                  {schemaInfo?.tables.map(table => (
-                    <option key={table.name} value={table.name}>
-                      {table.name}
+                  {getAvailableTableReferences().map(ref => (
+                    <option key={ref.value} value={ref.value}>
+                      {ref.label}
                     </option>
                   ))}
                 </select>
@@ -365,9 +462,8 @@ const QueryBuilderPage: React.FC = () => {
                 >
                   <option value="">{t('queryBuilder.selectColumn')}</option>
                   <option value="*">{t('queryBuilder.allColumns')}</option>
-                  {column.tableName && schemaInfo?.tables
-                    .find(table => table.name === column.tableName)?.columns
-                    ?.map(col => (
+                  {column.tableName && getColumnsForTableReference(column.tableName)
+                    .map(col => (
                       <option key={col.name} value={col.name}>
                         {col.name}
                       </option>
@@ -460,9 +556,9 @@ const QueryBuilderPage: React.FC = () => {
                   onChange={(e) => updateWhereCondition(index, 'tableName', e.target.value || '')}
                 >
                   <option value="">{t('queryBuilder.selectTable')}</option>
-                  {schemaInfo?.tables.map(table => (
-                    <option key={table.name} value={table.name}>
-                      {table.name}
+                  {getAvailableTableReferences().map(ref => (
+                    <option key={ref.value} value={ref.value}>
+                      {ref.label}
                     </option>
                   ))}
                 </select>
@@ -472,9 +568,8 @@ const QueryBuilderPage: React.FC = () => {
                   onChange={(e) => updateWhereCondition(index, 'columnName', e.target.value)}
                 >
                   <option value="">{t('queryBuilder.selectColumn')}</option>
-                  {condition.tableName && schemaInfo?.tables
-                    .find(table => table.name === condition.tableName)?.columns
-                    ?.map(col => (
+                  {condition.tableName && getColumnsForTableReference(condition.tableName)
+                    .map(col => (
                       <option key={col.name} value={col.name}>
                         {col.name}
                       </option>
@@ -553,9 +648,9 @@ const QueryBuilderPage: React.FC = () => {
                   onChange={(e) => updateOrderByColumn(index, 'tableName', e.target.value || '')}
                 >
                   <option value="">{t('queryBuilder.selectTable')}</option>
-                  {schemaInfo?.tables.map(table => (
-                    <option key={table.name} value={table.name}>
-                      {table.name}
+                  {getAvailableTableReferences().map(ref => (
+                    <option key={ref.value} value={ref.value}>
+                      {ref.label}
                     </option>
                   ))}
                 </select>
@@ -565,9 +660,8 @@ const QueryBuilderPage: React.FC = () => {
                   onChange={(e) => updateOrderByColumn(index, 'columnName', e.target.value)}
                 >
                   <option value="">{t('queryBuilder.selectColumn')}</option>
-                  {column.tableName && schemaInfo?.tables
-                    .find(table => table.name === column.tableName)?.columns
-                    ?.map(col => (
+                  {column.tableName && getColumnsForTableReference(column.tableName)
+                    .map(col => (
                       <option key={col.name} value={col.name}>
                         {col.name}
                       </option>
