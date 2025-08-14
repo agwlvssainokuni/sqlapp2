@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import React, {useCallback, useEffect, useState} from 'react'
+import React, {useCallback, useEffect, useRef, useState} from 'react'
 import {useTranslation} from 'react-i18next'
 import {useAuth} from '../context/AuthContext'
 import type {
@@ -134,20 +134,34 @@ const SqlExecutionPage: React.FC = () => {
     }
   }, [apiRequest])
 
+  // Use ref to track the latest parameters without causing re-renders
+  const parametersRef = useRef<ParameterDefinition[]>([])
+  parametersRef.current = parameters
+
   const extractParametersFromSql = useCallback(() => {
     // Use the sophisticated parameter extractor that ignores parameters in strings and comments
     const paramNames = extractParameters(sql)
 
     if (paramNames.length > 0) {
       const newParams = paramNames.map(name => {
-        const existing = parameters.find(p => p.name === name)
+        const existing = parametersRef.current.find(p => p.name === name)
         return existing || {name, type: 'string', value: ''}
       })
-      setParameters(newParams)
-    } else {
+      
+      // Only update if parameters actually changed
+      const currentParams = parametersRef.current
+      const hasChanges = currentParams.length !== newParams.length ||
+        currentParams.some((param, index) => 
+          !newParams[index] || param.name !== newParams[index].name
+        )
+        
+      if (hasChanges) {
+        setParameters(newParams)
+      }
+    } else if (parametersRef.current.length > 0) {
       setParameters([])
     }
-  }, [sql, parameters])
+  }, [sql])
 
   // useEffect hooks that use the functions defined above
   useEffect(() => {

@@ -17,7 +17,7 @@
 import React from 'react'
 import {useTranslation} from 'react-i18next'
 import {useAuth} from '../context/AuthContext'
-import {useNavigate} from 'react-router-dom'
+import {Link, useNavigate} from 'react-router-dom'
 
 const Header: React.FC = () => {
   const {t} = useTranslation()
@@ -29,10 +29,6 @@ const Header: React.FC = () => {
     navigate('/login')
   }
 
-  const handleDashboardClick = () => {
-    navigate('/dashboard')
-  }
-
   return (
     <header className="app-header">
       <div className="header-content">
@@ -40,9 +36,9 @@ const Header: React.FC = () => {
           <h1 className="app-title">SqlApp2</h1>
         </div>
         <nav className="header-nav">
-          <button className="nav-link" onClick={handleDashboardClick}>
+          <Link to="/dashboard" className="nav-link">
             {t('common.dashboard')}
-          </button>
+          </Link>
           <button className="logout-btn" onClick={handleLogout}>
             {t('common.logout')}
           </button>
