@@ -44,10 +44,12 @@ frontend/src/
 ### Core Features
 1. **User Management**: JWT authentication, user registration/login, profile management
 2. **Database Connectivity**: Multi-RDBMS support, encrypted connection storage, connection testing
-3. **SQL Execution**: Direct SQL + Visual Query Builder, parameterized queries, result metadata
-4. **Query Management**: Save/share queries, execution history, performance tracking
-5. **Schema Browsing**: Table/column metadata display, auto-completion support
-6. **Internationalization**: English/Japanese with real-time language switching
+3. **Visual Query Builder**: Complete JOIN support (INNER/LEFT/RIGHT/FULL OUTER), drag-and-drop interface, complex multi-table queries
+4. **SQL Execution**: Direct SQL + Visual Query Builder, parameterized queries, result metadata
+5. **Integrated Workflow**: Seamless Create → Execute → Save workflow with React Router state management
+6. **Query Management**: Save/share queries, execution history, performance tracking
+7. **Schema Browsing**: Table/column metadata display, auto-completion support
+8. **Internationalization**: English/Japanese with real-time language switching
 
 ## Development Guidelines
 
@@ -203,6 +205,7 @@ docker-compose -f docker-compose.yml -f docker-compose.monitoring.yml up -d
 
 ---
 
-**Status**: Production Ready - Full enterprise-grade SQL execution tool
+**Status**: World-Class Visual SQL Query Builder - Complete JOIN functionality with integrated workflow
 **Last Updated**: 2025-08-14
 **Total Tests**: 356 (303 unit + 53 integration) - 100% success rate
+**Development Phases**: 36 phases complete - JOIN UI + Workflow Integration + Production Ready
