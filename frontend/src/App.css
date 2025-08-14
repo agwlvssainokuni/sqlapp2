@@ -100,12 +100,16 @@
   cursor: pointer;
   font-size: 14px;
   transition: all 0.2s ease;
+  /* リンクの下線を削除 */
+  text-decoration: none !important;
 }
 
 .header-nav .nav-link:hover,
 .header-nav .logout-btn:hover {
   background-color: rgba(255, 255, 255, 0.1);
   border-color: rgba(255, 255, 255, 0.5);
+  /* リンクの下線を削除 */
+  text-decoration: none !important;
 }
 
 /* Main Content */
@@ -2253,26 +2257,26 @@ a:hover {
     flex-direction: column;
     gap: 1rem;
   }
-  
+
   .page-navigation {
     order: 1;
   }
-  
+
   .page-size-selector {
     order: 2;
   }
-  
+
   .page-numbers {
     flex-wrap: wrap;
     justify-content: center;
   }
-  
+
   .pagination-settings .pagination-options {
     padding-left: 0;
     border-left: none;
     margin-left: 0;
   }
-  
+
   .pagination-settings .page-size-setting {
     flex-direction: column;
     align-items: flex-start;
