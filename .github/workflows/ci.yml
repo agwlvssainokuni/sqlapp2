@@ -203,11 +203,11 @@ jobs:
 
       - name: Container Image Metadata
         id: meta
-        uses: docker/metadata-action@v4
+        uses: docker/metadata-action@v5
         with:
           images: ghcr.io/${{ github.repository }}
           tags: |
-            type=raw,value={{commit_date 'YYYYMMDD-HHmmss' tz='Asia/Tokyo'}},priority=100
+            type=raw,value={{ commit_date 'YYYYMMDD-HHmmss' tz='Asia/Tokyo' }},priority=100
             type=raw,value=${{ github.sha }},priority=200
 
       - name: Build Docker image
