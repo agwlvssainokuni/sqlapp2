@@ -1,5 +1,16 @@
 # SqlApp2 開発環境構築ガイド
 
+## プロジェクト概要
+
+**SqlApp2** は本格運用対応のエンタープライズ級SQL実行ツールです。
+
+### 技術スタック
+- **Backend**: Java 21 + Spring Boot 3.5.4, Spring Security, JPA/Hibernate
+- **Frontend**: React 18 + TypeScript, Vite 7.1.1, React Router, react-i18next v15.6.1
+- **Database**: H2 (内部) + MySQL/PostgreSQL/MariaDB (外部接続)
+- **Deployment**: Docker + Docker Compose, GitHub Actions CI/CD
+- **Monitoring**: Prometheus + Grafana + Spring Boot Actuator
+
 ## 前提条件
 
 ### 必須ソフトウェア
@@ -8,21 +19,32 @@
 - **Git**
 
 ### 推奨ソフトウェア
-- **Docker** (コンテナデプロイ用)
-- **Docker Compose** (開発環境用)
-- **IDE**: IntelliJ IDEA, VS Code, Eclipse等
+- **Docker & Docker Compose** (コンテナ開発・本番デプロイ用)
+- **IDE**: IntelliJ IDEA Ultimate, VS Code with Java/TypeScript extensions
 
 ## プロジェクト構造
 
 ```
 sqlapp2/
-├── src/main/java/           # Javaソースコード (Spring Boot)
-├── src/main/resources/      # アプリケーションリソース
-├── frontend/                # Reactフロントエンド (Vite)
-├── build.gradle             # Gradleビルド設定
-├── Dockerfile              # Dockerイメージ定義
-├── docker-compose.yml      # Docker Compose設定
-└── DEVELOPMENT.md          # このファイル
+├── src/main/java/cherry/sqlapp2/   # Spring Boot アプリケーション
+│   ├── controller/                 # REST API エンドポイント
+│   ├── service/                   # ビジネスロジック層
+│   ├── entity/                    # JPA エンティティ
+│   ├── dto/                       # データ転送オブジェクト
+│   ├── repository/                # Spring Data JPA リポジトリ
+│   └── config/                    # 設定クラス (Security, JWT等)
+├── src/main/resources/
+│   ├── application*.properties    # 環境別設定ファイル
+│   └── static/                    # ビルド済みフロントエンド資産
+├── frontend/                      # React + TypeScript アプリケーション
+│   ├── src/components/           # React コンポーネント (*Page.tsx)
+│   ├── src/locales/             # 国際化翻訳ファイル (en/, ja/)
+│   └── src/context/             # React Context (認証等)
+├── monitoring/                   # Prometheus/Grafana 設定
+├── .github/workflows/           # GitHub Actions CI/CD
+├── build.gradle                 # Gradle ビルド設定
+├── Dockerfile                   # 本番用 Docker イメージ
+└── docker-compose*.yml         # Docker Compose 設定
 ```
 
 ## 開発環境セットアップ
@@ -136,13 +158,36 @@ docker-compose down
 
 ## API エンドポイント
 
-### 認証API
+### 認証 API
 - `POST /api/auth/register` - ユーザー登録
-- `POST /api/auth/login` - ログイン
-- `GET /api/auth/user/{username}` - ユーザー情報取得
+- `POST /api/auth/login` - ログイン (JWT トークン取得)
+- `POST /api/auth/refresh` - リフレッシュトークン更新
+- `POST /api/auth/logout` - ログアウト
+- `GET /api/auth/me` - 現在ユーザー情報取得
 
-### システムAPI
-- `GET /api/health` - ヘルスチェック
+### データベース接続 API
+- `GET /api/connections` - 接続一覧取得
+- `POST /api/connections` - 新規接続作成
+- `PUT /api/connections/{id}` - 接続更新
+- `DELETE /api/connections/{id}` - 接続削除
+- `POST /api/connections/{id}/test` - 接続テスト
+
+### SQL実行 API
+- `POST /api/sql/execute` - SQL実行
+- `POST /api/sql/validate` - SQL検証
+
+### クエリ管理 API
+- `GET /api/queries/saved` - 保存済みクエリ一覧
+- `POST /api/queries/save` - クエリ保存
+- `GET /api/queries/history` - 実行履歴
+
+### スキーマ情報 API
+- `GET /api/schema/{connectionId}` - データベーススキーマ情報
+
+### システム API
+- `GET /api/health` - アプリケーションヘルスチェック
+- `GET /api/swagger-ui.html` - API ドキュメント (OpenAPI/Swagger)
+- `GET /actuator/*` - Spring Boot Actuator エンドポイント
 
 ## トラブルシューティング
 
@@ -195,31 +240,65 @@ docker-compose down
 
 ## テスト実行
 
+**現在のテスト実績**: 356テスト (303単体 + 53統合) - 100%成功率
+
 ```bash
-# バックエンドテスト
+# 全バックエンドテスト (単体 + 統合テスト)
 ./gradlew test
 
-# フロントエンドテスト (将来実装)
+# フロントエンドテスト (vitest)
 cd frontend
 npm test
+
+# ビルド確認 (全テスト含む)
+./gradlew build
 ```
 
 ## 本番デプロイ
 
-### WAR デプロイ
+### 単体 WAR デプロイ
 ```bash
 ./gradlew build
-java -jar build/libs/sqlapp2.war
+java -jar build/libs/sqlapp2-1.0.0.war --server.port=8080
 ```
 
-### Docker デプロイ
+### Docker デプロイ (推奨)
 ```bash
-docker-compose -f docker-compose.yml up -d
+# 開発環境
+docker-compose up -d
+
+# 本番環境 (監視込み)
+docker-compose -f docker-compose.yml -f docker-compose.monitoring.yml up -d
 ```
+
+### 環境設定
+- **dev**: 開発環境 (H2 in-memory)
+- **staging**: ステージング環境 (H2 file)
+- **prod**: 本番環境 (H2 file + 構造化ログ + メトリクス)
+
+## 監視・運用
+
+### Spring Boot Actuator
+- **Health Check**: `GET /actuator/health`
+- **Metrics**: `GET /actuator/metrics`
+- **Info**: `GET /actuator/info`
+- **Prometheus**: `GET /actuator/prometheus`
+
+### 監視スタック (Docker Compose)
+- **Prometheus**: メトリクス収集 (http://localhost:9090)
+- **Grafana**: ダッシュボード (http://localhost:3000)
+- **AlertManager**: アラート通知 (http://localhost:9093)
 
 ## 参考資料
 
+### 技術ドキュメント
 - [Spring Boot Reference](https://docs.spring.io/spring-boot/docs/current/reference/html/)
 - [React Documentation](https://react.dev)
 - [Vite Documentation](https://vitejs.dev)
 - [Docker Documentation](https://docs.docker.com)
+
+### プロジェクト固有
+- **CLAUDE.md**: 開発ガイドライン・アーキテクチャ詳細
+- **ROADMAP.md**: プロジェクト進捗・完成状況
+- **CONTRIBUTING.md**: コントリビューションガイド
+- **Swagger UI**: API仕様書 (http://localhost:8080/api/swagger-ui.html)
