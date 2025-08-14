@@ -194,6 +194,8 @@
     "addColumn": "Add Column",
     "addTable": "Add Table",
     "addCondition": "Add Condition",
+    "addJoin": "Add JOIN",
+    "joinConditions": "Join Conditions",
     "addOrderBy": "Add Order By",
     "value": "Value",
     "not": "NOT",

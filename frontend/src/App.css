@@ -1848,6 +1848,73 @@ a:hover {
   background: white;
 }
 
+/* JOIN specific styles */
+.query-builder .join-conditions {
+  margin-top: 15px;
+  padding: 15px;
+  background: #ffffff;
+  border: 1px solid #e9ecef;
+  border-radius: 6px;
+}
+
+.query-builder .join-conditions h4 {
+  margin: 0 0 12px 0;
+  color: #495057;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.query-builder .join-condition {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+  align-items: center;
+  padding: 8px;
+  background: #f8f9fa;
+  border-radius: 4px;
+}
+
+.query-builder .join-condition-content {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex: 1;
+  flex-wrap: wrap;
+}
+
+.query-builder .join-condition-actions {
+  display: flex;
+  align-items: center;
+  margin-left: auto;
+}
+
+.query-builder .join-condition select {
+  padding: 6px;
+  border: 1px solid #ced4da;
+  border-radius: 3px;
+  min-width: 120px;
+  font-size: 13px;
+}
+
+.query-builder .join-type-select {
+  min-width: 140px;
+  font-weight: 500;
+}
+
+.query-builder .add-btn-small {
+  background: #28a745;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 3px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.query-builder .add-btn-small:hover {
+  background: #218838;
+}
+
 .saved-queries .query-header {
   display: flex;
   justify-content: space-between;

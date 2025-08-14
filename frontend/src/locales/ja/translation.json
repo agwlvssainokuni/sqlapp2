@@ -194,6 +194,8 @@
     "addColumn": "カラム追加",
     "addTable": "テーブル追加",
     "addCondition": "条件追加",
+    "addJoin": "JOIN追加",
+    "joinConditions": "結合条件",
     "addOrderBy": "ソート順追加",
     "value": "値",
     "not": "NOT",
