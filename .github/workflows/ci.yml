@@ -205,8 +205,8 @@ jobs:
           images: ghcr.io/sqlapp2
           tags: |
             type=raw,value=latest
+            type=raw,value=${{ github.sha }}
             type=schedule,pattern={{date 'YYYYMMDD-HHmmss' tz='Asia/Tokyo'}}
-            type=sha,format=short
 
       - name: Build Docker image
         uses: docker/build-push-action@v5
