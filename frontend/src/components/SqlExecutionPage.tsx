@@ -14,10 +14,18 @@
  * limitations under the License.
  */
 
-import React, {useEffect, useState} from 'react'
+import React, {useCallback, useEffect, useState} from 'react'
 import {useTranslation} from 'react-i18next'
 import {useAuth} from '../context/AuthContext'
-import type {DatabaseConnection, SavedQuery, SqlExecutionResult, SqlValidationResult, QueryHistory, SqlExecutionRequest, PagingRequest} from '../types/api'
+import type {
+  DatabaseConnection,
+  PagingRequest,
+  QueryHistory,
+  SavedQuery,
+  SqlExecutionRequest,
+  SqlExecutionResult,
+  SqlValidationResult
+} from '../types/api'
 import {extractParameters} from '../utils/SqlParameterExtractor'
 import {hasOrderByClause} from '../utils/SqlAnalyzer'
 import Layout from './Layout'
@@ -50,12 +58,26 @@ const SqlExecutionPage: React.FC = () => {
     ignoreOrderByWarning: false
   })
 
-  useEffect(() => {
-    loadConnections()
-    loadFromUrl()
-  }, [])
+  // Define all useCallback functions first
+  const loadConnections = useCallback(async () => {
+    try {
+      const response = await apiRequest('/api/connections')
 
-  const loadFromUrl = async () => {
+      if (response.ok) {
+        const data = response.data as DatabaseConnection[]
+        setConnections(data)
+        if (data.length > 0) {
+          setSelectedConnectionId(data[0].id)
+        }
+      } else {
+        setError('Failed to load database connections')
+      }
+    } catch (err) {
+      setError('Error loading connections: ' + (err as Error).message)
+    }
+  }, [apiRequest])
+
+  const loadFromUrl = useCallback(async () => {
     const urlParams = new URLSearchParams(window.location.search)
     const queryId = urlParams.get('queryId')
     const historyId = urlParams.get('historyId')
@@ -110,34 +132,12 @@ const SqlExecutionPage: React.FC = () => {
     if (connectionId && !isNaN(Number(connectionId))) {
       setSelectedConnectionId(Number(connectionId))
     }
-  }
+  }, [apiRequest])
 
-  useEffect(() => {
-    extractParametersFromSql()
-  }, [sql])
-
-  const loadConnections = async () => {
-    try {
-      const response = await apiRequest('/api/connections')
-
-      if (response.ok) {
-        const data = response.data as DatabaseConnection[]
-        setConnections(data)
-        if (data.length > 0) {
-          setSelectedConnectionId(data[0].id)
-        }
-      } else {
-        setError('Failed to load database connections')
-      }
-    } catch (err) {
-      setError('Error loading connections: ' + (err as Error).message)
-    }
-  }
-
-  const extractParametersFromSql = () => {
+  const extractParametersFromSql = useCallback(() => {
     // Use the sophisticated parameter extractor that ignores parameters in strings and comments
     const paramNames = extractParameters(sql)
-    
+
     if (paramNames.length > 0) {
       const newParams = paramNames.map(name => {
         const existing = parameters.find(p => p.name === name)
@@ -147,7 +147,17 @@ const SqlExecutionPage: React.FC = () => {
     } else {
       setParameters([])
     }
-  }
+  }, [sql, parameters])
+
+  // useEffect hooks that use the functions defined above
+  useEffect(() => {
+    loadConnections()
+    loadFromUrl()
+  }, [loadConnections, loadFromUrl])
+
+  useEffect(() => {
+    extractParametersFromSql()
+  }, [extractParametersFromSql])
 
   const validateSql = async () => {
     if (!sql.trim()) {

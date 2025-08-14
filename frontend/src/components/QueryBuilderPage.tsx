@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import React, {useState, useEffect} from 'react'
+import React, {useCallback, useEffect, useState} from 'react'
 import {useTranslation} from 'react-i18next'
 import {useAuth} from '../context/AuthContext'
 import type {DatabaseConnection, TableInfo as ApiTableInfo} from '../types/api'
@@ -128,31 +128,31 @@ const QueryBuilderPage: React.FC = () => {
   // Helper function to get available table references (table names + aliases)
   const getAvailableTableReferences = (): { value: string; label: string }[] => {
     const references: { value: string; label: string }[] = []
-    
+
     // Add FROM table references (prioritize aliases when available)
     queryStructure.fromTables.forEach(table => {
       if (table.tableName) {
         if (table.alias && table.alias.trim()) {
           // Use alias when available
-          references.push({ value: table.alias.trim(), label: `${table.alias} (${table.tableName})` })
+          references.push({value: table.alias.trim(), label: `${table.alias} (${table.tableName})`})
         } else {
           // Use table name when no alias
-          references.push({ value: table.tableName, label: table.tableName })
+          references.push({value: table.tableName, label: table.tableName})
         }
       }
     })
-    
+
     // Add JOIN table references (when JOINs are implemented)
     queryStructure.joins.forEach(join => {
       if (join.tableName) {
         if (join.alias && join.alias.trim()) {
-          references.push({ value: join.alias.trim(), label: `${join.alias} (${join.tableName})` })
+          references.push({value: join.alias.trim(), label: `${join.alias} (${join.tableName})`})
         } else {
-          references.push({ value: join.tableName, label: join.tableName })
+          references.push({value: join.tableName, label: join.tableName})
         }
       }
     })
-    
+
     return references
   }
 
@@ -160,50 +160,38 @@ const QueryBuilderPage: React.FC = () => {
   const getColumnsForTableReference = (tableReference: string): { name: string }[] => {
     // Find the actual table name for this reference
     let actualTableName = tableReference
-    
+
     // Check if reference is an alias
-    const fromTableWithAlias = queryStructure.fromTables.find(table => 
+    const fromTableWithAlias = queryStructure.fromTables.find(table =>
       table.alias && table.alias.trim() === tableReference
     )
     if (fromTableWithAlias) {
       actualTableName = fromTableWithAlias.tableName
     }
-    
+
     // Check JOIN tables (when implemented)
-    const joinTableWithAlias = queryStructure.joins.find(join => 
+    const joinTableWithAlias = queryStructure.joins.find(join =>
       join.alias && join.alias.trim() === tableReference
     )
     if (joinTableWithAlias) {
       actualTableName = joinTableWithAlias.tableName
     }
-    
+
     // Return columns for the actual table
     const table = schemaInfo?.tables.find(t => t.name === actualTableName)
     return table?.columns || []
   }
 
-  // Load database connections
-  useEffect(() => {
-    loadConnections()
-  }, [])
-
-  // Load schema when connection changes
-  useEffect(() => {
-    if (selectedConnectionId) {
-      loadSchema(selectedConnectionId)
-    }
-  }, [selectedConnectionId])
-
-  const loadConnections = async () => {
+  const loadConnections = useCallback(async () => {
     try {
       const response = await apiRequest('/api/connections')
       setConnections(response.data as DatabaseConnection[])
     } catch (error) {
       console.error('Failed to load connections:', error)
     }
-  }
+  }, [apiRequest])
 
-  const loadSchema = async (connectionId: number) => {
+  const loadSchema = useCallback(async (connectionId: number) => {
     try {
       // Load tables first
       const tablesResponse = await apiRequest(`/api/schema/connections/${connectionId}/tables`)
@@ -227,7 +215,19 @@ const QueryBuilderPage: React.FC = () => {
     } catch (error) {
       console.error('Failed to load schema:', error)
     }
-  }
+  }, [apiRequest])
+
+  // Load database connections
+  useEffect(() => {
+    loadConnections()
+  }, [loadConnections])
+
+  // Load schema when connection changes
+  useEffect(() => {
+    if (selectedConnectionId) {
+      loadSchema(selectedConnectionId)
+    }
+  }, [selectedConnectionId, loadSchema])
 
   const buildQuery = async () => {
     if (!selectedConnectionId) {
@@ -300,40 +300,40 @@ const QueryBuilderPage: React.FC = () => {
       const updatedTables = prev.fromTables.map((table, i) =>
         i === index ? {...table, [field]: value || undefined} : table
       )
-      
+
       // Auto-update table references when FROM table aliases change
       let updatedSelectColumns = prev.selectColumns
       let updatedWhereConditions = prev.whereConditions
       let updatedOrderByColumns = prev.orderByColumns
-      
+
       if (field === 'alias' || field === 'tableName') {
         const oldTable = prev.fromTables[index]
         const newTable = updatedTables[index]
-        
+
         // If alias changed or table name changed, update all references
         if (oldTable && newTable) {
           const oldReference = oldTable.alias || oldTable.tableName
           const newReference = newTable.alias || newTable.tableName
-          
+
           if (oldReference && newReference && oldReference !== newReference) {
             // Update SELECT columns
-            updatedSelectColumns = prev.selectColumns.map(col => 
+            updatedSelectColumns = prev.selectColumns.map(col =>
               col.tableName === oldReference ? {...col, tableName: newReference} : col
             )
-            
+
             // Update WHERE conditions
-            updatedWhereConditions = prev.whereConditions.map(condition => 
+            updatedWhereConditions = prev.whereConditions.map(condition =>
               condition.tableName === oldReference ? {...condition, tableName: newReference} : condition
             )
-            
+
             // Update ORDER BY columns
-            updatedOrderByColumns = prev.orderByColumns.map(col => 
+            updatedOrderByColumns = prev.orderByColumns.map(col =>
               col.tableName === oldReference ? {...col, tableName: newReference} : col
             )
           }
         }
       }
-      
+
       return {
         ...prev,
         fromTables: updatedTables,

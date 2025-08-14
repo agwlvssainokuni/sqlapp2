@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import React, {useEffect, useState} from 'react'
+import React, {useCallback, useEffect, useState} from 'react'
 import {useTranslation} from 'react-i18next'
 import {useAuth} from '../context/AuthContext'
 import type {DatabaseConnection, SavedQuery} from '../types/api'
@@ -51,11 +51,7 @@ const SavedQueriesPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'my-queries' | 'public-queries'>('my-queries')
   const [searchTerm, setSearchTerm] = useState('')
 
-  useEffect(() => {
-    loadData()
-  }, [])
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     try {
       setLoading(true)
       setError(null)
@@ -79,7 +75,11 @@ const SavedQueriesPage: React.FC = () => {
     } finally {
       setLoading(false)
     }
-  }
+  }, [apiRequest, t])
+
+  useEffect(() => {
+    loadData()
+  }, [loadData])
 
   const handleSave = async () => {
     try {

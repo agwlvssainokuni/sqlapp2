@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import React, {useState, useEffect} from 'react'
+import React, {useCallback, useEffect, useState} from 'react'
 import {useTranslation} from 'react-i18next'
 import {useAuth} from '../context/AuthContext'
-import type {DatabaseConnection, DatabaseInfo, TableInfo, TableDetails} from '../types/api'
+import type {DatabaseConnection, DatabaseInfo, TableDetails, TableInfo} from '../types/api'
 import Layout from './Layout'
 
 const SchemaViewerPage: React.FC = () => {
@@ -34,18 +34,7 @@ const SchemaViewerPage: React.FC = () => {
   const [selectedCatalog, setSelectedCatalog] = useState<string>('')
   const [selectedSchema, setSelectedSchema] = useState<string>('')
 
-  useEffect(() => {
-    loadConnections()
-  }, [])
-
-  useEffect(() => {
-    if (selectedConnectionId) {
-      loadSchemaInfo()
-      loadTables()
-    }
-  }, [selectedConnectionId, selectedCatalog, selectedSchema])
-
-  const loadConnections = async () => {
+  const loadConnections = useCallback(async () => {
     try {
       const response = await apiRequest('/api/connections?activeOnly=true')
 
@@ -58,9 +47,13 @@ const SchemaViewerPage: React.FC = () => {
     } catch (err) {
       setError(t('common.error') + ': ' + (err as Error).message)
     }
-  }
+  }, [apiRequest, t])
 
-  const loadSchemaInfo = async () => {
+  useEffect(() => {
+    loadConnections()
+  }, [loadConnections])
+
+  const loadSchemaInfo = useCallback(async () => {
     if (!selectedConnectionId) return
 
     try {
@@ -79,9 +72,9 @@ const SchemaViewerPage: React.FC = () => {
     } finally {
       setLoading(false)
     }
-  }
+  }, [selectedConnectionId, apiRequest, t])
 
-  const loadTables = async () => {
+  const loadTables = useCallback(async () => {
     if (!selectedConnectionId) return
 
     try {
@@ -104,7 +97,15 @@ const SchemaViewerPage: React.FC = () => {
     } finally {
       setLoading(false)
     }
-  }
+  }, [selectedConnectionId, selectedCatalog, selectedSchema, apiRequest, t])
+
+  useEffect(() => {
+    if (selectedConnectionId) {
+      loadSchemaInfo()
+      loadTables()
+    }
+  }, [selectedConnectionId, selectedCatalog, selectedSchema, loadSchemaInfo, loadTables])
+
 
   const loadTableDetails = async (tableName: string) => {
     if (!selectedConnectionId) return

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import React, {useEffect, useState} from 'react'
+import React, {useCallback, useEffect, useState} from 'react'
 import {useTranslation} from 'react-i18next'
 import {useAuth} from '../context/AuthContext'
 import type {Page, QueryHistory, UserStatisticsResponse} from '../types/api'
@@ -42,11 +42,7 @@ const QueryHistoryPage: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(0)
   const [pageSize] = useState(20)
 
-  useEffect(() => {
-    loadData()
-  }, [filterType, currentPage])
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     try {
       setLoading(true)
       setError(null)
@@ -80,7 +76,11 @@ const QueryHistoryPage: React.FC = () => {
     } finally {
       setLoading(false)
     }
-  }
+  }, [apiRequest, currentPage, filterType, pageSize, t])
+
+  useEffect(() => {
+    loadData()
+  }, [loadData])
 
   const handleSearch = async () => {
     if (!searchTerm.trim()) {
