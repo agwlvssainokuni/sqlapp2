@@ -61,11 +61,12 @@ const ConnectionManagementPage: React.FC = () => {
     loadConnections()
   }, [loadConnections])
 
-  const handleDatabaseTypeChange = (type: 'MYSQL' | 'POSTGRESQL' | 'MARIADB') => {
+  const handleDatabaseTypeChange = (type: 'MYSQL' | 'POSTGRESQL' | 'MARIADB' | 'H2') => {
     const defaultPorts = {
       MYSQL: 3306,
       POSTGRESQL: 5432,
-      MARIADB: 3306
+      MARIADB: 3306,
+      H2: 9092
     }
 
     setNewConnection(prev => ({
@@ -215,7 +216,8 @@ const ConnectionManagementPage: React.FC = () => {
     const labels = {
       MYSQL: 'MySQL',
       POSTGRESQL: 'PostgreSQL',
-      MARIADB: 'MariaDB'
+      MARIADB: 'MariaDB',
+      H2: 'H2 Database'
     }
     return labels[type as keyof typeof labels] || type
   }
@@ -258,11 +260,12 @@ const ConnectionManagementPage: React.FC = () => {
                 <label>{t('connections.databaseType')} *</label>
                 <select
                   value={newConnection.databaseType}
-                  onChange={(e) => handleDatabaseTypeChange(e.target.value as 'MYSQL' | 'POSTGRESQL' | 'MARIADB')}
+                  onChange={(e) => handleDatabaseTypeChange(e.target.value as 'MYSQL' | 'POSTGRESQL' | 'MARIADB' | 'H2')}
                 >
                   <option value="MYSQL">MySQL</option>
                   <option value="POSTGRESQL">PostgreSQL</option>
                   <option value="MARIADB">MariaDB</option>
+                  <option value="H2">H2 Database</option>
                 </select>
               </div>
 

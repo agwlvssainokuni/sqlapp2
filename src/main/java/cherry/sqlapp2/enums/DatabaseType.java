@@ -19,7 +19,8 @@ package cherry.sqlapp2.enums;
 public enum DatabaseType {
     MYSQL("MySQL", "com.mysql.cj.jdbc.Driver", "jdbc:mysql://{host}:{port}/{database}?useInformationSchema=false", 3306),
     POSTGRESQL("PostgreSQL", "org.postgresql.Driver", "jdbc:postgresql://{host}:{port}/{database}", 5432),
-    MARIADB("MariaDB", "org.mariadb.jdbc.Driver", "jdbc:mariadb://{host}:{port}/{database}", 3306);
+    MARIADB("MariaDB", "org.mariadb.jdbc.Driver", "jdbc:mariadb://{host}:{port}/{database}", 3306),
+    H2("H2 Database", "org.h2.Driver", "jdbc:h2:tcp://{host}:{port}/{database}", 9092);
 
     private final String displayName;
     private final String driverClassName;

@@ -64,6 +64,19 @@ public class DatabaseConnectionControllerIntegrationTest extends BaseIntegration
         return request;
     }
 
+    private DatabaseConnectionRequest createTestH2ConnectionRequest() {
+        var request = new DatabaseConnectionRequest();
+        request.setConnectionName("Test H2 Connection");
+        request.setDatabaseType(DatabaseType.H2);
+        request.setHost("localhost");
+        request.setPort(9092);
+        request.setDatabaseName("testdb");
+        request.setUsername("sa");
+        request.setPassword("");
+        request.setActive(true);
+        return request;
+    }
+
     @Nested
     @DisplayName("接続管理")
     class ConnectionManagement {
@@ -99,6 +112,7 @@ public class DatabaseConnectionControllerIntegrationTest extends BaseIntegration
                     .andExpect(jsonPath("$.data.createdAt").isString())
                     .andExpect(jsonPath("$.data.updatedAt").isString());
         }
+
 
         @Test
         @DisplayName("ユーザーのデータベース接続一覧を取得できる")

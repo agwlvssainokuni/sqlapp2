@@ -47,7 +47,7 @@ export interface HealthcheckResult {
 // DatabaseConnectionController
 export interface NewConnection {
   connectionName: string
-  databaseType: 'MYSQL' | 'POSTGRESQL' | 'MARIADB'
+  databaseType: 'MYSQL' | 'POSTGRESQL' | 'MARIADB' | 'H2'
   host: string
   port: number
   databaseName: string
@@ -180,7 +180,7 @@ export interface QueryHistory {
 export interface DatabaseConnection {
   id: number
   connectionName: string
-  databaseType: 'MYSQL' | 'POSTGRESQL' | 'MARIADB'
+  databaseType: 'MYSQL' | 'POSTGRESQL' | 'MARIADB' | 'H2'
   host: string
   port: number
   databaseName: string
