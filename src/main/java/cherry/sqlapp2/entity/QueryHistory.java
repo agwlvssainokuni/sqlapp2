@@ -19,6 +19,11 @@ package cherry.sqlapp2.entity;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
+/**
+ * クエリ実行履歴を表すエンティティクラス。
+ * ユーザが実行したSQLクエリの実行結果、実行時間、成功・失敗状況などの
+ * 履歴情報を管理します。パフォーマンス分析や監査ログとしても活用されます。
+ */
 @Entity
 @Table(name = "query_history")
 public class QueryHistory {

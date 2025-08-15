@@ -35,6 +35,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * ビジュアルクエリビルダーの機能を提供するコントローラクラス。
+ * SQLクエリの生成とSQLからクエリ構造への逆変換機能を提供します。
+ * ユーザはGUIを通じてSQLクエリを構築し、既存のSQLを解析してクエリ構造として読み込むことができます。
+ */
 @RestController
 @RequestMapping("/api/query-builder")
 @Tag(name = "Query Builder", description = "Visual SQL query building operations")
@@ -47,6 +52,13 @@ public class QueryBuilderController {
     @Autowired
     private SqlReverseEngineeringService sqlReverseEngineeringService;
 
+    /**
+     * クエリ構造からSQLクエリを生成します。
+     * SELECT、FROM、WHERE句などの構造化されたクエリ情報から実行可能なSQLを作成します。
+     * 
+     * @param request クエリ構造を含むリクエスト
+     * @return 生成されたSQLクエリを含むAPIレスポンス
+     */
     @Operation(
             summary = "Build SQL query from structure",
             description = "Generate SQL query from structured query components (SELECT, FROM, WHERE, etc.)",
@@ -92,6 +104,13 @@ public class QueryBuilderController {
         return ApiResponse.success(response);
     }
 
+    /**
+     * SQLクエリを解析してクエリ構造に変換します。
+     * 既存のSELECT文を解析し、ビジュアルクエリビルダーで編集可能な構造に変換します。
+     * 
+     * @param request 解析対象のSQLクエリを含むリクエスト
+     * @return 解析結果（成功時はクエリ構造、失敗時はエラー詳細）を含むAPIレスポンス
+     */
     @Operation(
             summary = "Parse SQL query into structure",
             description = "Reverse engineer SQL SELECT statement into visual query builder structure",

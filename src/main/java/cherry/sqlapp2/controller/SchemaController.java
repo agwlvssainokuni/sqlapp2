@@ -33,6 +33,11 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * データベーススキーマ情報の取得機能を提供するコントローラクラス。
+ * データベースのテーブル、カラム、インデックス、外部キーなどの
+ * メタデータ情報を取得するエンドポイントを提供します。
+ */
 @RestController
 @RequestMapping("/api/schema")
 @Tag(name = "Database Schema", description = "Database schema information and metadata operations")
@@ -58,6 +63,14 @@ public class SchemaController {
                 .get();
     }
 
+    /**
+     * データベース情報を取得します。
+     * 指定されたデータベース接続のカタログやスキーマ情報を取得します。
+     * 
+     * @param connectionId データベース接続ID
+     * @param authentication 認証情報
+     * @return データベース情報を含むAPIレスポンス
+     */
     @Operation(
             summary = "Get database information",
             description = "Retrieve database metadata including catalogs and schemas for a specific connection"

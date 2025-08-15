@@ -19,9 +19,20 @@ package cherry.sqlapp2.controller;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+/**
+ * Single Page Application (SPA) のルーティングを処理するコントローラクラス。
+ * React Routerのクライアントサイドルーティングをサポートするため、
+ * 全てのSPA関連パスをindex.htmlにフォワードします。
+ */
 @Controller
 public class SpaController {
 
+    /**
+     * SPA関連の全パスをindex.htmlにフォワードします。
+     * React Routerがクライアントサイドでルーティングを処理できるようにします。
+     * 
+     * @return index.htmlへのフォワード指示
+     */
     @RequestMapping(value = {
             "/",
             "/login", "/register",

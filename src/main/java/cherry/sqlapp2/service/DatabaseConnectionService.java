@@ -31,6 +31,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+/**
+ * データベース接続の管理機能を提供するサービスクラス。
+ * データベース接続の作成、更新、削除、テスト機能を担当します。
+ * 接続情報の暗号化・復号化、実際のデータベースへの接続テストも行います。
+ */
 @Service
 @Transactional
 public class DatabaseConnectionService {
@@ -45,6 +50,12 @@ public class DatabaseConnectionService {
         this.encryptionService = encryptionService;
     }
 
+    /**
+     * ユーザのすべてのデータベース接続を取得します。
+     * 
+     * @param user ユーザ
+     * @return データベース接続のリスト
+     */
     @Transactional(readOnly = true)
     public List<DatabaseConnection> getAllConnectionsByUser(User user) {
         return connectionRepository.findByUserOrderByUpdatedAtDesc(user)
@@ -53,6 +64,12 @@ public class DatabaseConnectionService {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * ユーザのアクティブなデータベース接続を取得します。
+     * 
+     * @param user ユーザ
+     * @return アクティブなデータベース接続のリスト
+     */
     @Transactional(readOnly = true)
     public List<DatabaseConnection> getActiveConnectionsByUser(User user) {
         return connectionRepository.findByUserAndIsActiveOrderByUpdatedAtDesc(user, true)
@@ -71,6 +88,13 @@ public class DatabaseConnectionService {
         return connectionRepository.existsByUserAndConnectionName(user, connectionName);
     }
 
+    /**
+     * 新しいデータベース接続を作成します。
+     * 
+     * @param user ユーザ
+     * @param request データベース接続リクエスト
+     * @return 作成されたデータベース接続
+     */
     public DatabaseConnection createConnection(User user, DatabaseConnectionRequest request) {
         // Check if connection name already exists for this user
         if (connectionRepository.existsByUserAndConnectionName(user, request.getConnectionName())) {

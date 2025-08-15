@@ -19,6 +19,11 @@ package cherry.sqlapp2.entity;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
+/**
+ * ユーザ情報を表すエンティティクラス。
+ * システムにログインするユーザの基本情報（ユーザ名、パスワード、メール）を管理します。
+ * パスワードはBCryptでハッシュ化されて保存されます。
+ */
 @Entity
 @Table(name = "users")
 public class User {

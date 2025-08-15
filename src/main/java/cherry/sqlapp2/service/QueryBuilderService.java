@@ -28,9 +28,20 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.stream.Collectors;
 
+/**
+ * ビジュアルクエリビルダーのSQL生成を担当するサービスクラス。
+ * クエリ構造からSQLクエリを生成し、バリデーション、パラメータ抽出、
+ * エラーハンドリングを提供します。
+ */
 @Service
 public class QueryBuilderService {
 
+    /**
+     * クエリ構造からSQLクエリを生成します。
+     * 
+     * @param request クエリビルダーリクエスト（クエリ構造を含む）
+     * @return SQL生成結果（成功時はSQL文とパラメータ、失敗時はエラー詳細）
+     */
     public QueryBuilderResponse buildQuery(QueryBuilderRequest request) {
         long startTime = System.currentTimeMillis();
         

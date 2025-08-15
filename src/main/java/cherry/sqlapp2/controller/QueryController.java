@@ -42,6 +42,11 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+/**
+ * SQLクエリの管理機能を提供するコントローラクラス。
+ * クエリの保存、更新、削除、履歴管理、統計情報の取得などの
+ * クエリライフサイクル全体を管理します。
+ */
 @RestController
 @RequestMapping("/api/queries")
 @Tag(name = "Query Management", description = "SQL query execution, saving, and management operations")
@@ -69,6 +74,14 @@ public class QueryController {
 
     // ==================== Saved Queries Endpoints ====================
 
+    /**
+     * SQLクエリを保存します。
+     * ユーザが作成したクエリを名前付きで保存し、後で再利用できるようにします。
+     * 
+     * @param request 保存するクエリの情報（名前、SQL内容、説明など）
+     * @param authentication 認証情報
+     * @return 保存されたクエリ情報を含むAPIレスポンス
+     */
     @PostMapping("/saved")
     public ResponseEntity<ApiResponse<SavedQuery>> saveQuery(
             @Valid @RequestBody SavedQueryRequest request,
@@ -98,6 +111,13 @@ public class QueryController {
         );
     }
 
+    /**
+     * 保存されたクエリの詳細情報を取得します。
+     * 
+     * @param queryId 取得するクエリのID
+     * @param authentication 認証情報
+     * @return 保存されたクエリの詳細情報を含むAPIレスポンス
+     */
     @GetMapping("/saved/{queryId}")
     public ApiResponse<SavedQuery> getSavedQuery(
             @PathVariable Long queryId,
@@ -183,6 +203,15 @@ public class QueryController {
 
     // ==================== Query History Endpoints ====================
 
+    /**
+     * ユーザのクエリ実行履歴を取得します。
+     * ページネーション機能付きで履歴を取得できます。
+     * 
+     * @param page ページ番号（0から開始）
+     * @param size 1ページあたりの件数
+     * @param authentication 認証情報
+     * @return ページネーションされたクエリ履歴を含むAPIレスポンス
+     */
     @GetMapping("/history")
     public ApiResponse<Page<QueryHistory>> getQueryHistory(
             @RequestParam(defaultValue = "0") int page,
@@ -260,6 +289,13 @@ public class QueryController {
 
     // ==================== Statistics Endpoints ====================
 
+    /**
+     * ユーザのクエリ使用統計情報を取得します。
+     * 保存クエリ数、実行回数、平均実行時間、失敗回数などの統計を提供します。
+     * 
+     * @param authentication 認証情報
+     * @return ユーザの統計情報を含むAPIレスポンス
+     */
     @GetMapping("/stats")
     public ApiResponse<UserStatistics> getUserStatistics(
             Authentication authentication

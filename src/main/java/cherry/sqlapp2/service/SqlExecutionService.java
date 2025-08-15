@@ -35,6 +35,12 @@ import java.sql.Date;
 import java.time.*;
 import java.util.*;
 
+/**
+ * SQL実行機能を提供するサービスクラス。
+ * SQLクエリの実行、パラメータ処理、結果セットの変換、
+ * ページネーション、実行履歴の記録などを担当します。
+ * セキュアなSQL実行とパフォーマンス監視も提供します。
+ */
 @Service
 public class SqlExecutionService {
 

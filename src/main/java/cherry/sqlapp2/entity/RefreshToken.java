@@ -19,6 +19,11 @@ package cherry.sqlapp2.entity;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
+/**
+ * リフレッシュトークンを表すエンティティクラス。
+ * JWTアクセストークンの更新に使用されるリフレッシュトークンの情報を管理します。
+ * トークンの有効期限、利用状況、無効化状態を追跡し、セキュアな認証フローを支援します。
+ */
 @Entity
 @Table(name = "refresh_tokens")
 public class RefreshToken {

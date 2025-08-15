@@ -39,6 +39,11 @@ import org.springframework.web.bind.annotation.RestController;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
+/**
+ * SQL実行機能を提供するコントローラクラス。
+ * SQLクエリの実行、バリデーション、結果の取得など、
+ * SQL実行に関連する機能を提供します。
+ */
 @RestController
 @RequestMapping("/api/sql")
 @Tag(name = "SQL Execution", description = "SQL query execution and validation operations")
@@ -66,6 +71,14 @@ public class SqlExecutionController {
                 .get();
     }
 
+    /**
+     * SQLクエリを実行します。
+     * パラメータ付きクエリの実行、ページネーション、結果の履歴記録を行います。
+     * 
+     * @param request SQL実行リクエスト（SQL文、接続ID、パラメータなど）
+     * @param authentication 認証情報
+     * @return SQL実行結果を含むAPIレスポンス
+     */
     @Operation(
             summary = "Execute SQL query",
             description = "Execute SQL query with optional parameters and pagination support",

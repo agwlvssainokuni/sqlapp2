@@ -31,13 +31,14 @@ import org.springframework.stereotype.Service;
 import java.util.*;
 
 /**
- * Service for reverse engineering SQL queries into QueryStructure objects.
- * This is a simplified implementation that provides basic SQL to QueryBuilder conversion.
+ * SQLクエリのリバースエンジニアリング機能を提供するサービスクラス。
+ * 既存のSQLクエリを解析してQueryStructureオブジェクトに変換し、
+ * ビジュアルクエリビルダーで編集可能な形式に変換します。
  * 
- * Current limitations:
- * - Only supports basic SELECT, FROM, WHERE clauses
- * - Complex SQL features like JOINs, subqueries, UNION are not fully supported
- * - Serves as a foundation for future enhancements
+ * 現在の制限事項:
+ * - 基本的なSELECT、FROM、WHERE句のみサポート
+ * - JOIN、サブクエリ、UNIONなどの複雑なSQL機能は一部制限あり
+ * - 将来の機能拡張のための基盤として機能
  */
 @Service
 public class SqlReverseEngineeringService {
@@ -45,10 +46,10 @@ public class SqlReverseEngineeringService {
     private static final Logger logger = LoggerFactory.getLogger(SqlReverseEngineeringService.class);
 
     /**
-     * Parse SQL query and convert to QueryStructure.
+     * SQLクエリを解析してQueryStructureに変換します。
      * 
-     * @param sql SQL query to parse
-     * @return SqlParseResult containing either parsed structure or error information
+     * @param sql 解析対象のSQLクエリ
+     * @return 解析結果（成功時はクエリ構造、失敗時はエラー情報）
      */
     public SqlParseResult parseSQL(String sql) {
         if (sql == null || sql.trim().isEmpty()) {

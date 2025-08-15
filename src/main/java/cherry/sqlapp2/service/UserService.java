@@ -25,6 +25,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
+/**
+ * ユーザ管理機能を提供するサービスクラス。
+ * ユーザの作成、認証、検索などの操作を担当します。
+ * パスワードのハッシュ化やメトリクス記録も行います。
+ */
 @Service
 @Transactional
 public class UserService {
@@ -40,6 +45,15 @@ public class UserService {
         this.metricsService = metricsService;
     }
 
+    /**
+     * 新しいユーザを作成します。
+     * ユーザ名とメールアドレスの重複チェックを行い、パスワードをハッシュ化して保存します。
+     * 
+     * @param username ユーザ名
+     * @param password パスワード（平文）
+     * @param email メールアドレス
+     * @return 作成されたユーザ
+     */
     public User createUser(String username, String password, String email) {
         if (userRepository.existsByUsername(username)) {
             throw new IllegalArgumentException("Username already exists");
@@ -58,11 +72,24 @@ public class UserService {
         return savedUser;
     }
 
+    /**
+     * ユーザ名でユーザを検索します。
+     * 
+     * @param username 検索するユーザ名
+     * @return ユーザ（存在する場合）
+     */
     @Transactional(readOnly = true)
     public Optional<User> findByUsername(String username) {
         return userRepository.findByUsername(username);
     }
 
+    /**
+     * ユーザのパスワードを検証します。
+     * 
+     * @param user ユーザ
+     * @param rawPassword 検証する平文パスワード
+     * @return パスワードが正しい場合true
+     */
     @Transactional(readOnly = true)
     public boolean validatePassword(User user, String rawPassword) {
         return passwordEncoder.matches(rawPassword, user.getPassword());

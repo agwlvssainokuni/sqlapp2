@@ -18,8 +18,9 @@ package cherry.sqlapp2.util;
 import java.util.regex.Pattern;
 
 /**
- * SQL analysis utility for pagination and query structure detection
- * ページング機能とクエリ構造検出のためのSQL解析ユーティリティ
+ * SQLの解析機能を提供するユーティリティクラス。
+ * ページング機能とクエリ構造検出のためのSQL解析を行います。
+ * SELECT文の検証、LIMIT/OFFSET句の検出、ORDER BY句の確認などを提供します。
  */
 public class SqlAnalyzer {
 
@@ -45,8 +46,10 @@ public class SqlAnalyzer {
     );
 
     /**
-     * Check if SQL contains LIMIT clause
-     * SQLにLIMIT句が含まれているかチェック
+     * SQLにLIMIT句が含まれているかをチェックします。
+     * 
+     * @param sql チェック対象のSQL文
+     * @return LIMIT句が含まれている場合true
      */
     public static boolean hasLimitClause(String sql) {
         if (sql == null || sql.trim().isEmpty()) {
@@ -56,8 +59,10 @@ public class SqlAnalyzer {
     }
 
     /**
-     * Check if SQL contains OFFSET clause
-     * SQLにOFFSET句が含まれているかチェック
+     * SQLにOFFSET句が含まれているかをチェックします。
+     * 
+     * @param sql チェック対象のSQL文
+     * @return OFFSET句が含まれている場合true
      */
     public static boolean hasOffsetClause(String sql) {
         if (sql == null || sql.trim().isEmpty()) {
@@ -67,8 +72,10 @@ public class SqlAnalyzer {
     }
 
     /**
-     * Check if SQL has pagination conflicts (LIMIT or OFFSET)
-     * SQLにページング競合（LIMITまたはOFFSET）があるかチェック
+     * SQLにページング競合（LIMITまたはOFFSET）があるかをチェックします。
+     * 
+     * @param sql チェック対象のSQL文
+     * @return ページング競合がある場合true
      */
     public static boolean hasPagingConflict(String sql) {
         return hasLimitClause(sql) || hasOffsetClause(sql);
@@ -86,8 +93,11 @@ public class SqlAnalyzer {
     }
 
     /**
-     * Check if SQL is a SELECT query
-     * SQLがSELECTクエリかチェック
+     * SQLがSELECTクエリかをチェックします。
+     * SELECT、WITH、SHOW、DESCRIBE、EXPLAIN文を検出します。
+     * 
+     * @param sql チェック対象のSQL文
+     * @return SELECTクエリの場合true
      */
     public static boolean isSelectQuery(String sql) {
         if (sql == null || sql.trim().isEmpty()) {

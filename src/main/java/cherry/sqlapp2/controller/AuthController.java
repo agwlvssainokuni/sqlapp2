@@ -44,6 +44,11 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * ユーザ認証・認可の管理を行うコントローラクラス。
+ * ログイン、ログアウト、トークンリフレッシュ、ユーザ登録などの
+ * 認証に関連する操作を提供します。
+ */
 @RestController
 @RequestMapping("/api/auth")
 @Tag(name = "Authentication", description = "User authentication and authorization operations")
@@ -70,6 +75,13 @@ public class AuthController {
         this.metricsService = metricsService;
     }
 
+    /**
+     * ユーザのログイン認証を行います。
+     * ユーザ名とパスワードを検証し、成功時にはアクセストークンとリフレッシュトークンを生成して返します。
+     * 
+     * @param request ログイン認証情報（ユーザ名とパスワード）
+     * @return ログイン結果（トークン情報とユーザ情報）を含むAPIレスポンス
+     */
     @Operation(
             summary = "User login",
             description = "Authenticate user and return access token",
@@ -131,6 +143,13 @@ public class AuthController {
         return ApiResponse.success(loginResult);
     }
 
+    /**
+     * リフレッシュトークンを使用してアクセストークンを更新します。
+     * 期限切れ前のアクセストークンを新しいトークンに置き換えます。
+     * 
+     * @param request リフレッシュトークンを含むリクエスト
+     * @return 新しいアクセストークンとリフレッシュトークンを含むAPIレスポンス
+     */
     @Operation(
             summary = "Refresh access token",
             description = "Generate a new access token using a refresh token"
@@ -190,6 +209,13 @@ public class AuthController {
         return ApiResponse.success(result);
     }
 
+    /**
+     * ユーザのログアウト処理を行います。
+     * 指定されたリフレッシュトークンを無効化してセッションを終了します。
+     * 
+     * @param request 無効化するリフレッシュトークンを含むリクエスト
+     * @return ログアウト完了を示すAPIレスポンス
+     */
     @Operation(
             summary = "User logout",
             description = "Logout user and invalidate refresh token"
@@ -216,6 +242,13 @@ public class AuthController {
         return ApiResponse.success(null);
     }
 
+    /**
+     * 全デバイスからのログアウト処理を行います。
+     * 認証されたユーザのすべてのリフレッシュトークンを無効化します。
+     * 
+     * @param authentication 認証情報
+     * @return 全ログアウト完了を示すAPIレスポンス
+     */
     @Operation(
             summary = "Logout from all devices",
             description = "Logout user from all devices by invalidating all refresh tokens"
@@ -234,6 +267,13 @@ public class AuthController {
         return ApiResponse.success(null);
     }
 
+    /**
+     * 新規ユーザの登録を行います。
+     * ユーザ名の重複チェック、パスワードのハッシュ化を行い、新しいユーザアカウントを作成します。
+     * 
+     * @param request ユーザ登録情報（ユーザ名、パスワード、メールアドレス）
+     * @return 登録されたユーザ情報を含むAPIレスポンス
+     */
     @Operation(
             summary = "User registration",
             description = "Register a new user account",
@@ -280,6 +320,12 @@ public class AuthController {
         );
     }
 
+    /**
+     * 現在認証されているユーザの情報を取得します。
+     * JWTトークンから認証情報を抽出し、ユーザのプロフィール情報を返します。
+     * 
+     * @return 認証されたユーザの情報を含むAPIレスポンス
+     */
     @Operation(
             summary = "Get current user information",
             description = "Retrieve authenticated user's profile information"

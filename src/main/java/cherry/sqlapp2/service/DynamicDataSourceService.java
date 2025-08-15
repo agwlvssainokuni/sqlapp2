@@ -27,6 +27,12 @@ import java.sql.SQLException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * 動的データソース管理を提供するサービスクラス。
+ * ユーザごとの外部データベース接続を動的に管理し、
+ * 接続プールの作成とキャッシュ機能を提供します。
+ * マルチテナント環境での効率的なデータベース接続を実現します。
+ */
 @Service
 public class DynamicDataSourceService {
 
@@ -44,7 +50,12 @@ public class DynamicDataSourceService {
     }
 
     /**
-     * Get a JDBC Connection for the specified user and connection ID
+     * 指定されたユーザと接続IDに対応するJDBC接続を取得します。
+     * 
+     * @param user ユーザ情報
+     * @param connectionId データベース接続ID
+     * @return JDBC接続オブジェクト
+     * @throws SQLException データベース接続に失敗した場合
      */
     public Connection getConnection(User user, Long connectionId) throws SQLException {
         DatabaseConnection dbConfig = connectionService.getConnectionEntityById(user, connectionId)

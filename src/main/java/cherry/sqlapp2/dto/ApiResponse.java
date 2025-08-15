@@ -20,6 +20,13 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 
 import java.util.List;
 
+/**
+ * API統一レスポンス形式を表すDTOクラス。
+ * すべてのAPIエンドポイントで一貫したレスポンス構造を提供します。
+ * 成功時はdata、失敗時はerrorリストを含みます。
+ * 
+ * @param <T> レスポンスデータの型
+ */
 public record ApiResponse<T>(
         boolean ok,
         @JsonInclude(JsonInclude.Include.NON_NULL)

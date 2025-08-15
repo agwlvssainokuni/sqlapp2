@@ -19,6 +19,11 @@ package cherry.sqlapp2.entity;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
+/**
+ * 保存されたクエリを表すエンティティクラス。
+ * ユーザが作成・保存したSQLクエリの情報を管理します。
+ * プライベートまたはパブリック共有の設定も管理されます。
+ */
 @Entity
 @Table(name = "saved_queries")
 public class SavedQuery {

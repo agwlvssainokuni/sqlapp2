@@ -25,6 +25,11 @@ import jakarta.validation.constraints.Size;
 
 import java.time.LocalDateTime;
 
+/**
+ * データベース接続情報を表すエンティティクラス。
+ * ユーザが登録した外部データベースへの接続設定を管理します。
+ * パスワードはAES-256-GCMで暗号化されて保存されます。
+ */
 @Entity
 @Table(name = "database_connections")
 public class DatabaseConnection {

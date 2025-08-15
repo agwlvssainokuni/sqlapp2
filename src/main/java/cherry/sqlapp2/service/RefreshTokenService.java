@@ -27,6 +27,11 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
+/**
+ * リフレッシュトークン管理機能を提供するサービスクラス。
+ * JWTリフレッシュトークンの作成、利用、無効化、期限管理を行います。
+ * セキュアな認証フローとトークンライフサイクル管理を担当します。
+ */
 @Service
 @Transactional
 public class RefreshTokenService {
@@ -41,7 +46,10 @@ public class RefreshTokenService {
     }
 
     /**
-     * Create a new refresh token for the given user
+     * 指定されたユーザに対して新しいリフレッシュトークンを作成します。
+     * 
+     * @param user トークンを作成するユーザ
+     * @return 作成されたリフレッシュトークン
      */
     public RefreshToken createRefreshToken(User user) {
         // Revoke existing active tokens for security (optional, but recommended for single session)
@@ -55,14 +63,20 @@ public class RefreshTokenService {
     }
 
     /**
-     * Find a refresh token by its token value
+     * トークン値でリフレッシュトークンを検索します。
+     * 
+     * @param token トークン値
+     * @return リフレッシュトークン（存在する場合）
      */
     public Optional<RefreshToken> findByToken(String token) {
         return refreshTokenRepository.findByToken(token);
     }
 
     /**
-     * Validate a refresh token and return it if valid
+     * リフレッシュトークンを検証し、有効な場合に返します。
+     * 
+     * @param token 検証するトークン値
+     * @return 有効なリフレッシュトークン（存在し有効な場合）
      */
     public Optional<RefreshToken> validateRefreshToken(String token) {
         return findByToken(token)
@@ -70,8 +84,11 @@ public class RefreshTokenService {
     }
 
     /**
-     * Use a refresh token to generate new access token
-     * Updates the last used timestamp and optionally extends expiration
+     * リフレッシュトークンを使用して新しいアクセストークンを生成します。
+     * 最終使用日時を更新し、必要に応じて有効期限を延長します。
+     * 
+     * @param token 使用するリフレッシュトークン値
+     * @return 更新されたリフレッシュトークン（有効な場合）
      */
     public Optional<RefreshToken> useRefreshToken(String token) {
         Optional<RefreshToken> refreshTokenOpt = validateRefreshToken(token);

@@ -21,28 +21,28 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Utility class for extracting named parameters from SQL queries while properly handling
- * string literals and comments to avoid false positives.
+ * SQLクエリから名前付きパラメータを抽出するユーティリティクラス。
+ * 文字列リテラルやコメント内のパラメータを適切に除外し、誤検出を防ぎます。
  * 
- * <p>This class solves the issue where simple regex patterns like {@code :(\\w+)} would
- * incorrectly match parameter-like patterns inside:</p>
+ * <p>このクラスは、単純な正規表現パターン {@code :(\\w+)} では以下の場所で
+ * パラメータ様パターンを誤って検出してしまう問題を解決します：</p>
  * <ul>
- *   <li>String literals: {@code SELECT ':param' FROM table}</li>
- *   <li>Line comments: {@code -- comment with :param}</li>
- *   <li>Block comments: comment with :param</li>
+ *   <li>文字列リテラル: {@code SELECT ':param' FROM table}</li>
+ *   <li>行コメント: {@code -- comment with :param}</li>
+ *   <li>ブロックコメント: {@code /* comment with :param */}</li>
  * </ul>
  * 
- * <p>The extractor uses state-based parsing to distinguish between actual SQL code and
- * quoted content, ensuring only legitimate parameters are extracted.</p>
+ * <p>このエクストラクタは状態ベースの解析を使用して実際のSQLコードと
+ * 引用符内のコンテンツを区別し、正当なパラメータのみを抽出することを保証します。</p>
  */
 public class SqlParameterExtractor {
 
     /**
-     * Extract named parameters (:paramName) from SQL text, ignoring parameters that appear
-     * inside string literals or comments.
+     * SQLテキストから名前付きパラメータ（:paramName）を抽出します。
+     * 文字列リテラルやコメント内のパラメータは無視されます。
      * 
-     * @param sql The SQL query text
-     * @return List of parameter names in order of appearance (without duplicates)
+     * @param sql SQLクエリテキスト
+     * @return 出現順のパラメータ名リスト（重複なし）
      */
     public static List<String> extractParameters(String sql) {
         if (sql == null || sql.isEmpty()) {
@@ -99,11 +99,11 @@ public class SqlParameterExtractor {
     }
 
     /**
-     * Extract named parameters with their positions from SQL text, ignoring parameters that appear
-     * inside string literals or comments.
+     * SQLテキストから名前付きパラメータとその位置情報を抽出します。
+     * 文字列リテラルやコメント内のパラメータは無視されます。
      * 
-     * @param sql The SQL query text
-     * @return List of ParameterPosition objects with parameter names and positions
+     * @param sql SQLクエリテキスト
+     * @return パラメータ名と位置情報を含むParameterPositionオブジェクトのリスト
      */
     public static List<ParameterPosition> extractParametersWithPositions(String sql) {
         if (sql == null || sql.isEmpty()) {
@@ -158,7 +158,11 @@ public class SqlParameterExtractor {
     }
 
     /**
-     * Record class to hold parameter name and position information.
+     * パラメータ名と位置情報を保持するレコードクラス。
+     * 
+     * @param name パラメータ名
+     * @param start 開始位置
+     * @param end 終了位置
      */
     public static record ParameterPosition(String name, int start, int end) {
     }

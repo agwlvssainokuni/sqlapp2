@@ -37,6 +37,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+/**
+ * クエリ管理機能を提供するサービスクラス。
+ * 保存クエリの作成・更新・削除、クエリ実行履歴の管理、
+ * 統計情報の取得などのクエリライフサイクル全体を管理します。
+ * パラメータ定義の処理とJSONシリアライゼーションも担当します。
+ */
 @Service
 @Transactional
 public class QueryManagementService {
@@ -58,6 +64,18 @@ public class QueryManagementService {
 
     // ==================== Saved Queries Management ====================
 
+    /**
+     * 新しいクエリを保存します。
+     * 
+     * @param name クエリ名
+     * @param sqlContent SQL内容
+     * @param description 説明
+     * @param parameterDefinitions パラメータ定義
+     * @param sharingScope 共有範囲
+     * @param user ユーザ
+     * @param defaultConnection デフォルト接続
+     * @return 保存されたクエリ
+     */
     public SavedQuery saveQuery(String name, String sqlContent, String description,
                                 Map<String, String> parameterDefinitions,
                                 SavedQuery.SharingScope sharingScope,
@@ -86,6 +104,19 @@ public class QueryManagementService {
         return savedQueryRepository.save(savedQuery);
     }
 
+    /**
+     * 保存されたクエリを更新します。
+     * 
+     * @param queryId クエリID
+     * @param name クエリ名
+     * @param sqlContent SQL内容
+     * @param description 説明
+     * @param parameterDefinitions パラメータ定義
+     * @param sharingScope 共有範囲
+     * @param defaultConnection デフォルト接続
+     * @param user ユーザ
+     * @return 更新されたクエリ
+     */
     public SavedQuery updateSavedQuery(Long queryId, String name, String sqlContent,
                                        String description, Map<String, String> parameterDefinitions,
                                        SavedQuery.SharingScope sharingScope,

@@ -28,6 +28,11 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * データベーススキーマ情報の取得機能を提供するサービスクラス。
+ * データベースのメタデータ（テーブル、カラム、インデックス、外部キーなど）を
+ * 取得し、クエリビルダーやスキーマブラウザで使用する情報を提供します。
+ */
 @Service
 public class SchemaService {
 
@@ -41,7 +46,11 @@ public class SchemaService {
     }
 
     /**
-     * Get database schema information including tables and views
+     * データベースのスキーマ情報（テーブルとビューを含む）を取得します。
+     * 
+     * @param user ユーザ情報
+     * @param connectionId データベース接続ID
+     * @return データベース情報オブジェクト
      */
     public DatabaseInfo getDatabaseInfo(User user, Long connectionId) {
         try (Connection connection = dynamicDataSourceService.getConnection(user, connectionId)) {

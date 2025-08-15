@@ -29,6 +29,11 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.function.Function;
 
+/**
+ * JWT（JSON Web Token）の生成・検証・解析機能を提供するユーティリティクラス。
+ * アクセストークンとリフレッシュトークンの作成、検証、クレーム抽出などの
+ * JWT関連の処理を一元管理します。HMAC-SHA256署名を使用してトークンの整合性を保証します。
+ */
 @Component
 public class JwtUtil {
 
@@ -53,10 +58,22 @@ public class JwtUtil {
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
+    /**
+     * JWTトークンからユーザ名を抽出します。
+     * 
+     * @param token JWTトークン
+     * @return ユーザ名
+     */
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
     }
 
+    /**
+     * JWTトークンから有効期限を抽出します。
+     * 
+     * @param token JWTトークン
+     * @return 有効期限
+     */
     public Date extractExpiration(String token) {
         return extractClaim(token, Claims::getExpiration);
     }
@@ -82,6 +99,12 @@ public class JwtUtil {
         return extractExpiration(token).before(new Date());
     }
 
+    /**
+     * アクセストークンを生成します。
+     * 
+     * @param username ユーザ名
+     * @return 生成されたアクセストークン
+     */
     public String generateAccessToken(String username) {
         Map<String, Object> claims = new HashMap<>();
         claims.put(TOKEN_TYPE_CLAIM, ACCESS_TOKEN_TYPE);
@@ -90,6 +113,12 @@ public class JwtUtil {
         return createToken(claims, username, accessTokenExpiration);
     }
 
+    /**
+     * リフレッシュトークンを生成します。
+     * 
+     * @param username ユーザ名
+     * @return 生成されたリフレッシュトークン
+     */
     public String generateRefreshToken(String username) {
         Map<String, Object> claims = new HashMap<>();
         claims.put(TOKEN_TYPE_CLAIM, REFRESH_TOKEN_TYPE);

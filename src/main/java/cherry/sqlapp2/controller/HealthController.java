@@ -29,11 +29,22 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDateTime;
 
+/**
+ * アプリケーションのヘルスチェック機能を提供するコントローラクラス。
+ * システムの稼働状態や正常性を監視するためのエンドポイントを提供します。
+ * 負荷分散器やモニタリングツールによる死活監視に使用されます。
+ */
 @RestController
 @RequestMapping("/api")
 @Tag(name = "Health Check", description = "Application health monitoring endpoints")
 public class HealthController {
 
+    /**
+     * アプリケーションのヘルスチェックを実行します。
+     * システムの稼働状態と現在時刻を返します。
+     * 
+     * @return アプリケーションの健康状態を含むAPIレスポンス
+     */
     @Operation(
             summary = "Health check",
             description = "Check application health status"
