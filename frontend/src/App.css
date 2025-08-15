@@ -1965,6 +1965,128 @@ a:hover {
   opacity: 0.6;
 }
 
+/* Tab Navigation Styles */
+.query-builder .tab-navigation {
+  display: flex;
+  gap: 2px;
+  margin-bottom: 20px;
+  background: #f8f9fa;
+  padding: 4px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  overflow-x: auto;
+}
+
+.query-builder .tab-btn {
+  background: #e9ecef;
+  border: none;
+  padding: 12px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  color: #495057;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  min-width: 120px;
+  text-align: center;
+}
+
+.query-builder .tab-btn:hover {
+  background: #dee2e6;
+  color: #212529;
+}
+
+.query-builder .tab-btn.active {
+  background: #007bff;
+  color: white;
+  box-shadow: 0 2px 4px rgba(0, 123, 255, 0.3);
+}
+
+.query-builder .tab-content {
+  min-height: 400px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+/* Compact JOIN Condition Styles */
+.query-builder .join-condition.compact {
+  display: block;
+  background: #ffffff;
+  border: 1px solid #e9ecef;
+  border-radius: 6px;
+  padding: 12px;
+  margin-bottom: 12px;
+}
+
+.query-builder .join-condition-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.query-builder .join-condition-row:last-child {
+  margin-bottom: 0;
+}
+
+.query-builder .join-table-select {
+  min-width: 140px;
+  flex: 1;
+}
+
+.query-builder .join-column-select {
+  min-width: 120px;
+  flex: 1;
+}
+
+.query-builder .join-operator-select {
+  min-width: 80px;
+  font-weight: 600;
+  background: #f8f9fa;
+}
+
+.query-builder .join-dot {
+  color: #6c757d;
+  font-weight: bold;
+  margin: 0 4px;
+}
+
+.query-builder .remove-btn.compact {
+  margin-left: auto;
+  padding: 4px 8px;
+  font-size: 14px;
+  min-width: 28px;
+  height: 28px;
+}
+
+/* Responsive adjustments for tabs */
+@media screen and (max-width: 768px) {
+  .query-builder .tab-navigation {
+    flex-wrap: wrap;
+  }
+  
+  .query-builder .tab-btn {
+    min-width: 100px;
+    font-size: 12px;
+    padding: 10px 12px;
+  }
+  
+  .query-builder .join-condition-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .query-builder .join-table-select,
+  .query-builder .join-column-select {
+    min-width: 100%;
+  }
+}
+
 .saved-queries .query-header {
   display: flex;
   justify-content: space-between;

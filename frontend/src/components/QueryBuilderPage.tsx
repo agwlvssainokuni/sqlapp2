@@ -128,6 +128,7 @@ const QueryBuilderPage: React.FC = () => {
   const [validationErrors, setValidationErrors] = useState<string[]>([])
   const [isBuilding, setIsBuilding] = useState(false)
   const [aliasWarnings, setAliasWarnings] = useState<string[]>([])
+  const [activeTab, setActiveTab] = useState<string>('select')
 
   // Helper function to get available table references (table names + aliases)
   const getAvailableTableReferences = (): { value: string; label: string }[] => {
@@ -715,9 +716,53 @@ const QueryBuilderPage: React.FC = () => {
           </select>
         </div>
 
-        {/* SELECT Clause */}
-        <div className="section">
-          <h2>{t('queryBuilder.selectClause')}</h2>
+        {/* Tab Navigation */}
+        <div className="tab-navigation">
+          <button 
+            className={`tab-btn ${activeTab === 'select' ? 'active' : ''}`}
+            onClick={() => setActiveTab('select')}
+          >
+            {t('queryBuilder.selectClause')} ({queryStructure.selectColumns.length})
+          </button>
+          <button 
+            className={`tab-btn ${activeTab === 'from' ? 'active' : ''}`}
+            onClick={() => setActiveTab('from')}
+          >
+            {t('queryBuilder.fromClause')} ({queryStructure.fromTables.length})
+          </button>
+          <button 
+            className={`tab-btn ${activeTab === 'join' ? 'active' : ''}`}
+            onClick={() => setActiveTab('join')}
+          >
+            {t('queryBuilder.joinClause')} ({queryStructure.joins.length})
+          </button>
+          <button 
+            className={`tab-btn ${activeTab === 'where' ? 'active' : ''}`}
+            onClick={() => setActiveTab('where')}
+          >
+            {t('queryBuilder.whereClause')} ({queryStructure.whereConditions.length})
+          </button>
+          <button 
+            className={`tab-btn ${activeTab === 'orderby' ? 'active' : ''}`}
+            onClick={() => setActiveTab('orderby')}
+          >
+            {t('queryBuilder.orderByClause')} ({queryStructure.orderByColumns.length})
+          </button>
+          <button 
+            className={`tab-btn ${activeTab === 'limit' ? 'active' : ''}`}
+            onClick={() => setActiveTab('limit')}
+          >
+            {t('queryBuilder.limitClause')}
+          </button>
+        </div>
+
+        {/* Tab Content */}
+        <div className="tab-content">
+          
+          {/* SELECT Tab */}
+          {activeTab === 'select' && (
+            <div className="section">
+              <h2>{t('queryBuilder.selectClause')}</h2>
 
           {/* DISTINCT checkbox for entire SELECT */}
           <div className="clause-item">
@@ -793,12 +838,14 @@ const QueryBuilderPage: React.FC = () => {
               </div>
             </div>
           ))}
-          <button onClick={addSelectColumn} className="add-btn">{t('queryBuilder.addColumn')}</button>
-        </div>
+              <button onClick={addSelectColumn} className="add-btn">{t('queryBuilder.addColumn')}</button>
+            </div>
+          )}
 
-        {/* FROM Clause */}
-        <div className="section">
-          <h2>{t('queryBuilder.fromClause')}</h2>
+          {/* FROM Tab */}
+          {activeTab === 'from' && (
+            <div className="section">
+              <h2>{t('queryBuilder.fromClause')}</h2>
           {queryStructure.fromTables.map((table, index) => (
             <div key={index} className="clause-item">
               <div className="clause-item-content">
@@ -834,12 +881,14 @@ const QueryBuilderPage: React.FC = () => {
               </div>
             </div>
           ))}
-          <button onClick={addFromTable} className="add-btn">{t('queryBuilder.addTable')}</button>
-        </div>
+              <button onClick={addFromTable} className="add-btn">{t('queryBuilder.addTable')}</button>
+            </div>
+          )}
 
-        {/* JOIN Clause */}
-        <div className="section">
-          <h2>{t('queryBuilder.joinClause')}</h2>
+          {/* JOIN Tab */}
+          {activeTab === 'join' && (
+            <div className="section">
+              <h2>{t('queryBuilder.joinClause')}</h2>
           {queryStructure.joins.map((join, index) => (
             <div key={index} className="clause-item">
               <div className="clause-item-content">
@@ -881,12 +930,13 @@ const QueryBuilderPage: React.FC = () => {
               <div className="join-conditions">
                 <h4>{t('queryBuilder.joinConditions')}</h4>
                 {join.conditions.map((condition, condIndex) => (
-                  <div key={condIndex} className="join-condition">
-                    <div className="join-condition-content">
-                      {/* Left Table */}
+                  <div key={condIndex} className="join-condition compact">
+                    {/* First row: Left Table + Column */}
+                    <div className="join-condition-row">
                       <select
                         value={condition.leftTable}
                         onChange={(e) => updateJoinCondition(index, condIndex, 'leftTable', e.target.value)}
+                        className="join-table-select"
                       >
                         <option value="">{t('queryBuilder.selectTable')}</option>
                         {getAvailableTableReferences().map(ref => (
@@ -895,11 +945,11 @@ const QueryBuilderPage: React.FC = () => {
                           </option>
                         ))}
                       </select>
-
-                      {/* Left Column */}
+                      <span className="join-dot">.</span>
                       <select
                         value={condition.leftColumn}
                         onChange={(e) => updateJoinCondition(index, condIndex, 'leftColumn', e.target.value)}
+                        className="join-column-select"
                       >
                         <option value="">{t('queryBuilder.selectColumn')}</option>
                         {condition.leftTable && getColumnsForTableReference(condition.leftTable)
@@ -909,11 +959,14 @@ const QueryBuilderPage: React.FC = () => {
                             </option>
                           ))}
                       </select>
+                    </div>
 
-                      {/* Operator */}
+                    {/* Second row: Operator + Right Table + Column + Actions */}
+                    <div className="join-condition-row">
                       <select
                         value={condition.operator}
                         onChange={(e) => updateJoinCondition(index, condIndex, 'operator', e.target.value)}
+                        className="join-operator-select"
                       >
                         <option value="=">=</option>
                         <option value="<>">≠</option>
@@ -922,11 +975,10 @@ const QueryBuilderPage: React.FC = () => {
                         <option value="<=">≤</option>
                         <option value=">=">≥</option>
                       </select>
-
-                      {/* Right Table */}
                       <select
                         value={condition.rightTable}
                         onChange={(e) => updateJoinCondition(index, condIndex, 'rightTable', e.target.value)}
+                        className="join-table-select"
                       >
                         <option value="">{t('queryBuilder.selectTable')}</option>
                         {getAvailableTableReferences().map(ref => (
@@ -935,11 +987,11 @@ const QueryBuilderPage: React.FC = () => {
                           </option>
                         ))}
                       </select>
-
-                      {/* Right Column */}
+                      <span className="join-dot">.</span>
                       <select
                         value={condition.rightColumn}
                         onChange={(e) => updateJoinCondition(index, condIndex, 'rightColumn', e.target.value)}
+                        className="join-column-select"
                       >
                         <option value="">{t('queryBuilder.selectColumn')}</option>
                         {condition.rightTable && getColumnsForTableReference(condition.rightTable)
@@ -949,12 +1001,9 @@ const QueryBuilderPage: React.FC = () => {
                             </option>
                           ))}
                       </select>
-                    </div>
-
-                    <div className="join-condition-actions">
                       <button
                         onClick={() => removeJoinCondition(index, condIndex)}
-                        className="remove-btn"
+                        className="remove-btn compact"
                         title={t('queryBuilder.remove')}
                       >
                         ×
@@ -978,12 +1027,14 @@ const QueryBuilderPage: React.FC = () => {
               </div>
             </div>
           ))}
-          <button onClick={addJoin} className="add-btn">{t('queryBuilder.addJoin')}</button>
-        </div>
+              <button onClick={addJoin} className="add-btn">{t('queryBuilder.addJoin')}</button>
+            </div>
+          )}
 
-        {/* WHERE Clause */}
-        <div className="section">
-          <h2>{t('queryBuilder.whereClause')}</h2>
+          {/* WHERE Tab */}
+          {activeTab === 'where' && (
+            <div className="section">
+              <h2>{t('queryBuilder.whereClause')}</h2>
           {queryStructure.whereConditions.map((condition, index) => (
             <div key={index} className="clause-item">
               <div className="clause-item-content">
@@ -1070,12 +1121,14 @@ const QueryBuilderPage: React.FC = () => {
               </div>
             </div>
           ))}
-          <button onClick={addWhereCondition} className="add-btn">{t('queryBuilder.addCondition')}</button>
-        </div>
+              <button onClick={addWhereCondition} className="add-btn">{t('queryBuilder.addCondition')}</button>
+            </div>
+          )}
 
-        {/* ORDER BY Clause */}
-        <div className="section">
-          <h2>{t('queryBuilder.orderByClause')}</h2>
+          {/* ORDER BY Tab */}
+          {activeTab === 'orderby' && (
+            <div className="section">
+              <h2>{t('queryBuilder.orderByClause')}</h2>
           {queryStructure.orderByColumns.map((column, index) => (
             <div key={index} className="clause-item">
               <div className="clause-item-content">
@@ -1125,12 +1178,14 @@ const QueryBuilderPage: React.FC = () => {
               </div>
             </div>
           ))}
-          <button onClick={addOrderByColumn} className="add-btn">{t('queryBuilder.addOrderBy')}</button>
-        </div>
+              <button onClick={addOrderByColumn} className="add-btn">{t('queryBuilder.addOrderBy')}</button>
+            </div>
+          )}
 
-        {/* LIMIT */}
-        <div className="section">
-          <h2>{t('queryBuilder.limitClause')}</h2>
+          {/* LIMIT Tab */}
+          {activeTab === 'limit' && (
+            <div className="section">
+              <h2>{t('queryBuilder.limitClause')}</h2>
           <input
             type="number"
             placeholder={t('queryBuilder.limitOptional')}
@@ -1148,7 +1203,10 @@ const QueryBuilderPage: React.FC = () => {
               ...prev,
               offset: e.target.value ? parseInt(e.target.value) : undefined
             }))}
-          />
+              />
+            </div>
+          )}
+          
         </div>
 
         {/* Build Buttons */}
