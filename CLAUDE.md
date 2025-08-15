@@ -80,8 +80,9 @@ frontend/src/
 - **Records**: Use Java records for immutable DTOs where appropriate
 - **Security**: All controllers use explicit `Authentication` parameter injection
 - **Advanced SQL Processing**:
-  - `SqlReverseEngineeringService.parseComplexWhereExpression()` for OR/AND/IS NULL parsing
-  - `createWhereCondition()` helper for consistent condition creation
+  - `SqlReverseEngineeringService.parseComplexWhereExpression()` with BETWEEN-aware OR/AND parsing
+  - `splitRespectingBetween()` algorithm for protected BETWEEN clause handling
+  - `createBetweenWhereCondition()` for dual-value BETWEEN condition creation
   - JSqlParser 5.3 integration with enhanced error handling
 - **Testing**: Comprehensive unit and integration tests with @DisplayName in Japanese
 
@@ -123,6 +124,7 @@ frontend/src/
 - User 1:N SavedQuery (with sharing control)
 - User 1:N QueryHistory (execution tracking)
 - SavedQuery 1:N QueryHistory (saved query executions)
+- WhereCondition: Enhanced with minValue/maxValue for BETWEEN operator support
 
 ## Security Implementation
 
@@ -230,7 +232,9 @@ docker-compose -f docker-compose.yml -f docker-compose.monitoring.yml up -d
 - **QueryBuilder DISTINCT Issues**: Check both QueryStructure.isDistinct() global flag and individual SelectColumn.isDistinct() flags are processed in buildSelectClause()
 - **React Hooks Warnings**: Use useCallback for functions, useRef for parameter state management to prevent infinite loops
 - **Alias Synchronization Issues**: FROM/JOIN alias changes should automatically update all related SQL clauses via bidirectional synchronization
-- **WHERE Clause Parsing**: Complex OR/AND conditions and IS NULL operators require parseComplexWhereExpression method for proper reverse engineering
+- **WHERE Clause Parsing**: Complex OR/AND/BETWEEN mixed conditions require splitRespectingBetween() for accurate parsing
+- **BETWEEN Operator Issues**: Use minValue/maxValue fields instead of values array for dual-input BETWEEN conditions
+- **Reverse Engineering Failures**: Check OR conditions with BETWEEN clauses - ensure BETWEEN AND keywords are protected from OR splitting
 - **Test Integration Issues**: Use @SpringBootTest instead of @WebMvcTest for complex security integration scenarios to avoid JWT dependency conflicts
 - **CSS Module Issues**: Verify correct import paths for component-specific CSS files in src/styles/
 - **Authentication Flow**: Check initialization optimization - avoid unnecessary checkAuthStatus() calls during app startup
@@ -265,12 +269,14 @@ docker-compose -f docker-compose.yml -f docker-compose.monitoring.yml up -d
 
 ---
 
-**Status**: Enterprise-Grade Visual SQL Query Builder - Enhanced Authentication & Documentation + H2 Database Support
+**Status**: Enterprise-Grade Visual SQL Query Builder - BETWEEN Predicate + Complex WHERE Clause Parsing Complete
 **Last Updated**: 2025-08-15
 **Total Tests**: 358 (305 unit + 53 integration) - 100% success rate
-**Development Phases**: 42+ phases complete - JWT Token Management Optimization + CSS Architecture Refactoring + Production Ready
+**Development Phases**: 44+ phases complete - BETWEEN Operator + Multi-Condition WHERE Parsing + Production Ready
 **Recent Enhancements**: 
-- **Phase 23: H2 Database Support** - Complete H2 database integration with TCP server mode connectivity
+- **Phase 25: BETWEEN Predicate Complete Support** - Dual min/max input fields, proper SQL generation, reverse engineering
+- **Phase 26: Complex WHERE Clause Parsing** - OR+BETWEEN mixed conditions, BETWEEN AND keyword protection, accurate reverse engineering
+- **Enhanced Dashboard i18n** - Complete multilingual support for all feature descriptions including H2 database references
 - **Comprehensive Japanese Javadoc Documentation** - All Java classes and methods documented in Japanese
 - QueryBuilder DISTINCT functionality fix: Global distinct flag now properly processed in SQL generation
 - React Router 7.8.0 integration with proper component hierarchy (Router → AuthProvider → Routes)
