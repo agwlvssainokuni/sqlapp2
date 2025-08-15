@@ -17,6 +17,45 @@
 import type {ApiResponse, RefreshTokenResult} from '../types/api.ts'
 import {isTokenExpired, isTokenExpiringSoon} from './jwtUtils.ts'
 
+// Navigation callback for handling redirects
+let navigationCallback: ((path: string, options?: { replace?: boolean }) => void) | null = null
+
+/**
+ * Set navigation callback for React Router integration
+ * This should be called from a React component that has access to navigate
+ */
+export const setNavigationCallback = (callback: (path: string, options?: { replace?: boolean }) => void) => {
+  navigationCallback = callback
+}
+
+/**
+ * Save current location state for restoration after login
+ */
+const saveCurrentLocationState = () => {
+  try {
+    // Try to get React Router location from current URL
+    const currentPath = window.location.pathname + window.location.search + window.location.hash
+    
+    if (currentPath !== '/login') {
+      const locationState = {
+        pathname: window.location.pathname,
+        search: window.location.search,
+        hash: window.location.hash,
+        timestamp: Date.now()
+      }
+      sessionStorage.setItem('redirectAfterLogin', JSON.stringify(locationState))
+      console.log('Saved location state for redirect:', locationState)
+    }
+  } catch (error) {
+    console.warn('Failed to save location state:', error)
+    // Fallback to simple path storage
+    const currentPath = window.location.pathname + window.location.search
+    if (currentPath !== '/login') {
+      sessionStorage.setItem('redirectAfterLogin', currentPath)
+    }
+  }
+}
+
 // Global promise to prevent multiple simultaneous refresh attempts
 let refreshPromise: Promise<string | null> | null = null
 
@@ -206,11 +245,15 @@ const handleAuthenticationFailure = (reason: string) => {
   localStorage.removeItem('refreshToken')
   localStorage.removeItem('user')
   
-  // Use a more graceful redirect that preserves current location for later redirect
-  const currentPath = window.location.pathname + window.location.search
-  if (currentPath !== '/login') {
-    sessionStorage.setItem('redirectAfterLogin', currentPath)
-  }
+  // Save current location state for restoration after login
+  saveCurrentLocationState()
   
-  window.location.href = '/login'
+  // Use React Router navigation if available, otherwise fallback to window.location
+  if (navigationCallback) {
+    console.log('Using React Router navigation for login redirect')
+    navigationCallback('/login', { replace: true })
+  } else {
+    console.log('Falling back to window.location for login redirect')
+    window.location.href = '/login'
+  }
 }

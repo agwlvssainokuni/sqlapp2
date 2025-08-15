@@ -15,7 +15,8 @@
  */
 
 import React, {createContext, type ReactNode, useContext, useEffect, useState} from 'react'
-import {apiRequest, getValidAccessToken} from '../utils/api'
+import {useNavigate} from 'react-router-dom'
+import {apiRequest, getValidAccessToken, setNavigationCallback} from '../utils/api'
 import {isTokenExpired} from '../utils/jwtUtils'
 import type {ApiResponse, LoginResult, LoginUser} from '../types/api.ts'
 
@@ -38,6 +39,14 @@ interface AuthProviderProps {
 export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
   const [user, setUser] = useState<LoginUser | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const navigate = useNavigate()
+
+  // Set navigation callback for API utilities
+  useEffect(() => {
+    setNavigationCallback((path: string, options?: { replace?: boolean }) => {
+      navigate(path, options)
+    })
+  }, [navigate])
 
   const clearAuthData = () => {
     console.log('Clearing authentication data')

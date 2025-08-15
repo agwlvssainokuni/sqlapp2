@@ -37,11 +37,27 @@ const Login: React.FC = () => {
     try {
       await login(username, password)
       
-      // Check for redirect path stored by authentication failure handler
-      const redirectPath = sessionStorage.getItem('redirectAfterLogin')
-      if (redirectPath) {
+      // Enhanced redirect handling with full location state support
+      const redirectData = sessionStorage.getItem('redirectAfterLogin')
+      if (redirectData) {
         sessionStorage.removeItem('redirectAfterLogin')
-        navigate(redirectPath, { replace: true })
+        
+        try {
+          // Try to parse as full location state object
+          const locationState = JSON.parse(redirectData)
+          if (locationState.pathname) {
+            console.log('Restoring full location state:', locationState)
+            const fullPath = locationState.pathname + (locationState.search || '') + (locationState.hash || '')
+            navigate(fullPath, { replace: true })
+          } else {
+            // Fallback for old simple string format
+            navigate(redirectData, { replace: true })
+          }
+        } catch {
+          // Fallback if JSON parsing fails - treat as simple path
+          console.log('Using simple redirect path:', redirectData)
+          navigate(redirectData, { replace: true })
+        }
       } else {
         navigate('/dashboard', { replace: true })
       }
