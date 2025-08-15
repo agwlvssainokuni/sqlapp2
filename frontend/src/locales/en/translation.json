@@ -42,7 +42,13 @@
     "viewQueries": "View Saved Queries",
     "buildQuery": "Build Query",
     "viewHistory": "View History",
-    "browseSchema": "Browse Schema"
+    "browseSchema": "Browse Schema",
+    "sqlExecutionDescription": "Execute SQL queries with parameterized support against your configured databases.",
+    "connectionsDescription": "Manage your database connections for MySQL, PostgreSQL, MariaDB, and H2.",
+    "schemaViewerDescription": "Browse database schemas, tables, columns, and their relationships.",
+    "savedQueriesDescription": "Save, organize, and share your SQL queries with parameter templates.",
+    "queryHistoryDescription": "Track and analyze your SQL execution history with performance metrics.",
+    "queryBuilderDescription": "Build SQL queries visually with drag-and-drop interface and schema assistance."
   },
   "connections": {
     "title": "Database Connections",

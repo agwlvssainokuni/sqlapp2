@@ -35,32 +35,32 @@ const Dashboard: React.FC = () => {
         <div className="feature-cards">
           <div className="feature-card">
             <h3>{t('navigation.sqlExecution')}</h3>
-            <p>Execute SQL queries with parameterized support against your configured databases.</p>
+            <p>{t('dashboard.sqlExecutionDescription')}</p>
             <Link to="/sql" className="feature-link">{t('dashboard.executeSQL')}</Link>
           </div>
           <div className="feature-card">
             <h3>{t('navigation.connections')}</h3>
-            <p>Manage your database connections for MySQL, PostgreSQL, and MariaDB.</p>
+            <p>{t('dashboard.connectionsDescription')}</p>
             <Link to="/connections" className="feature-link">{t('dashboard.manageConnections')}</Link>
           </div>
           <div className="feature-card">
             <h3>{t('navigation.schemaViewer')}</h3>
-            <p>Browse database schemas, tables, columns, and their relationships.</p>
+            <p>{t('dashboard.schemaViewerDescription')}</p>
             <Link to="/schema" className="feature-link">{t('dashboard.browseSchema')}</Link>
           </div>
           <div className="feature-card">
             <h3>{t('navigation.savedQueries')}</h3>
-            <p>Save, organize, and share your SQL queries with parameter templates.</p>
+            <p>{t('dashboard.savedQueriesDescription')}</p>
             <Link to="/queries" className="feature-link">{t('dashboard.viewQueries')}</Link>
           </div>
           <div className="feature-card">
             <h3>{t('navigation.queryHistory')}</h3>
-            <p>Track and analyze your SQL execution history with performance metrics.</p>
+            <p>{t('dashboard.queryHistoryDescription')}</p>
             <Link to="/history" className="feature-link">{t('dashboard.viewHistory')}</Link>
           </div>
           <div className="feature-card">
             <h3>{t('navigation.queryBuilder')}</h3>
-            <p>Build SQL queries visually with drag-and-drop interface and schema assistance.</p>
+            <p>{t('dashboard.queryBuilderDescription')}</p>
             <Link to="/builder" className="feature-link">{t('dashboard.buildQuery')}</Link>
           </div>
         </div>

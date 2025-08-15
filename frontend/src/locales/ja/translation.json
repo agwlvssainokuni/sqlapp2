@@ -42,7 +42,13 @@
     "viewQueries": "保存済みクエリ表示",
     "buildQuery": "クエリ構築",
     "viewHistory": "履歴表示",
-    "browseSchema": "スキーマ参照"
+    "browseSchema": "スキーマ参照",
+    "sqlExecutionDescription": "設定されたデータベースに対してパラメータ化されたSQLクエリを実行します。",
+    "connectionsDescription": "MySQL、PostgreSQL、MariaDB、H2のデータベース接続を管理します。",
+    "schemaViewerDescription": "データベーススキーマ、テーブル、カラム、およびそれらの関係を参照します。",
+    "savedQueriesDescription": "パラメータテンプレート付きのSQLクエリを保存、整理、共有します。",
+    "queryHistoryDescription": "パフォーマンスメトリクスを含むSQL実行履歴を追跡・分析します。",
+    "queryBuilderDescription": "ドラッグアンドドロップインターフェースとスキーマ支援でSQLクエリを視覚的に構築します。"
   },
   "connections": {
     "title": "データベース接続",
