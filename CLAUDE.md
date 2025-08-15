@@ -9,7 +9,7 @@ SqlApp2 is a production-ready web-based SQL execution tool with enterprise-grade
 ### Technology Stack
 - **Backend**: Java 21 + Spring Boot 3.5.4, Spring Security, JPA/Hibernate, H2 Database
 - **Frontend**: React 19.1.1 + TypeScript 5.9.2, Vite 7.1.2, React Router 7.8.0, react-i18next v15.6.1
-- **Database Support**: MySQL, PostgreSQL, MariaDB (via JDBC)
+- **Database Support**: MySQL, PostgreSQL, MariaDB, H2 (via JDBC)
 - **Deployment**: Docker + Docker Compose, GitHub Actions CI/CD, Prometheus/Grafana monitoring
 
 ### Architecture
@@ -23,11 +23,12 @@ SqlApp2 is a production-ready web-based SQL execution tool with enterprise-grade
 ### Backend Structure
 ```
 src/main/java/cherry/sqlapp2/
-├── controller/         # REST APIs with OpenAPI documentation
-├── service/           # Business logic layer
-├── entity/            # JPA entities with validation
+├── controller/         # REST APIs with OpenAPI documentation and Japanese javadoc
+├── service/           # Business logic layer with comprehensive documentation
+├── entity/            # JPA entities with validation and Japanese javadoc
 ├── dto/               # Data Transfer Objects (many using Java records)
 ├── repository/        # Spring Data JPA repositories
+├── util/              # Utility classes (JWT, SQL analysis, parameter extraction)
 └── config/            # Security, JWT, database configuration
 ```
 
@@ -257,17 +258,20 @@ docker-compose -f docker-compose.yml -f docker-compose.monitoring.yml up -d
 
 ### General
 - Apache License header required on all source files
+- Comprehensive Japanese javadoc documentation on all Java classes and methods
 - Consistent error handling and logging
 - Security-first mindset in all implementations
 - Performance considerations for database operations
 
 ---
 
-**Status**: Enterprise-Grade Visual SQL Query Builder - Enhanced Authentication & Modular Architecture + Dependency Updates
+**Status**: Enterprise-Grade Visual SQL Query Builder - Enhanced Authentication & Documentation + H2 Database Support
 **Last Updated**: 2025-08-15
 **Total Tests**: 358 (305 unit + 53 integration) - 100% success rate
-**Development Phases**: 40+ phases complete - JWT Token Management Optimization + CSS Architecture Refactoring + Production Ready
+**Development Phases**: 42+ phases complete - JWT Token Management Optimization + CSS Architecture Refactoring + Production Ready
 **Recent Enhancements**: 
+- **Phase 23: H2 Database Support** - Complete H2 database integration with TCP server mode connectivity
+- **Comprehensive Japanese Javadoc Documentation** - All Java classes and methods documented in Japanese
 - QueryBuilder DISTINCT functionality fix: Global distinct flag now properly processed in SQL generation
 - React Router 7.8.0 integration with proper component hierarchy (Router → AuthProvider → Routes)
 - Enhanced CSS architecture with copyright headers and complete style organization
