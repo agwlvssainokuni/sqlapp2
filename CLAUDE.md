@@ -58,12 +58,14 @@ frontend/src/
 2. **Database Connectivity**: Multi-RDBMS support, encrypted connection storage, connection testing
 3. **Advanced Visual Query Builder**: 
    - Complete JOIN support (INNER/LEFT/RIGHT/FULL OUTER) with drag-and-drop interface
+   - **Enhanced BETWEEN Predicate Support**: Dual input fields (min/max values) with proper UI/backend integration
    - **Bidirectional Alias Synchronization**: FROM/JOIN alias changes auto-update across all SQL clauses
    - **Real-time Alias Conflict Detection**: Duplicate alias warnings with multi-language support
    - Complex multi-table queries with intelligent table reference management
 4. **Enhanced SQL Execution**: 
    - Direct SQL + Visual Query Builder with seamless integration
-   - **Advanced SQL Reverse Engineering**: Complex WHERE clause parsing (OR/AND operators, IS NULL/IS NOT NULL)
+   - **Advanced SQL Reverse Engineering**: Complex WHERE clause parsing with BETWEEN/OR/AND operator protection
+   - **Multi-Condition WHERE Clause Support**: Accurate parsing of mixed OR/BETWEEN conditions (e.g., `col1 IS NULL OR col2 BETWEEN 'a' AND 'b'`)
    - Parameterized queries with comprehensive result metadata
 5. **Integrated Workflow**: Seamless Create → Execute → Save workflow with React Router state management
 6. **Query Management**: Save/share queries, execution history, performance tracking
