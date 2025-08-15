@@ -890,120 +890,138 @@ const QueryBuilderPage: React.FC = () => {
             <div className="section">
               <h2>{t('queryBuilder.joinClause')}</h2>
           {queryStructure.joins.map((join, index) => (
-            <div key={index} className="clause-item">
-              <div className="clause-item-content">
-                {/* Join Type Selection */}
-                <select
-                  value={join.joinType}
-                  onChange={(e) => updateJoin(index, 'joinType', e.target.value)}
-                  className="join-type-select"
-                >
-                  <option value="INNER">INNER JOIN</option>
-                  <option value="LEFT">LEFT JOIN</option>
-                  <option value="RIGHT">RIGHT JOIN</option>
-                  <option value="FULL OUTER">FULL OUTER JOIN</option>
-                </select>
+            <div key={index} className="clause-item join-clause-vertical">
+              {/* JOIN Table Definition */}
+              <div className="join-table-definition">
+                <div className="join-table-row">
+                  {/* Join Type Selection */}
+                  <select
+                    value={join.joinType}
+                    onChange={(e) => updateJoin(index, 'joinType', e.target.value)}
+                    className="join-type-select"
+                  >
+                    <option value="INNER">INNER JOIN</option>
+                    <option value="LEFT">LEFT JOIN</option>
+                    <option value="RIGHT">RIGHT JOIN</option>
+                    <option value="FULL OUTER">FULL OUTER JOIN</option>
+                  </select>
 
-                {/* Join Table Selection */}
-                <select
-                  value={join.tableName}
-                  onChange={(e) => updateJoin(index, 'tableName', e.target.value)}
-                >
-                  <option value="">{t('queryBuilder.selectTable')}</option>
-                  {schemaInfo?.tables.map(t => (
-                    <option key={t.name} value={t.name}>
-                      {t.name}
-                    </option>
-                  ))}
-                </select>
+                  {/* Join Table Selection */}
+                  <select
+                    value={join.tableName}
+                    onChange={(e) => updateJoin(index, 'tableName', e.target.value)}
+                    className="join-table-select-main"
+                  >
+                    <option value="">{t('queryBuilder.selectTable')}</option>
+                    {schemaInfo?.tables.map(t => (
+                      <option key={t.name} value={t.name}>
+                        {t.name}
+                      </option>
+                    ))}
+                  </select>
 
-                {/* Join Table Alias */}
-                <input
-                  type="text"
-                  placeholder={t('queryBuilder.aliasOptional')}
-                  value={join.alias || ''}
-                  onChange={(e) => updateJoin(index, 'alias', e.target.value || '')}
-                />
+                  {/* Join Table Alias */}
+                  <input
+                    type="text"
+                    placeholder={t('queryBuilder.aliasOptional')}
+                    value={join.alias || ''}
+                    onChange={(e) => updateJoin(index, 'alias', e.target.value || '')}
+                    className="join-alias-input"
+                  />
+
+                  {/* Remove JOIN button */}
+                  <button
+                    onClick={() => removeJoin(index)}
+                    className="remove-btn join-remove"
+                    title={t('queryBuilder.remove')}
+                  >
+                    ×
+                  </button>
+                </div>
               </div>
 
-              {/* Join Conditions */}
-              <div className="join-conditions">
+              {/* Join Conditions - Moved below */}
+              <div className="join-conditions-vertical">
                 <h4>{t('queryBuilder.joinConditions')}</h4>
                 {join.conditions.map((condition, condIndex) => (
-                  <div key={condIndex} className="join-condition compact">
-                    {/* First row: Left Table + Column */}
-                    <div className="join-condition-row">
-                      <select
-                        value={condition.leftTable}
-                        onChange={(e) => updateJoinCondition(index, condIndex, 'leftTable', e.target.value)}
-                        className="join-table-select"
-                      >
-                        <option value="">{t('queryBuilder.selectTable')}</option>
-                        {getAvailableTableReferences().map(ref => (
-                          <option key={ref.value} value={ref.value}>
-                            {ref.label}
-                          </option>
-                        ))}
-                      </select>
-                      <span className="join-dot">.</span>
-                      <select
-                        value={condition.leftColumn}
-                        onChange={(e) => updateJoinCondition(index, condIndex, 'leftColumn', e.target.value)}
-                        className="join-column-select"
-                      >
-                        <option value="">{t('queryBuilder.selectColumn')}</option>
-                        {condition.leftTable && getColumnsForTableReference(condition.leftTable)
-                          .map(col => (
-                            <option key={col.name} value={col.name}>
-                              {col.name}
+                  <div key={condIndex} className="join-condition-vertical">
+                    <div className="condition-expression">
+                      <div className="condition-left">
+                        <select
+                          value={condition.leftTable}
+                          onChange={(e) => updateJoinCondition(index, condIndex, 'leftTable', e.target.value)}
+                          className="table-select"
+                        >
+                          <option value="">{t('queryBuilder.selectTable')}</option>
+                          {getAvailableTableReferences().map(ref => (
+                            <option key={ref.value} value={ref.value}>
+                              {ref.label}
                             </option>
                           ))}
-                      </select>
-                    </div>
+                        </select>
+                        <span className="dot">.</span>
+                        <select
+                          value={condition.leftColumn}
+                          onChange={(e) => updateJoinCondition(index, condIndex, 'leftColumn', e.target.value)}
+                          className="column-select"
+                        >
+                          <option value="">{t('queryBuilder.selectColumn')}</option>
+                          {condition.leftTable && getColumnsForTableReference(condition.leftTable)
+                            .map(col => (
+                              <option key={col.name} value={col.name}>
+                                {col.name}
+                              </option>
+                            ))}
+                        </select>
+                      </div>
 
-                    {/* Second row: Operator + Right Table + Column + Actions */}
-                    <div className="join-condition-row">
-                      <select
-                        value={condition.operator}
-                        onChange={(e) => updateJoinCondition(index, condIndex, 'operator', e.target.value)}
-                        className="join-operator-select"
-                      >
-                        <option value="=">=</option>
-                        <option value="<>">≠</option>
-                        <option value="<">{'<'}</option>
-                        <option value=">">{'>'}</option>
-                        <option value="<=">≤</option>
-                        <option value=">=">≥</option>
-                      </select>
-                      <select
-                        value={condition.rightTable}
-                        onChange={(e) => updateJoinCondition(index, condIndex, 'rightTable', e.target.value)}
-                        className="join-table-select"
-                      >
-                        <option value="">{t('queryBuilder.selectTable')}</option>
-                        {getAvailableTableReferences().map(ref => (
-                          <option key={ref.value} value={ref.value}>
-                            {ref.label}
-                          </option>
-                        ))}
-                      </select>
-                      <span className="join-dot">.</span>
-                      <select
-                        value={condition.rightColumn}
-                        onChange={(e) => updateJoinCondition(index, condIndex, 'rightColumn', e.target.value)}
-                        className="join-column-select"
-                      >
-                        <option value="">{t('queryBuilder.selectColumn')}</option>
-                        {condition.rightTable && getColumnsForTableReference(condition.rightTable)
-                          .map(col => (
-                            <option key={col.name} value={col.name}>
-                              {col.name}
+                      <div className="condition-operator">
+                        <select
+                          value={condition.operator}
+                          onChange={(e) => updateJoinCondition(index, condIndex, 'operator', e.target.value)}
+                          className="operator-select"
+                        >
+                          <option value="=">=</option>
+                          <option value="<>">≠</option>
+                          <option value="<">{'<'}</option>
+                          <option value=">">{'>'}</option>
+                          <option value="<=">≤</option>
+                          <option value=">=">≥</option>
+                        </select>
+                      </div>
+
+                      <div className="condition-right">
+                        <select
+                          value={condition.rightTable}
+                          onChange={(e) => updateJoinCondition(index, condIndex, 'rightTable', e.target.value)}
+                          className="table-select"
+                        >
+                          <option value="">{t('queryBuilder.selectTable')}</option>
+                          {getAvailableTableReferences().map(ref => (
+                            <option key={ref.value} value={ref.value}>
+                              {ref.label}
                             </option>
                           ))}
-                      </select>
+                        </select>
+                        <span className="dot">.</span>
+                        <select
+                          value={condition.rightColumn}
+                          onChange={(e) => updateJoinCondition(index, condIndex, 'rightColumn', e.target.value)}
+                          className="column-select"
+                        >
+                          <option value="">{t('queryBuilder.selectColumn')}</option>
+                          {condition.rightTable && getColumnsForTableReference(condition.rightTable)
+                            .map(col => (
+                              <option key={col.name} value={col.name}>
+                                {col.name}
+                              </option>
+                            ))}
+                        </select>
+                      </div>
+
                       <button
                         onClick={() => removeJoinCondition(index, condIndex)}
-                        className="remove-btn compact"
+                        className="remove-btn condition-remove"
                         title={t('queryBuilder.remove')}
                       >
                         ×
@@ -1013,16 +1031,6 @@ const QueryBuilderPage: React.FC = () => {
                 ))}
                 <button onClick={() => addJoinCondition(index)} className="add-btn-small">
                   {t('queryBuilder.addCondition')}
-                </button>
-              </div>
-
-              <div className="clause-item-actions">
-                <button
-                  onClick={() => removeJoin(index)}
-                  className="remove-btn"
-                  title={t('queryBuilder.remove')}
-                >
-                  ×
                 </button>
               </div>
             </div>
