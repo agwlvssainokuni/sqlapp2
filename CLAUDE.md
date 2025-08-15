@@ -35,14 +35,25 @@ src/main/java/cherry/sqlapp2/
 ```
 frontend/src/
 ├── components/        # Page components (ending with "Page.tsx")
-├── context/          # React context (AuthContext)
+├── context/          # React context (AuthContext with enhanced token management)
 ├── locales/          # i18n translation files (en/, ja/)
+├── styles/           # Modular CSS architecture (8 files)
+│   ├── common.css    # Layout, authentication, pagination
+│   ├── Dashboard.css, SqlExecution.css, QueryBuilder.css
+│   ├── ConnectionManagement.css, SchemaViewer.css
+│   └── QueryHistory.css, SavedQueries.css
 ├── utils/            # Utility functions and API helpers
+│   ├── api.ts        # Enhanced JWT token management
+│   └── jwtUtils.ts   # Comprehensive token validation
 └── i18n.ts           # Internationalization configuration
 ```
 
 ### Core Features
-1. **User Management**: JWT authentication, user registration/login, profile management
+1. **Enhanced User Management**: 
+   - JWT authentication with proactive token refresh (30s buffer)
+   - Smart 401 handling with double-refresh prevention
+   - Graceful session preservation and automatic page restoration
+   - User registration/login with optimized authentication flow
 2. **Database Connectivity**: Multi-RDBMS support, encrypted connection storage, connection testing
 3. **Advanced Visual Query Builder**: 
    - Complete JOIN support (INNER/LEFT/RIGHT/FULL OUTER) with drag-and-drop interface
@@ -57,6 +68,7 @@ frontend/src/
 6. **Query Management**: Save/share queries, execution history, performance tracking
 7. **Schema Browsing**: Table/column metadata display, auto-completion support
 8. **Internationalization**: English/Japanese with real-time language switching and context-aware messaging
+9. **Modular Architecture**: 8-file CSS structure for improved maintainability and component isolation
 
 ## Development Guidelines
 
@@ -81,7 +93,14 @@ frontend/src/
   - Use `useCallback` for alias synchronization functions to prevent infinite re-renders
   - Implement `checkAliasConflicts` for real-time duplicate detection
   - CASCADE updates across FROM/JOIN/SELECT/WHERE/ORDER BY clauses for seamless user experience
-- **Styling**: CSS3 with component-based approach, responsive design
+- **Styling**: Modular CSS architecture with component-specific files
+  - `src/styles/common.css` - Layout, authentication, pagination
+  - `src/styles/[Component].css` - Component-specific styles
+  - 8-file structure for improved maintainability and code organization
+- **Authentication Integration**: 
+  - Token refresh handling with `getValidAccessToken()` 
+  - Automatic redirect preservation via `sessionStorage`
+  - Type-safe JWT utilities with comprehensive error handling
 
 ### API Standards
 - **Authentication**: Bearer JWT tokens in Authorization header
@@ -106,17 +125,28 @@ frontend/src/
 
 ## Security Implementation
 
-### Authentication Flow
+### Enhanced Authentication Flow
 1. User login → JWT access token + refresh token generation
-2. Frontend stores tokens in AuthContext
-3. API requests include Bearer token in Authorization header
-4. JWT validation via Spring Security filter chain
+2. Frontend stores tokens in localStorage with AuthContext management
+3. **Proactive Token Refresh**: Automatic refresh 30 seconds before expiry
+4. **Smart 401 Handling**: Prevention of double refresh attempts with tokenWasRefreshed tracking
+5. API requests include Bearer token in Authorization header
+6. JWT validation via Spring Security filter chain
+7. **Graceful Redirect**: Session preservation with automatic return to original page after login
+
+### Advanced Token Management
+- **Two-Tier Refresh Strategy**: Proactive (30s buffer) + Reactive (401 response)
+- **Race Condition Prevention**: Global refreshPromise to avoid simultaneous refresh attempts
+- **Token Validation**: Client-side JWT expiry checking with comprehensive error handling
+- **Authentication State**: Optimized initialization without unnecessary API calls
+- **Secure Storage**: localStorage with automatic cleanup on authentication failure
 
 ### Data Protection
 - **Database passwords**: AES-256-GCM encryption
 - **SQL injection prevention**: PreparedStatement usage
 - **User isolation**: Connection and query separation by user ID
 - **HTTPS enforcement**: SSL/TLS in production environments
+- **Token Security**: Automatic refresh, expiry validation, and secure cleanup
 
 ## Testing Strategy
 
@@ -171,8 +201,10 @@ docker-compose -f docker-compose.yml -f docker-compose.monitoring.yml up -d
 2. Use TypeScript strict typing
 3. Implement i18n with useTranslation hook
 4. Follow existing patterns for API calls and error handling
-5. Ensure responsive design compatibility
-6. Add appropriate testing coverage
+5. Create component-specific CSS file in `src/styles/ComponentName.css`
+6. Import CSS in App.tsx following modular structure
+7. Ensure responsive design compatibility
+8. Add appropriate testing coverage
 
 ### Database Schema Changes
 1. Update JPA entities with proper validation annotations
@@ -184,7 +216,11 @@ docker-compose -f docker-compose.yml -f docker-compose.monitoring.yml up -d
 ## Troubleshooting
 
 ### Common Issues
-- **JWT Token Issues**: Check token expiration, refresh token flow
+- **JWT Token Issues**: 
+  - Check token expiration, refresh token flow
+  - Verify proactive refresh (30s buffer) is working
+  - Monitor double refresh prevention with tokenWasRefreshed flag
+  - Check sessionStorage for redirect preservation
 - **Database Connection**: Verify encryption/decryption, JDBC driver availability
 - **CORS Errors**: Update SecurityConfig for new origins
 - **i18n Missing Keys**: Add translations to both en/ and ja/ files
@@ -194,6 +230,8 @@ docker-compose -f docker-compose.yml -f docker-compose.monitoring.yml up -d
 - **Alias Synchronization Issues**: FROM/JOIN alias changes should automatically update all related SQL clauses via bidirectional synchronization
 - **WHERE Clause Parsing**: Complex OR/AND conditions and IS NULL operators require parseComplexWhereExpression method for proper reverse engineering
 - **Test Integration Issues**: Use @SpringBootTest instead of @WebMvcTest for complex security integration scenarios to avoid JWT dependency conflicts
+- **CSS Module Issues**: Verify correct import paths for component-specific CSS files in src/styles/
+- **Authentication Flow**: Check initialization optimization - avoid unnecessary checkAuthStatus() calls during app startup
 
 ### Development Tools
 - **H2 Console**: Available at `/h2-console` (dev environment only)
@@ -210,10 +248,11 @@ docker-compose -f docker-compose.yml -f docker-compose.monitoring.yml up -d
 - Minimize `@Deprecated` usage, clean up legacy code promptly
 
 ### TypeScript/React
-- Strict TypeScript configuration
-- Functional components with hooks
+- Strict TypeScript configuration with comprehensive type safety
+- Functional components with hooks and proper dependency arrays
 - Semicolon-omitted style (Vite default)
-- CSS-in-JS or modular CSS approach
+- Modular CSS approach with 8-file component-specific structure
+- Type-only imports for enhanced build optimization
 
 ### General
 - Apache License header required on all source files
@@ -223,7 +262,12 @@ docker-compose -f docker-compose.yml -f docker-compose.monitoring.yml up -d
 
 ---
 
-**Status**: Enterprise-Grade Visual SQL Query Builder - Advanced Alias Synchronization & SQL Reverse Engineering
+**Status**: Enterprise-Grade Visual SQL Query Builder - Enhanced Authentication & Modular Architecture
 **Last Updated**: 2025-08-15
 **Total Tests**: 358 (305 unit + 53 integration) - 100% success rate
-**Development Phases**: 38 phases complete - Complete Bidirectional Synchronization + Advanced SQL Parsing + Production Ready
+**Development Phases**: 40 phases complete - JWT Token Management Optimization + CSS Architecture Refactoring + Production Ready
+**Recent Enhancements**: 
+- Advanced JWT token refresh with double-refresh prevention
+- Modular CSS architecture (8-file structure) for improved maintainability
+- Enhanced authentication flow with graceful session preservation
+- Comprehensive error handling and debugging improvements
