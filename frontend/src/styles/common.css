@@ -1,12 +1,41 @@
+/*
+ * Copyright 2025 agwlvssainokuni
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 /* Common Layout, Authentication Forms, and Pagination Styles */
 
 /* Responsive Design */
+
+@media screen and (min-width: 1250px) {
+  .app-layout {
+    width: 1250px;
+    align-content: center;
+  }
+}
+
+@media screen and (max-width: 1249px) {
+  .app-layout {
+    width: 100%;
+    align-content: center;
+  }
+}
+
 @media screen and (max-width: 768px) {
   .header-content {
-    padding: 16px;
     flex-direction: column;
     gap: 16px;
-    text-align: center;
   }
 
   .header-nav {
@@ -15,12 +44,7 @@
     gap: 8px;
   }
 
-  .content-container {
-    padding: 16px;
-  }
-
-  .page-title {
-    font-size: 24px;
+  .page-header .page-title {
     text-align: center;
   }
 
@@ -29,26 +53,6 @@
     flex-direction: column;
     gap: 16px;
     text-align: center;
-  }
-}
-
-@media screen and (min-width: 769px) and (max-width: 1023px) {
-  .app-layout {
-    width: 768px;
-  }
-}
-
-@media screen and (min-width: 1024px) and (max-width: 1249px) {
-  .app-layout {
-    width: 1050px;
-    align-content: center;
-  }
-}
-
-@media screen and (min-width: 1250px) {
-  .app-layout {
-    width: 1250px;
-    align-content: center;
   }
 }
 
@@ -62,7 +66,7 @@
 
 /* Header Styles */
 .app-header {
-  padding: 0;
+  padding: 16px;
   background-color: #007bff;
   color: white;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -72,8 +76,6 @@
 }
 
 .header-content {
-  margin: 0 auto;
-  padding: 16px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -81,7 +83,7 @@
 
 .header-left .app-title {
   margin: 0;
-  font-size: 1.5rem;
+  font-size: 24px;
   font-weight: bold;
   color: white;
 }
@@ -89,7 +91,6 @@
 .header-nav {
   display: flex;
   gap: 16px;
-  align-items: center;
 }
 
 .header-nav .nav-link,
@@ -101,59 +102,42 @@
   border-radius: 4px;
   cursor: pointer;
   font-size: 14px;
-  text-decoration: none !important;
 }
 
 .header-nav .nav-link:hover,
 .header-nav .logout-btn:hover {
   background-color: rgba(255, 255, 255, 0.1);
   border-color: rgba(255, 255, 255, 0.5);
-  text-decoration: none !important;
 }
 
 /* Main Content */
-.main-content {
-  width: 100%;
+.app-main {
+  padding: 16px;
   flex: 1;
   display: flex;
   flex-direction: column;
 }
 
-.content-container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 16px;
-  width: 100%;
-  box-sizing: border-box;
-}
-
 /* Page Header */
 .page-header {
+  padding-bottom: 8px;
   margin-bottom: 16px;
-  padding-bottom: 16px;
   border-bottom: 2px solid #e9ecef;
 }
 
-.page-title {
+.page-header .page-title {
   margin: 0;
-  font-size: 2rem;
-  font-weight: 600;
-  color: #333;
-  text-align: left;
+  font-size: 28px;
+  font-weight: bold;
 }
 
 /* Footer Styles */
 .app-footer {
+  padding: 16px;
   background-color: #343a40;
-  color: #fff;
-  padding: 1rem 0;
-  margin-top: auto;
 }
 
 .footer-content {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 16px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -161,7 +145,7 @@
 
 .footer-left .copyright {
   margin: 0;
-  font-size: 0.9rem;
+  font-size: 16px;
   color: #adb5bd;
 }
 
@@ -179,50 +163,12 @@
   background-color: #495057;
   color: white;
   border: 1px solid #6c757d;
-  padding: 0.25rem 0.5rem;
+  padding: 4px 8px;
   border-radius: 4px;
-  font-size: 0.8rem;
+  font-size: 12px;
 }
 
 .footer-right .language-switcher .language-select:focus {
-  outline: none;
-  border-color: #007bff;
-  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
-}
-
-/* Links */
-a {
-  color: #007bff;
-  text-decoration: none;
-}
-
-a:hover {
-  color: #0056b3;
-  text-decoration: underline;
-}
-
-/* Language Switcher */
-.language-switcher {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.language-switcher label {
-  font-size: 14px;
-  font-weight: 500;
-  margin: 0;
-}
-
-.language-select {
-  padding: 6px 8px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  background: white;
-  font-size: 14px;
-}
-
-.language-select:focus {
   outline: none;
   border-color: #007bff;
   box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
@@ -435,26 +381,26 @@ button:disabled {
     padding: 16px;
     gap: 12px;
   }
-  
+
   .pagination-info {
     font-size: 13px;
     gap: 12px;
   }
-  
+
   .pagination-settings {
     gap: 12px;
   }
-  
+
   .pagination-controls {
     gap: 4px;
   }
-  
+
   .pagination-button {
     padding: 6px 8px;
     font-size: 13px;
     min-width: 32px;
   }
-  
+
   .pagination-jump input {
     width: 50px;
     font-size: 13px;

@@ -27,8 +27,8 @@ const Layout: React.FC<LayoutProps> = ({children, title}) => {
   return (
     <div className="app-layout">
       <Header/>
-      <main className="main-content">
-        <div className="content-container">
+      <main className="app-main">
+        <div className="main-content">
           {title && (
             <div className="page-header">
               <h1 className="page-title">{title}</h1>

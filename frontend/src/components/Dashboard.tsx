@@ -27,7 +27,7 @@ const Dashboard: React.FC = () => {
   return (
     <Layout title={t('dashboard.title')}>
       <div className="dashboard-welcome">
-        <p>{t('dashboard.welcome')}, <strong>{user?.username}</strong></p>
+        <div>{t('dashboard.welcome')}, <strong>{user?.username}</strong></div>
       </div>
 
       <section className="dashboard-content">

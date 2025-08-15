@@ -15,13 +15,12 @@
  */
 
 import React, {useCallback, useEffect, useState} from 'react'
-import {useLocation, useNavigate} from 'react-router-dom'
 import type {Location} from 'react-router-dom'
+import {useLocation, useNavigate} from 'react-router-dom'
 import {useTranslation} from 'react-i18next'
 import {useAuth} from '../context/AuthContext'
 import type {DatabaseConnection, TableInfo as ApiTableInfo} from '../types/api'
 import Layout from './Layout'
-
 
 interface SchemaInfo {
   tables: LocalTableInfo[]
@@ -31,7 +30,6 @@ interface LocalTableInfo {
   name: string
   columns: { name: string }[]
 }
-
 
 interface SelectColumn {
   tableName: string
@@ -174,7 +172,7 @@ const QueryBuilderPage: React.FC = () => {
         const alias = table.alias.trim()
         if (alias) {
           if (usedAliases.has(alias) || usedTableNames.has(alias)) {
-            warnings.push(t('queryBuilder.duplicateAlias', { alias, location: `FROM[${index + 1}]` }))
+            warnings.push(t('queryBuilder.duplicateAlias', {alias, location: `FROM[${index + 1}]`}))
           }
           usedAliases.add(alias)
         }
@@ -190,14 +188,14 @@ const QueryBuilderPage: React.FC = () => {
         const alias = join.alias.trim()
         if (alias) {
           if (usedAliases.has(alias) || usedTableNames.has(alias)) {
-            warnings.push(t('queryBuilder.duplicateAlias', { alias, location: `JOIN[${index + 1}]` }))
+            warnings.push(t('queryBuilder.duplicateAlias', {alias, location: `JOIN[${index + 1}]`}))
           }
           usedAliases.add(alias)
         }
       }
       if (join.tableName && !join.alias) {
         if (usedTableNames.has(join.tableName) || usedAliases.has(join.tableName)) {
-          warnings.push(t('queryBuilder.duplicateTable', { table: join.tableName, location: `JOIN[${index + 1}]` }))
+          warnings.push(t('queryBuilder.duplicateTable', {table: join.tableName, location: `JOIN[${index + 1}]`}))
         }
         usedTableNames.add(join.tableName)
       }
@@ -282,21 +280,21 @@ const QueryBuilderPage: React.FC = () => {
       console.log('parseAndLoadSQL: Starting with SQL:', sql, 'connectionId:', connectionId) // Debug log
       setIsBuilding(true)
       setValidationErrors([])
-      
+
       // Set connection first
       setSelectedConnectionId(connectionId)
-      
+
       // Parse SQL using the new API
       console.log('parseAndLoadSQL: Making API request to /api/query-builder/parse') // Debug log
       const response = await apiRequest('/api/query-builder/parse', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({ sql })
+        body: JSON.stringify({sql})
       })
 
       console.log('parseAndLoadSQL: API response:', response) // Debug log
       const result = response.data as { success: boolean; queryStructure?: QueryStructure; errorMessage?: string }
-      
+
       if (result.success && result.queryStructure) {
         // Successfully parsed - load the structure
         console.log('parseAndLoadSQL: Successfully parsed, loading structure:', result.queryStructure) // Debug log
@@ -333,14 +331,20 @@ const QueryBuilderPage: React.FC = () => {
 
   // Handle SQL parsing from other pages (React Router state)
   useEffect(() => {
-    const state = (location as Location<{ sql?: string; connectionId?: number; mode?: string; savedQueryId?: number; savedQueryName?: string }>).state
+    const state = (location as Location<{
+      sql?: string;
+      connectionId?: number;
+      mode?: string;
+      savedQueryId?: number;
+      savedQueryName?: string
+    }>).state
     console.log('QueryBuilderPage: location.state =', state) // Debug log
     console.log('QueryBuilderPage: location.pathname =', location.pathname) // Debug log
-    
+
     if (state?.mode === 'edit' && state?.sql && state?.connectionId) {
       console.log('QueryBuilderPage: Starting SQL parsing for:', state.sql) // Debug log
       parseAndLoadSQL(state.sql, state.connectionId)
-      
+
       // Don't clear state immediately to ensure it's processed
       setTimeout(() => {
         if (location.state) {
@@ -389,7 +393,7 @@ const QueryBuilderPage: React.FC = () => {
   const executeGeneratedQuery = () => {
     if (!generatedSql || !selectedConnectionId) {
       setValidationErrors([
-        !selectedConnectionId 
+        !selectedConnectionId
           ? t('queryBuilder.pleaseSelectConnection')
           : t('queryBuilder.pleaseGenerateFirst')
       ])
@@ -407,7 +411,7 @@ const QueryBuilderPage: React.FC = () => {
   const saveGeneratedQuery = () => {
     if (!generatedSql || !selectedConnectionId) {
       setValidationErrors([
-        !selectedConnectionId 
+        !selectedConnectionId
           ? t('queryBuilder.pleaseSelectConnection')
           : t('queryBuilder.pleaseGenerateFirst')
       ])
@@ -719,37 +723,37 @@ const QueryBuilderPage: React.FC = () => {
 
         {/* Tab Navigation */}
         <div className="tab-navigation">
-          <button 
+          <button
             className={`tab-btn ${activeTab === 'select' ? 'active' : ''}`}
             onClick={() => setActiveTab('select')}
           >
             {t('queryBuilder.selectClause')} ({queryStructure.selectColumns.length})
           </button>
-          <button 
+          <button
             className={`tab-btn ${activeTab === 'from' ? 'active' : ''}`}
             onClick={() => setActiveTab('from')}
           >
             {t('queryBuilder.fromClause')} ({queryStructure.fromTables.length})
           </button>
-          <button 
+          <button
             className={`tab-btn ${activeTab === 'join' ? 'active' : ''}`}
             onClick={() => setActiveTab('join')}
           >
             {t('queryBuilder.joinClause')} ({queryStructure.joins.length})
           </button>
-          <button 
+          <button
             className={`tab-btn ${activeTab === 'where' ? 'active' : ''}`}
             onClick={() => setActiveTab('where')}
           >
             {t('queryBuilder.whereClause')} ({queryStructure.whereConditions.length})
           </button>
-          <button 
+          <button
             className={`tab-btn ${activeTab === 'orderby' ? 'active' : ''}`}
             onClick={() => setActiveTab('orderby')}
           >
             {t('queryBuilder.orderByClause')} ({queryStructure.orderByColumns.length})
           </button>
-          <button 
+          <button
             className={`tab-btn ${activeTab === 'limit' ? 'active' : ''}`}
             onClick={() => setActiveTab('limit')}
           >
@@ -759,86 +763,86 @@ const QueryBuilderPage: React.FC = () => {
 
         {/* Tab Content */}
         <div className="tab-content">
-          
+
           {/* SELECT Tab */}
           {activeTab === 'select' && (
             <div className="section">
               <h2>{t('queryBuilder.selectClause')}</h2>
 
-          {/* DISTINCT checkbox for entire SELECT */}
-          <div className="clause-item">
-            <label>
-              <input
-                type="checkbox"
-                checked={queryStructure.distinct}
-                onChange={(e) => setQueryStructure(prev => ({
-                  ...prev,
-                  distinct: e.target.checked
-                }))}
-              />
-              {t('queryBuilder.distinct')}
-            </label>
-          </div>
-          {queryStructure.selectColumns.map((column, index) => (
-            <div key={index} className="clause-item">
-              <div className="clause-item-content">
-                <select
-                  value={column.tableName}
-                  onChange={(e) => updateSelectColumn(index, 'tableName', e.target.value)}
-                >
-                  <option value="">{t('queryBuilder.selectTable')}</option>
-                  {getAvailableTableReferences().map(ref => (
-                    <option key={ref.value} value={ref.value}>
-                      {ref.label}
-                    </option>
-                  ))}
-                </select>
-
-                <select
-                  value={column.columnName}
-                  onChange={(e) => updateSelectColumn(index, 'columnName', e.target.value)}
-                >
-                  <option value="">{t('queryBuilder.selectColumn')}</option>
-                  <option value="*">{t('queryBuilder.allColumns')}</option>
-                  {column.tableName && getColumnsForTableReference(column.tableName)
-                    .map(col => (
-                      <option key={col.name} value={col.name}>
-                        {col.name}
-                      </option>
-                    ))}
-                </select>
-
-                <select
-                  value={column.aggregateFunction || ''}
-                  onChange={(e) => updateSelectColumn(index, 'aggregateFunction', e.target.value || '')}
-                >
-                  <option value="">{t('queryBuilder.noFunction')}</option>
-                  <option value="COUNT">COUNT</option>
-                  <option value="SUM">SUM</option>
-                  <option value="AVG">AVG</option>
-                  <option value="MAX">MAX</option>
-                  <option value="MIN">MIN</option>
-                </select>
-
-                <input
-                  type="text"
-                  placeholder={t('queryBuilder.aliasOptional')}
-                  value={column.alias || ''}
-                  onChange={(e) => updateSelectColumn(index, 'alias', e.target.value || '')}
-                />
+              {/* DISTINCT checkbox for entire SELECT */}
+              <div className="clause-item">
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={queryStructure.distinct}
+                    onChange={(e) => setQueryStructure(prev => ({
+                      ...prev,
+                      distinct: e.target.checked
+                    }))}
+                  />
+                  {t('queryBuilder.distinct')}
+                </label>
               </div>
+              {queryStructure.selectColumns.map((column, index) => (
+                <div key={index} className="clause-item">
+                  <div className="clause-item-content">
+                    <select
+                      value={column.tableName}
+                      onChange={(e) => updateSelectColumn(index, 'tableName', e.target.value)}
+                    >
+                      <option value="">{t('queryBuilder.selectTable')}</option>
+                      {getAvailableTableReferences().map(ref => (
+                        <option key={ref.value} value={ref.value}>
+                          {ref.label}
+                        </option>
+                      ))}
+                    </select>
 
-              <div className="clause-item-actions">
-                <button
-                  onClick={() => removeSelectColumn(index)}
-                  className="remove-btn"
-                  title={t('queryBuilder.remove')}
-                >
-                  ×
-                </button>
-              </div>
-            </div>
-          ))}
+                    <select
+                      value={column.columnName}
+                      onChange={(e) => updateSelectColumn(index, 'columnName', e.target.value)}
+                    >
+                      <option value="">{t('queryBuilder.selectColumn')}</option>
+                      <option value="*">{t('queryBuilder.allColumns')}</option>
+                      {column.tableName && getColumnsForTableReference(column.tableName)
+                        .map(col => (
+                          <option key={col.name} value={col.name}>
+                            {col.name}
+                          </option>
+                        ))}
+                    </select>
+
+                    <select
+                      value={column.aggregateFunction || ''}
+                      onChange={(e) => updateSelectColumn(index, 'aggregateFunction', e.target.value || '')}
+                    >
+                      <option value="">{t('queryBuilder.noFunction')}</option>
+                      <option value="COUNT">COUNT</option>
+                      <option value="SUM">SUM</option>
+                      <option value="AVG">AVG</option>
+                      <option value="MAX">MAX</option>
+                      <option value="MIN">MIN</option>
+                    </select>
+
+                    <input
+                      type="text"
+                      placeholder={t('queryBuilder.aliasOptional')}
+                      value={column.alias || ''}
+                      onChange={(e) => updateSelectColumn(index, 'alias', e.target.value || '')}
+                    />
+                  </div>
+
+                  <div className="clause-item-actions">
+                    <button
+                      onClick={() => removeSelectColumn(index)}
+                      className="remove-btn"
+                      title={t('queryBuilder.remove')}
+                    >
+                      ×
+                    </button>
+                  </div>
+                </div>
+              ))}
               <button onClick={addSelectColumn} className="add-btn">{t('queryBuilder.addColumn')}</button>
             </div>
           )}
@@ -847,41 +851,41 @@ const QueryBuilderPage: React.FC = () => {
           {activeTab === 'from' && (
             <div className="section">
               <h2>{t('queryBuilder.fromClause')}</h2>
-          {queryStructure.fromTables.map((table, index) => (
-            <div key={index} className="clause-item">
-              <div className="clause-item-content">
-                <select
-                  value={table.tableName}
-                  onChange={(e) => updateFromTable(index, 'tableName', e.target.value)}
-                >
-                  <option value="">{t('queryBuilder.selectTable')}</option>
-                  {schemaInfo?.tables.map(t => (
-                    <option key={t.name} value={t.name}>
-                      {t.name}
-                    </option>
-                  ))}
-                </select>
+              {queryStructure.fromTables.map((table, index) => (
+                <div key={index} className="clause-item">
+                  <div className="clause-item-content">
+                    <select
+                      value={table.tableName}
+                      onChange={(e) => updateFromTable(index, 'tableName', e.target.value)}
+                    >
+                      <option value="">{t('queryBuilder.selectTable')}</option>
+                      {schemaInfo?.tables.map(t => (
+                        <option key={t.name} value={t.name}>
+                          {t.name}
+                        </option>
+                      ))}
+                    </select>
 
-                <input
-                  type="text"
-                  placeholder={t('queryBuilder.aliasOptional')}
-                  value={table.alias || ''}
-                  onChange={(e) => updateFromTable(index, 'alias', e.target.value || '')}
-                />
+                    <input
+                      type="text"
+                      placeholder={t('queryBuilder.aliasOptional')}
+                      value={table.alias || ''}
+                      onChange={(e) => updateFromTable(index, 'alias', e.target.value || '')}
+                    />
 
-              </div>
+                  </div>
 
-              <div className="clause-item-actions">
-                <button
-                  onClick={() => removeFromTable(index)}
-                  className="remove-btn"
-                  title={t('queryBuilder.remove')}
-                >
-                  ×
-                </button>
-              </div>
-            </div>
-          ))}
+                  <div className="clause-item-actions">
+                    <button
+                      onClick={() => removeFromTable(index)}
+                      className="remove-btn"
+                      title={t('queryBuilder.remove')}
+                    >
+                      ×
+                    </button>
+                  </div>
+                </div>
+              ))}
               <button onClick={addFromTable} className="add-btn">{t('queryBuilder.addTable')}</button>
             </div>
           )}
@@ -890,152 +894,152 @@ const QueryBuilderPage: React.FC = () => {
           {activeTab === 'join' && (
             <div className="section">
               <h2>{t('queryBuilder.joinClause')}</h2>
-          {queryStructure.joins.map((join, index) => (
-            <div key={index} className="clause-item join-clause-vertical">
-              {/* JOIN Table Definition */}
-              <div className="join-table-definition">
-                <div className="join-table-row">
-                  {/* Join Type Selection */}
-                  <select
-                    value={join.joinType}
-                    onChange={(e) => updateJoin(index, 'joinType', e.target.value)}
-                    className="join-type-select"
-                  >
-                    <option value="INNER">INNER JOIN</option>
-                    <option value="LEFT">LEFT JOIN</option>
-                    <option value="RIGHT">RIGHT JOIN</option>
-                    <option value="FULL OUTER">FULL OUTER JOIN</option>
-                  </select>
+              {queryStructure.joins.map((join, index) => (
+                <div key={index} className="join-clause">
+                  {/* JOIN Table Definition */}
+                  <div className="clause-item join-table-definition">
+                    <div className="join-table-row">
+                      {/* Join Type Selection */}
+                      <select
+                        value={join.joinType}
+                        onChange={(e) => updateJoin(index, 'joinType', e.target.value)}
+                        className="join-type-select"
+                      >
+                        <option value="INNER">INNER JOIN</option>
+                        <option value="LEFT">LEFT JOIN</option>
+                        <option value="RIGHT">RIGHT JOIN</option>
+                        <option value="FULL OUTER">FULL OUTER JOIN</option>
+                      </select>
 
-                  {/* Join Table Selection */}
-                  <select
-                    value={join.tableName}
-                    onChange={(e) => updateJoin(index, 'tableName', e.target.value)}
-                    className="join-table-select-main"
-                  >
-                    <option value="">{t('queryBuilder.selectTable')}</option>
-                    {schemaInfo?.tables.map(t => (
-                      <option key={t.name} value={t.name}>
-                        {t.name}
-                      </option>
-                    ))}
-                  </select>
+                      {/* Join Table Selection */}
+                      <select
+                        value={join.tableName}
+                        onChange={(e) => updateJoin(index, 'tableName', e.target.value)}
+                        className="join-table-select-main"
+                      >
+                        <option value="">{t('queryBuilder.selectTable')}</option>
+                        {schemaInfo?.tables.map(t => (
+                          <option key={t.name} value={t.name}>
+                            {t.name}
+                          </option>
+                        ))}
+                      </select>
 
-                  {/* Join Table Alias */}
-                  <input
-                    type="text"
-                    placeholder={t('queryBuilder.aliasOptional')}
-                    value={join.alias || ''}
-                    onChange={(e) => updateJoin(index, 'alias', e.target.value || '')}
-                    className="join-alias-input"
-                  />
+                      {/* Join Table Alias */}
+                      <input
+                        type="text"
+                        placeholder={t('queryBuilder.aliasOptional')}
+                        value={join.alias || ''}
+                        onChange={(e) => updateJoin(index, 'alias', e.target.value || '')}
+                        className="join-alias-input"
+                      />
 
-                  {/* Remove JOIN button */}
-                  <button
-                    onClick={() => removeJoin(index)}
-                    className="remove-btn join-remove"
-                    title={t('queryBuilder.remove')}
-                  >
-                    ×
-                  </button>
-                </div>
-              </div>
-
-              {/* Join Conditions - Moved below */}
-              <div className="join-conditions-vertical">
-                <h4>{t('queryBuilder.joinConditions')}</h4>
-                {join.conditions.map((condition, condIndex) => (
-                  <div key={condIndex} className="join-condition-vertical">
-                    <div className="condition-expression">
-                      <div className="condition-left">
-                        <select
-                          value={condition.leftTable}
-                          onChange={(e) => updateJoinCondition(index, condIndex, 'leftTable', e.target.value)}
-                          className="table-select"
-                        >
-                          <option value="">{t('queryBuilder.selectTable')}</option>
-                          {getAvailableTableReferences().map(ref => (
-                            <option key={ref.value} value={ref.value}>
-                              {ref.label}
-                            </option>
-                          ))}
-                        </select>
-                        <span className="dot">.</span>
-                        <select
-                          value={condition.leftColumn}
-                          onChange={(e) => updateJoinCondition(index, condIndex, 'leftColumn', e.target.value)}
-                          className="column-select"
-                        >
-                          <option value="">{t('queryBuilder.selectColumn')}</option>
-                          {condition.leftTable && getColumnsForTableReference(condition.leftTable)
-                            .map(col => (
-                              <option key={col.name} value={col.name}>
-                                {col.name}
-                              </option>
-                            ))}
-                        </select>
-                      </div>
-
-                      <div className="condition-operator">
-                        <select
-                          value={condition.operator}
-                          onChange={(e) => updateJoinCondition(index, condIndex, 'operator', e.target.value)}
-                          className="operator-select"
-                        >
-                          <option value="=">=</option>
-                          <option value="<>">≠</option>
-                          <option value="<">{'<'}</option>
-                          <option value=">">{'>'}</option>
-                          <option value="<=">≤</option>
-                          <option value=">=">≥</option>
-                        </select>
-                      </div>
-
-                      <div className="condition-right">
-                        <select
-                          value={condition.rightTable}
-                          onChange={(e) => updateJoinCondition(index, condIndex, 'rightTable', e.target.value)}
-                          className="table-select"
-                        >
-                          <option value="">{t('queryBuilder.selectTable')}</option>
-                          {getAvailableTableReferences().map(ref => (
-                            <option key={ref.value} value={ref.value}>
-                              {ref.label}
-                            </option>
-                          ))}
-                        </select>
-                        <span className="dot">.</span>
-                        <select
-                          value={condition.rightColumn}
-                          onChange={(e) => updateJoinCondition(index, condIndex, 'rightColumn', e.target.value)}
-                          className="column-select"
-                        >
-                          <option value="">{t('queryBuilder.selectColumn')}</option>
-                          {condition.rightTable && getColumnsForTableReference(condition.rightTable)
-                            .map(col => (
-                              <option key={col.name} value={col.name}>
-                                {col.name}
-                              </option>
-                            ))}
-                        </select>
-                      </div>
-
+                      {/* Remove JOIN button */}
                       <button
-                        onClick={() => removeJoinCondition(index, condIndex)}
-                        className="remove-btn condition-remove"
+                        onClick={() => removeJoin(index)}
+                        className="remove-btn join-remove"
                         title={t('queryBuilder.remove')}
                       >
                         ×
                       </button>
                     </div>
                   </div>
-                ))}
-                <button onClick={() => addJoinCondition(index)} className="add-btn-small">
-                  {t('queryBuilder.addCondition')}
-                </button>
-              </div>
-            </div>
-          ))}
+
+                  {/* Join Conditions - Moved below */}
+                  <div className="join-conditions">
+                    <h4>{t('queryBuilder.joinConditions')}</h4>
+                    {join.conditions.map((condition, condIndex) => (
+                      <div key={condIndex} className="join-condition">
+                        <div className="condition-expression">
+                          <div className="condition-left">
+                            <select
+                              value={condition.leftTable}
+                              onChange={(e) => updateJoinCondition(index, condIndex, 'leftTable', e.target.value)}
+                              className="table-select"
+                            >
+                              <option value="">{t('queryBuilder.selectTable')}</option>
+                              {getAvailableTableReferences().map(ref => (
+                                <option key={ref.value} value={ref.value}>
+                                  {ref.label}
+                                </option>
+                              ))}
+                            </select>
+                            <span className="dot">.</span>
+                            <select
+                              value={condition.leftColumn}
+                              onChange={(e) => updateJoinCondition(index, condIndex, 'leftColumn', e.target.value)}
+                              className="column-select"
+                            >
+                              <option value="">{t('queryBuilder.selectColumn')}</option>
+                              {condition.leftTable && getColumnsForTableReference(condition.leftTable)
+                                .map(col => (
+                                  <option key={col.name} value={col.name}>
+                                    {col.name}
+                                  </option>
+                                ))}
+                            </select>
+                          </div>
+
+                          <div className="condition-operator">
+                            <select
+                              value={condition.operator}
+                              onChange={(e) => updateJoinCondition(index, condIndex, 'operator', e.target.value)}
+                              className="operator-select"
+                            >
+                              <option value="=">=</option>
+                              <option value="<>">≠</option>
+                              <option value="<">{'<'}</option>
+                              <option value=">">{'>'}</option>
+                              <option value="<=">≤</option>
+                              <option value=">=">≥</option>
+                            </select>
+                          </div>
+
+                          <div className="condition-right">
+                            <select
+                              value={condition.rightTable}
+                              onChange={(e) => updateJoinCondition(index, condIndex, 'rightTable', e.target.value)}
+                              className="table-select"
+                            >
+                              <option value="">{t('queryBuilder.selectTable')}</option>
+                              {getAvailableTableReferences().map(ref => (
+                                <option key={ref.value} value={ref.value}>
+                                  {ref.label}
+                                </option>
+                              ))}
+                            </select>
+                            <span className="dot">.</span>
+                            <select
+                              value={condition.rightColumn}
+                              onChange={(e) => updateJoinCondition(index, condIndex, 'rightColumn', e.target.value)}
+                              className="column-select"
+                            >
+                              <option value="">{t('queryBuilder.selectColumn')}</option>
+                              {condition.rightTable && getColumnsForTableReference(condition.rightTable)
+                                .map(col => (
+                                  <option key={col.name} value={col.name}>
+                                    {col.name}
+                                  </option>
+                                ))}
+                            </select>
+                          </div>
+
+                          <button
+                            onClick={() => removeJoinCondition(index, condIndex)}
+                            className="remove-btn condition-remove"
+                            title={t('queryBuilder.remove')}
+                          >
+                            ×
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                    <button onClick={() => addJoinCondition(index)} className="add-btn-small">
+                      {t('queryBuilder.addCondition')}
+                    </button>
+                  </div>
+                </div>
+              ))}
               <button onClick={addJoin} className="add-btn">{t('queryBuilder.addJoin')}</button>
             </div>
           )}
@@ -1044,92 +1048,92 @@ const QueryBuilderPage: React.FC = () => {
           {activeTab === 'where' && (
             <div className="section">
               <h2>{t('queryBuilder.whereClause')}</h2>
-          {queryStructure.whereConditions.map((condition, index) => (
-            <div key={index} className="clause-item">
-              <div className="clause-item-content">
-                <select
-                  value={condition.tableName || ''}
-                  onChange={(e) => updateWhereCondition(index, 'tableName', e.target.value || '')}
-                >
-                  <option value="">{t('queryBuilder.selectTable')}</option>
-                  {getAvailableTableReferences().map(ref => (
-                    <option key={ref.value} value={ref.value}>
-                      {ref.label}
-                    </option>
-                  ))}
-                </select>
+              {queryStructure.whereConditions.map((condition, index) => (
+                <div key={index} className="clause-item">
+                  <div className="clause-item-content">
+                    <select
+                      value={condition.tableName || ''}
+                      onChange={(e) => updateWhereCondition(index, 'tableName', e.target.value || '')}
+                    >
+                      <option value="">{t('queryBuilder.selectTable')}</option>
+                      {getAvailableTableReferences().map(ref => (
+                        <option key={ref.value} value={ref.value}>
+                          {ref.label}
+                        </option>
+                      ))}
+                    </select>
 
-                <select
-                  value={condition.columnName}
-                  onChange={(e) => updateWhereCondition(index, 'columnName', e.target.value)}
-                >
-                  <option value="">{t('queryBuilder.selectColumn')}</option>
-                  {condition.tableName && getColumnsForTableReference(condition.tableName)
-                    .map(col => (
-                      <option key={col.name} value={col.name}>
-                        {col.name}
-                      </option>
-                    ))}
-                </select>
+                    <select
+                      value={condition.columnName}
+                      onChange={(e) => updateWhereCondition(index, 'columnName', e.target.value)}
+                    >
+                      <option value="">{t('queryBuilder.selectColumn')}</option>
+                      {condition.tableName && getColumnsForTableReference(condition.tableName)
+                        .map(col => (
+                          <option key={col.name} value={col.name}>
+                            {col.name}
+                          </option>
+                        ))}
+                    </select>
 
-                <select
-                  value={condition.operator}
-                  onChange={(e) => updateWhereCondition(index, 'operator', e.target.value)}
-                >
-                  <option value="=">=</option>
-                  <option value="<>">≠</option>
-                  <option value="<">{'<'}</option>
-                  <option value=">">{'>'}</option>
-                  <option value="<=">≤</option>
-                  <option value=">=">≥</option>
-                  <option value="LIKE">LIKE</option>
-                  <option value="IN">IN</option>
-                  <option value="BETWEEN">BETWEEN</option>
-                  <option value="IS NULL">IS NULL</option>
-                  <option value="IS NOT NULL">IS NOT NULL</option>
-                </select>
+                    <select
+                      value={condition.operator}
+                      onChange={(e) => updateWhereCondition(index, 'operator', e.target.value)}
+                    >
+                      <option value="=">=</option>
+                      <option value="<>">≠</option>
+                      <option value="<">{'<'}</option>
+                      <option value=">">{'>'}</option>
+                      <option value="<=">≤</option>
+                      <option value=">=">≥</option>
+                      <option value="LIKE">LIKE</option>
+                      <option value="IN">IN</option>
+                      <option value="BETWEEN">BETWEEN</option>
+                      <option value="IS NULL">IS NULL</option>
+                      <option value="IS NOT NULL">IS NOT NULL</option>
+                    </select>
 
-                {!['IS NULL', 'IS NOT NULL'].includes(condition.operator) && (
-                  <input
-                    type="text"
-                    placeholder={t('queryBuilder.value')}
-                    value={condition.value || ''}
-                    onChange={(e) => updateWhereCondition(index, 'value', e.target.value)}
-                  />
-                )}
+                    {!['IS NULL', 'IS NOT NULL'].includes(condition.operator) && (
+                      <input
+                        type="text"
+                        placeholder={t('queryBuilder.value')}
+                        value={condition.value || ''}
+                        onChange={(e) => updateWhereCondition(index, 'value', e.target.value)}
+                      />
+                    )}
 
-                {index > 0 && (
-                  <select
-                    value={condition.logicalOperator || 'AND'}
-                    onChange={(e) => updateWhereCondition(index, 'logicalOperator', e.target.value)}
-                  >
-                    <option value="AND">AND</option>
-                    <option value="OR">OR</option>
-                  </select>
-                )}
+                    {index > 0 && (
+                      <select
+                        value={condition.logicalOperator || 'AND'}
+                        onChange={(e) => updateWhereCondition(index, 'logicalOperator', e.target.value)}
+                      >
+                        <option value="AND">AND</option>
+                        <option value="OR">OR</option>
+                      </select>
+                    )}
 
-                <label>
-                  <input
-                    type="checkbox"
-                    checked={condition.negated}
-                    onChange={(e) => updateWhereCondition(index, 'negated', e.target.checked)}
-                  />
-                  {t('queryBuilder.not')}
-                </label>
+                    <label>
+                      <input
+                        type="checkbox"
+                        checked={condition.negated}
+                        onChange={(e) => updateWhereCondition(index, 'negated', e.target.checked)}
+                      />
+                      {t('queryBuilder.not')}
+                    </label>
 
-              </div>
+                  </div>
 
-              <div className="clause-item-actions">
-                <button
-                  onClick={() => removeWhereCondition(index)}
-                  className="remove-btn"
-                  title={t('queryBuilder.remove')}
-                >
-                  ×
-                </button>
-              </div>
-            </div>
-          ))}
+                  <div className="clause-item-actions">
+                    <button
+                      onClick={() => removeWhereCondition(index)}
+                      className="remove-btn"
+                      title={t('queryBuilder.remove')}
+                    >
+                      ×
+                    </button>
+                  </div>
+                </div>
+              ))}
               <button onClick={addWhereCondition} className="add-btn">{t('queryBuilder.addCondition')}</button>
             </div>
           )}
@@ -1138,55 +1142,55 @@ const QueryBuilderPage: React.FC = () => {
           {activeTab === 'orderby' && (
             <div className="section">
               <h2>{t('queryBuilder.orderByClause')}</h2>
-          {queryStructure.orderByColumns.map((column, index) => (
-            <div key={index} className="clause-item">
-              <div className="clause-item-content">
-                <select
-                  value={column.tableName || ''}
-                  onChange={(e) => updateOrderByColumn(index, 'tableName', e.target.value || '')}
-                >
-                  <option value="">{t('queryBuilder.selectTable')}</option>
-                  {getAvailableTableReferences().map(ref => (
-                    <option key={ref.value} value={ref.value}>
-                      {ref.label}
-                    </option>
-                  ))}
-                </select>
+              {queryStructure.orderByColumns.map((column, index) => (
+                <div key={index} className="clause-item">
+                  <div className="clause-item-content">
+                    <select
+                      value={column.tableName || ''}
+                      onChange={(e) => updateOrderByColumn(index, 'tableName', e.target.value || '')}
+                    >
+                      <option value="">{t('queryBuilder.selectTable')}</option>
+                      {getAvailableTableReferences().map(ref => (
+                        <option key={ref.value} value={ref.value}>
+                          {ref.label}
+                        </option>
+                      ))}
+                    </select>
 
-                <select
-                  value={column.columnName}
-                  onChange={(e) => updateOrderByColumn(index, 'columnName', e.target.value)}
-                >
-                  <option value="">{t('queryBuilder.selectColumn')}</option>
-                  {column.tableName && getColumnsForTableReference(column.tableName)
-                    .map(col => (
-                      <option key={col.name} value={col.name}>
-                        {col.name}
-                      </option>
-                    ))}
-                </select>
+                    <select
+                      value={column.columnName}
+                      onChange={(e) => updateOrderByColumn(index, 'columnName', e.target.value)}
+                    >
+                      <option value="">{t('queryBuilder.selectColumn')}</option>
+                      {column.tableName && getColumnsForTableReference(column.tableName)
+                        .map(col => (
+                          <option key={col.name} value={col.name}>
+                            {col.name}
+                          </option>
+                        ))}
+                    </select>
 
-                <select
-                  value={column.direction}
-                  onChange={(e) => updateOrderByColumn(index, 'direction', e.target.value)}
-                >
-                  <option value="ASC">ASC</option>
-                  <option value="DESC">DESC</option>
-                </select>
+                    <select
+                      value={column.direction}
+                      onChange={(e) => updateOrderByColumn(index, 'direction', e.target.value)}
+                    >
+                      <option value="ASC">ASC</option>
+                      <option value="DESC">DESC</option>
+                    </select>
 
-              </div>
+                  </div>
 
-              <div className="clause-item-actions">
-                <button
-                  onClick={() => removeOrderByColumn(index)}
-                  className="remove-btn"
-                  title={t('queryBuilder.remove')}
-                >
-                  ×
-                </button>
-              </div>
-            </div>
-          ))}
+                  <div className="clause-item-actions">
+                    <button
+                      onClick={() => removeOrderByColumn(index)}
+                      className="remove-btn"
+                      title={t('queryBuilder.remove')}
+                    >
+                      ×
+                    </button>
+                  </div>
+                </div>
+              ))}
               <button onClick={addOrderByColumn} className="add-btn">{t('queryBuilder.addOrderBy')}</button>
             </div>
           )}
@@ -1195,27 +1199,27 @@ const QueryBuilderPage: React.FC = () => {
           {activeTab === 'limit' && (
             <div className="section">
               <h2>{t('queryBuilder.limitClause')}</h2>
-          <input
-            type="number"
-            placeholder={t('queryBuilder.limitOptional')}
-            value={queryStructure.limit || ''}
-            onChange={(e) => setQueryStructure(prev => ({
-              ...prev,
-              limit: e.target.value ? parseInt(e.target.value) : undefined
-            }))}
-          />
-          <input
-            type="number"
-            placeholder={t('queryBuilder.offsetOptional')}
-            value={queryStructure.offset || ''}
-            onChange={(e) => setQueryStructure(prev => ({
-              ...prev,
-              offset: e.target.value ? parseInt(e.target.value) : undefined
-            }))}
+              <input
+                type="number"
+                placeholder={t('queryBuilder.limitOptional')}
+                value={queryStructure.limit || ''}
+                onChange={(e) => setQueryStructure(prev => ({
+                  ...prev,
+                  limit: e.target.value ? parseInt(e.target.value) : undefined
+                }))}
+              />
+              <input
+                type="number"
+                placeholder={t('queryBuilder.offsetOptional')}
+                value={queryStructure.offset || ''}
+                onChange={(e) => setQueryStructure(prev => ({
+                  ...prev,
+                  offset: e.target.value ? parseInt(e.target.value) : undefined
+                }))}
               />
             </div>
           )}
-          
+
         </div>
 
         {/* Build Buttons */}
@@ -1228,7 +1232,7 @@ const QueryBuilderPage: React.FC = () => {
             >
               {isBuilding ? t('queryBuilder.building') : t('queryBuilder.generateSQL')}
             </button>
-            
+
             <button
               onClick={executeGeneratedQuery}
               disabled={!generatedSql || !selectedConnectionId}
@@ -1236,7 +1240,7 @@ const QueryBuilderPage: React.FC = () => {
             >
               {t('queryBuilder.executeQuery')}
             </button>
-            
+
             <button
               onClick={saveGeneratedQuery}
               disabled={!generatedSql || !selectedConnectionId}
@@ -1249,7 +1253,13 @@ const QueryBuilderPage: React.FC = () => {
 
         {/* Alias Warnings */}
         {aliasWarnings.length > 0 && (
-          <div className="alias-warnings" style={{backgroundColor: '#fff3cd', border: '1px solid #ffeaa7', padding: '10px', margin: '10px 0', borderRadius: '4px'}}>
+          <div className="alias-warnings" style={{
+            backgroundColor: '#fff3cd',
+            border: '1px solid #ffeaa7',
+            padding: '10px',
+            margin: '10px 0',
+            borderRadius: '4px'
+          }}>
             <h3 style={{color: '#856404'}}>{t('queryBuilder.aliasWarnings')}:</h3>
             <ul style={{color: '#856404', margin: '5px 0'}}>
               {aliasWarnings.map((warning, index) => (
