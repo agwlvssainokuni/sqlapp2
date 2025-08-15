@@ -226,6 +226,7 @@ docker-compose -f docker-compose.yml -f docker-compose.monitoring.yml up -d
 - **i18n Missing Keys**: Add translations to both en/ and ja/ files
 - **Test Failures**: Check database state isolation, mock configurations
 - **SQL Standards Violation**: Ensure QueryBuilder uses proper table alias references (e.g., `SELECT u.name FROM users AS u` not `SELECT users.name FROM users AS u`)
+- **QueryBuilder DISTINCT Issues**: Check both QueryStructure.isDistinct() global flag and individual SelectColumn.isDistinct() flags are processed in buildSelectClause()
 - **React Hooks Warnings**: Use useCallback for functions, useRef for parameter state management to prevent infinite loops
 - **Alias Synchronization Issues**: FROM/JOIN alias changes should automatically update all related SQL clauses via bidirectional synchronization
 - **WHERE Clause Parsing**: Complex OR/AND conditions and IS NULL operators require parseComplexWhereExpression method for proper reverse engineering
@@ -267,6 +268,7 @@ docker-compose -f docker-compose.yml -f docker-compose.monitoring.yml up -d
 **Total Tests**: 358 (305 unit + 53 integration) - 100% success rate
 **Development Phases**: 40+ phases complete - JWT Token Management Optimization + CSS Architecture Refactoring + Production Ready
 **Recent Enhancements**: 
+- QueryBuilder DISTINCT functionality fix: Global distinct flag now properly processed in SQL generation
 - React Router 7.8.0 integration with proper component hierarchy (Router → AuthProvider → Routes)
 - Enhanced CSS architecture with copyright headers and complete style organization
 - Advanced JWT token refresh with double-refresh prevention and navigation callback system
