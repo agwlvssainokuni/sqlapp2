@@ -64,6 +64,8 @@ interface WhereCondition {
   operator: string
   value?: string
   values?: string[]
+  minValue?: string
+  maxValue?: string
   logicalOperator?: string
   negated: boolean
 }
@@ -1093,7 +1095,22 @@ const QueryBuilderPage: React.FC = () => {
                       <option value="IS NOT NULL">IS NOT NULL</option>
                     </select>
 
-                    {!['IS NULL', 'IS NOT NULL'].includes(condition.operator) && (
+                    {condition.operator === 'BETWEEN' ? (
+                      <>
+                        <input
+                          type="text"
+                          placeholder={t('queryBuilder.minValue')}
+                          value={condition.minValue || ''}
+                          onChange={(e) => updateWhereCondition(index, 'minValue', e.target.value)}
+                        />
+                        <input
+                          type="text"
+                          placeholder={t('queryBuilder.maxValue')}
+                          value={condition.maxValue || ''}
+                          onChange={(e) => updateWhereCondition(index, 'maxValue', e.target.value)}
+                        />
+                      </>
+                    ) : !['IS NULL', 'IS NOT NULL'].includes(condition.operator) && (
                       <input
                         type="text"
                         placeholder={t('queryBuilder.value')}

@@ -207,6 +207,8 @@
     "joinConditions": "結合条件",
     "addOrderBy": "ソート順追加",
     "value": "値",
+    "minValue": "最小値",
+    "maxValue": "最大値",
     "not": "NOT",
     "limitOptional": "制限 (任意)",
     "offsetOptional": "オフセット (任意)",

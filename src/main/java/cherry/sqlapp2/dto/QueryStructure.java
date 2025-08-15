@@ -162,6 +162,8 @@ public class QueryStructure {
         private String operator; // =, <>, <, >, <=, >=, LIKE, IN, BETWEEN, IS NULL, IS NOT NULL
         private String value;
         private List<String> values; // For IN operator
+        private String minValue; // For BETWEEN operator (minimum value)
+        private String maxValue; // For BETWEEN operator (maximum value)
         private String logicalOperator; // AND, OR
         private boolean negated; // NOT
 
@@ -189,6 +191,12 @@ public class QueryStructure {
         
         public List<String> getValues() { return values; }
         public void setValues(List<String> values) { this.values = values; }
+        
+        public String getMinValue() { return minValue; }
+        public void setMinValue(String minValue) { this.minValue = minValue; }
+        
+        public String getMaxValue() { return maxValue; }
+        public void setMaxValue(String maxValue) { this.maxValue = maxValue; }
         
         public String getLogicalOperator() { return logicalOperator; }
         public void setLogicalOperator(String logicalOperator) { this.logicalOperator = logicalOperator; }

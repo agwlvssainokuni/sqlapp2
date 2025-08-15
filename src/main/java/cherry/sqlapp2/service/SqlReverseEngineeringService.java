@@ -388,6 +388,7 @@ public class SqlReverseEngineeringService {
     
     /**
      * Parse complex WHERE expressions with AND/OR support.
+     * Handles BETWEEN clauses correctly by protecting them from being split.
      */
     private void parseComplexWhereExpression(Expression expression, List<WhereCondition> conditions, String logicalOperator) {
         if (expression == null) {
@@ -396,31 +397,24 @@ public class SqlReverseEngineeringService {
         
         String expressionString = expression.toString();
         
+        // Handle OR expressions first (since they have lower precedence)
+        if (expressionString.toUpperCase().contains(" OR ")) {
+            List<String> orParts = splitRespectingBetween(expressionString, "OR");
+            for (int i = 0; i < orParts.size(); i++) {
+                String part = orParts.get(i).trim();
+                // Recursively parse each OR part to handle nested AND conditions
+                parseComplexWhereExpressionPart(part, conditions, i > 0 ? "OR" : logicalOperator);
+            }
+        }
         // Handle AND expressions
-        if (expressionString.toUpperCase().contains(" AND ")) {
-            String[] andParts = expressionString.split("(?i)\\s+AND\\s+");
-            for (int i = 0; i < andParts.length; i++) {
-                String part = andParts[i].trim();
+        else if (expressionString.toUpperCase().contains(" AND ")) {
+            List<String> andParts = splitRespectingBetween(expressionString, "AND");
+            for (int i = 0; i < andParts.size(); i++) {
+                String part = andParts.get(i).trim();
                 WhereCondition condition = parseSimpleWhereCondition(part);
                 if (condition != null) {
                     if (i > 0) {
                         condition.setLogicalOperator("AND");
-                    } else if (logicalOperator != null) {
-                        condition.setLogicalOperator(logicalOperator);
-                    }
-                    conditions.add(condition);
-                }
-            }
-        }
-        // Handle OR expressions
-        else if (expressionString.toUpperCase().contains(" OR ")) {
-            String[] orParts = expressionString.split("(?i)\\s+OR\\s+");
-            for (int i = 0; i < orParts.length; i++) {
-                String part = orParts[i].trim();
-                WhereCondition condition = parseSimpleWhereCondition(part);
-                if (condition != null) {
-                    if (i > 0) {
-                        condition.setLogicalOperator("OR");
                     } else if (logicalOperator != null) {
                         condition.setLogicalOperator(logicalOperator);
                     }
@@ -441,6 +435,91 @@ public class SqlReverseEngineeringService {
     }
     
     /**
+     * Helper method to parse a part of WHERE expression that might contain AND.
+     */
+    private void parseComplexWhereExpressionPart(String part, List<WhereCondition> conditions, String logicalOperator) {
+        if (part.toUpperCase().contains(" AND ")) {
+            List<String> andParts = splitRespectingBetween(part, "AND");
+            for (int i = 0; i < andParts.size(); i++) {
+                String andPart = andParts.get(i).trim();
+                WhereCondition condition = parseSimpleWhereCondition(andPart);
+                if (condition != null) {
+                    if (i > 0) {
+                        condition.setLogicalOperator("AND");
+                    } else if (logicalOperator != null) {
+                        condition.setLogicalOperator(logicalOperator);
+                    }
+                    conditions.add(condition);
+                }
+            }
+        } else {
+            WhereCondition condition = parseSimpleWhereCondition(part);
+            if (condition != null) {
+                if (logicalOperator != null) {
+                    condition.setLogicalOperator(logicalOperator);
+                }
+                conditions.add(condition);
+            }
+        }
+    }
+    
+    /**
+     * Split a string by AND/OR while respecting BETWEEN clauses.
+     * BETWEEN clauses contain AND keywords that should not be used for splitting.
+     */
+    private List<String> splitRespectingBetween(String expression, String operator) {
+        List<String> parts = new ArrayList<>();
+        String upperExpression = expression.toUpperCase();
+        String upperOperator = " " + operator.toUpperCase() + " ";
+        
+        int start = 0;
+        int pos = 0;
+        
+        while (pos < expression.length()) {
+            int operatorPos = upperExpression.indexOf(upperOperator, pos);
+            if (operatorPos == -1) {
+                // No more operators found
+                parts.add(expression.substring(start));
+                break;
+            }
+            
+            // Check if this operator is inside a BETWEEN clause
+            String beforeOperator = upperExpression.substring(start, operatorPos);
+            
+            // Count BETWEEN keywords that don't have matching AND
+            int betweenCount = 0;
+            int betweenPos = 0;
+            while ((betweenPos = beforeOperator.indexOf(" BETWEEN ", betweenPos)) != -1) {
+                betweenCount++;
+                betweenPos += 9; // length of " BETWEEN "
+            }
+            
+            // Count AND keywords (only for AND operator splitting)
+            int andCount = 0;
+            if ("AND".equals(operator)) {
+                int andPos = 0;
+                while ((andPos = beforeOperator.indexOf(" AND ", andPos)) != -1) {
+                    andCount++;
+                    andPos += 5; // length of " AND "
+                }
+            }
+            
+            // If we're splitting by AND and there are unmatched BETWEEN clauses, skip this AND
+            if ("AND".equals(operator) && betweenCount > andCount) {
+                pos = operatorPos + upperOperator.length();
+                continue;
+            }
+            
+            // This is a valid split point
+            parts.add(expression.substring(start, operatorPos));
+            start = operatorPos + upperOperator.length();
+            pos = start;
+        }
+        
+        return parts;
+    }
+    
+    /**
      * Parse a simple WHERE condition string like "m.id = 'job_id'".
      */
     private WhereCondition parseSimpleWhereCondition(String conditionString) {
@@ -457,6 +536,35 @@ public class SqlReverseEngineeringService {
         if (conditionString.toUpperCase().contains(" IS NOT NULL")) {
             String leftSide = conditionString.replaceAll("(?i)\\s+IS\\s+NOT\\s+NULL", "").trim();
             return createWhereCondition(leftSide, "IS NOT NULL", null);
+        }
+        
+        // Handle BETWEEN operator first (special case with two values)
+        if (conditionString.toUpperCase().contains(" BETWEEN ")) {
+            String[] betweenParts = conditionString.split("(?i)\\s+BETWEEN\\s+", 2);
+            if (betweenParts.length == 2) {
+                String leftSide = betweenParts[0].trim();
+                String rightSide = betweenParts[1].trim();
+                
+                // Parse the "value1 AND value2" part, being careful about AND keyword
+                if (rightSide.toUpperCase().contains(" AND ")) {
+                    // Find the last " AND " which should be the BETWEEN AND
+                    int lastAndIndex = rightSide.toUpperCase().lastIndexOf(" AND ");
+                    if (lastAndIndex > 0) {
+                        String minValue = rightSide.substring(0, lastAndIndex).trim();
+                        String maxValue = rightSide.substring(lastAndIndex + 5).trim(); // +5 for " AND "
+                        
+                        // Remove quotes if present
+                        if (minValue.startsWith("'") && minValue.endsWith("'")) {
+                            minValue = minValue.substring(1, minValue.length() - 1);
+                        }
+                        if (maxValue.startsWith("'") && maxValue.endsWith("'")) {
+                            maxValue = maxValue.substring(1, maxValue.length() - 1);
+                        }
+                        
+                        return createBetweenWhereCondition(leftSide, minValue, maxValue);
+                    }
+                }
+            }
         }
         
         // Handle common operators with values
@@ -515,6 +623,30 @@ public class SqlReverseEngineeringService {
         condition.setColumnName(columnName);
         condition.setOperator(operator);
         condition.setValue(value);
+        
+        return condition;
+    }
+    
+    /**
+     * Helper method to create WhereCondition for BETWEEN operator with min and max values.
+     */
+    private WhereCondition createBetweenWhereCondition(String leftSide, String minValue, String maxValue) {
+        // Parse left side (e.g., "m.id")
+        String tableName = "";
+        String columnName = leftSide;
+        if (leftSide.contains(".")) {
+            String[] leftParts = leftSide.split("\\.", 2);
+            tableName = leftParts[0];
+            columnName = leftParts[1];
+        }
+        
+        // Create WHERE condition for BETWEEN
+        WhereCondition condition = new WhereCondition();
+        condition.setTableName(tableName);
+        condition.setColumnName(columnName);
+        condition.setOperator("BETWEEN");
+        condition.setMinValue(minValue);
+        condition.setMaxValue(maxValue);
         
         return condition;
     }

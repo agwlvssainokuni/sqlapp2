@@ -280,9 +280,18 @@ public class QueryBuilderService {
                 .map(v -> "'" + v + "'")
                 .collect(Collectors.joining(", "));
             formatted.append("(").append(inValues).append(")");
-        } else if ("BETWEEN".equals(operator) && condition.getValues() != null && condition.getValues().size() >= 2) {
-            formatted.append("'").append(condition.getValues().get(0)).append("' AND '")
-                    .append(condition.getValues().get(1)).append("'");
+        } else if ("BETWEEN".equals(operator)) {
+            // First try to use minValue and maxValue (new approach)
+            if (condition.getMinValue() != null && condition.getMaxValue() != null) {
+                String minVal = condition.getMinValue().startsWith(":") ? condition.getMinValue() : "'" + condition.getMinValue() + "'";
+                String maxVal = condition.getMaxValue().startsWith(":") ? condition.getMaxValue() : "'" + condition.getMaxValue() + "'";
+                formatted.append(minVal).append(" AND ").append(maxVal);
+            }
+            // Fall back to values array for backward compatibility
+            else if (condition.getValues() != null && condition.getValues().size() >= 2) {
+                formatted.append("'").append(condition.getValues().get(0)).append("' AND '")
+                        .append(condition.getValues().get(1)).append("'");
+            }
         } else if ("IS NULL".equals(operator) || "IS NOT NULL".equals(operator)) {
             // No value needed for NULL checks
         } else if (condition.getValue() != null) {

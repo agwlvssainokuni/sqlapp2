@@ -207,6 +207,8 @@
     "joinConditions": "Join Conditions",
     "addOrderBy": "Add Order By",
     "value": "Value",
+    "minValue": "Min value",
+    "maxValue": "Max value",
     "not": "NOT",
     "limitOptional": "Limit (optional)",
     "offsetOptional": "Offset (optional)",
