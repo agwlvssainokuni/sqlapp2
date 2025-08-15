@@ -16,6 +16,7 @@
 
 import React, {useCallback, useEffect, useState} from 'react'
 import {useLocation, useNavigate} from 'react-router-dom'
+import type {Location} from 'react-router-dom'
 import {useTranslation} from 'react-i18next'
 import {useAuth} from '../context/AuthContext'
 import type {DatabaseConnection, TableInfo as ApiTableInfo} from '../types/api'
@@ -276,33 +277,7 @@ const QueryBuilderPage: React.FC = () => {
     loadConnections()
   }, [loadConnections])
 
-  // Load schema when connection changes
-  useEffect(() => {
-    if (selectedConnectionId) {
-      loadSchema(selectedConnectionId)
-    }
-  }, [selectedConnectionId, loadSchema])
-
-  // Handle SQL parsing from other pages (React Router state)
-  useEffect(() => {
-    const state = (location as any).state as { sql?: string; connectionId?: number; mode?: string; savedQueryId?: number; savedQueryName?: string } | null
-    console.log('QueryBuilderPage: location.state =', state) // Debug log
-    console.log('QueryBuilderPage: location.pathname =', location.pathname) // Debug log
-    
-    if (state?.mode === 'edit' && state?.sql && state?.connectionId) {
-      console.log('QueryBuilderPage: Starting SQL parsing for:', state.sql) // Debug log
-      parseAndLoadSQL(state.sql, state.connectionId)
-      
-      // Don't clear state immediately to ensure it's processed
-      setTimeout(() => {
-        if ((location as any).state) {
-          window.history.replaceState({}, '', location.pathname)
-        }
-      }, 100)
-    }
-  }, [location]) // Listen to the entire location object changes
-
-  const parseAndLoadSQL = async (sql: string, connectionId: number) => {
+  const parseAndLoadSQL = useCallback(async (sql: string, connectionId: number) => {
     try {
       console.log('parseAndLoadSQL: Starting with SQL:', sql, 'connectionId:', connectionId) // Debug log
       setIsBuilding(true)
@@ -347,7 +322,33 @@ const QueryBuilderPage: React.FC = () => {
     } finally {
       setIsBuilding(false)
     }
-  }
+  }, [t, apiRequest])
+
+  // Load schema when connection changes
+  useEffect(() => {
+    if (selectedConnectionId) {
+      loadSchema(selectedConnectionId)
+    }
+  }, [selectedConnectionId, loadSchema])
+
+  // Handle SQL parsing from other pages (React Router state)
+  useEffect(() => {
+    const state = (location as Location<{ sql?: string; connectionId?: number; mode?: string; savedQueryId?: number; savedQueryName?: string }>).state
+    console.log('QueryBuilderPage: location.state =', state) // Debug log
+    console.log('QueryBuilderPage: location.pathname =', location.pathname) // Debug log
+    
+    if (state?.mode === 'edit' && state?.sql && state?.connectionId) {
+      console.log('QueryBuilderPage: Starting SQL parsing for:', state.sql) // Debug log
+      parseAndLoadSQL(state.sql, state.connectionId)
+      
+      // Don't clear state immediately to ensure it's processed
+      setTimeout(() => {
+        if (location.state) {
+          window.history.replaceState({}, '', location.pathname)
+        }
+      }, 100)
+    }
+  }, [location, parseAndLoadSQL]) // Listen to the entire location object changes
 
   const buildQuery = async () => {
     if (!selectedConnectionId) {
