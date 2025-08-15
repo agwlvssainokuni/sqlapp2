@@ -27,7 +27,14 @@ import QueryBuilderPage from './components/QueryBuilderPage'
 import {AuthProvider} from './context/AuthContext'
 import ProtectedRoute from './components/ProtectedRoute'
 import ErrorBoundary from './components/ErrorBoundary'
-import './App.css'
+import './styles/common.css'
+import './styles/Dashboard.css'
+import './styles/SqlExecution.css'
+import './styles/ConnectionManagement.css'
+import './styles/SchemaViewer.css'
+import './styles/QueryBuilder.css'
+import './styles/QueryHistory.css'
+import './styles/SavedQueries.css'
 
 function App() {
   return (

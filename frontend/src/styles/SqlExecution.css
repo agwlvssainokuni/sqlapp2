@@ -1,0 +1,261 @@
+/* SQL Execution Page Styles */
+
+.sql-execution {
+  background-color: #f8f9fa;
+}
+
+.sql-header {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: 1.5rem;
+}
+
+.sql-header h2 {
+  margin: 0 0 1rem 0;
+  color: #333;
+}
+
+.connection-selector {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.connection-selector label {
+  font-weight: 500;
+  color: #555;
+}
+
+.connection-selector select {
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background: white;
+  min-width: 250px;
+}
+
+/* Execution Mode Indicator */
+.execution-mode-indicator {
+  margin-bottom: 16px;
+}
+
+.mode-badge {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  border-radius: 8px;
+  font-size: 15px;
+  line-height: 1.4;
+}
+
+.mode-badge.saved-query-mode {
+  background: linear-gradient(135deg, #e7f3ff 0%, #f0f8ff 100%);
+  border: 2px solid #b3d9ff;
+  color: #0066cc;
+}
+
+.mode-badge.history-mode {
+  background: linear-gradient(135deg, #fff8e1 0%, #fffbf0 100%);
+  border: 2px solid #ffd54f;
+  color: #f57f17;
+}
+
+.mode-icon {
+  font-size: 1.2em;
+  flex-shrink: 0;
+}
+
+.mode-text {
+  flex: 1;
+  font-weight: 600;
+}
+
+.mode-text strong {
+  font-weight: 700;
+}
+
+.mode-note {
+  font-size: 13px;
+  opacity: 0.8;
+  font-style: italic;
+  margin-left: 8px;
+}
+
+.sql-input-section {
+  background: white;
+  padding: 16px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: 16px;
+}
+
+.sql-input-section label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: #555;
+}
+
+.sql-input-section textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 14px;
+  line-height: 1.4;
+  resize: vertical;
+  box-sizing: border-box;
+}
+
+.sql-input-section textarea:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+.parameters-section {
+  background: white;
+  padding: 16px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: 16px;
+}
+
+.parameters-section h3 {
+  margin: 0 0 16px 0;
+  color: #333;
+}
+
+.parameter-row {
+  display: grid;
+  grid-template-columns: 120px 150px 1fr;
+  gap: 16px;
+  align-items: center;
+  margin-bottom: 12px;
+  padding: 12px;
+  background: #f8f9fa;
+  border-radius: 4px;
+}
+
+.parameter-row label {
+  font-weight: 500;
+  color: #007bff;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+}
+
+.parameter-row select,
+.parameter-row input {
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background: white;
+}
+
+.execution-controls {
+  background: white;
+  padding: 16px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: 16px;
+  display: flex;
+  gap: 16px;
+}
+
+.execute-btn {
+  background-color: #28a745;
+  width: auto;
+  padding: 12px 24px;
+}
+
+.execute-btn:hover {
+  background-color: #218838;
+}
+
+.validate-btn {
+  background-color: #17a2b8;
+  width: auto;
+  padding: 12px 24px;
+}
+
+.validate-btn:hover {
+  background-color: #138496;
+}
+
+.result-section {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.result-header {
+  background: #f8f9fa;
+  padding: 16px;
+  border-bottom: 1px solid #e9ecef;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.result-header h3 {
+  margin: 0;
+  color: #333;
+}
+
+.result-meta {
+  display: flex;
+  gap: 16px;
+  font-size: 14px;
+  color: #666;
+}
+
+.result-message {
+  padding: 16px;
+  background: #d4edda;
+  color: #155724;
+  border-bottom: 1px solid #c3e6cb;
+}
+
+.result-warning {
+  padding: 16px;
+  background: #fff3cd;
+  color: #856404;
+  border-bottom: 1px solid #ffeaa7;
+  font-weight: 500;
+}
+
+.result-table-container {
+  max-height: 500px;
+  overflow: auto;
+}
+
+.result-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.result-table th {
+  background: #343a40;
+  color: white;
+  padding: 12px;
+  text-align: left;
+  font-weight: 500;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.result-table td {
+  padding: 8px 12px;
+  border-bottom: 1px solid #e9ecef;
+  vertical-align: top;
+}
+
+.result-table tbody tr:hover {
+  background-color: #f8f9fa;
+}

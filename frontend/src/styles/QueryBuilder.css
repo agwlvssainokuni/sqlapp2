@@ -1,0 +1,330 @@
+/* Query Builder */
+.query-builder {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.query-builder .section {
+  margin-bottom: 30px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 20px;
+  background: #f9f9f9;
+}
+
+.query-builder .section h2 {
+  margin: 0 0 15px 0;
+  color: #333;
+  border-bottom: 2px solid #007bff;
+  padding-bottom: 5px;
+}
+
+.query-builder .clause-item {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+  align-items: center;
+  padding: 12px;
+  background: white;
+  border-radius: 5px;
+  border: 1px solid #eee;
+}
+
+.query-builder .clause-item-content {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex: 1;
+}
+
+.query-builder .clause-item-actions {
+  display: flex;
+  align-items: center;
+  margin-left: auto;
+}
+
+.query-builder .clause-item select,
+.query-builder .clause-item input[type="text"],
+.query-builder .clause-item input[type="number"] {
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  min-width: 150px;
+}
+
+.query-builder .clause-item label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap;
+}
+
+.query-builder .connection-select {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 16px;
+}
+
+.query-builder .add-btn, .query-builder .build-btn {
+  background: #007bff;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.query-builder .add-btn:hover, .query-builder .build-btn:hover {
+  background: #0056b3;
+}
+
+.query-builder .remove-btn {
+  background: #6c757d;
+  color: white;
+  border: none;
+  padding: 4px 8px;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 11px;
+  min-width: auto;
+  width: auto;
+  opacity: 0.7;
+}
+
+.query-builder .remove-btn:hover {
+  background: #dc3545;
+  opacity: 1;
+  transform: scale(1.05);
+}
+
+.query-builder .build-btn {
+  font-size: 16px;
+  padding: 12px 30px;
+}
+
+.query-builder .build-btn:disabled {
+  background: #6c757d;
+  cursor: not-allowed;
+}
+
+.query-builder .validation-errors {
+  background: #f8d7da;
+  border: 1px solid #f5c6cb;
+  border-radius: 4px;
+  padding: 15px;
+  margin-bottom: 20px;
+}
+
+.query-builder .validation-errors h3 {
+  color: #721c24;
+  margin: 0 0 10px 0;
+}
+
+.query-builder .validation-errors ul {
+  margin: 0;
+  color: #721c24;
+}
+
+.query-builder .generated-sql {
+  background: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  padding: 20px;
+}
+
+.query-builder .generated-sql h2 {
+  margin: 0 0 15px 0;
+  color: #495057;
+}
+
+.query-builder .generated-sql pre {
+  background: #ffffff;
+  border: 1px solid #e9ecef;
+  border-radius: 4px;
+  padding: 15px;
+  margin: 0;
+  overflow-x: auto;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 14px;
+  line-height: 1.4;
+  color: #333;
+}
+
+/* Tab Navigation Styles */
+.query-builder .tab-navigation {
+  display: flex;
+  gap: 2px;
+  margin-bottom: 20px;
+  background: #f8f9fa;
+  padding: 4px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  overflow-x: auto;
+}
+
+.query-builder .tab-btn {
+  background: #e9ecef;
+  border: none;
+  padding: 12px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  color: #495057;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  min-width: 120px;
+  text-align: center;
+}
+
+.query-builder .tab-btn:hover {
+  background: #dee2e6;
+  color: #212529;
+}
+
+.query-builder .tab-btn.active {
+  background: #007bff;
+  color: white;
+  box-shadow: 0 2px 4px rgba(0, 123, 255, 0.3);
+}
+
+.query-builder .tab-content {
+  min-height: 400px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+/* JOIN Styles - Clean and Unified */
+.query-builder .join-conditions {
+  margin-top: 15px;
+  padding: 15px;
+  background: #ffffff;
+  border: 1px solid #e9ecef;
+  border-radius: 6px;
+}
+
+.query-builder .join-conditions h4 {
+  margin: 0 0 12px 0;
+  color: #495057;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.query-builder .join-condition {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+  align-items: center;
+  padding: 8px;
+  background: #f8f9fa;
+  border-radius: 4px;
+}
+
+.query-builder .join-condition select {
+  padding: 6px;
+  border: 1px solid #ced4da;
+  border-radius: 3px;
+  min-width: 120px;
+  font-size: 13px;
+}
+
+.query-builder .join-type-select {
+  min-width: 140px;
+  font-weight: 500;
+}
+
+.query-builder .add-btn-small {
+  background: #28a745;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 3px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.query-builder .add-btn-small:hover {
+  background: #218838;
+}
+
+/* Button group for Generate SQL and Execute Query */
+.query-builder .button-group {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.query-builder .execute-btn {
+  background: #28a745;
+  color: white;
+  border: none;
+  padding: 12px 30px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background 0.2s ease;
+}
+
+.query-builder .execute-btn:hover:not(:disabled) {
+  background: #218838;
+}
+
+.query-builder .execute-btn:disabled {
+  background: #6c757d;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.query-builder .save-btn {
+  background: #17a2b8;
+  color: white;
+  border: none;
+  padding: 12px 30px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background 0.2s ease;
+}
+
+.query-builder .save-btn:hover:not(:disabled) {
+  background: #138496;
+}
+
+.query-builder .save-btn:disabled {
+  background: #6c757d;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* Query Builder Mobile Responsive */
+@media (max-width: 768px) {
+  .query-builder .clause-item {
+    flex-wrap: wrap;
+    gap: 5px;
+  }
+
+  .query-builder .clause-item select,
+  .query-builder .clause-item input {
+    min-width: 120px;
+    flex: 1;
+  }
+  
+  .query-builder .tab-navigation {
+    flex-wrap: wrap;
+  }
+  
+  .query-builder .tab-btn {
+    min-width: 100px;
+    font-size: 12px;
+    padding: 10px 12px;
+  }
+}
