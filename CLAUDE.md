@@ -44,12 +44,19 @@ frontend/src/
 ### Core Features
 1. **User Management**: JWT authentication, user registration/login, profile management
 2. **Database Connectivity**: Multi-RDBMS support, encrypted connection storage, connection testing
-3. **Visual Query Builder**: Complete JOIN support (INNER/LEFT/RIGHT/FULL OUTER), drag-and-drop interface, complex multi-table queries
-4. **SQL Execution**: Direct SQL + Visual Query Builder, parameterized queries, result metadata
+3. **Advanced Visual Query Builder**: 
+   - Complete JOIN support (INNER/LEFT/RIGHT/FULL OUTER) with drag-and-drop interface
+   - **Bidirectional Alias Synchronization**: FROM/JOIN alias changes auto-update across all SQL clauses
+   - **Real-time Alias Conflict Detection**: Duplicate alias warnings with multi-language support
+   - Complex multi-table queries with intelligent table reference management
+4. **Enhanced SQL Execution**: 
+   - Direct SQL + Visual Query Builder with seamless integration
+   - **Advanced SQL Reverse Engineering**: Complex WHERE clause parsing (OR/AND operators, IS NULL/IS NOT NULL)
+   - Parameterized queries with comprehensive result metadata
 5. **Integrated Workflow**: Seamless Create → Execute → Save workflow with React Router state management
 6. **Query Management**: Save/share queries, execution history, performance tracking
 7. **Schema Browsing**: Table/column metadata display, auto-completion support
-8. **Internationalization**: English/Japanese with real-time language switching
+8. **Internationalization**: English/Japanese with real-time language switching and context-aware messaging
 
 ## Development Guidelines
 
@@ -59,13 +66,21 @@ frontend/src/
 - **API Responses**: All REST endpoints return `ApiResponse<T>` wrapper
 - **Records**: Use Java records for immutable DTOs where appropriate
 - **Security**: All controllers use explicit `Authentication` parameter injection
+- **Advanced SQL Processing**:
+  - `SqlReverseEngineeringService.parseComplexWhereExpression()` for OR/AND/IS NULL parsing
+  - `createWhereCondition()` helper for consistent condition creation
+  - JSqlParser 5.3 integration with enhanced error handling
 - **Testing**: Comprehensive unit and integration tests with @DisplayName in Japanese
 
 ### React/TypeScript Conventions
 - **Component Naming**: Page components end with "Page" (e.g., `SqlExecutionPage.tsx`)
 - **API Integration**: Use `.data` property from ApiResponse structure
 - **State Management**: React Context for authentication, local state for UI
-- **Internationalization**: Use `useTranslation` hook from react-i18next
+- **Internationalization**: Use `useTranslation` hook from react-i18next with context-aware warnings
+- **Advanced State Management**: 
+  - Use `useCallback` for alias synchronization functions to prevent infinite re-renders
+  - Implement `checkAliasConflicts` for real-time duplicate detection
+  - CASCADE updates across FROM/JOIN/SELECT/WHERE/ORDER BY clauses for seamless user experience
 - **Styling**: CSS3 with component-based approach, responsive design
 
 ### API Standards
@@ -105,12 +120,12 @@ frontend/src/
 
 ## Testing Strategy
 
-### Test Coverage (356 tests, 100% success rate)
-- **Unit Tests (303)**: Service layer, utilities, security components
-- **Integration Tests (53)**: REST API endpoints, database integration
-- **Test Structure**: @Nested classes with Japanese @DisplayName
-- **Mock Strategy**: Mockito for external dependencies
-- **Database**: H2 in-memory for integration tests
+### Test Coverage (358 tests, 100% success rate)
+- **Unit Tests (305)**: Service layer, utilities, security components including advanced SQL parsing tests
+- **Integration Tests (53)**: REST API endpoints, database integration, complete workflow validation
+- **Test Structure**: @Nested classes with Japanese @DisplayName for clear documentation
+- **Mock Strategy**: Mockito for external dependencies, @SpringBootTest for complex integration scenarios
+- **Database**: H2 in-memory for integration tests with comprehensive SQL dialect support
 
 ### Quality Assurance
 - **Static Analysis**: SonarCloud integration
@@ -176,6 +191,9 @@ docker-compose -f docker-compose.yml -f docker-compose.monitoring.yml up -d
 - **Test Failures**: Check database state isolation, mock configurations
 - **SQL Standards Violation**: Ensure QueryBuilder uses proper table alias references (e.g., `SELECT u.name FROM users AS u` not `SELECT users.name FROM users AS u`)
 - **React Hooks Warnings**: Use useCallback for functions, useRef for parameter state management to prevent infinite loops
+- **Alias Synchronization Issues**: FROM/JOIN alias changes should automatically update all related SQL clauses via bidirectional synchronization
+- **WHERE Clause Parsing**: Complex OR/AND conditions and IS NULL operators require parseComplexWhereExpression method for proper reverse engineering
+- **Test Integration Issues**: Use @SpringBootTest instead of @WebMvcTest for complex security integration scenarios to avoid JWT dependency conflicts
 
 ### Development Tools
 - **H2 Console**: Available at `/h2-console` (dev environment only)
@@ -205,7 +223,7 @@ docker-compose -f docker-compose.yml -f docker-compose.monitoring.yml up -d
 
 ---
 
-**Status**: World-Class Visual SQL Query Builder - Complete JOIN functionality with integrated workflow
-**Last Updated**: 2025-08-14
-**Total Tests**: 356 (303 unit + 53 integration) - 100% success rate
-**Development Phases**: 36 phases complete - JOIN UI + Workflow Integration + Production Ready
+**Status**: Enterprise-Grade Visual SQL Query Builder - Advanced Alias Synchronization & SQL Reverse Engineering
+**Last Updated**: 2025-08-15
+**Total Tests**: 358 (305 unit + 53 integration) - 100% success rate
+**Development Phases**: 38 phases complete - Complete Bidirectional Synchronization + Advanced SQL Parsing + Production Ready
