@@ -18,26 +18,30 @@ package cherry.sqlapp2.controller;
 
 import cherry.sqlapp2.dto.SqlParseResult;
 import cherry.sqlapp2.service.SqlReverseEngineeringService;
-import cherry.sqlapp2.service.QueryBuilderService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.transaction.annotation.Transactional;
 
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(QueryBuilderController.class)
+@SpringBootTest
+@AutoConfigureMockMvc
 @ActiveProfiles("test")
+@Transactional
 @DisplayName("QueryBuilderController統合テスト")
 class QueryBuilderControllerTest {
 
@@ -47,11 +51,8 @@ class QueryBuilderControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @MockBean
+    @MockitoBean
     private SqlReverseEngineeringService sqlReverseEngineeringService;
-
-    @MockBean
-    private QueryBuilderService queryBuilderService;
 
     @Test
     @WithMockUser
@@ -64,9 +65,9 @@ class QueryBuilderControllerTest {
         String requestJson = "{\"sql\": \"SELECT * FROM users\"}";
 
         mockMvc.perform(post("/api/query-builder/parse")
-                .with(csrf())
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(requestJson))
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestJson))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.ok").value(true))
                 .andExpect(jsonPath("$.data.success").value(true));
@@ -83,9 +84,9 @@ class QueryBuilderControllerTest {
         String requestJson = "{\"sql\": \"INVALID SQL\"}";
 
         mockMvc.perform(post("/api/query-builder/parse")
-                .with(csrf())
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(requestJson))
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestJson))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.ok").value(true))
                 .andExpect(jsonPath("$.data.success").value(false))
