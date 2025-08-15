@@ -39,8 +39,8 @@ import './styles/SavedQueries.css'
 function App() {
   return (
     <ErrorBoundary>
-      <AuthProvider>
-        <Router>
+      <Router>
+        <AuthProvider>
           <Routes>
             <Route path="/login" element={<Login/>}/>
             <Route path="/register" element={<Register/>}/>
@@ -102,8 +102,8 @@ function App() {
             />
             <Route path="/" element={<Navigate to="/dashboard" replace/>}/>
           </Routes>
-        </Router>
-      </AuthProvider>
+        </AuthProvider>
+      </Router>
     </ErrorBoundary>
   )
 }
