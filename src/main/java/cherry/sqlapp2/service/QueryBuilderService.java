@@ -47,7 +47,7 @@ public class QueryBuilderService {
             StringBuilder sql = new StringBuilder();
             
             // Build SELECT clause
-            buildSelectClause(sql, structure.getSelectColumns());
+            buildSelectClause(sql, structure, structure.getSelectColumns());
             
             // Build FROM clause
             buildFromClause(sql, structure.getFromTables());
@@ -123,11 +123,11 @@ public class QueryBuilderService {
         return errors;
     }
 
-    private void buildSelectClause(StringBuilder sql, List<QueryStructure.SelectColumn> selectColumns) {
+    private void buildSelectClause(StringBuilder sql, QueryStructure structure, List<QueryStructure.SelectColumn> selectColumns) {
         sql.append("SELECT ");
         
-        boolean distinctFound = selectColumns.stream().anyMatch(QueryStructure.SelectColumn::isDistinct);
-        if (distinctFound) {
+        // Check QueryStructure global distinct flag or individual column distinct flags
+        if (structure.isDistinct() || selectColumns.stream().anyMatch(QueryStructure.SelectColumn::isDistinct)) {
             sql.append("DISTINCT ");
         }
         

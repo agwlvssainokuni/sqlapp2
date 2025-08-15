@@ -151,8 +151,8 @@ class QueryBuilderServiceTest {
         }
 
         @Test
-        @DisplayName("DISTINCT付きSELECT文を構築する")
-        void shouldBuildSelectWithDistinct() {
+        @DisplayName("個別カラムDISTINCT付きSELECT文を構築する")
+        void shouldBuildSelectWithColumnDistinct() {
             // Given
             QueryStructure structure = new QueryStructure();
             
@@ -173,6 +173,35 @@ class QueryBuilderServiceTest {
             // Then
             assertThat(response.isValid()).isTrue();
             assertThat(response.getGeneratedSql()).isEqualTo("SELECT DISTINCT department FROM users");
+        }
+
+        @Test
+        @DisplayName("QueryStructure全体DISTINCT付きSELECT文を構築する")
+        void shouldBuildSelectWithGlobalDistinct() {
+            // Given
+            QueryStructure structure = new QueryStructure();
+            structure.setDistinct(true); // QueryStructure全体のdistinctフラグを設定
+            
+            QueryStructure.SelectColumn column1 = new QueryStructure.SelectColumn();
+            column1.setColumnName("name");
+            structure.getSelectColumns().add(column1);
+            
+            QueryStructure.SelectColumn column2 = new QueryStructure.SelectColumn();
+            column2.setColumnName("department");
+            structure.getSelectColumns().add(column2);
+            
+            QueryStructure.FromTable fromTable = new QueryStructure.FromTable("users");
+            structure.getFromTables().add(fromTable);
+            
+            QueryBuilderRequest request = new QueryBuilderRequest(structure);
+            request.setFormatSql(false);
+
+            // When
+            QueryBuilderResponse response = queryBuilderService.buildQuery(request);
+
+            // Then
+            assertThat(response.isValid()).isTrue();
+            assertThat(response.getGeneratedSql()).isEqualTo("SELECT DISTINCT name, department FROM users");
         }
 
         @Test
