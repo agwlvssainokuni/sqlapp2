@@ -85,7 +85,7 @@ const refreshAccessToken = async (): Promise<string | null> => {
  * Get a valid access token, refreshing if necessary
  * @returns Valid access token or null if unable to obtain one
  */
-const getValidAccessToken = async (): Promise<string | null> => {
+export const getValidAccessToken = async (): Promise<string | null> => {
   const accessToken = localStorage.getItem('token')
 
   if (!accessToken) {
@@ -122,16 +122,18 @@ export const apiRequest = async <T>(url: string, options: RequestInit = {}): Pro
   const isAuthEndpoint = url.includes('/api/auth/')
 
   let token: string | null = null
+  let tokenWasRefreshed = false
 
   if (!isAuthEndpoint) {
     token = await getValidAccessToken()
+    
+    // Check if token was refreshed during getValidAccessToken call
+    const originalToken = localStorage.getItem('token')
+    tokenWasRefreshed = originalToken !== token
 
     if (!token) {
-      // No valid token available, redirect to login
-      localStorage.removeItem('token')
-      localStorage.removeItem('refreshToken')
-      localStorage.removeItem('user')
-      window.location.href = '/login'
+      // No valid token available, handle authentication failure
+      handleAuthenticationFailure('No valid access token available')
       throw new Error('No valid access token available')
     }
   } else {
@@ -152,34 +154,37 @@ export const apiRequest = async <T>(url: string, options: RequestInit = {}): Pro
 
   if (response.status === 401) {
     if (!isAuthEndpoint) {
-      // Try to refresh token once more for non-auth endpoints
-      console.log('Received 401, attempting final token refresh...')
-      const newToken = await refreshAccessToken()
+      // Only attempt additional refresh if token wasn't already refreshed
+      if (!tokenWasRefreshed) {
+        console.log('Received 401, attempting token refresh...')
+        const newToken = await refreshAccessToken()
 
-      if (newToken) {
-        // Retry with new token
-        const retryOptions: RequestInit = {
-          ...options,
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${newToken}`,
-            ...options.headers,
-          },
+        if (newToken && newToken !== token) {
+          // Retry with new token
+          const retryOptions: RequestInit = {
+            ...options,
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${newToken}`,
+              ...options.headers,
+            },
+          }
+
+          const retryResponse = await fetch(url, retryOptions)
+
+          if (retryResponse.ok) {
+            return await retryResponse.json() as ApiResponse<T>
+          } else if (retryResponse.status === 401) {
+            console.error('Retry with refreshed token also failed with 401')
+          }
         }
-
-        const retryResponse = await fetch(url, retryOptions)
-
-        if (retryResponse.ok) {
-          return await retryResponse.json() as ApiResponse<T>
-        }
+      } else {
+        console.log('Received 401 but token was already refreshed, authentication failure')
       }
     }
 
-    // Clear tokens and redirect to login
-    localStorage.removeItem('token')
-    localStorage.removeItem('refreshToken')
-    localStorage.removeItem('user')
-    window.location.href = '/login'
+    // Handle authentication failure
+    handleAuthenticationFailure('Authentication failed after token refresh attempts')
     throw new Error('Authentication failed')
   }
 
@@ -190,4 +195,22 @@ export const apiRequest = async <T>(url: string, options: RequestInit = {}): Pro
   }
 
   return await response.json() as ApiResponse<T>
+}
+
+/**
+ * Handle authentication failure by clearing tokens and redirecting to login
+ */
+const handleAuthenticationFailure = (reason: string) => {
+  console.warn('Authentication failure:', reason)
+  localStorage.removeItem('token')
+  localStorage.removeItem('refreshToken')
+  localStorage.removeItem('user')
+  
+  // Use a more graceful redirect that preserves current location for later redirect
+  const currentPath = window.location.pathname + window.location.search
+  if (currentPath !== '/login') {
+    sessionStorage.setItem('redirectAfterLogin', currentPath)
+  }
+  
+  window.location.href = '/login'
 }

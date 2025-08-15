@@ -36,7 +36,15 @@ const Login: React.FC = () => {
 
     try {
       await login(username, password)
-      navigate('/dashboard')
+      
+      // Check for redirect path stored by authentication failure handler
+      const redirectPath = sessionStorage.getItem('redirectAfterLogin')
+      if (redirectPath) {
+        sessionStorage.removeItem('redirectAfterLogin')
+        navigate(redirectPath, { replace: true })
+      } else {
+        navigate('/dashboard', { replace: true })
+      }
     } catch {
       setError(t('auth.loginFailed'))
     } finally {

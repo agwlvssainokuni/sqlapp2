@@ -15,7 +15,8 @@
  */
 
 import React, {createContext, type ReactNode, useContext, useEffect, useState} from 'react'
-import {apiRequest} from '../utils/api'
+import {apiRequest, getValidAccessToken} from '../utils/api'
+import {isTokenExpired} from '../utils/jwtUtils'
 import type {ApiResponse, LoginResult, LoginUser} from '../types/api.ts'
 
 interface AuthContextType {
@@ -38,6 +39,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
   const [user, setUser] = useState<LoginUser | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
+  const clearAuthData = () => {
+    console.log('Clearing authentication data')
+    setUser(null)
+    localStorage.removeItem('token')
+    localStorage.removeItem('refreshToken')
+    localStorage.removeItem('user')
+  }
+
   useEffect(() => {
     const initAuth = async () => {
       const token = localStorage.getItem('token')
@@ -46,18 +55,46 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
       if (token && storedUser) {
         try {
           const userData = JSON.parse(storedUser)
-          const isValid = await checkAuthStatus()
-          if (isValid) {
-            setUser(userData)
-          } else {
-            localStorage.removeItem('token')
-            localStorage.removeItem('refreshToken')
-            localStorage.removeItem('user')
+          
+          // First, validate stored user data structure
+          if (!userData?.username || !userData?.id) {
+            console.warn('Invalid stored user data, clearing tokens')
+            clearAuthData()
+            setIsLoading(false)
+            return
           }
-        } catch {
-          localStorage.removeItem('token')
-          localStorage.removeItem('refreshToken')
-          localStorage.removeItem('user')
+
+          // Basic token validation - if token is obviously expired, don't make API call
+          try {
+            if (isTokenExpired(token)) {
+              console.log('Stored token is expired, attempting silent refresh')
+              // Try to get a valid token through refresh
+              const validToken = await getValidAccessToken()
+              
+              if (validToken) {
+                console.log('Token refreshed successfully during initialization')
+                setUser(userData)
+              } else {
+                console.log('Token refresh failed during initialization')
+                clearAuthData()
+              }
+              setIsLoading(false)
+              return
+            }
+          } catch (jwtError) {
+            console.warn('JWT validation failed during init:', jwtError)
+            clearAuthData()
+            setIsLoading(false)
+            return
+          }
+
+          // Token appears valid, set user without additional API call
+          // The API calls will handle token validation and refresh as needed
+          console.log('Setting user from stored data with valid token')
+          setUser(userData)
+        } catch (error) {
+          console.error('Error during auth initialization:', error)
+          clearAuthData()
         }
       }
       setIsLoading(false)
@@ -97,10 +134,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
   }
 
   const logout = () => {
-    setUser(null)
-    localStorage.removeItem('token')
-    localStorage.removeItem('refreshToken')
-    localStorage.removeItem('user')
+    clearAuthData()
+    // Clear any stored redirect path as well
+    sessionStorage.removeItem('redirectAfterLogin')
   }
 
   const value: AuthContextType = {
