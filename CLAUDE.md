@@ -8,7 +8,7 @@ SqlApp2 is a production-ready web-based SQL execution tool with enterprise-grade
 
 ### Technology Stack
 - **Backend**: Java 21 + Spring Boot 3.5.4, Spring Security, JPA/Hibernate, H2 Database
-- **Frontend**: React 19 + TypeScript, Vite 7.1.1, React Router, react-i18next v15.6.1
+- **Frontend**: React 19.1.1 + TypeScript 5.9.2, Vite 7.1.2, React Router 7.8.0, react-i18next v15.6.1
 - **Database Support**: MySQL, PostgreSQL, MariaDB (via JDBC)
 - **Deployment**: Docker + Docker Compose, GitHub Actions CI/CD, Prometheus/Grafana monitoring
 
@@ -37,8 +37,8 @@ frontend/src/
 ├── components/        # Page components (ending with "Page.tsx")
 ├── context/          # React context (AuthContext with enhanced token management)
 ├── locales/          # i18n translation files (en/, ja/)
-├── styles/           # Modular CSS architecture (8 files)
-│   ├── common.css    # Layout, authentication, pagination
+├── styles/           # Modular CSS architecture (8 files with copyright headers)
+│   ├── common.css    # Layout, authentication, pagination, header/main/footer
 │   ├── Dashboard.css, SqlExecution.css, QueryBuilder.css
 │   ├── ConnectionManagement.css, SchemaViewer.css
 │   └── QueryHistory.css, SavedQueries.css
@@ -262,12 +262,13 @@ docker-compose -f docker-compose.yml -f docker-compose.monitoring.yml up -d
 
 ---
 
-**Status**: Enterprise-Grade Visual SQL Query Builder - Enhanced Authentication & Modular Architecture
+**Status**: Enterprise-Grade Visual SQL Query Builder - Enhanced Authentication & Modular Architecture + Dependency Updates
 **Last Updated**: 2025-08-15
 **Total Tests**: 358 (305 unit + 53 integration) - 100% success rate
-**Development Phases**: 40 phases complete - JWT Token Management Optimization + CSS Architecture Refactoring + Production Ready
+**Development Phases**: 40+ phases complete - JWT Token Management Optimization + CSS Architecture Refactoring + Production Ready
 **Recent Enhancements**: 
-- Advanced JWT token refresh with double-refresh prevention
+- React Router 7.8.0 integration with proper component hierarchy (Router → AuthProvider → Routes)
+- Enhanced CSS architecture with copyright headers and complete style organization
+- Advanced JWT token refresh with double-refresh prevention and navigation callback system
+- Comprehensive dependency updates (React 19.1.1, TypeScript 5.9.2, Vite 7.1.2)
 - Modular CSS architecture (8-file structure) for improved maintainability
-- Enhanced authentication flow with graceful session preservation
-- Comprehensive error handling and debugging improvements
