@@ -85,7 +85,10 @@ frontend/src/
   - `SqlReverseEngineeringService.parseComplexWhereExpression()` with BETWEEN-aware OR/AND parsing
   - `splitRespectingBetween()` algorithm for protected BETWEEN clause handling
   - `createBetweenWhereCondition()` for dual-value BETWEEN condition creation
-  - JSqlParser 5.3 integration with enhanced error handling
+  - **Complete Aggregate Function Support**: `parseSelectExpression()`, `parseOrderByExpression()` for comprehensive function parsing
+  - **Enhanced HAVING/WHERE Parsing**: `createWhereConditionWithAggregateSupport()` for aggregate function recognition in conditions
+  - **Multi-Clause Aggregate Processing**: COUNT, SUM, AVG, MAX, MIN functions across SELECT, HAVING, ORDER BY, BETWEEN clauses
+  - JSqlParser 5.3 integration with enhanced error handling and aggregate function extraction
 - **Testing**: Comprehensive unit and integration tests with @DisplayName in Japanese
 
 ### React/TypeScript Conventions
@@ -237,6 +240,8 @@ docker-compose -f docker-compose.yml -f docker-compose.monitoring.yml up -d
 - **WHERE Clause Parsing**: Complex OR/AND/BETWEEN mixed conditions require splitRespectingBetween() for accurate parsing
 - **BETWEEN Operator Issues**: Use minValue/maxValue fields instead of values array for dual-input BETWEEN conditions
 - **Reverse Engineering Failures**: Check OR conditions with BETWEEN clauses - ensure BETWEEN AND keywords are protected from OR splitting
+- **Aggregate Function Parsing Issues**: Verify parseSelectExpression(), parseOrderByExpression(), and createWhereConditionWithAggregateSupport() methods handle COUNT/SUM/AVG/MAX/MIN correctly
+- **Complex SQL Parsing Failures**: For aggregate functions in nested conditions, ensure JSqlParser 5.3 compatibility and proper parentheses extraction
 - **Test Integration Issues**: Use @SpringBootTest instead of @WebMvcTest for complex security integration scenarios to avoid JWT dependency conflicts
 - **CSS Module Issues**: Verify correct import paths for component-specific CSS files in src/styles/
 - **Authentication Flow**: Check initialization optimization - avoid unnecessary checkAuthStatus() calls during app startup
@@ -271,11 +276,14 @@ docker-compose -f docker-compose.yml -f docker-compose.monitoring.yml up -d
 
 ---
 
-**Status**: Enterprise-Grade Visual SQL Query Builder - BETWEEN Predicate + Complex WHERE Clause Parsing Complete
-**Last Updated**: 2025-08-15
-**Total Tests**: 358 (305 unit + 53 integration) - 100% success rate
-**Development Phases**: 44+ phases complete - BETWEEN Operator + Multi-Condition WHERE Parsing + Production Ready
+**Status**: Enterprise-Grade Visual SQL Query Builder - Aggregate Function Parsing Complete
+**Last Updated**: 2025-08-16
+**Total Tests**: 358+ (305+ unit + 53+ integration) - 100% success rate
+**Development Phases**: 47+ phases complete - Complete Aggregate Function Support + Advanced SQL Reverse Engineering + Production Ready
 **Recent Enhancements**: 
+- **Phase 27: Complete Aggregate Function Parsing** - Full support for aggregate functions (COUNT, SUM, AVG, MAX, MIN) in SELECT, HAVING, and ORDER BY clauses
+- **Advanced SQL Reverse Engineering** - Accurate parsing and structuring of complex SQL queries with aggregate functions
+- **Enhanced Query Builder Compatibility** - Seamless bidirectional conversion of aggregate function queries (SQL ↔ Visual Builder)
 - **Phase 25: BETWEEN Predicate Complete Support** - Dual min/max input fields, proper SQL generation, reverse engineering
 - **Phase 26: Complex WHERE Clause Parsing** - OR+BETWEEN mixed conditions, BETWEEN AND keyword protection, accurate reverse engineering
 - **Enhanced Dashboard i18n** - Complete multilingual support for all feature descriptions including H2 database references
