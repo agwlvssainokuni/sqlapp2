@@ -99,19 +99,6 @@ public class MetricsService {
     }
 
     /**
-     * SQL実行メトリクスを記録
-     */
-    public void recordSqlExecution(long durationMs, int resultRows, boolean isError) {
-        sqlExecutionCounter.increment();
-        sqlExecutionTimer.record(durationMs, java.util.concurrent.TimeUnit.MILLISECONDS);
-        totalResultRows.addAndGet(resultRows);
-
-        if (isError) {
-            sqlExecutionErrorCounter.increment();
-        }
-    }
-
-    /**
      * SQL実行タイマーを開始
      */
     public Timer.Sample startSqlExecutionTimer() {
@@ -164,13 +151,6 @@ public class MetricsService {
         } else {
             activeConnections.incrementAndGet();
         }
-    }
-
-    /**
-     * データベース接続終了を記録
-     */
-    public void recordDatabaseConnectionClosed() {
-        activeConnections.updateAndGet(current -> Math.max(0, current - 1));
     }
 
     /**

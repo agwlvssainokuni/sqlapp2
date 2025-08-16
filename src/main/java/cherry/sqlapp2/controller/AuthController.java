@@ -239,6 +239,9 @@ public class AuthController {
             return ApiResponse.error(List.of("Invalid refresh token"));
         }
 
+        // Record user logout metric
+        metricsService.recordUserLogout();
+
         return ApiResponse.success(null);
     }
 
@@ -264,6 +267,10 @@ public class AuthController {
                 .get();
 
         refreshTokenService.revokeAllUserTokens(user);
+        
+        // Record user logout metric
+        metricsService.recordUserLogout();
+        
         return ApiResponse.success(null);
     }
 

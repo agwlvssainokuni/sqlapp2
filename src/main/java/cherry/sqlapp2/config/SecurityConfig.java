@@ -146,6 +146,8 @@ public class SecurityConfig {
                         // ヘルスチェックやH2コンソールは認証不要
                         .requestMatchers("/api/health").permitAll()
                         .requestMatchers("/h2-console/**").permitAll()
+                        // Actuatorエンドポイントは認証不要
+                        .requestMatchers("/actuator/**").permitAll()
                         // OpenAPI/Swagger UIは認証不要（開発・テスト用）
                         .requestMatchers(
                                 "/api/v3/api-docs/**",

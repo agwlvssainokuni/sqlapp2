@@ -55,6 +55,9 @@ class QueryManagementServiceTest {
     @Mock
     private QueryHistoryRepository queryHistoryRepository;
 
+    @Mock
+    private MetricsService metricsService;
+
     private QueryManagementService queryManagementService;
 
     private final String testUsername = "testUser";
@@ -69,7 +72,7 @@ class QueryManagementServiceTest {
 
     @BeforeEach
     void setUp() {
-        queryManagementService = new QueryManagementService(savedQueryRepository, queryHistoryRepository);
+        queryManagementService = new QueryManagementService(savedQueryRepository, queryHistoryRepository, metricsService);
         
         testUser = new User(testUsername, testPassword, testEmail);
         ReflectionTestUtils.setField(testUser, "id", 1L);
@@ -729,7 +732,7 @@ class QueryManagementServiceTest {
         @DisplayName("JSONシリアライゼーション例外を適切に処理する")
         void shouldHandleJsonSerializationException() {
             // Given - ObjectMapperをモックして例外をスローさせる
-            QueryManagementService serviceWithMockMapper = new QueryManagementService(savedQueryRepository, queryHistoryRepository);
+            QueryManagementService serviceWithMockMapper = new QueryManagementService(savedQueryRepository, queryHistoryRepository, metricsService);
             ObjectMapper mockMapper = mock(ObjectMapper.class);
             ReflectionTestUtils.setField(serviceWithMockMapper, "objectMapper", mockMapper);
 

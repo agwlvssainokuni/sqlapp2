@@ -47,6 +47,9 @@ class DatabaseConnectionServiceTest {
     @Mock
     private EncryptionService encryptionService;
 
+    @Mock
+    private MetricsService metricsService;
+
     private DatabaseConnectionService databaseConnectionService;
 
     private final String testUsername = "testUser";
@@ -66,7 +69,7 @@ class DatabaseConnectionServiceTest {
 
     @BeforeEach
     void setUp() {
-        databaseConnectionService = new DatabaseConnectionService(connectionRepository, encryptionService);
+        databaseConnectionService = new DatabaseConnectionService(connectionRepository, encryptionService, metricsService);
         
         testUser = new User(testUsername, testPassword, testEmail);
         ReflectionTestUtils.setField(testUser, "id", 1L);

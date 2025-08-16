@@ -49,15 +49,18 @@ public class QueryManagementService {
 
     private final SavedQueryRepository savedQueryRepository;
     private final QueryHistoryRepository queryHistoryRepository;
+    private final MetricsService metricsService;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Autowired
     public QueryManagementService(
             SavedQueryRepository savedQueryRepository,
-            QueryHistoryRepository queryHistoryRepository
+            QueryHistoryRepository queryHistoryRepository,
+            MetricsService metricsService
     ) {
         this.savedQueryRepository = savedQueryRepository;
         this.queryHistoryRepository = queryHistoryRepository;
+        this.metricsService = metricsService;
     }
 
     // ==================== Saved Queries Management ====================
@@ -99,7 +102,12 @@ public class QueryManagementService {
             }
         }
 
-        return savedQueryRepository.save(savedQuery);
+        SavedQuery result = savedQueryRepository.save(savedQuery);
+        
+        // Record query management operation
+        metricsService.recordQueryManagementOperation("SAVE");
+        
+        return result;
     }
 
     /**
@@ -147,7 +155,12 @@ public class QueryManagementService {
             savedQuery.setParameterDefinitions(null);
         }
 
-        return savedQueryRepository.save(savedQuery);
+        SavedQuery result = savedQueryRepository.save(savedQuery);
+        
+        // Record query management operation
+        metricsService.recordQueryManagementOperation("UPDATE");
+        
+        return result;
     }
 
     @Transactional(readOnly = true)
@@ -174,6 +187,9 @@ public class QueryManagementService {
         }
 
         savedQueryRepository.delete(savedQuery);
+        
+        // Record query management operation
+        metricsService.recordQueryManagementOperation("DELETE");
     }
 
     @SuppressWarnings("unchecked")

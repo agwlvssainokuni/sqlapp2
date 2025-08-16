@@ -42,14 +42,17 @@ public class DatabaseConnectionService {
 
     private final DatabaseConnectionRepository connectionRepository;
     private final EncryptionService encryptionService;
+    private final MetricsService metricsService;
 
     @Autowired
     public DatabaseConnectionService(
             DatabaseConnectionRepository connectionRepository,
-            EncryptionService encryptionService
+            EncryptionService encryptionService,
+            MetricsService metricsService
     ) {
         this.connectionRepository = connectionRepository;
         this.encryptionService = encryptionService;
+        this.metricsService = metricsService;
     }
 
     /**
@@ -225,15 +228,23 @@ public class DatabaseConnectionService {
 
                 // Test if connection is valid with 5 second timeout
                 if (conn.isValid(5)) {
+                    // Record successful connection attempt
+                    metricsService.recordDatabaseConnectionAttempt(request.getDatabaseType().name(), false);
                     return ConnectionTestResult.createSuccess();
                 } else {
+                    // Record failed connection attempt
+                    metricsService.recordDatabaseConnectionAttempt(request.getDatabaseType().name(), true);
                     return ConnectionTestResult.createFailure("Connection is not valid");
                 }
 
             } catch (SQLException e) {
+                // Record failed connection attempt
+                metricsService.recordDatabaseConnectionAttempt(request.getDatabaseType().name(), true);
                 return ConnectionTestResult.createFailure("Database connection failed: " + e.getMessage());
             }
         } catch (Exception e) {
+            // Record failed connection attempt
+            metricsService.recordDatabaseConnectionAttempt("UNKNOWN", true);
             return ConnectionTestResult.createFailure("Unexpected error during connection test: " + e.getMessage());
         }
     }
@@ -250,15 +261,23 @@ public class DatabaseConnectionService {
 
                 // Test if connection is valid with 5 second timeout
                 if (conn.isValid(5)) {
+                    // Record successful connection attempt
+                    metricsService.recordDatabaseConnectionAttempt(connection.getDatabaseType().name(), false);
                     return ConnectionTestResult.createSuccess();
                 } else {
+                    // Record failed connection attempt
+                    metricsService.recordDatabaseConnectionAttempt(connection.getDatabaseType().name(), true);
                     return ConnectionTestResult.createFailure("Connection is not valid");
                 }
 
             } catch (SQLException e) {
+                // Record failed connection attempt
+                metricsService.recordDatabaseConnectionAttempt(connection.getDatabaseType().name(), true);
                 return ConnectionTestResult.createFailure("Database connection failed: " + e.getMessage());
             }
         } catch (Exception e) {
+            // Record failed connection attempt
+            metricsService.recordDatabaseConnectionAttempt("UNKNOWN", true);
             return ConnectionTestResult.createFailure("Unexpected error during connection test: " + e.getMessage());
         }
     }
