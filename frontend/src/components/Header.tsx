@@ -21,7 +21,7 @@ import {Link, useNavigate} from 'react-router-dom'
 
 const Header: React.FC = () => {
   const {t} = useTranslation()
-  const {logout} = useAuth()
+  const {user, logout} = useAuth()
   const navigate = useNavigate()
 
   const handleLogout = () => {
@@ -39,6 +39,11 @@ const Header: React.FC = () => {
           <Link to="/dashboard" className="nav-link">
             {t('common.dashboard')}
           </Link>
+          {user?.role === 'ADMIN' && (
+            <Link to="/admin" className="nav-link admin-link">
+              {t('admin.title')}
+            </Link>
+          )}
           <button className="logout-btn" onClick={handleLogout}>
             {t('common.logout')}
           </button>

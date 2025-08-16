@@ -55,7 +55,7 @@ public class RefreshTokenService {
         // Revoke existing active tokens for security (optional, but recommended for single session)
         revokeAllUserTokens(user);
 
-        String tokenValue = jwtUtil.generateRefreshToken(user.getUsername());
+        String tokenValue = jwtUtil.generateRefreshToken(user.getUsername(), user.getRole());
         LocalDateTime expiresAt = LocalDateTime.now().plusSeconds(jwtUtil.getRefreshTokenExpiration());
 
         RefreshToken refreshToken = new RefreshToken(tokenValue, user, expiresAt);
@@ -162,8 +162,7 @@ public class RefreshTokenService {
      * This method can be extended to implement business logic for token refresh control
      */
     public boolean canRefreshToken(User user) {
-        // For now, all users can refresh tokens
-        // This can be extended to check user status, account locks, etc.
-        return true;
+        // Check if user is approved
+        return user.isApproved();
     }
 }

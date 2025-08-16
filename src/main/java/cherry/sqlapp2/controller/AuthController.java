@@ -123,7 +123,12 @@ public class AuthController {
 
         User user = userService.findByUsername(request.getUsername()).get();
 
-        String accessToken = jwtUtil.generateAccessToken(user.getUsername());
+        // Check if user is approved
+        if (!user.isApproved()) {
+            return ApiResponse.error(List.of("Account not yet approved. Please wait for administrator approval."));
+        }
+
+        String accessToken = jwtUtil.generateAccessToken(user.getUsername(), user.getRole());
         RefreshToken refreshToken = refreshTokenService.createRefreshToken(user);
 
         Long accessExpiresIn = jwtUtil.getAccessTokenExpiration();
@@ -185,8 +190,13 @@ public class AuthController {
             return ApiResponse.error(List.of("Invalid refresh token"));
         }
 
+        // Check if user is still approved
+        if (!user.isApproved()) {
+            return ApiResponse.error(List.of("Account not approved."));
+        }
+
         // Generate new access token
-        String newAccessToken = jwtUtil.generateAccessToken(user.getUsername());
+        String newAccessToken = jwtUtil.generateAccessToken(user.getUsername(), user.getRole());
 
         // Generate new refresh token if not using sliding expiration
         String newRefreshToken = request.refreshToken();

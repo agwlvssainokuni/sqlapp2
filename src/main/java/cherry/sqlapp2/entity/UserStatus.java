@@ -14,22 +14,17 @@
  * limitations under the License.
  */
 
-package cherry.sqlapp2.dto;
+package cherry.sqlapp2.entity;
 
-import cherry.sqlapp2.entity.User;
-
-import java.time.LocalDateTime;
-
-public record LoginUser(
-    Long id,
-    String username,
-    String email,
-    String role,
-    String status,
-    LocalDateTime createdAt
-) {
-    public LoginUser(User user) {
-        this(user.getId(), user.getUsername(), user.getEmail(), 
-             user.getRole().name(), user.getStatus().name(), user.getCreatedAt());
-    }
+/**
+ * ユーザー承認状態を表す列挙型。
+ * ユーザー登録後の承認ワークフローの状態を管理します。
+ */
+public enum UserStatus {
+    /** 承認待ち */
+    PENDING,
+    /** 承認済み */
+    APPROVED,
+    /** 拒否 */
+    REJECTED
 }

@@ -23,6 +23,7 @@ import java.time.LocalDateTime;
  * ユーザ情報を表すエンティティクラス。
  * システムにログインするユーザの基本情報（ユーザ名、パスワード、メール）を管理します。
  * パスワードはBCryptでハッシュ化されて保存されます。
+ * ユーザーロール（一般ユーザー/管理者）と承認状態（承認待ち/承認済み/拒否）を管理します。
  */
 @Entity
 @Table(name = "users")
@@ -40,6 +41,14 @@ public class User {
 
     @Column(nullable = false, length = 100)
     private String email;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private Role role = Role.USER;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private UserStatus status = UserStatus.PENDING;
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
@@ -65,6 +74,16 @@ public class User {
         this.username = username;
         this.password = password;
         this.email = email;
+        this.role = Role.USER;
+        this.status = UserStatus.PENDING;
+    }
+
+    public User(String username, String password, String email, Role role, UserStatus status) {
+        this.username = username;
+        this.password = password;
+        this.email = email;
+        this.role = role;
+        this.status = status;
     }
 
     // Getters and Setters
@@ -114,5 +133,37 @@ public class User {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public Role getRole() {
+        return role;
+    }
+
+    public void setRole(Role role) {
+        this.role = role;
+    }
+
+    public UserStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(UserStatus status) {
+        this.status = status;
+    }
+
+    /**
+     * ユーザーが管理者権限を持つかどうかを判定します。
+     * @return 管理者の場合true、それ以外はfalse
+     */
+    public boolean isAdmin() {
+        return Role.ADMIN.equals(this.role);
+    }
+
+    /**
+     * ユーザーが承認済みかどうかを判定します。
+     * @return 承認済みの場合true、それ以外はfalse
+     */
+    public boolean isApproved() {
+        return UserStatus.APPROVED.equals(this.status);
     }
 }

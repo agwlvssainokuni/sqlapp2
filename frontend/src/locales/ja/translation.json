@@ -291,5 +291,22 @@
     "noResults": "表示する結果がありません",
     "loadingResults": "結果を読み込み中...",
     "paginationError": "ページネーション結果の読み込みエラー"
+  },
+  "admin": {
+    "title": "管理者パネル",
+    "pendingUsers": "承認待ちユーザー",
+    "username": "ユーザー名",
+    "email": "メールアドレス",
+    "registeredAt": "登録日時",
+    "actions": "アクション",
+    "approve": "承認",
+    "reject": "拒否",
+    "rejectionReason": "拒否理由を入力...",
+    "rejectionReasonRequired": "拒否理由の入力が必要です",
+    "noPendingUsers": "承認待ちユーザーが見つかりません",
+    "accessDenied": "アクセスが拒否されました。管理者権限が必要です。",
+    "loadError": "承認待ちユーザーの読み込みに失敗しました",
+    "approveError": "ユーザーの承認に失敗しました",
+    "rejectError": "ユーザーの拒否に失敗しました"
   }
 }

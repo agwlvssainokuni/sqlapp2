@@ -16,6 +16,7 @@
 
 package cherry.sqlapp2.util;
 
+import cherry.sqlapp2.entity.Role;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -52,6 +53,7 @@ public class JwtUtil {
     private static final String TOKEN_TYPE_CLAIM = "token_type";
     private static final String ACCESS_TOKEN_TYPE = "access";
     private static final String REFRESH_TOKEN_TYPE = "refresh";
+    private static final String ROLE_CLAIM = "role";
 
     private SecretKey getSigningKey() {
         byte[] keyBytes = secret.getBytes();
@@ -66,6 +68,16 @@ public class JwtUtil {
      */
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
+    }
+
+    /**
+     * JWTトークンからロール情報を抽出します。
+     * 
+     * @param token JWTトークン
+     * @return ロール
+     */
+    public String extractRole(String token) {
+        return extractClaim(token, claims -> claims.get(ROLE_CLAIM, String.class));
     }
 
     /**
@@ -103,28 +115,56 @@ public class JwtUtil {
      * アクセストークンを生成します。
      * 
      * @param username ユーザ名
+     * @param role ユーザーロール
      * @return 生成されたアクセストークン
      */
-    public String generateAccessToken(String username) {
+    public String generateAccessToken(String username, Role role) {
         Map<String, Object> claims = new HashMap<>();
         claims.put(TOKEN_TYPE_CLAIM, ACCESS_TOKEN_TYPE);
+        claims.put(ROLE_CLAIM, role.name());
         // Add a unique identifier to ensure uniqueness even for simultaneous token creation
         claims.put("jti", UUID.randomUUID().toString());
         return createToken(claims, username, accessTokenExpiration);
     }
 
     /**
+     * アクセストークンを生成します（ロール情報なしの後方互換メソッド）。
+     * 
+     * @param username ユーザ名
+     * @return 生成されたアクセストークン
+     * @deprecated Use generateAccessToken(String, Role) instead
+     */
+    @Deprecated
+    public String generateAccessToken(String username) {
+        return generateAccessToken(username, Role.USER);
+    }
+
+    /**
      * リフレッシュトークンを生成します。
      * 
      * @param username ユーザ名
+     * @param role ユーザーロール
      * @return 生成されたリフレッシュトークン
      */
-    public String generateRefreshToken(String username) {
+    public String generateRefreshToken(String username, Role role) {
         Map<String, Object> claims = new HashMap<>();
         claims.put(TOKEN_TYPE_CLAIM, REFRESH_TOKEN_TYPE);
+        claims.put(ROLE_CLAIM, role.name());
         // Add a unique identifier to ensure uniqueness even for simultaneous token creation
         claims.put("jti", UUID.randomUUID().toString());
         return createToken(claims, username, refreshTokenExpiration);
+    }
+
+    /**
+     * リフレッシュトークンを生成します（ロール情報なしの後方互換メソッド）。
+     * 
+     * @param username ユーザ名
+     * @return 生成されたリフレッシュトークン
+     * @deprecated Use generateRefreshToken(String, Role) instead
+     */
+    @Deprecated
+    public String generateRefreshToken(String username) {
+        return generateRefreshToken(username, Role.USER);
     }
 
     /**

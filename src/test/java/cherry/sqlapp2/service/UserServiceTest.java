@@ -47,6 +47,9 @@ class UserServiceTest {
     @Mock
     private MetricsService metricsService;
 
+    @Mock
+    private EmailNotificationService emailNotificationService;
+
     private UserService userService;
 
     private final String testUsername = "testUser";
@@ -59,7 +62,8 @@ class UserServiceTest {
         userService = new UserService(
                 userRepository,
                 passwordEncoder,
-                metricsService
+                metricsService,
+                emailNotificationService
         );
     }
 

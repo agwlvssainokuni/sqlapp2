@@ -16,19 +16,24 @@
 
 package cherry.sqlapp2.service;
 
+import cherry.sqlapp2.entity.Role;
 import cherry.sqlapp2.entity.User;
+import cherry.sqlapp2.entity.UserStatus;
 import cherry.sqlapp2.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
  * ユーザ管理機能を提供するサービスクラス。
- * ユーザの作成、認証、検索などの操作を担当します。
- * パスワードのハッシュ化やメトリクス記録も行います。
+ * ユーザの作成、認証、検索、承認管理などの操作を担当します。
+ * パスワードのハッシュ化、メトリクス記録、メール通知も行います。
  */
 @Service
 @Transactional
@@ -37,21 +42,25 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final MetricsService metricsService;
+    private final EmailNotificationService emailNotificationService;
 
     @Autowired
     public UserService(
             UserRepository userRepository,
             PasswordEncoder passwordEncoder,
-            MetricsService metricsService
+            MetricsService metricsService,
+            EmailNotificationService emailNotificationService
     ) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.metricsService = metricsService;
+        this.emailNotificationService = emailNotificationService;
     }
 
     /**
      * 新しいユーザを作成します。
      * ユーザ名とメールアドレスの重複チェックを行い、パスワードをハッシュ化して保存します。
+     * 作成されたユーザーは承認待ち状態となり、登録通知メールが送信されます。
      *
      * @param username ユーザ名
      * @param password パスワード（平文）
@@ -67,11 +76,14 @@ public class UserService {
         }
 
         String encodedPassword = passwordEncoder.encode(password);
-        User user = new User(username, encodedPassword, email);
+        User user = new User(username, encodedPassword, email); // デフォルトでPENDING状態
         User savedUser = userRepository.save(user);
 
         // Record user registration metric
         metricsService.recordUserRegistration();
+
+        // Send registration notification email
+        emailNotificationService.sendRegistrationNotification(savedUser, null);
 
         return savedUser;
     }
@@ -107,5 +119,74 @@ public class UserService {
     @Transactional(readOnly = true)
     public boolean existsByEmail(String email) {
         return userRepository.existsByEmail(email);
+    }
+
+    /**
+     * 承認待ちユーザーの一覧を取得します。
+     *
+     * @param pageable ページング情報
+     * @return 承認待ちユーザーのページ
+     */
+    @Transactional(readOnly = true)
+    public Page<User> getPendingUsers(Pageable pageable) {
+        return userRepository.findByStatus(UserStatus.PENDING, pageable);
+    }
+
+    /**
+     * ユーザーを承認します。
+     *
+     * @param userId 承認するユーザーID
+     * @return 承認されたユーザー
+     */
+    public User approveUser(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+        
+        if (user.getStatus() != UserStatus.PENDING) {
+            throw new IllegalStateException("User is not in pending status");
+        }
+
+        user.setStatus(UserStatus.APPROVED);
+        User savedUser = userRepository.save(user);
+
+        // Send approval notification email
+        emailNotificationService.sendApprovalNotification(savedUser, null);
+
+        return savedUser;
+    }
+
+    /**
+     * ユーザー申請を拒否します。
+     *
+     * @param userId 拒否するユーザーID
+     * @param reason 拒否理由
+     * @return 拒否されたユーザー
+     */
+    public User rejectUser(Long userId, String reason) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+        
+        if (user.getStatus() != UserStatus.PENDING) {
+            throw new IllegalStateException("User is not in pending status");
+        }
+
+        user.setStatus(UserStatus.REJECTED);
+        User savedUser = userRepository.save(user);
+
+        // Send rejection notification email
+        emailNotificationService.sendRejectionNotification(savedUser, reason, null);
+
+        return savedUser;
+    }
+
+    /**
+     * 指定されたIDのユーザーを取得します。
+     *
+     * @param userId ユーザーID
+     * @return ユーザー
+     */
+    @Transactional(readOnly = true)
+    public Optional<User> findById(Long userId) {
+        return userRepository.findById(userId);
     }
 }

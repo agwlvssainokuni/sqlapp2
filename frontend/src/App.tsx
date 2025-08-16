@@ -24,6 +24,7 @@ import SchemaViewerPage from './components/SchemaViewerPage'
 import SavedQueriesPage from './components/SavedQueriesPage'
 import QueryHistoryPage from './components/QueryHistoryPage'
 import QueryBuilderPage from './components/QueryBuilderPage'
+import AdminPage from './components/AdminPage'
 import {AuthProvider} from './context/AuthContext'
 import ProtectedRoute from './components/ProtectedRoute'
 import ErrorBoundary from './components/ErrorBoundary'
@@ -35,6 +36,7 @@ import './styles/SchemaViewer.css'
 import './styles/QueryBuilder.css'
 import './styles/QueryHistory.css'
 import './styles/SavedQueries.css'
+import './styles/AdminPage.css'
 
 function App() {
   return (
@@ -97,6 +99,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <QueryBuilderPage/>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin"
+              element={
+                <ProtectedRoute>
+                  <AdminPage/>
                 </ProtectedRoute>
               }
             />

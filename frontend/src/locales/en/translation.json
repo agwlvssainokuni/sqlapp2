@@ -291,5 +291,22 @@
     "noResults": "No results to display",
     "loadingResults": "Loading results...",
     "paginationError": "Error loading paginated results"
+  },
+  "admin": {
+    "title": "Admin Panel",
+    "pendingUsers": "Pending Users",
+    "username": "Username",
+    "email": "Email",
+    "registeredAt": "Registered At",
+    "actions": "Actions",
+    "approve": "Approve",
+    "reject": "Reject",
+    "rejectionReason": "Rejection reason...",
+    "rejectionReasonRequired": "Rejection reason is required",
+    "noPendingUsers": "No pending users found",
+    "accessDenied": "Access denied. Admin privileges required.",
+    "loadError": "Failed to load pending users",
+    "approveError": "Failed to approve user",
+    "rejectError": "Failed to reject user"
   }
 }

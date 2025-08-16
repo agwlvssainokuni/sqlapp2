@@ -14,22 +14,15 @@
  * limitations under the License.
  */
 
-package cherry.sqlapp2.dto;
+package cherry.sqlapp2.entity;
 
-import cherry.sqlapp2.entity.User;
-
-import java.time.LocalDateTime;
-
-public record LoginUser(
-    Long id,
-    String username,
-    String email,
-    String role,
-    String status,
-    LocalDateTime createdAt
-) {
-    public LoginUser(User user) {
-        this(user.getId(), user.getUsername(), user.getEmail(), 
-             user.getRole().name(), user.getStatus().name(), user.getCreatedAt());
-    }
+/**
+ * ユーザーロールを表す列挙型。
+ * システム内でのユーザーの権限レベルを定義します。
+ */
+public enum Role {
+    /** 一般ユーザー */
+    USER,
+    /** 管理者 */
+    ADMIN
 }
