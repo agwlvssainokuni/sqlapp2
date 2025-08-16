@@ -20,9 +20,9 @@ import cherry.sqlapp2.entity.EmailTemplate;
 import cherry.sqlapp2.repository.EmailTemplateRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.ApplicationArguments;
+import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Service;
 
 /**
@@ -30,25 +30,26 @@ import org.springframework.stereotype.Service;
  * アプリケーション起動時に必要なメールテンプレートがなければ自動作成します。
  */
 @Service
-public class EmailTemplateInitService implements CommandLineRunner {
+public class EmailTemplateInitializationService implements ApplicationRunner {
 
-    private static final Logger logger = LoggerFactory.getLogger(EmailTemplateInitService.class);
+    private static final Logger logger = LoggerFactory.getLogger(EmailTemplateInitializationService.class);
 
     private final EmailTemplateRepository emailTemplateRepository;
-    
-    @Value("${app.email.auto-create-templates:true}")
-    private boolean autoCreateTemplates;
-    
-    @Value("${app.email.default-bcc:admin@sqlapp2.local}")
-    private String defaultBcc;
+    private final boolean autoCreateTemplates;
+    private final String defaultBcc;
 
-    @Autowired
-    public EmailTemplateInitService(EmailTemplateRepository emailTemplateRepository) {
+    public EmailTemplateInitializationService(
+            EmailTemplateRepository emailTemplateRepository,
+            @Value("${app.email.auto-create-templates:true}") boolean autoCreateTemplates,
+            @Value("${app.email.default-bcc:admin@sqlapp2.local}") String defaultBcc
+    ) {
         this.emailTemplateRepository = emailTemplateRepository;
+        this.autoCreateTemplates = autoCreateTemplates;
+        this.defaultBcc = defaultBcc;
     }
 
     @Override
-    public void run(String... args) {
+    public void run(ApplicationArguments args) {
         if (!autoCreateTemplates) {
             logger.info("Email template auto-creation is disabled");
             return;

@@ -35,28 +35,31 @@ import org.springframework.transaction.annotation.Transactional;
  * 設定ファイルの情報を基に初期管理者を自動作成します。
  */
 @Service
-public class InitialAdminService implements ApplicationRunner {
+public class AdminInitializationService implements ApplicationRunner {
 
-    private static final Logger logger = LoggerFactory.getLogger(InitialAdminService.class);
+    private static final Logger logger = LoggerFactory.getLogger(AdminInitializationService.class);
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    
-    @Value("${app.user.admin.enabled:true}")
-    private boolean adminCreationEnabled;
-    
-    @Value("${app.user.admin.username:admin}")
-    private String adminUsername;
-    
-    @Value("${app.user.admin.password:admin123}")
-    private String adminPassword;
-    
-    @Value("${app.user.admin.email:admin@sqlapp2.local}")
-    private String adminEmail;
+    private final boolean adminCreationEnabled;
+    private final String adminUsername;
+    private final String adminPassword;
+    private final String adminEmail;
 
-    public InitialAdminService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public AdminInitializationService(
+            UserRepository userRepository,
+            PasswordEncoder passwordEncoder,
+            @Value("${app.user.admin.enabled:true}") boolean adminCreationEnabled,
+            @Value("${app.user.admin.username:admin}") String adminUsername,
+            @Value("${app.user.admin.password:admin123}") String adminPassword,
+            @Value("${app.user.admin.email:admin@sqlapp2.local}") String adminEmail
+    ) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.adminCreationEnabled = adminCreationEnabled;
+        this.adminUsername = adminUsername;
+        this.adminPassword = adminPassword;
+        this.adminEmail = adminEmail;
     }
 
     /**
