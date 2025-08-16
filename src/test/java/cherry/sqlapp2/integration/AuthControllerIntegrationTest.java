@@ -165,7 +165,7 @@ class AuthControllerIntegrationTest extends BaseIntegrationTest {
                     .andExpect(jsonPath("$.data.access_token").isString())
                     .andExpect(jsonPath("$.data.token_type").value("Bearer"))
                     .andExpect(jsonPath("$.data.expires_in").isNumber())
-                    .andExpect(jsonPath("$.data.user.id").value(1))
+                    .andExpect(jsonPath("$.data.user.id").value(10))
                     .andExpect(jsonPath("$.data.user.username").value("testuser1"))
                     .andExpect(jsonPath("$.data.user.email").value("testuser1@example.com"))
                     .andReturn();

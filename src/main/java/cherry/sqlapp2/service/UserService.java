@@ -21,6 +21,7 @@ import cherry.sqlapp2.entity.User;
 import cherry.sqlapp2.entity.UserStatus;
 import cherry.sqlapp2.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -43,6 +44,9 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final MetricsService metricsService;
     private final EmailNotificationService emailNotificationService;
+    
+    @Value("${app.user.auto-approve-in-tests:false}")
+    private boolean autoApproveInTests;
 
     @Autowired
     public UserService(
@@ -77,6 +81,12 @@ public class UserService {
 
         String encodedPassword = passwordEncoder.encode(password);
         User user = new User(username, encodedPassword, email); // デフォルトでPENDING状態
+        
+        // 統合テスト環境では自動承認
+        if (autoApproveInTests) {
+            user.setStatus(UserStatus.APPROVED);
+        }
+        
         User savedUser = userRepository.save(user);
 
         // Record user registration metric

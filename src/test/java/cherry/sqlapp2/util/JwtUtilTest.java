@@ -15,6 +15,7 @@
  */
 package cherry.sqlapp2.util;
 
+import cherry.sqlapp2.entity.Role;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;
@@ -54,7 +55,7 @@ class JwtUtilTest {
         @Test
         @DisplayName("ユーザー名から有効なJWTトークンを生成する")
         void shouldGenerateValidTokenForUsername() {
-            String token = jwtUtil.generateAccessToken(testUsername);
+            String token = jwtUtil.generateAccessToken(testUsername, Role.USER);
 
             assertThat(token).isNotNull()
                     .isNotBlank()
@@ -68,9 +69,9 @@ class JwtUtilTest {
         @Test
         @DisplayName("同一ユーザー名でも異なる時刻で異なるトークンを生成する")
         void shouldGenerateDifferentTokensForSameUsername() throws InterruptedException {
-            String token1 = jwtUtil.generateAccessToken(testUsername);
+            String token1 = jwtUtil.generateAccessToken(testUsername, Role.USER);
             Thread.sleep(1000); // 1秒待機して異なるタイムスタンプを確保
-            String token2 = jwtUtil.generateAccessToken(testUsername);
+            String token2 = jwtUtil.generateAccessToken(testUsername, Role.USER);
 
             assertThat(token1).isNotEqualTo(token2);
         }
@@ -78,8 +79,8 @@ class JwtUtilTest {
         @Test
         @DisplayName("異なるユーザー名で異なるトークンを生成する")
         void shouldGenerateDifferentTokensForDifferentUsernames() {
-            String token1 = jwtUtil.generateAccessToken("user1");
-            String token2 = jwtUtil.generateAccessToken("user2");
+            String token1 = jwtUtil.generateAccessToken("user1", Role.USER);
+            String token2 = jwtUtil.generateAccessToken("user2", Role.USER);
 
             assertThat(token1).isNotEqualTo(token2);
         }
@@ -87,7 +88,7 @@ class JwtUtilTest {
         @Test
         @DisplayName("空のユーザー名を処理する")
         void shouldHandleEmptyUsername() {
-            String token = jwtUtil.generateAccessToken("");
+            String token = jwtUtil.generateAccessToken("", Role.USER);
 
             assertThat(token).isNotNull().isNotBlank();
             // JJWTライブラリは空文字列のsubjectをJSONから省略するため、nullが返される
@@ -97,7 +98,7 @@ class JwtUtilTest {
         @Test
         @DisplayName("nullユーザー名を処理する")
         void shouldHandleNullUsername() {
-            String token = jwtUtil.generateAccessToken(null);
+            String token = jwtUtil.generateAccessToken(null, Role.USER);
 
             assertThat(token).isNotNull();
             assertThat(jwtUtil.extractUsername(token)).isNull();
@@ -112,7 +113,7 @@ class JwtUtilTest {
 
         @BeforeEach
         void setUpToken() {
-            validToken = jwtUtil.generateAccessToken(testUsername);
+            validToken = jwtUtil.generateAccessToken(testUsername, Role.USER);
         }
 
         @Test
@@ -166,7 +167,7 @@ class JwtUtilTest {
             ReflectionTestUtils.setField(differentKeyUtil, "refreshTokenExpiration", testExpiration * 24);
             ReflectionTestUtils.setField(differentKeyUtil, "slidingRefreshExpiration", false);
 
-            String tokenWithDifferentKey = differentKeyUtil.generateAccessToken(testUsername);
+            String tokenWithDifferentKey = differentKeyUtil.generateAccessToken(testUsername, Role.USER);
 
             assertThatThrownBy(() -> jwtUtil.extractUsername(tokenWithDifferentKey))
                     .isInstanceOf(SignatureException.class);
@@ -195,7 +196,7 @@ class JwtUtilTest {
 
         @BeforeEach
         void setUpToken() {
-            validToken = jwtUtil.generateAccessToken(testUsername);
+            validToken = jwtUtil.generateAccessToken(testUsername, Role.USER);
         }
 
         @Test
@@ -224,7 +225,7 @@ class JwtUtilTest {
             ReflectionTestUtils.setField(shortExpirationUtil, "refreshTokenExpiration", 1L);
             ReflectionTestUtils.setField(shortExpirationUtil, "slidingRefreshExpiration", false);
 
-            String expiredToken = shortExpirationUtil.generateAccessToken(testUsername);
+            String expiredToken = shortExpirationUtil.generateAccessToken(testUsername, Role.USER);
 
             // トークンの有効期限切れを待つ
             Thread.sleep(1500L); // 1.5秒待機
@@ -269,7 +270,7 @@ class JwtUtilTest {
         @Test
         @DisplayName("検証時の空ユーザー名を処理する")
         void shouldHandleEmptyUsernameInValidation() {
-            String emptyUsernameToken = jwtUtil.generateAccessToken("");
+            String emptyUsernameToken = jwtUtil.generateAccessToken("", Role.USER);
             Boolean isValid = jwtUtil.validateAccessToken(emptyUsernameToken, "");
 
             // JJWTライブラリの仕様により、空文字列で生成されたトークンは
@@ -285,7 +286,7 @@ class JwtUtilTest {
         @Test
         @DisplayName("期限切れでないトークンを正しく検出する")
         void shouldDetectNonExpiredTokenCorrectly() {
-            String token = jwtUtil.generateAccessToken(testUsername);
+            String token = jwtUtil.generateAccessToken(testUsername, Role.USER);
             Date expiration = jwtUtil.extractExpiration(token);
             Date now = new Date();
 
@@ -302,7 +303,7 @@ class JwtUtilTest {
             ReflectionTestUtils.setField(shortExpirationUtil, "refreshTokenExpiration", 1L);
             ReflectionTestUtils.setField(shortExpirationUtil, "slidingRefreshExpiration", false);
 
-            String token = shortExpirationUtil.generateAccessToken(testUsername);
+            String token = shortExpirationUtil.generateAccessToken(testUsername, Role.USER);
 
             // トークンの有効期限切れを待つ
             Thread.sleep(1500L); // 1.5秒待機
@@ -328,8 +329,8 @@ class JwtUtilTest {
         @Test
         @DisplayName("同じ秘密鍵で一貫した署名鍵を使用する")
         void shouldUseConsistentSigningKeyForSameSecret() {
-            String token1 = jwtUtil.generateAccessToken(testUsername);
-            String token2 = jwtUtil.generateAccessToken(testUsername);
+            String token1 = jwtUtil.generateAccessToken(testUsername, Role.USER);
+            String token2 = jwtUtil.generateAccessToken(testUsername, Role.USER);
 
             // 両方のトークンが同じutilインスタンスで検証可能であるべき
             assertThat(jwtUtil.validateAccessToken(token1, testUsername)).isTrue();
@@ -340,7 +341,7 @@ class JwtUtilTest {
         @DisplayName("非常に長いユーザー名を処理する")
         void shouldHandleVeryLongUsername() {
             String longUsername = "a".repeat(1000);
-            String token = jwtUtil.generateAccessToken(longUsername);
+            String token = jwtUtil.generateAccessToken(longUsername, Role.USER);
 
             assertThat(jwtUtil.extractUsername(token)).isEqualTo(longUsername);
             assertThat(jwtUtil.validateAccessToken(token, longUsername)).isTrue();
@@ -350,7 +351,7 @@ class JwtUtilTest {
         @DisplayName("ユーザー名のUnicode文字を処理する")
         void shouldHandleUnicodeCharactersInUsername() {
             String unicodeUsername = "ユーザー名テスト123";
-            String token = jwtUtil.generateAccessToken(unicodeUsername);
+            String token = jwtUtil.generateAccessToken(unicodeUsername, Role.USER);
 
             assertThat(jwtUtil.extractUsername(token)).isEqualTo(unicodeUsername);
             assertThat(jwtUtil.validateAccessToken(token, unicodeUsername)).isTrue();
@@ -360,7 +361,7 @@ class JwtUtilTest {
         @DisplayName("ユーザー名の特殊文字を処理する")
         void shouldHandleSpecialCharactersInUsername() {
             String specialUsername = "user@domain.com+test!#$%";
-            String token = jwtUtil.generateAccessToken(specialUsername);
+            String token = jwtUtil.generateAccessToken(specialUsername, Role.USER);
 
             assertThat(jwtUtil.extractUsername(token)).isEqualTo(specialUsername);
             assertThat(jwtUtil.validateAccessToken(token, specialUsername)).isTrue();

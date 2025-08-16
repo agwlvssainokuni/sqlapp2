@@ -148,7 +148,7 @@ class AuthControllerTest {
 
             verify(authenticationManager).authenticate(any(UsernamePasswordAuthenticationToken.class));
             verify(userService, never()).findByUsername(anyString());
-            verify(jwtUtil, never()).generateAccessToken(anyString());
+            verify(jwtUtil, never()).generateAccessToken(anyString(), any(Role.class));
         }
 
         @Test
@@ -168,7 +168,7 @@ class AuthControllerTest {
 
             verify(authenticationManager).authenticate(any(UsernamePasswordAuthenticationToken.class));
             verify(userService).findByUsername(testUsername);
-            verify(jwtUtil, never()).generateAccessToken(anyString());
+            verify(jwtUtil, never()).generateAccessToken(anyString(), any(Role.class));
         }
 
         @Test
