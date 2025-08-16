@@ -34,6 +34,11 @@ const Dashboard: React.FC = () => {
         <h2>{t('dashboard.quickActions')}</h2>
         <div className="feature-cards">
           <div className="feature-card">
+            <h3>{t('navigation.queryBuilder')}</h3>
+            <p>{t('dashboard.queryBuilderDescription')}</p>
+            <Link to="/builder" className="feature-link">{t('dashboard.buildQuery')}</Link>
+          </div>
+          <div className="feature-card">
             <h3>{t('navigation.sqlExecution')}</h3>
             <p>{t('dashboard.sqlExecutionDescription')}</p>
             <Link to="/sql" className="feature-link">{t('dashboard.executeSQL')}</Link>
@@ -42,11 +47,6 @@ const Dashboard: React.FC = () => {
             <h3>{t('navigation.connections')}</h3>
             <p>{t('dashboard.connectionsDescription')}</p>
             <Link to="/connections" className="feature-link">{t('dashboard.manageConnections')}</Link>
-          </div>
-          <div className="feature-card">
-            <h3>{t('navigation.schemaViewer')}</h3>
-            <p>{t('dashboard.schemaViewerDescription')}</p>
-            <Link to="/schema" className="feature-link">{t('dashboard.browseSchema')}</Link>
           </div>
           <div className="feature-card">
             <h3>{t('navigation.savedQueries')}</h3>
@@ -59,9 +59,9 @@ const Dashboard: React.FC = () => {
             <Link to="/history" className="feature-link">{t('dashboard.viewHistory')}</Link>
           </div>
           <div className="feature-card">
-            <h3>{t('navigation.queryBuilder')}</h3>
-            <p>{t('dashboard.queryBuilderDescription')}</p>
-            <Link to="/builder" className="feature-link">{t('dashboard.buildQuery')}</Link>
+            <h3>{t('navigation.schemaViewer')}</h3>
+            <p>{t('dashboard.schemaViewerDescription')}</p>
+            <Link to="/schema" className="feature-link">{t('dashboard.browseSchema')}</Link>
           </div>
         </div>
       </section>
