@@ -195,7 +195,7 @@ public class SqlReverseEngineeringService {
                     }
                 }
                 
-                // Parse the expression part (without alias)
+                // Parse the expression part (without alias) - Enhanced for aggregate functions
                 if (expression.equals("*")) {
                     // SELECT *
                     selectColumn.setTableName("");
@@ -205,15 +205,9 @@ public class SqlReverseEngineeringService {
                     String tableName = expression.replace(".*", "");
                     selectColumn.setTableName(tableName);
                     selectColumn.setColumnName("*");
-                } else if (expression.contains(".")) {
-                    // SELECT table.column
-                    String[] parts = expression.split("\\.", 2);
-                    selectColumn.setTableName(parts[0]);
-                    selectColumn.setColumnName(parts[1]);
                 } else {
-                    // SELECT column
-                    selectColumn.setTableName("");
-                    selectColumn.setColumnName(expression);
+                    // Check for aggregate functions
+                    parseSelectExpression(expression, selectColumn);
                 }
                 
                 // Set alias if present
@@ -226,6 +220,66 @@ public class SqlReverseEngineeringService {
         }
         
         return selectColumns;
+    }
+    
+    /**
+     * Parse SELECT expression to extract aggregate function, table name, and column name.
+     */
+    private void parseSelectExpression(String expression, SelectColumn selectColumn) {
+        // Common aggregate functions
+        String[] aggregateFunctions = {"COUNT", "SUM", "AVG", "MAX", "MIN", "DISTINCT"};
+        
+        String upperExpression = expression.toUpperCase();
+        boolean foundAggregate = false;
+        
+        for (String func : aggregateFunctions) {
+            if (upperExpression.startsWith(func + "(")) {
+                // Found aggregate function
+                selectColumn.setAggregateFunction(func);
+                
+                // Extract the content inside parentheses
+                int openParen = expression.indexOf("(");
+                int closeParen = expression.lastIndexOf(")");
+                if (openParen != -1 && closeParen != -1 && closeParen > openParen) {
+                    String innerExpression = expression.substring(openParen + 1, closeParen).trim();
+                    
+                    if ("*".equals(innerExpression)) {
+                        // COUNT(*), etc.
+                        selectColumn.setTableName("");
+                        selectColumn.setColumnName("*");
+                    } else if (innerExpression.contains(".")) {
+                        // COUNT(table.column)
+                        String[] parts = innerExpression.split("\\.", 2);
+                        selectColumn.setTableName(parts[0]);
+                        selectColumn.setColumnName(parts[1]);
+                    } else {
+                        // COUNT(column)
+                        selectColumn.setTableName("");
+                        selectColumn.setColumnName(innerExpression);
+                    }
+                } else {
+                    // Fallback: treat the whole expression as column name
+                    selectColumn.setTableName("");
+                    selectColumn.setColumnName(expression);
+                }
+                foundAggregate = true;
+                break;
+            }
+        }
+        
+        if (!foundAggregate) {
+            // Regular column without aggregate function
+            if (expression.contains(".")) {
+                // SELECT table.column
+                String[] parts = expression.split("\\.", 2);
+                selectColumn.setTableName(parts[0]);
+                selectColumn.setColumnName(parts[1]);
+            } else {
+                // SELECT column
+                selectColumn.setTableName("");
+                selectColumn.setColumnName(expression);
+            }
+        }
     }
 
     private List<FromTable> parseFromItem(FromItem fromItem) {
@@ -524,7 +578,7 @@ public class SqlReverseEngineeringService {
     }
     
     /**
-     * Parse a simple WHERE condition string like "m.id = 'job_id'".
+     * Parse a simple WHERE condition string like "m.id = 'job_id'" or "COUNT(v1.id) >= '1'".
      */
     private WhereCondition parseSimpleWhereCondition(String conditionString) {
         if (conditionString == null || conditionString.trim().isEmpty()) {
@@ -565,7 +619,7 @@ public class SqlReverseEngineeringService {
                             maxValue = maxValue.substring(1, maxValue.length() - 1);
                         }
                         
-                        return createBetweenWhereCondition(leftSide, minValue, maxValue);
+                        return createBetweenWhereConditionWithAggregateSupport(leftSide, minValue, maxValue);
                     }
                 }
             }
@@ -600,7 +654,7 @@ public class SqlReverseEngineeringService {
                         value = value.substring(1, value.length() - 1);
                     }
                     
-                    return createWhereCondition(leftSide, operator, value);
+                    return createWhereConditionWithAggregateSupport(leftSide, operator, value);
                 }
             }
         }
@@ -632,6 +686,69 @@ public class SqlReverseEngineeringService {
     }
     
     /**
+     * Enhanced helper method to create WhereCondition with aggregate function support.
+     */
+    private WhereCondition createWhereConditionWithAggregateSupport(String leftSide, String operator, String value) {
+        // Check for aggregate functions in left side
+        String[] aggregateFunctions = {"COUNT", "SUM", "AVG", "MAX", "MIN"};
+        String upperLeftSide = leftSide.toUpperCase();
+        
+        WhereCondition condition = new WhereCondition();
+        condition.setOperator(operator);
+        condition.setValue(value);
+        
+        boolean foundAggregate = false;
+        for (String func : aggregateFunctions) {
+            if (upperLeftSide.startsWith(func + "(")) {
+                // Found aggregate function
+                condition.setAggregateFunction(func);
+                
+                // Extract the content inside parentheses
+                int openParen = leftSide.indexOf("(");
+                int closeParen = leftSide.lastIndexOf(")");
+                if (openParen != -1 && closeParen != -1 && closeParen > openParen) {
+                    String innerExpression = leftSide.substring(openParen + 1, closeParen).trim();
+                    
+                    if ("*".equals(innerExpression)) {
+                        // COUNT(*), etc.
+                        condition.setTableName("");
+                        condition.setColumnName("*");
+                    } else if (innerExpression.contains(".")) {
+                        // COUNT(table.column)
+                        String[] parts = innerExpression.split("\\.", 2);
+                        condition.setTableName(parts[0]);
+                        condition.setColumnName(parts[1]);
+                    } else {
+                        // COUNT(column)
+                        condition.setTableName("");
+                        condition.setColumnName(innerExpression);
+                    }
+                } else {
+                    // Fallback: treat the whole expression as column name
+                    condition.setTableName("");
+                    condition.setColumnName(leftSide);
+                }
+                foundAggregate = true;
+                break;
+            }
+        }
+        
+        if (!foundAggregate) {
+            // Regular column without aggregate function
+            if (leftSide.contains(".")) {
+                String[] leftParts = leftSide.split("\\.", 2);
+                condition.setTableName(leftParts[0]);
+                condition.setColumnName(leftParts[1]);
+            } else {
+                condition.setTableName("");
+                condition.setColumnName(leftSide);
+            }
+        }
+        
+        return condition;
+    }
+    
+    /**
      * Helper method to create WhereCondition for BETWEEN operator with min and max values.
      */
     private WhereCondition createBetweenWhereCondition(String leftSide, String minValue, String maxValue) {
@@ -654,6 +771,70 @@ public class SqlReverseEngineeringService {
         
         return condition;
     }
+    
+    /**
+     * Enhanced helper method to create WhereCondition for BETWEEN operator with aggregate function support.
+     */
+    private WhereCondition createBetweenWhereConditionWithAggregateSupport(String leftSide, String minValue, String maxValue) {
+        // Check for aggregate functions in left side
+        String[] aggregateFunctions = {"COUNT", "SUM", "AVG", "MAX", "MIN"};
+        String upperLeftSide = leftSide.toUpperCase();
+        
+        WhereCondition condition = new WhereCondition();
+        condition.setOperator("BETWEEN");
+        condition.setMinValue(minValue);
+        condition.setMaxValue(maxValue);
+        
+        boolean foundAggregate = false;
+        for (String func : aggregateFunctions) {
+            if (upperLeftSide.startsWith(func + "(")) {
+                // Found aggregate function
+                condition.setAggregateFunction(func);
+                
+                // Extract the content inside parentheses
+                int openParen = leftSide.indexOf("(");
+                int closeParen = leftSide.lastIndexOf(")");
+                if (openParen != -1 && closeParen != -1 && closeParen > openParen) {
+                    String innerExpression = leftSide.substring(openParen + 1, closeParen).trim();
+                    
+                    if ("*".equals(innerExpression)) {
+                        // COUNT(*), etc.
+                        condition.setTableName("");
+                        condition.setColumnName("*");
+                    } else if (innerExpression.contains(".")) {
+                        // COUNT(table.column)
+                        String[] parts = innerExpression.split("\\.", 2);
+                        condition.setTableName(parts[0]);
+                        condition.setColumnName(parts[1]);
+                    } else {
+                        // COUNT(column)
+                        condition.setTableName("");
+                        condition.setColumnName(innerExpression);
+                    }
+                } else {
+                    // Fallback: treat the whole expression as column name
+                    condition.setTableName("");
+                    condition.setColumnName(leftSide);
+                }
+                foundAggregate = true;
+                break;
+            }
+        }
+        
+        if (!foundAggregate) {
+            // Regular column without aggregate function
+            if (leftSide.contains(".")) {
+                String[] leftParts = leftSide.split("\\.", 2);
+                condition.setTableName(leftParts[0]);
+                condition.setColumnName(leftParts[1]);
+            } else {
+                condition.setTableName("");
+                condition.setColumnName(leftSide);
+            }
+        }
+        
+        return condition;
+    }
 
     private List<OrderByColumn> parseOrderBy(List<OrderByElement> orderByElements) {
         List<OrderByColumn> orderByColumns = new ArrayList<>();
@@ -663,14 +844,9 @@ public class SqlReverseEngineeringService {
                 OrderByColumn orderByColumn = new OrderByColumn();
                 
                 String expression = element.getExpression().toString();
-                if (expression.contains(".")) {
-                    String[] parts = expression.split("\\.", 2);
-                    orderByColumn.setTableName(parts[0]);
-                    orderByColumn.setColumnName(parts[1]);
-                } else {
-                    orderByColumn.setTableName("");
-                    orderByColumn.setColumnName(expression);
-                }
+                
+                // Parse expression with aggregate function support
+                parseOrderByExpression(expression, orderByColumn);
                 
                 orderByColumn.setDirection(element.isAsc() ? "ASC" : "DESC");
                 orderByColumns.add(orderByColumn);
@@ -678,6 +854,64 @@ public class SqlReverseEngineeringService {
         }
         
         return orderByColumns;
+    }
+    
+    /**
+     * Parse ORDER BY expression to extract aggregate function, table name, and column name.
+     */
+    private void parseOrderByExpression(String expression, OrderByColumn orderByColumn) {
+        // Common aggregate functions
+        String[] aggregateFunctions = {"COUNT", "SUM", "AVG", "MAX", "MIN"};
+        
+        String upperExpression = expression.toUpperCase();
+        boolean foundAggregate = false;
+        
+        for (String func : aggregateFunctions) {
+            if (upperExpression.startsWith(func + "(")) {
+                // Found aggregate function
+                orderByColumn.setAggregateFunction(func);
+                
+                // Extract the content inside parentheses
+                int openParen = expression.indexOf("(");
+                int closeParen = expression.lastIndexOf(")");
+                if (openParen != -1 && closeParen != -1 && closeParen > openParen) {
+                    String innerExpression = expression.substring(openParen + 1, closeParen).trim();
+                    
+                    if ("*".equals(innerExpression)) {
+                        // COUNT(*), etc.
+                        orderByColumn.setTableName("");
+                        orderByColumn.setColumnName("*");
+                    } else if (innerExpression.contains(".")) {
+                        // COUNT(table.column)
+                        String[] parts = innerExpression.split("\\.", 2);
+                        orderByColumn.setTableName(parts[0]);
+                        orderByColumn.setColumnName(parts[1]);
+                    } else {
+                        // COUNT(column)
+                        orderByColumn.setTableName("");
+                        orderByColumn.setColumnName(innerExpression);
+                    }
+                } else {
+                    // Fallback: treat the whole expression as column name
+                    orderByColumn.setTableName("");
+                    orderByColumn.setColumnName(expression);
+                }
+                foundAggregate = true;
+                break;
+            }
+        }
+        
+        if (!foundAggregate) {
+            // Regular column without aggregate function
+            if (expression.contains(".")) {
+                String[] parts = expression.split("\\.", 2);
+                orderByColumn.setTableName(parts[0]);
+                orderByColumn.setColumnName(parts[1]);
+            } else {
+                orderByColumn.setTableName("");
+                orderByColumn.setColumnName(expression);
+            }
+        }
     }
 
     /**

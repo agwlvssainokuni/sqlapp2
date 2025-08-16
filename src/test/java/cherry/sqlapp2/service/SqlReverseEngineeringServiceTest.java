@@ -221,9 +221,13 @@ class SqlReverseEngineeringServiceTest {
             QueryStructure structure = result.queryStructure();
             assertThat(structure.getHavingConditions()).hasSize(1);
             
-            // Note: 現在のリバースエンジニアリングでは集約関数の詳細解析は制限されています
-            // 将来のリリースで対応予定
-            assertThat(structure.getHavingConditions().get(0).getColumnName()).contains("COUNT");
+            // 集約関数が正しく解析されることを確認
+            QueryStructure.WhereCondition havingCondition = structure.getHavingConditions().get(0);
+            assertThat(havingCondition.getAggregateFunction()).isEqualTo("COUNT");
+            assertThat(havingCondition.getTableName()).isEmpty();
+            assertThat(havingCondition.getColumnName()).isEqualTo("*");
+            assertThat(havingCondition.getOperator()).isEqualTo(">");
+            assertThat(havingCondition.getValue()).isEqualTo("10");
         }
 
         @Test
@@ -240,9 +244,20 @@ class SqlReverseEngineeringServiceTest {
             QueryStructure structure = result.queryStructure();
             assertThat(structure.getOrderByColumns()).hasSize(1);
             
-            // Note: 現在のリバースエンジニアリングでは集約関数の詳細解析は制限されています
-            // 将来のリリースで対応予定
-            assertThat(structure.getOrderByColumns().get(0).getColumnName()).contains("SUM");
+            // 集約関数が正しく解析されることを確認
+            QueryStructure.OrderByColumn orderByColumn = structure.getOrderByColumns().get(0);
+            assertThat(orderByColumn.getAggregateFunction()).isEqualTo("SUM");
+            assertThat(orderByColumn.getTableName()).isEmpty();
+            assertThat(orderByColumn.getColumnName()).isEqualTo("salary");
+            assertThat(orderByColumn.getDirection()).isEqualTo("DESC");
+            
+            // SELECT句の集約関数も確認
+            assertThat(structure.getSelectColumns()).hasSize(2);
+            QueryStructure.SelectColumn aggregateColumn = structure.getSelectColumns().get(1);
+            assertThat(aggregateColumn.getAggregateFunction()).isEqualTo("SUM");
+            assertThat(aggregateColumn.getTableName()).isEmpty();
+            assertThat(aggregateColumn.getColumnName()).isEqualTo("salary");
+            assertThat(aggregateColumn.getAlias()).isEqualTo("total");
         }
 
         @Test
@@ -271,6 +286,55 @@ class SqlReverseEngineeringServiceTest {
             
             // ORDER BY検証（集約関数は現在制限されているため、基本的な構造のみ確認）
             assertThat(structure.getOrderByColumns()).hasSize(2);
+        }
+
+        @Test
+        @DisplayName("報告された問題のSQLをパースする")
+        void shouldParseReportedProblemQuery() {
+            // Given
+            String sql = "SELECT COUNT(v1.id), m1.id FROM tbl_value AS v1 RIGHT JOIN tbl_master AS m1 ON m1.id = v1.field_id AND m1.type = v1.field_type GROUP BY m1.id HAVING COUNT(v1.id) >= '1'";
+
+            // When
+            SqlParseResult result = service.parseSQL(sql);
+
+            // Then
+            assertThat(result.success()).isTrue();
+            QueryStructure structure = result.queryStructure();
+            
+            // SELECT句の確認（集約関数含む）
+            assertThat(structure.getSelectColumns()).hasSize(2);
+            
+            // 最初のカラム: COUNT(v1.id)
+            QueryStructure.SelectColumn firstColumn = structure.getSelectColumns().get(0);
+            assertThat(firstColumn.getAggregateFunction()).isEqualTo("COUNT");
+            assertThat(firstColumn.getTableName()).isEqualTo("v1");
+            assertThat(firstColumn.getColumnName()).isEqualTo("id");
+            
+            // 2番目のカラム: m1.id
+            QueryStructure.SelectColumn secondColumn = structure.getSelectColumns().get(1);
+            assertThat(secondColumn.getAggregateFunction()).isNull();
+            assertThat(secondColumn.getTableName()).isEqualTo("m1");
+            assertThat(secondColumn.getColumnName()).isEqualTo("id");
+            
+            // JOIN条件の確認
+            assertThat(structure.getJoins()).hasSize(1);
+            assertThat(structure.getJoins().get(0).getJoinType()).isEqualTo("RIGHT");
+            assertThat(structure.getJoins().get(0).getTableName()).isEqualTo("tbl_master");
+            assertThat(structure.getJoins().get(0).getAlias()).isEqualTo("m1");
+            
+            // GROUP BY検証
+            assertThat(structure.getGroupByColumns()).hasSize(1);
+            assertThat(structure.getGroupByColumns().get(0).getTableName()).isEqualTo("m1");
+            assertThat(structure.getGroupByColumns().get(0).getColumnName()).isEqualTo("id");
+            
+            // HAVING検証（集約関数含む）
+            assertThat(structure.getHavingConditions()).hasSize(1);
+            QueryStructure.WhereCondition havingCondition = structure.getHavingConditions().get(0);
+            assertThat(havingCondition.getAggregateFunction()).isEqualTo("COUNT");
+            assertThat(havingCondition.getTableName()).isEqualTo("v1");
+            assertThat(havingCondition.getColumnName()).isEqualTo("id");
+            assertThat(havingCondition.getOperator()).isEqualTo(">=");
+            assertThat(havingCondition.getValue()).isEqualTo("1");
         }
     }
 }
