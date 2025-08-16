@@ -142,13 +142,17 @@ public class SqlReverseEngineeringService {
         Expression whereExpression = plainSelect.getWhere();
         builder.whereConditions(parseWhereConditions(whereExpression));
 
+        // Parse GROUP BY
+        GroupByElement groupByElement = plainSelect.getGroupBy();
+        builder.groupByColumns(parseGroupBy(groupByElement));
+
+        // Parse HAVING
+        Expression havingExpression = plainSelect.getHaving();
+        builder.havingConditions(parseWhereConditions(havingExpression));
+
         // Parse ORDER BY
         List<OrderByElement> orderByElements = plainSelect.getOrderByElements();
         builder.orderByColumns(parseOrderBy(orderByElements));
-
-        // Parse other clauses (set to empty for now)
-        builder.groupByColumns(new ArrayList<>());
-        builder.havingConditions(new ArrayList<>());
 
         // Parse LIMIT/OFFSET (if available)
         Limit limit = plainSelect.getLimit();
@@ -674,5 +678,35 @@ public class SqlReverseEngineeringService {
         }
         
         return orderByColumns;
+    }
+
+    /**
+     * Parse GROUP BY clause from JSqlParser GroupByElement.
+     */
+    private List<GroupByColumn> parseGroupBy(GroupByElement groupByElement) {
+        List<GroupByColumn> groupByColumns = new ArrayList<>();
+        
+        if (groupByElement != null && groupByElement.getGroupByExpressionList() != null) {
+            for (Object expressionObj : groupByElement.getGroupByExpressionList()) {
+                if (expressionObj instanceof Expression) {
+                    Expression expression = (Expression) expressionObj;
+                    GroupByColumn groupByColumn = new GroupByColumn();
+                    
+                    String expressionString = expression.toString();
+                    if (expressionString.contains(".")) {
+                        String[] parts = expressionString.split("\\.", 2);
+                        groupByColumn.setTableName(parts[0]);
+                        groupByColumn.setColumnName(parts[1]);
+                    } else {
+                        groupByColumn.setTableName("");
+                        groupByColumn.setColumnName(expressionString);
+                    }
+                    
+                    groupByColumns.add(groupByColumn);
+                }
+            }
+        }
+        
+        return groupByColumns;
     }
 }

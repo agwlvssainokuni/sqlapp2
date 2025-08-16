@@ -206,6 +206,7 @@
     "addJoin": "JOIN追加",
     "joinConditions": "結合条件",
     "addOrderBy": "ソート順追加",
+    "addGroupBy": "GROUP BY追加",
     "value": "値",
     "minValue": "最小値",
     "maxValue": "最大値",

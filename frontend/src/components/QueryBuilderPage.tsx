@@ -61,6 +61,7 @@ interface JoinClause {
 interface WhereCondition {
   tableName?: string
   columnName: string
+  aggregateFunction?: string
   operator: string
   value?: string
   values?: string[]
@@ -78,6 +79,7 @@ interface GroupByColumn {
 interface OrderByColumn {
   tableName?: string
   columnName: string
+  aggregateFunction?: string
   direction: string
 }
 
@@ -702,6 +704,59 @@ const QueryBuilderPage: React.FC = () => {
     }))
   }
 
+  // GROUP BY functions
+  const addGroupByColumn = () => {
+    setQueryStructure(prev => ({
+      ...prev,
+      groupByColumns: [...prev.groupByColumns, {columnName: ''}]
+    }))
+  }
+
+  const updateGroupByColumn = (index: number, field: keyof GroupByColumn, value: string) => {
+    setQueryStructure(prev => ({
+      ...prev,
+      groupByColumns: prev.groupByColumns.map((col, i) =>
+        i === index ? {...col, [field]: value || undefined} : col
+      )
+    }))
+  }
+
+  const removeGroupByColumn = (index: number) => {
+    setQueryStructure(prev => ({
+      ...prev,
+      groupByColumns: prev.groupByColumns.filter((_, i) => i !== index)
+    }))
+  }
+
+  // HAVING functions
+  const addHavingCondition = () => {
+    setQueryStructure(prev => ({
+      ...prev,
+      havingConditions: [...prev.havingConditions, {
+        columnName: '',
+        operator: '=',
+        value: '',
+        negated: false
+      }]
+    }))
+  }
+
+  const updateHavingCondition = (index: number, field: keyof WhereCondition, value: any) => {
+    setQueryStructure(prev => ({
+      ...prev,
+      havingConditions: prev.havingConditions.map((condition, i) =>
+        i === index ? {...condition, [field]: value} : condition
+      )
+    }))
+  }
+
+  const removeHavingCondition = (index: number) => {
+    setQueryStructure(prev => ({
+      ...prev,
+      havingConditions: prev.havingConditions.filter((_, i) => i !== index)
+    }))
+  }
+
   return (
     <Layout title={t('queryBuilder.title')}>
       <div className="query-builder">
@@ -748,6 +803,18 @@ const QueryBuilderPage: React.FC = () => {
             onClick={() => setActiveTab('where')}
           >
             {t('queryBuilder.whereClause')} ({queryStructure.whereConditions.length})
+          </button>
+          <button
+            className={`tab-btn ${activeTab === 'groupby' ? 'active' : ''}`}
+            onClick={() => setActiveTab('groupby')}
+          >
+            {t('queryBuilder.groupByClause')} ({queryStructure.groupByColumns.length})
+          </button>
+          <button
+            className={`tab-btn ${activeTab === 'having' ? 'active' : ''}`}
+            onClick={() => setActiveTab('having')}
+          >
+            {t('queryBuilder.havingClause')} ({queryStructure.havingConditions.length})
           </button>
           <button
             className={`tab-btn ${activeTab === 'orderby' ? 'active' : ''}`}
@@ -1188,6 +1255,18 @@ const QueryBuilderPage: React.FC = () => {
                     </select>
 
                     <select
+                      value={column.aggregateFunction || ''}
+                      onChange={(e) => updateOrderByColumn(index, 'aggregateFunction', e.target.value || '')}
+                    >
+                      <option value="">{t('queryBuilder.noFunction')}</option>
+                      <option value="COUNT">COUNT</option>
+                      <option value="SUM">SUM</option>
+                      <option value="AVG">AVG</option>
+                      <option value="MAX">MAX</option>
+                      <option value="MIN">MIN</option>
+                    </select>
+
+                    <select
                       value={column.direction}
                       onChange={(e) => updateOrderByColumn(index, 'direction', e.target.value)}
                     >
@@ -1209,6 +1288,172 @@ const QueryBuilderPage: React.FC = () => {
                 </div>
               ))}
               <button onClick={addOrderByColumn} className="add-btn">{t('queryBuilder.addOrderBy')}</button>
+            </div>
+          )}
+
+          {/* GROUP BY Tab */}
+          {activeTab === 'groupby' && (
+            <div className="section">
+              <h2>{t('queryBuilder.groupByClause')}</h2>
+              {queryStructure.groupByColumns.map((column, index) => (
+                <div key={index} className="clause-item">
+                  <div className="clause-item-content">
+                    <select
+                      value={column.tableName || ''}
+                      onChange={(e) => updateGroupByColumn(index, 'tableName', e.target.value || '')}
+                    >
+                      <option value="">{t('queryBuilder.selectTable')}</option>
+                      {getAvailableTableReferences().map(ref => (
+                        <option key={ref.value} value={ref.value}>{ref.label}</option>
+                      ))}
+                    </select>
+
+                    <select
+                      value={column.columnName}
+                      onChange={(e) => updateGroupByColumn(index, 'columnName', e.target.value)}
+                    >
+                      <option value="">{t('queryBuilder.selectColumn')}</option>
+                      {getColumnsForTableReference(column.tableName || '').map(col => (
+                        <option key={col.name} value={col.name}>{col.name}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="clause-item-actions">
+                    <button
+                      onClick={() => removeGroupByColumn(index)}
+                      className="remove-btn"
+                      title={t('queryBuilder.remove')}
+                    >
+                      ×
+                    </button>
+                  </div>
+                </div>
+              ))}
+              <button onClick={addGroupByColumn} className="add-btn">{t('queryBuilder.addGroupBy')}</button>
+            </div>
+          )}
+
+          {/* HAVING Tab */}
+          {activeTab === 'having' && (
+            <div className="section">
+              <h2>{t('queryBuilder.havingClause')}</h2>
+              {queryStructure.havingConditions.map((condition, index) => (
+                <div key={index} className="clause-item">
+                  <div className="clause-item-content">
+                    {index > 0 && (
+                      <select
+                        value={condition.logicalOperator || 'AND'}
+                        onChange={(e) => updateHavingCondition(index, 'logicalOperator', e.target.value)}
+                        className="logical-operator"
+                      >
+                        <option value="AND">AND</option>
+                        <option value="OR">OR</option>
+                      </select>
+                    )}
+
+                    <label>
+                      <input
+                        type="checkbox"
+                        checked={condition.negated}
+                        onChange={(e) => updateHavingCondition(index, 'negated', e.target.checked)}
+                      />
+                      {t('queryBuilder.not')}
+                    </label>
+
+                    <select
+                      value={condition.tableName || ''}
+                      onChange={(e) => updateHavingCondition(index, 'tableName', e.target.value || '')}
+                    >
+                      <option value="">{t('queryBuilder.selectTable')}</option>
+                      {getAvailableTableReferences().map(ref => (
+                        <option key={ref.value} value={ref.value}>{ref.label}</option>
+                      ))}
+                    </select>
+
+                    <select
+                      value={condition.columnName}
+                      onChange={(e) => updateHavingCondition(index, 'columnName', e.target.value)}
+                    >
+                      <option value="">{t('queryBuilder.selectColumn')}</option>
+                      {getColumnsForTableReference(condition.tableName || '').map(col => (
+                        <option key={col.name} value={col.name}>{col.name}</option>
+                      ))}
+                    </select>
+
+                    <select
+                      value={condition.aggregateFunction || ''}
+                      onChange={(e) => updateHavingCondition(index, 'aggregateFunction', e.target.value || '')}
+                    >
+                      <option value="">{t('queryBuilder.noFunction')}</option>
+                      <option value="COUNT">COUNT</option>
+                      <option value="SUM">SUM</option>
+                      <option value="AVG">AVG</option>
+                      <option value="MAX">MAX</option>
+                      <option value="MIN">MIN</option>
+                    </select>
+
+                    <select
+                      value={condition.operator}
+                      onChange={(e) => updateHavingCondition(index, 'operator', e.target.value)}
+                    >
+                      <option value="=">=</option>
+                      <option value="<>">≠</option>
+                      <option value="<">&lt;</option>
+                      <option value=">">&gt;</option>
+                      <option value="<=">&le;</option>
+                      <option value=">=">&ge;</option>
+                      <option value="LIKE">LIKE</option>
+                      <option value="IN">IN</option>
+                      <option value="BETWEEN">BETWEEN</option>
+                      <option value="IS NULL">IS NULL</option>
+                      <option value="IS NOT NULL">IS NOT NULL</option>
+                    </select>
+
+                    {condition.operator === 'BETWEEN' ? (
+                      <>
+                        <input
+                          type="text"
+                          placeholder={t('queryBuilder.minValue')}
+                          value={condition.minValue || ''}
+                          onChange={(e) => updateHavingCondition(index, 'minValue', e.target.value)}
+                        />
+                        <input
+                          type="text"
+                          placeholder={t('queryBuilder.maxValue')}
+                          value={condition.maxValue || ''}
+                          onChange={(e) => updateHavingCondition(index, 'maxValue', e.target.value)}
+                        />
+                      </>
+                    ) : condition.operator === 'IN' ? (
+                      <input
+                        type="text"
+                        placeholder="value1,value2,value3"
+                        value={condition.values?.join(',') || ''}
+                        onChange={(e) => updateHavingCondition(index, 'values', e.target.value.split(',').map(v => v.trim()).filter(v => v))}
+                      />
+                    ) : !['IS NULL', 'IS NOT NULL'].includes(condition.operator) && (
+                      <input
+                        type="text"
+                        placeholder={t('queryBuilder.value')}
+                        value={condition.value || ''}
+                        onChange={(e) => updateHavingCondition(index, 'value', e.target.value)}
+                      />
+                    )}
+                  </div>
+
+                  <div className="clause-item-actions">
+                    <button
+                      onClick={() => removeHavingCondition(index)}
+                      className="remove-btn"
+                      title={t('queryBuilder.remove')}
+                    >
+                      ×
+                    </button>
+                  </div>
+                </div>
+              ))}
+              <button onClick={addHavingCondition} className="add-btn">{t('queryBuilder.addCondition')}</button>
             </div>
           )}
 

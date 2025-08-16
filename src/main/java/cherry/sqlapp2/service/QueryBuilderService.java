@@ -267,10 +267,20 @@ public class QueryBuilderService {
             formatted.append("NOT ");
         }
         
+        // Add aggregate function if present
+        if (condition.getAggregateFunction() != null && !condition.getAggregateFunction().trim().isEmpty()) {
+            formatted.append(condition.getAggregateFunction().toUpperCase()).append("(");
+        }
+        
         if (condition.getTableName() != null && !condition.getTableName().trim().isEmpty()) {
             formatted.append(condition.getTableName()).append(".");
         }
         formatted.append(condition.getColumnName());
+        
+        // Close aggregate function if present
+        if (condition.getAggregateFunction() != null && !condition.getAggregateFunction().trim().isEmpty()) {
+            formatted.append(")");
+        }
         
         String operator = condition.getOperator().toUpperCase();
         formatted.append(" ").append(operator).append(" ");
@@ -340,10 +350,20 @@ public class QueryBuilderService {
     private String formatOrderByColumn(QueryStructure.OrderByColumn column) {
         StringBuilder formatted = new StringBuilder();
         
+        // Add aggregate function if present
+        if (column.getAggregateFunction() != null && !column.getAggregateFunction().trim().isEmpty()) {
+            formatted.append(column.getAggregateFunction().toUpperCase()).append("(");
+        }
+        
         if (column.getTableName() != null && !column.getTableName().trim().isEmpty()) {
             formatted.append(column.getTableName()).append(".");
         }
         formatted.append(column.getColumnName());
+        
+        // Close aggregate function if present
+        if (column.getAggregateFunction() != null && !column.getAggregateFunction().trim().isEmpty()) {
+            formatted.append(")");
+        }
         
         if (column.getDirection() != null && !column.getDirection().trim().isEmpty()) {
             formatted.append(" ").append(column.getDirection().toUpperCase());

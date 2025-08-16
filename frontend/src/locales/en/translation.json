@@ -206,6 +206,7 @@
     "addJoin": "Add JOIN",
     "joinConditions": "Join Conditions",
     "addOrderBy": "Add Order By",
+    "addGroupBy": "Add Group By",
     "value": "Value",
     "minValue": "Min value",
     "maxValue": "Max value",

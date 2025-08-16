@@ -159,6 +159,7 @@ public class QueryStructure {
     public static class WhereCondition {
         private String tableName;
         private String columnName;
+        private String aggregateFunction; // COUNT, SUM, AVG, MAX, MIN, etc. (for HAVING clause)
         private String operator; // =, <>, <, >, <=, >=, LIKE, IN, BETWEEN, IS NULL, IS NOT NULL
         private String value;
         private List<String> values; // For IN operator
@@ -182,6 +183,9 @@ public class QueryStructure {
         
         public String getColumnName() { return columnName; }
         public void setColumnName(String columnName) { this.columnName = columnName; }
+        
+        public String getAggregateFunction() { return aggregateFunction; }
+        public void setAggregateFunction(String aggregateFunction) { this.aggregateFunction = aggregateFunction; }
         
         public String getOperator() { return operator; }
         public void setOperator(String operator) { this.operator = operator; }
@@ -227,6 +231,7 @@ public class QueryStructure {
     public static class OrderByColumn {
         private String tableName;
         private String columnName;
+        private String aggregateFunction; // COUNT, SUM, AVG, MAX, MIN, etc.
         private String direction; // ASC, DESC
 
         public OrderByColumn() {}
@@ -243,6 +248,9 @@ public class QueryStructure {
         
         public String getColumnName() { return columnName; }
         public void setColumnName(String columnName) { this.columnName = columnName; }
+        
+        public String getAggregateFunction() { return aggregateFunction; }
+        public void setAggregateFunction(String aggregateFunction) { this.aggregateFunction = aggregateFunction; }
         
         public String getDirection() { return direction; }
         public void setDirection(String direction) { this.direction = direction; }

@@ -1024,5 +1024,186 @@ class QueryBuilderServiceTest {
             assertThat(response.getDetectedParameters()).containsKey("active");
             assertThat(response.getBuildTimeMs()).isGreaterThanOrEqualTo(0);
         }
+
+        @Test
+        @DisplayName("GROUP BY句のみのSQL文を構築する")
+        void shouldBuildQueryWithGroupByOnly() {
+            // Given
+            QueryStructure structure = new QueryStructure();
+            
+            QueryStructure.SelectColumn column = new QueryStructure.SelectColumn();
+            column.setTableName("u");
+            column.setColumnName("department");
+            structure.getSelectColumns().add(column);
+            
+            QueryStructure.SelectColumn countColumn = new QueryStructure.SelectColumn();
+            countColumn.setTableName("u");
+            countColumn.setColumnName("id");
+            countColumn.setAggregateFunction("COUNT");
+            countColumn.setAlias("user_count");
+            structure.getSelectColumns().add(countColumn);
+            
+            QueryStructure.FromTable fromTable = new QueryStructure.FromTable("users");
+            fromTable.setAlias("u");
+            structure.getFromTables().add(fromTable);
+            
+            QueryStructure.GroupByColumn groupByColumn = new QueryStructure.GroupByColumn();
+            groupByColumn.setTableName("u");
+            groupByColumn.setColumnName("department");
+            structure.getGroupByColumns().add(groupByColumn);
+            
+            QueryBuilderRequest request = new QueryBuilderRequest(structure);
+            request.setFormatSql(false);
+
+            // When
+            QueryBuilderResponse response = queryBuilderService.buildQuery(request);
+
+            // Then
+            assertThat(response.isValid()).isTrue();
+            assertThat(response.getGeneratedSql()).isEqualTo(
+                "SELECT u.department, COUNT(u.id) AS user_count FROM users AS u GROUP BY u.department"
+            );
+        }
+
+        @Test
+        @DisplayName("HAVING句のみのSQL文を構築する")
+        void shouldBuildQueryWithHavingOnly() {
+            // Given
+            QueryStructure structure = new QueryStructure();
+            
+            QueryStructure.SelectColumn column = new QueryStructure.SelectColumn();
+            column.setTableName("u");
+            column.setColumnName("department");
+            structure.getSelectColumns().add(column);
+            
+            QueryStructure.SelectColumn countColumn = new QueryStructure.SelectColumn();
+            countColumn.setTableName("u");
+            countColumn.setColumnName("id");
+            countColumn.setAggregateFunction("COUNT");
+            countColumn.setAlias("user_count");
+            structure.getSelectColumns().add(countColumn);
+            
+            QueryStructure.FromTable fromTable = new QueryStructure.FromTable("users");
+            fromTable.setAlias("u");
+            structure.getFromTables().add(fromTable);
+            
+            QueryStructure.GroupByColumn groupByColumn = new QueryStructure.GroupByColumn();
+            groupByColumn.setTableName("u");
+            groupByColumn.setColumnName("department");
+            structure.getGroupByColumns().add(groupByColumn);
+            
+            QueryStructure.WhereCondition havingCondition = new QueryStructure.WhereCondition();
+            havingCondition.setColumnName("user_count");
+            havingCondition.setOperator(">");
+            havingCondition.setValue("5");
+            structure.getHavingConditions().add(havingCondition);
+            
+            QueryBuilderRequest request = new QueryBuilderRequest(structure);
+            request.setFormatSql(false);
+
+            // When
+            QueryBuilderResponse response = queryBuilderService.buildQuery(request);
+
+            // Then
+            assertThat(response.isValid()).isTrue();
+            assertThat(response.getGeneratedSql()).isEqualTo(
+                "SELECT u.department, COUNT(u.id) AS user_count FROM users AS u GROUP BY u.department HAVING user_count > '5'"
+            );
+        }
+
+        @Test
+        @DisplayName("HAVING句で集約関数を使用するSQL文を構築する")
+        void shouldBuildQueryWithAggregateFunctionInHaving() {
+            // Given
+            QueryStructure structure = new QueryStructure();
+            
+            QueryStructure.SelectColumn column = new QueryStructure.SelectColumn();
+            column.setTableName("u");
+            column.setColumnName("department");
+            structure.getSelectColumns().add(column);
+            
+            QueryStructure.SelectColumn countColumn = new QueryStructure.SelectColumn();
+            countColumn.setTableName("u");
+            countColumn.setColumnName("id");
+            countColumn.setAggregateFunction("COUNT");
+            countColumn.setAlias("user_count");
+            structure.getSelectColumns().add(countColumn);
+            
+            QueryStructure.FromTable fromTable = new QueryStructure.FromTable("users");
+            fromTable.setAlias("u");
+            structure.getFromTables().add(fromTable);
+            
+            QueryStructure.GroupByColumn groupByColumn = new QueryStructure.GroupByColumn();
+            groupByColumn.setTableName("u");
+            groupByColumn.setColumnName("department");
+            structure.getGroupByColumns().add(groupByColumn);
+            
+            QueryStructure.WhereCondition havingCondition = new QueryStructure.WhereCondition();
+            havingCondition.setTableName("u");
+            havingCondition.setColumnName("id");
+            havingCondition.setAggregateFunction("COUNT");
+            havingCondition.setOperator(">");
+            havingCondition.setValue("5");
+            structure.getHavingConditions().add(havingCondition);
+            
+            QueryBuilderRequest request = new QueryBuilderRequest(structure);
+            request.setFormatSql(false);
+
+            // When
+            QueryBuilderResponse response = queryBuilderService.buildQuery(request);
+
+            // Then
+            assertThat(response.isValid()).isTrue();
+            assertThat(response.getGeneratedSql()).isEqualTo(
+                "SELECT u.department, COUNT(u.id) AS user_count FROM users AS u GROUP BY u.department HAVING COUNT(u.id) > '5'"
+            );
+        }
+
+        @Test
+        @DisplayName("ORDER BY句で集約関数を使用するSQL文を構築する")
+        void shouldBuildQueryWithAggregateFunctionInOrderBy() {
+            // Given
+            QueryStructure structure = new QueryStructure();
+            
+            QueryStructure.SelectColumn column = new QueryStructure.SelectColumn();
+            column.setTableName("u");
+            column.setColumnName("department");
+            structure.getSelectColumns().add(column);
+            
+            QueryStructure.SelectColumn sumColumn = new QueryStructure.SelectColumn();
+            sumColumn.setTableName("u");
+            sumColumn.setColumnName("salary");
+            sumColumn.setAggregateFunction("SUM");
+            sumColumn.setAlias("total_salary");
+            structure.getSelectColumns().add(sumColumn);
+            
+            QueryStructure.FromTable fromTable = new QueryStructure.FromTable("users");
+            fromTable.setAlias("u");
+            structure.getFromTables().add(fromTable);
+            
+            QueryStructure.GroupByColumn groupByColumn = new QueryStructure.GroupByColumn();
+            groupByColumn.setTableName("u");
+            groupByColumn.setColumnName("department");
+            structure.getGroupByColumns().add(groupByColumn);
+            
+            QueryStructure.OrderByColumn orderByColumn = new QueryStructure.OrderByColumn();
+            orderByColumn.setTableName("u");
+            orderByColumn.setColumnName("salary");
+            orderByColumn.setAggregateFunction("SUM");
+            orderByColumn.setDirection("DESC");
+            structure.getOrderByColumns().add(orderByColumn);
+            
+            QueryBuilderRequest request = new QueryBuilderRequest(structure);
+            request.setFormatSql(false);
+
+            // When
+            QueryBuilderResponse response = queryBuilderService.buildQuery(request);
+
+            // Then
+            assertThat(response.isValid()).isTrue();
+            assertThat(response.getGeneratedSql()).isEqualTo(
+                "SELECT u.department, SUM(u.salary) AS total_salary FROM users AS u GROUP BY u.department ORDER BY SUM(u.salary) DESC"
+            );
+        }
     }
 }
