@@ -69,6 +69,31 @@ npm run dev
 ```
 Frontend runs at `http://localhost:5173` with automatic API proxy to `http://localhost:8080`
 
+#### 4. Development Email Server (MailPit)
+For development and testing of email features (user registration, approval notifications):
+
+```bash
+# Start MailPit using Docker
+docker run -d \
+  --name mailpit \
+  -p 1025:1025 \
+  -p 8025:8025 \
+  axllent/mailpit
+
+# Or using podman
+podman run -d \
+  --name mailpit \
+  -p 1025:1025 \
+  -p 8025:8025 \
+  axllent/mailpit
+```
+
+- **SMTP Server**: `localhost:1025` (used by application)
+- **Web Interface**: `http://localhost:8025` (view sent emails)
+- **Configuration**: Already configured in `application.properties` for development
+
+**Note**: MailPit prevents accidental email delivery to real addresses during development.
+
 ## 🛠️ Development Workflows
 
 ### Standard Development Flow
@@ -83,7 +108,13 @@ Frontend runs at `http://localhost:5173` with automatic API proxy to `http://loc
    cd frontend && npm run dev
    ```
 
-3. **Access Application**: Navigate to `http://localhost:5173`
+3. **Email Development** (optional, for testing notifications):
+   ```bash
+   docker run -d --name mailpit -p 1025:1025 -p 8025:8025 axllent/mailpit
+   ```
+
+4. **Access Application**: Navigate to `http://localhost:5173`
+   - **Email UI**: `http://localhost:8025` (view sent emails)
 
 ### Integrated Testing
 Build frontend and integrate with backend for full testing:
@@ -146,6 +177,12 @@ npm test
 - Mock external dependencies with Mockito
 - Test both success scenarios and comprehensive error handling
 - Use @Nested classes with Japanese @DisplayName for clear test documentation
+
+#### Email Feature Testing
+- **MailPit Integration**: Use MailPit for email notification testing during development
+- **Email Templates**: Test email template rendering with variable substitution
+- **Admin Approval Flow**: Test complete user registration → approval → notification workflow
+- **Multi-language Support**: Verify email templates work correctly in both English and Japanese
 
 #### Frontend Testing
 - Component testing with React Testing Library and vitest
@@ -397,8 +434,10 @@ docker-compose -f docker-compose.yml -f docker-compose.monitoring.yml up -d
 #### Port Conflicts
 ```bash
 # Check processes using ports
-lsof -i :8080
-lsof -i :5173
+lsof -i :8080   # Backend
+lsof -i :5173   # Frontend  
+lsof -i :1025   # MailPit SMTP
+lsof -i :8025   # MailPit Web UI
 
 # Terminate processes if needed
 kill -9 <PID>
@@ -425,6 +464,14 @@ sudo docker-compose up
 - **Spring Boot**: Console output and `app.log`
 - **React**: Browser Developer Tools console
 - **Docker**: `docker-compose logs -f`
+- **MailPit**: Web interface at `http://localhost:8025` for email delivery logs
+
+#### Email Testing Workflow
+1. Start MailPit: `docker run -d --name mailpit -p 1025:1025 -p 8025:8025 axllent/mailpit`
+2. Register new user through application
+3. Check email delivery at `http://localhost:8025`
+4. Test admin approval/rejection notifications
+5. Verify email templates and variable substitution
 
 ## 📚 Documentation Resources
 
