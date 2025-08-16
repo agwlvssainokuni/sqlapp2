@@ -22,9 +22,11 @@ import cherry.sqlapp2.repository.EmailTemplateRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -140,6 +142,93 @@ public class EmailTemplateService {
             return "Unknown";
         }
         return dateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
+    }
+
+    // ==============================
+    // 管理機能用メソッド
+    // ==============================
+    
+    /**
+     * 全てのメールテンプレートを取得します。
+     *
+     * @return 全メールテンプレートのリスト
+     */
+    @Transactional(readOnly = true)
+    public List<EmailTemplate> getAllTemplates() {
+        return emailTemplateRepository.findAll();
+    }
+    
+    /**
+     * 指定されたテンプレートキーの全メールテンプレートを取得します。
+     *
+     * @param templateKey テンプレートキー
+     * @return 指定されたテンプレートキーのメールテンプレートリスト
+     */
+    @Transactional(readOnly = true)
+    public List<EmailTemplate> getTemplatesByKey(String templateKey) {
+        return emailTemplateRepository.findByTemplateKeyOrderByLanguage(templateKey);
+    }
+    
+    /**
+     * 新しいメールテンプレートを作成します。
+     *
+     * @param templateKey テンプレートキー
+     * @param language 言語
+     * @param subject 件名
+     * @param body 本文
+     * @param bcc BCC
+     * @return 作成されたメールテンプレート
+     */
+    @Transactional
+    public EmailTemplate createTemplate(String templateKey, String language, String subject, String body, String bcc) {
+        // 重複チェック
+        Optional<EmailTemplate> existing = emailTemplateRepository.findByTemplateKeyAndLanguage(templateKey, language);
+        if (existing.isPresent()) {
+            throw new IllegalArgumentException("Email template already exists for key: " + templateKey + " and language: " + language);
+        }
+        
+        EmailTemplate template = new EmailTemplate();
+        template.setTemplateKey(templateKey);
+        template.setLanguage(language);
+        template.setSubject(subject);
+        template.setBody(body);
+        template.setBcc(bcc);
+        
+        return emailTemplateRepository.save(template);
+    }
+    
+    /**
+     * メールテンプレートを更新します。
+     *
+     * @param id テンプレートID
+     * @param subject 件名
+     * @param body 本文
+     * @param bcc BCC
+     * @return 更新されたメールテンプレート
+     */
+    @Transactional
+    public EmailTemplate updateTemplate(Long id, String subject, String body, String bcc) {
+        EmailTemplate template = emailTemplateRepository.findById(id)
+            .orElseThrow(() -> new IllegalArgumentException("Email template not found: " + id));
+        
+        template.setSubject(subject);
+        template.setBody(body);
+        template.setBcc(bcc);
+        
+        return emailTemplateRepository.save(template);
+    }
+    
+    /**
+     * メールテンプレートを削除します。
+     *
+     * @param id テンプレートID
+     */
+    @Transactional
+    public void deleteTemplate(Long id) {
+        if (!emailTemplateRepository.existsById(id)) {
+            throw new IllegalArgumentException("Email template not found: " + id);
+        }
+        emailTemplateRepository.deleteById(id);
     }
 
     /**

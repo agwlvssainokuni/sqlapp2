@@ -28,6 +28,15 @@ interface User {
   updatedAt: string
 }
 
+interface EmailTemplate {
+  id: number
+  templateKey: string
+  language: string
+  subject: string
+  body: string
+  bcc?: string
+}
+
 interface ApiResponse<T> {
   ok: boolean
   data?: T
@@ -42,8 +51,15 @@ interface PageResponse<T> {
   number: number
 }
 
+type TabType = 'users' | 'email-templates'
+
 const AdminPage: React.FC = () => {
   const { t } = useTranslation()
+  
+  // Tab管理
+  const [activeTab, setActiveTab] = useState<TabType>('users')
+  
+  // ユーザー管理
   const [pendingUsers, setPendingUsers] = useState<User[]>([])
   const [currentPage, setCurrentPage] = useState(0)
   const [totalPages, setTotalPages] = useState(0)
@@ -53,6 +69,20 @@ const AdminPage: React.FC = () => {
   const [error, setError] = useState<string>('')
   const [processingUser, setProcessingUser] = useState<number | null>(null)
   const [rejectionReason, setRejectionReason] = useState<{ [key: number]: string }>({})
+  
+  // メールテンプレート管理
+  const [emailTemplates, setEmailTemplates] = useState<EmailTemplate[]>([])
+  const [templateLoading, setTemplateLoading] = useState(false)
+  const [templateError, setTemplateError] = useState<string>('')
+  const [editingTemplate, setEditingTemplate] = useState<EmailTemplate | null>(null)
+  const [showTemplateForm, setShowTemplateForm] = useState(false)
+  const [templateForm, setTemplateForm] = useState({
+    templateKey: '',
+    language: '',
+    subject: '',
+    body: '',
+    bcc: ''
+  })
 
   const loadPendingUsers = useCallback(async () => {
     setLoading(true)
@@ -175,9 +205,158 @@ const AdminPage: React.FC = () => {
     setRejectionReason(prev => ({ ...prev, [userId]: reason }))
   }
 
+  // メールテンプレート管理機能
+  const loadEmailTemplates = useCallback(async () => {
+    setTemplateLoading(true)
+    setTemplateError('')
+
+    try {
+      const token = await getValidAccessToken()
+      const response = await fetch('/api/admin/email-templates', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      })
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`)
+      }
+
+      const result: ApiResponse<EmailTemplate[]> = await response.json()
+
+      if (result.ok && result.data) {
+        setEmailTemplates(result.data)
+      } else {
+        setTemplateError(result.error?.join(', ') || t('admin.templateLoadError'))
+      }
+    } catch (err) {
+      setTemplateError(err instanceof Error ? err.message : t('admin.templateLoadError'))
+    } finally {
+      setTemplateLoading(false)
+    }
+  }, [t])
+
+  const handleCreateTemplate = async () => {
+    try {
+      const token = await getValidAccessToken()
+      const response = await fetch('/api/admin/email-templates', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(templateForm)
+      })
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`)
+      }
+
+      const result: ApiResponse<EmailTemplate> = await response.json()
+
+      if (result.ok && result.data) {
+        setEmailTemplates(prev => [...prev, result.data!])
+        setShowTemplateForm(false)
+        setTemplateForm({ templateKey: '', language: '', subject: '', body: '', bcc: '' })
+      } else {
+        setTemplateError(result.error?.join(', ') || t('admin.templateCreateError'))
+      }
+    } catch (err) {
+      setTemplateError(err instanceof Error ? err.message : t('admin.templateCreateError'))
+    }
+  }
+
+  const handleUpdateTemplate = async () => {
+    if (!editingTemplate) return
+
+    try {
+      const token = await getValidAccessToken()
+      const response = await fetch(`/api/admin/email-templates/${editingTemplate.id}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          subject: templateForm.subject,
+          body: templateForm.body,
+          bcc: templateForm.bcc
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`)
+      }
+
+      const result: ApiResponse<EmailTemplate> = await response.json()
+
+      if (result.ok && result.data) {
+        setEmailTemplates(prev => prev.map(t => t.id === editingTemplate.id ? result.data! : t))
+        setEditingTemplate(null)
+        setTemplateForm({ templateKey: '', language: '', subject: '', body: '', bcc: '' })
+      } else {
+        setTemplateError(result.error?.join(', ') || t('admin.templateUpdateError'))
+      }
+    } catch (err) {
+      setTemplateError(err instanceof Error ? err.message : t('admin.templateUpdateError'))
+    }
+  }
+
+  const handleDeleteTemplate = async (templateId: number) => {
+    if (!confirm(t('admin.templateDeleteConfirm'))) return
+
+    try {
+      const token = await getValidAccessToken()
+      const response = await fetch(`/api/admin/email-templates/${templateId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      })
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`)
+      }
+
+      const result: ApiResponse<void> = await response.json()
+
+      if (result.ok) {
+        setEmailTemplates(prev => prev.filter(t => t.id !== templateId))
+      } else {
+        setTemplateError(result.error?.join(', ') || t('admin.templateDeleteError'))
+      }
+    } catch (err) {
+      setTemplateError(err instanceof Error ? err.message : t('admin.templateDeleteError'))
+    }
+  }
+
+  const handleEditTemplate = (template: EmailTemplate) => {
+    setEditingTemplate(template)
+    setTemplateForm({
+      templateKey: template.templateKey,
+      language: template.language,
+      subject: template.subject,
+      body: template.body,
+      bcc: template.bcc || ''
+    })
+    setShowTemplateForm(true)
+  }
+
+  const handleCancelTemplateForm = () => {
+    setEditingTemplate(null)
+    setShowTemplateForm(false)
+    setTemplateForm({ templateKey: '', language: '', subject: '', body: '', bcc: '' })
+  }
+
   useEffect(() => {
-    loadPendingUsers()
-  }, [loadPendingUsers])
+    if (activeTab === 'users') {
+      loadPendingUsers()
+    } else if (activeTab === 'email-templates') {
+      loadEmailTemplates()
+    }
+  }, [activeTab, loadPendingUsers, loadEmailTemplates])
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleString()
@@ -188,14 +367,33 @@ const AdminPage: React.FC = () => {
       <div className="container">
         <h1>{t('admin.title')}</h1>
         
-        {error && (
-          <div className="error-message">
-            {error}
-          </div>
-        )}
+        {/* タブナビゲーション */}
+        <div className="admin-tabs">
+          <button
+            className={`tab-button ${activeTab === 'users' ? 'active' : ''}`}
+            onClick={() => setActiveTab('users')}
+          >
+            {t('admin.userManagement')}
+          </button>
+          <button
+            className={`tab-button ${activeTab === 'email-templates' ? 'active' : ''}`}
+            onClick={() => setActiveTab('email-templates')}
+          >
+            {t('admin.emailTemplateManagement')}
+          </button>
+        </div>
 
-        <div className="pending-users-section">
-          <h2>{t('admin.pendingUsers')} ({totalElements})</h2>
+        {/* ユーザー管理タブ */}
+        {activeTab === 'users' && (
+          <>
+            {error && (
+              <div className="error-message">
+                {error}
+              </div>
+            )}
+
+            <div className="pending-users-section">
+              <h2>{t('admin.pendingUsers')} ({totalElements})</h2>
           
           {loading ? (
             <div className="loading">{t('common.loading')}</div>
@@ -276,8 +474,155 @@ const AdminPage: React.FC = () => {
                 {t('common.next')}
               </button>
             </div>
-          )}
-        </div>
+              )}
+            </div>
+          </>
+        )}
+
+        {/* メールテンプレート管理タブ */}
+        {activeTab === 'email-templates' && (
+          <>
+            {templateError && (
+              <div className="error-message">
+                {templateError}
+              </div>
+            )}
+
+            <div className="email-templates-section">
+              <div className="section-header">
+                <h2>{t('admin.emailTemplates')}</h2>
+                <button
+                  className="btn-primary"
+                  onClick={() => setShowTemplateForm(true)}
+                  disabled={showTemplateForm}
+                >
+                  {t('admin.createTemplate')}
+                </button>
+              </div>
+
+              {/* テンプレート作成・編集フォーム */}
+              {showTemplateForm && (
+                <div className="template-form">
+                  <h3>{editingTemplate ? t('admin.editTemplate') : t('admin.createTemplate')}</h3>
+                  
+                  <div className="form-row">
+                    <div className="form-group">
+                      <label>{t('admin.templateKey')}</label>
+                      <input
+                        type="text"
+                        value={templateForm.templateKey}
+                        onChange={(e) => setTemplateForm(prev => ({ ...prev, templateKey: e.target.value }))}
+                        disabled={!!editingTemplate}
+                        placeholder="user-registration, user-approved, user-rejected"
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label>{t('admin.language')}</label>
+                      <input
+                        type="text"
+                        value={templateForm.language}
+                        onChange={(e) => setTemplateForm(prev => ({ ...prev, language: e.target.value }))}
+                        disabled={!!editingTemplate}
+                        placeholder="en, ja"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="form-group">
+                    <label>{t('admin.subject')}</label>
+                    <input
+                      type="text"
+                      value={templateForm.subject}
+                      onChange={(e) => setTemplateForm(prev => ({ ...prev, subject: e.target.value }))}
+                      placeholder={t('admin.subjectPlaceholder')}
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label>{t('admin.body')}</label>
+                    <textarea
+                      value={templateForm.body}
+                      onChange={(e) => setTemplateForm(prev => ({ ...prev, body: e.target.value }))}
+                      rows={10}
+                      placeholder={t('admin.bodyPlaceholder')}
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label>{t('admin.bcc')} ({t('admin.optional')})</label>
+                    <input
+                      type="email"
+                      value={templateForm.bcc}
+                      onChange={(e) => setTemplateForm(prev => ({ ...prev, bcc: e.target.value }))}
+                      placeholder="admin@example.com"
+                    />
+                  </div>
+
+                  <div className="form-actions">
+                    <button
+                      className="btn-primary"
+                      onClick={editingTemplate ? handleUpdateTemplate : handleCreateTemplate}
+                    >
+                      {editingTemplate ? t('admin.updateTemplate') : t('admin.createTemplate')}
+                    </button>
+                    <button
+                      className="btn-secondary"
+                      onClick={handleCancelTemplateForm}
+                    >
+                      {t('common.cancel')}
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* テンプレート一覧 */}
+              {templateLoading ? (
+                <div className="loading">{t('common.loading')}</div>
+              ) : emailTemplates.length === 0 ? (
+                <div className="no-data">{t('admin.noTemplates')}</div>
+              ) : (
+                <div className="templates-table-container">
+                  <table className="templates-table">
+                    <thead>
+                      <tr>
+                        <th>{t('admin.templateKey')}</th>
+                        <th>{t('admin.language')}</th>
+                        <th>{t('admin.subject')}</th>
+                        <th>{t('admin.bcc')}</th>
+                        <th>{t('admin.actions')}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {emailTemplates.map((template) => (
+                        <tr key={template.id}>
+                          <td>{template.templateKey}</td>
+                          <td>{template.language}</td>
+                          <td className="subject-cell" title={template.subject}>{template.subject}</td>
+                          <td>{template.bcc || '-'}</td>
+                          <td className="actions-cell">
+                            <button
+                              className="btn-edit"
+                              onClick={() => handleEditTemplate(template)}
+                              disabled={showTemplateForm}
+                            >
+                              {t('admin.edit')}
+                            </button>
+                            <button
+                              className="btn-delete"
+                              onClick={() => handleDeleteTemplate(template.id)}
+                            >
+                              {t('admin.delete')}
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </>
+        )}
       </div>
     </div>
   )

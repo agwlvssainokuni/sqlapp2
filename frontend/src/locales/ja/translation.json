@@ -261,6 +261,7 @@
     "dashboard": "ダッシュボード",
     "logout": "ログアウト",
     "loading": "読み込み中...",
+    "processing": "処理中...",
     "error": "エラー",
     "success": "成功",
     "yes": "はい",
@@ -268,7 +269,8 @@
     "ok": "OK",
     "close": "閉じる",
     "refresh": "更新",
-    "clear": "クリア"
+    "clear": "クリア",
+    "cancel": "キャンセル"
   },
   "pagination": {
     "enablePagination": "ページネーションを有効にする",
@@ -294,6 +296,8 @@
   },
   "admin": {
     "title": "管理者パネル",
+    "userManagement": "ユーザー管理",
+    "emailTemplateManagement": "メールテンプレート管理",
     "pendingUsers": "承認待ちユーザー",
     "username": "ユーザー名",
     "email": "メールアドレス",
@@ -307,6 +311,26 @@
     "accessDenied": "アクセスが拒否されました。管理者権限が必要です。",
     "loadError": "承認待ちユーザーの読み込みに失敗しました",
     "approveError": "ユーザーの承認に失敗しました",
-    "rejectError": "ユーザーの拒否に失敗しました"
+    "rejectError": "ユーザーの拒否に失敗しました",
+    "emailTemplates": "メールテンプレート",
+    "createTemplate": "テンプレート作成",
+    "editTemplate": "テンプレート編集",
+    "updateTemplate": "テンプレート更新",
+    "templateKey": "テンプレートキー",
+    "language": "言語",
+    "subject": "件名",
+    "body": "本文",
+    "bcc": "BCC",
+    "optional": "任意",
+    "edit": "編集",
+    "delete": "削除",
+    "noTemplates": "メールテンプレートが見つかりません",
+    "templateLoadError": "メールテンプレートの読み込みに失敗しました",
+    "templateCreateError": "メールテンプレートの作成に失敗しました",
+    "templateUpdateError": "メールテンプレートの更新に失敗しました",
+    "templateDeleteError": "メールテンプレートの削除に失敗しました",
+    "templateDeleteConfirm": "このメールテンプレートを削除しますか？",
+    "subjectPlaceholder": "{{変数}}を含むメール件名",
+    "bodyPlaceholder": "{{username}}、{{email}}などの{{変数}}を含むメール本文"
   }
 }

@@ -261,6 +261,7 @@
     "dashboard": "Dashboard",
     "logout": "Logout",
     "loading": "Loading...",
+    "processing": "Processing...",
     "error": "Error",
     "success": "Success",
     "yes": "Yes",
@@ -268,7 +269,8 @@
     "ok": "OK",
     "close": "Close",
     "refresh": "Refresh",
-    "clear": "Clear"
+    "clear": "Clear",
+    "cancel": "Cancel"
   },
   "pagination": {
     "enablePagination": "Enable Pagination",
@@ -294,6 +296,8 @@
   },
   "admin": {
     "title": "Admin Panel",
+    "userManagement": "User Management",
+    "emailTemplateManagement": "Email Template Management",
     "pendingUsers": "Pending Users",
     "username": "Username",
     "email": "Email",
@@ -307,6 +311,26 @@
     "accessDenied": "Access denied. Admin privileges required.",
     "loadError": "Failed to load pending users",
     "approveError": "Failed to approve user",
-    "rejectError": "Failed to reject user"
+    "rejectError": "Failed to reject user",
+    "emailTemplates": "Email Templates",
+    "createTemplate": "Create Template",
+    "editTemplate": "Edit Template",
+    "updateTemplate": "Update Template",
+    "templateKey": "Template Key",
+    "language": "Language",
+    "subject": "Subject",
+    "body": "Body",
+    "bcc": "BCC",
+    "optional": "optional",
+    "edit": "Edit",
+    "delete": "Delete",
+    "noTemplates": "No email templates found",
+    "templateLoadError": "Failed to load email templates",
+    "templateCreateError": "Failed to create email template",
+    "templateUpdateError": "Failed to update email template",
+    "templateDeleteError": "Failed to delete email template",
+    "templateDeleteConfirm": "Are you sure you want to delete this email template?",
+    "subjectPlaceholder": "Email subject with {{variables}}",
+    "bodyPlaceholder": "Email body content with {{variables}} like {{username}}, {{email}}, etc."
   }
 }

@@ -54,4 +54,9 @@ public interface EmailTemplateRepository extends JpaRepository<EmailTemplate, Lo
      * テンプレートキーと言語の組み合わせが存在するかチェックします。
      */
     boolean existsByTemplateKeyAndLanguage(String templateKey, String language);
+    
+    /**
+     * テンプレートキーでテンプレート一覧を言語順で取得します。
+     */
+    List<EmailTemplate> findByTemplateKeyOrderByLanguage(String templateKey);
 }
