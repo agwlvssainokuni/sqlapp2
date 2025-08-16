@@ -741,7 +741,7 @@ const QueryBuilderPage: React.FC = () => {
     }))
   }
 
-  const updateHavingCondition = (index: number, field: keyof WhereCondition, value: any) => {
+  const updateHavingCondition = (index: number, field: keyof WhereCondition, value: string | boolean | string[]) => {
     setQueryStructure(prev => ({
       ...prev,
       havingConditions: prev.havingConditions.map((condition, i) =>
