@@ -68,7 +68,12 @@ frontend/src/
    - **Multi-Condition WHERE Clause Support**: Accurate parsing of mixed OR/BETWEEN conditions (e.g., `col1 IS NULL OR col2 BETWEEN 'a' AND 'b'`)
    - Parameterized queries with comprehensive result metadata
 5. **Integrated Workflow**: Seamless Create → Execute → Save workflow with React Router state management
-6. **Query Management**: Save/share queries, execution history, performance tracking
+6. **Enhanced Query Management**: 
+   - Save/share queries with comprehensive metadata
+   - **Advanced Query History with Date Range Filtering**: All history endpoints (`/history`, `/history/successful`, `/history/failed`) support date range specification
+   - **Configurable Default Period**: Default 30-day history period configurable via `app.query-history.default-period-days`
+   - **Unified Date Range UI**: Consistent datetime-local input fields across all filter types
+   - Performance tracking with detailed statistics
 7. **Schema Browsing**: Table/column metadata display, auto-completion support
 8. **Internationalization**: English/Japanese with real-time language switching and context-aware messaging
 9. **Modular Architecture**: 8-file CSS structure for improved maintainability and component isolation
@@ -158,9 +163,9 @@ frontend/src/
 
 ## Testing Strategy
 
-### Test Coverage (358 tests, 100% success rate)
-- **Unit Tests (305)**: Service layer, utilities, security components including advanced SQL parsing tests
-- **Integration Tests (53)**: REST API endpoints, database integration, complete workflow validation
+### Test Coverage (381 tests, 100% success rate)
+- **Unit Tests (310+)**: Service layer, utilities, security components including advanced SQL parsing and date range filtering tests
+- **Integration Tests (70+)**: REST API endpoints, database integration, complete workflow validation including date range parameters
 - **Test Structure**: @Nested classes with Japanese @DisplayName for clear documentation
 - **Mock Strategy**: Mockito for external dependencies, @SpringBootTest for complex integration scenarios
 - **Database**: H2 in-memory for integration tests with comprehensive SQL dialect support
@@ -276,11 +281,17 @@ docker-compose -f docker-compose.yml -f docker-compose.monitoring.yml up -d
 
 ---
 
-**Status**: Enterprise-Grade Visual SQL Query Builder - Complete Metrics Integration
+**Status**: Enterprise-Grade Visual SQL Query Builder - Complete Query History Date Range Filtering
 **Last Updated**: 2025-08-16
-**Total Tests**: 358+ (305+ unit + 53+ integration) - 100% success rate
-**Development Phases**: 48+ phases complete - Complete Metrics Integration + Aggregate Function Support + Advanced SQL Reverse Engineering + Production Ready
+**Total Tests**: 381+ (310+ unit + 70+ integration) - 100% success rate
+**Development Phases**: 49+ phases complete - Complete Query History Date Range Filtering + Complete Metrics Integration + Aggregate Function Support + Advanced SQL Reverse Engineering + Production Ready
 **Recent Enhancements**: 
+- **Query History Date Range Filtering Enhancement** - Complete date range filtering across all query history endpoints
+  - All endpoints (`/api/queries/history`, `/history/successful`, `/history/failed`) support `fromDate`/`toDate` parameters
+  - Configurable default period (30 days) via `app.query-history.default-period-days` setting
+  - Repository layer methods for success/failure + date range combinations
+  - Unified frontend UI for date range specification across all filter types
+  - Comprehensive test coverage for all new date range filtering scenarios
 - **Phase 28: Complete MetricsService Integration** - 100% method utilization with comprehensive monitoring
   - SQL execution metrics (timing, result counts, error tracking)
   - User activity metrics (login, logout, registration)
