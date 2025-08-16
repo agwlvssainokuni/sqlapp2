@@ -17,6 +17,7 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { getValidAccessToken } from '../utils/api'
+import Layout from './Layout'
 
 interface User {
   id: number
@@ -363,25 +364,24 @@ const AdminPage: React.FC = () => {
   }
 
   return (
-    <div className="admin-page">
-      <div className="container">
-        <h1>{t('admin.title')}</h1>
-        
-        {/* タブナビゲーション */}
-        <div className="admin-tabs">
-          <button
-            className={`tab-button ${activeTab === 'users' ? 'active' : ''}`}
-            onClick={() => setActiveTab('users')}
-          >
-            {t('admin.userManagement')}
-          </button>
-          <button
-            className={`tab-button ${activeTab === 'email-templates' ? 'active' : ''}`}
-            onClick={() => setActiveTab('email-templates')}
-          >
-            {t('admin.emailTemplateManagement')}
-          </button>
-        </div>
+    <Layout title={t('admin.title')}>
+      <div className="admin-page">
+        <div className="container">
+          {/* タブナビゲーション */}
+          <div className="admin-tabs">
+            <button
+              className={`tab-button ${activeTab === 'users' ? 'active' : ''}`}
+              onClick={() => setActiveTab('users')}
+            >
+              {t('admin.userManagement')}
+            </button>
+            <button
+              className={`tab-button ${activeTab === 'email-templates' ? 'active' : ''}`}
+              onClick={() => setActiveTab('email-templates')}
+            >
+              {t('admin.emailTemplateManagement')}
+            </button>
+          </div>
 
         {/* ユーザー管理タブ */}
         {activeTab === 'users' && (
@@ -623,8 +623,9 @@ const AdminPage: React.FC = () => {
             </div>
           </>
         )}
+        </div>
       </div>
-    </div>
+    </Layout>
   )
 }
 

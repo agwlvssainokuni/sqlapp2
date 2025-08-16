@@ -16,20 +16,14 @@
 
 /* Admin Page Styles */
 .admin-page {
-  padding: 20px 0;
-}
-
-.admin-page h1 {
-  color: #333;
-  margin-bottom: 30px;
-  text-align: center;
+  padding: 0;
 }
 
 .admin-page h2 {
   color: #444;
-  margin-bottom: 20px;
+  margin-bottom: 16px;
   border-bottom: 2px solid #007bff;
-  padding-bottom: 10px;
+  padding-bottom: 8px;
 }
 
 .pending-users-section {
@@ -209,59 +203,48 @@
 /* Admin Tabs */
 .admin-tabs {
   display: flex;
-  border-bottom: 2px solid #dee2e6;
-  margin-bottom: 30px;
-  gap: 0;
+  gap: 2px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  overflow-x: auto;
 }
 
-.tab-button {
-  padding: 12px 24px;
-  background: none;
+.admin-tabs .tab-button {
+  background: #e9ecef;
   border: none;
-  border-bottom: 3px solid transparent;
+  padding: 12px 16px;
+  border-radius: 6px;
   cursor: pointer;
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 500;
-  color: #6c757d;
+  color: #495057;
   transition: all 0.2s ease;
+  white-space: nowrap;
+  min-width: 120px;
+  text-align: center;
 }
 
-.tab-button:hover {
-  color: #007bff;
-  background-color: #f8f9fa;
+.admin-tabs .tab-button:hover {
+  background: #dee2e6;
+  color: #212529;
 }
 
-.tab-button.active {
-  color: #007bff;
-  border-bottom-color: #007bff;
-  background-color: #f8f9fa;
+.admin-tabs .tab-button.active {
+  background: #007bff;
+  color: white;
+  box-shadow: 0 2px 4px rgba(0, 123, 255, 0.3);
 }
 
 /* Email Templates Section */
-.email-templates-section {
-  margin-bottom: 40px;
-}
-
-.section-header {
-  display: flex;
-  justify-content: between;
-  align-items: center;
-  margin-bottom: 20px;
-  gap: 20px;
-}
-
-.section-header h2 {
-  margin: 0;
-  flex: 1;
-}
 
 /* Template Form */
 .template-form {
   background: #f8f9fa;
   border: 1px solid #dee2e6;
   border-radius: 8px;
-  padding: 20px;
-  margin-bottom: 30px;
+  padding: 16px;
+  margin-bottom: 16px;
 }
 
 .template-form h3 {
