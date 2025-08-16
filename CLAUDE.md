@@ -51,10 +51,12 @@ frontend/src/
 
 ### Core Features
 1. **Enhanced User Management**: 
+   - **Admin Approval System**: User registration requires administrator approval for security
+   - **Email Notifications**: Multi-language email templates for registration, approval, and rejection
+   - **Database-Managed Email Templates**: Configurable email templates with variable substitution
    - JWT authentication with proactive token refresh (30s buffer)
    - Smart 401 handling with double-refresh prevention
    - Graceful session preservation and automatic page restoration
-   - User registration/login with optimized authentication flow
 2. **Database Connectivity**: Multi-RDBMS support, encrypted connection storage, connection testing
 3. **Advanced Visual Query Builder**: 
    - Complete JOIN support (INNER/LEFT/RIGHT/FULL OUTER) with drag-and-drop interface
@@ -76,7 +78,12 @@ frontend/src/
    - Performance tracking with detailed statistics
 7. **Schema Browsing**: Table/column metadata display, auto-completion support
 8. **Internationalization**: English/Japanese with real-time language switching and context-aware messaging
-9. **Modular Architecture**: 8-file CSS structure for improved maintainability and component isolation
+9. **Enterprise Security Features**: 
+   - **Role-Based Access Control**: USER/ADMIN roles with method-level security
+   - **Admin Management UI**: Complete admin interface with user approval workflow
+   - **Email Template Management**: Admin interface for managing multi-language email templates
+10. **Modular Architecture**: 8-file CSS structure for improved maintainability and component isolation
+11. **Development Support**: MailPit integration for email testing without external delivery
 
 ## Development Guidelines
 
@@ -160,6 +167,8 @@ frontend/src/
 - **User isolation**: Connection and query separation by user ID
 - **HTTPS enforcement**: SSL/TLS in production environments
 - **Token Security**: Automatic refresh, expiry validation, and secure cleanup
+- **Admin Approval System**: Registration requires administrator approval to prevent unauthorized access
+- **Email Security**: MailPit for development to prevent accidental email delivery
 
 ## Testing Strategy
 
@@ -226,6 +235,13 @@ docker-compose -f docker-compose.yml -f docker-compose.monitoring.yml up -d
 4. Consider backward compatibility for rolling deployments
 5. Update API documentation for affected endpoints
 
+### Email Template Management
+1. Create templates using admin interface at `/admin` page
+2. Support both English and Japanese languages
+3. Use variable substitution with {{variable}} syntax
+4. Test with MailPit during development
+5. Configure fallback language in application.properties
+
 ## Troubleshooting
 
 ### Common Issues
@@ -250,10 +266,15 @@ docker-compose -f docker-compose.yml -f docker-compose.monitoring.yml up -d
 - **Test Integration Issues**: Use @SpringBootTest instead of @WebMvcTest for complex security integration scenarios to avoid JWT dependency conflicts
 - **CSS Module Issues**: Verify correct import paths for component-specific CSS files in src/styles/
 - **Authentication Flow**: Check initialization optimization - avoid unnecessary checkAuthStatus() calls during app startup
+- **Email Template Issues**: Use fallback language (configured in application.properties) when template not found for user's language
+- **Admin Access Issues**: Ensure user has ADMIN role and check @PreAuthorize annotations on admin endpoints
+- **MailPit Connection**: Verify MailPit is running on port 1025 (SMTP) and 8025 (Web UI) for email testing
 
 ### Development Tools
 - **H2 Console**: Available at `/h2-console` (dev environment only)
 - **Swagger UI**: Available at `/api/swagger-ui.html`
+- **Admin Interface**: Available at `/admin` for user management and email templates
+- **MailPit Web UI**: Available at `http://localhost:8025` for email testing
 - **Actuator Endpoints**: Health, metrics, info at `/actuator/*`
 - **Log Files**: Structured JSON output to stdout/files based on profile
 
@@ -281,11 +302,18 @@ docker-compose -f docker-compose.yml -f docker-compose.monitoring.yml up -d
 
 ---
 
-**Status**: Enterprise-Grade Visual SQL Query Builder - Complete Query History Date Range Filtering
-**Last Updated**: 2025-08-16
+**Status**: Enterprise-Grade Visual SQL Query Builder - Complete Admin Approval System with Email Notifications
+**Last Updated**: 2025-08-17
 **Total Tests**: 381+ (310+ unit + 70+ integration) - 100% success rate
-**Development Phases**: 49+ phases complete - Complete Query History Date Range Filtering + Complete Metrics Integration + Aggregate Function Support + Advanced SQL Reverse Engineering + Production Ready
+**Development Phases**: 50+ phases complete - Complete Admin Approval System + Database-Managed Email Templates + Query History Date Range Filtering + Complete Metrics Integration + Aggregate Function Support + Advanced SQL Reverse Engineering + Production Ready
 **Recent Enhancements**: 
+- **Phase 30: Complete Admin Approval System with Email Notifications** - Enterprise-grade user management with multi-language email support
+  - Admin approval required for all new user registrations for enhanced security
+  - Multi-language email notification system (English/Japanese) with database-managed templates
+  - Admin management interface with user approval/rejection workflow and email template management
+  - MailPit integration for development email testing without external delivery
+  - Automatic initial admin account creation and email template initialization
+  - Role-based access control (USER/ADMIN) with Spring Security method-level protection
 - **Query History Date Range Filtering Enhancement** - Complete date range filtering across all query history endpoints
   - All endpoints (`/api/queries/history`, `/history/successful`, `/history/failed`) support `fromDate`/`toDate` parameters
   - Configurable default period (30 days) via `app.query-history.default-period-days` setting
