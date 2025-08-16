@@ -295,6 +295,32 @@ public class QueryManagementService {
         return queryHistoryRepository.findByUserAndIsSuccessful(user, false, pageable);
     }
 
+    /**
+     * ユーザの成功したクエリ履歴を指定された期間で取得します。
+     * FROM日付は必須、TO日付は任意です。
+     */
+    @Transactional(readOnly = true)
+    public Page<QueryHistory> getSuccessfulQueriesWithDateRange(User user, LocalDateTime fromDate, LocalDateTime toDate, Pageable pageable) {
+        if (toDate != null) {
+            return queryHistoryRepository.findByUserAndIsSuccessfulAndExecutedAtBetween(user, true, fromDate, toDate, pageable);
+        } else {
+            return queryHistoryRepository.findByUserAndIsSuccessfulAndExecutedAtAfter(user, true, fromDate, pageable);
+        }
+    }
+
+    /**
+     * ユーザの失敗したクエリ履歴を指定された期間で取得します。
+     * FROM日付は必須、TO日付は任意です。
+     */
+    @Transactional(readOnly = true)
+    public Page<QueryHistory> getFailedQueriesWithDateRange(User user, LocalDateTime fromDate, LocalDateTime toDate, Pageable pageable) {
+        if (toDate != null) {
+            return queryHistoryRepository.findByUserAndIsSuccessfulAndExecutedAtBetween(user, false, fromDate, toDate, pageable);
+        } else {
+            return queryHistoryRepository.findByUserAndIsSuccessfulAndExecutedAtAfter(user, false, fromDate, pageable);
+        }
+    }
+
     // ==================== Statistics ====================
 
     @Transactional(readOnly = true)

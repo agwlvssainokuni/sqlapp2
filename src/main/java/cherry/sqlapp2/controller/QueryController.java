@@ -272,12 +272,22 @@ public class QueryController {
     public ApiResponse<Page<QueryHistory>> getSuccessfulQueries(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
+            @RequestParam(required = false) String fromDate,
+            @RequestParam(required = false) String toDate,
             Authentication authentication
     ) {
 
         User user = getCurrentUser(authentication);
         Pageable pageable = PageRequest.of(page, size);
-        var successfulQueries = queryManagementService.getSuccessfulQueries(user, pageable);
+
+        Page<cherry.sqlapp2.entity.QueryHistory> successfulQueries;
+        if (fromDate != null) {
+            LocalDateTime from = LocalDateTime.parse(fromDate);
+            LocalDateTime to = toDate != null ? LocalDateTime.parse(toDate) : null;
+            successfulQueries = queryManagementService.getSuccessfulQueriesWithDateRange(user, from, to, pageable);
+        } else {
+            successfulQueries = queryManagementService.getSuccessfulQueries(user, pageable);
+        }
 
         var response = successfulQueries.map(this::createQueryHistoryDto);
         return ApiResponse.success(response);
@@ -287,12 +297,22 @@ public class QueryController {
     public ApiResponse<Page<QueryHistory>> getFailedQueries(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
+            @RequestParam(required = false) String fromDate,
+            @RequestParam(required = false) String toDate,
             Authentication authentication
     ) {
 
         User user = getCurrentUser(authentication);
         Pageable pageable = PageRequest.of(page, size);
-        var failedQueries = queryManagementService.getFailedQueries(user, pageable);
+
+        Page<cherry.sqlapp2.entity.QueryHistory> failedQueries;
+        if (fromDate != null) {
+            LocalDateTime from = LocalDateTime.parse(fromDate);
+            LocalDateTime to = toDate != null ? LocalDateTime.parse(toDate) : null;
+            failedQueries = queryManagementService.getFailedQueriesWithDateRange(user, from, to, pageable);
+        } else {
+            failedQueries = queryManagementService.getFailedQueries(user, pageable);
+        }
 
         var response = failedQueries.map(this::createQueryHistoryDto);
         return ApiResponse.success(response);

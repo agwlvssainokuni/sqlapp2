@@ -54,6 +54,19 @@ public interface QueryHistoryRepository extends JpaRepository<QueryHistory, Long
                                                 @Param("successful") Boolean successful, 
                                                 Pageable pageable);
 
+    @Query("SELECT qh FROM QueryHistory qh WHERE qh.user = :user AND qh.isSuccessful = :successful AND qh.executedAt >= :fromDate ORDER BY qh.executedAt DESC")
+    Page<QueryHistory> findByUserAndIsSuccessfulAndExecutedAtAfter(@Param("user") User user, 
+                                                                  @Param("successful") Boolean successful,
+                                                                  @Param("fromDate") LocalDateTime fromDate, 
+                                                                  Pageable pageable);
+
+    @Query("SELECT qh FROM QueryHistory qh WHERE qh.user = :user AND qh.isSuccessful = :successful AND qh.executedAt >= :fromDate AND qh.executedAt <= :toDate ORDER BY qh.executedAt DESC")
+    Page<QueryHistory> findByUserAndIsSuccessfulAndExecutedAtBetween(@Param("user") User user, 
+                                                                    @Param("successful") Boolean successful,
+                                                                    @Param("fromDate") LocalDateTime fromDate, 
+                                                                    @Param("toDate") LocalDateTime toDate, 
+                                                                    Pageable pageable);
+
     @Query("SELECT qh FROM QueryHistory qh WHERE qh.user = :user " +
            "AND LOWER(qh.sqlContent) LIKE LOWER(CONCAT('%', :searchTerm, '%')) " +
            "ORDER BY qh.executedAt DESC")

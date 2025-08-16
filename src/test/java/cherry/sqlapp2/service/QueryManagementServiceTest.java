@@ -597,6 +597,92 @@ class QueryManagementServiceTest {
         }
 
         @Test
+        @DisplayName("成功したクエリ履歴を日時範囲指定で取得する（FROM・TO両方指定）")
+        void shouldGetSuccessfulQueriesWithDateRangeBoth() {
+            // Given
+            LocalDateTime fromDate = LocalDateTime.now().minusDays(7);
+            LocalDateTime toDate = LocalDateTime.now().minusDays(1);
+            Pageable pageable = PageRequest.of(0, 10);
+            List<QueryHistory> historyList = List.of(new QueryHistory());
+            Page<QueryHistory> expectedPage = new PageImpl<>(historyList, pageable, 1);
+            
+            when(queryHistoryRepository.findByUserAndIsSuccessfulAndExecutedAtBetween(testUser, true, fromDate, toDate, pageable))
+                    .thenReturn(expectedPage);
+
+            // When
+            Page<QueryHistory> result = queryManagementService.getSuccessfulQueriesWithDateRange(testUser, fromDate, toDate, pageable);
+
+            // Then
+            assertThat(result.getContent()).hasSize(1);
+            assertThat(result.getTotalElements()).isEqualTo(1);
+            verify(queryHistoryRepository).findByUserAndIsSuccessfulAndExecutedAtBetween(testUser, true, fromDate, toDate, pageable);
+        }
+
+        @Test
+        @DisplayName("成功したクエリ履歴を日時範囲指定で取得する（FROMのみ指定）")
+        void shouldGetSuccessfulQueriesWithDateRangeFromOnly() {
+            // Given
+            LocalDateTime fromDate = LocalDateTime.now().minusDays(7);
+            Pageable pageable = PageRequest.of(0, 10);
+            List<QueryHistory> historyList = List.of(new QueryHistory());
+            Page<QueryHistory> expectedPage = new PageImpl<>(historyList, pageable, 1);
+            
+            when(queryHistoryRepository.findByUserAndIsSuccessfulAndExecutedAtAfter(testUser, true, fromDate, pageable))
+                    .thenReturn(expectedPage);
+
+            // When
+            Page<QueryHistory> result = queryManagementService.getSuccessfulQueriesWithDateRange(testUser, fromDate, null, pageable);
+
+            // Then
+            assertThat(result.getContent()).hasSize(1);
+            assertThat(result.getTotalElements()).isEqualTo(1);
+            verify(queryHistoryRepository).findByUserAndIsSuccessfulAndExecutedAtAfter(testUser, true, fromDate, pageable);
+        }
+
+        @Test
+        @DisplayName("失敗したクエリ履歴を日時範囲指定で取得する（FROM・TO両方指定）")
+        void shouldGetFailedQueriesWithDateRangeBoth() {
+            // Given
+            LocalDateTime fromDate = LocalDateTime.now().minusDays(7);
+            LocalDateTime toDate = LocalDateTime.now().minusDays(1);
+            Pageable pageable = PageRequest.of(0, 10);
+            List<QueryHistory> historyList = List.of(new QueryHistory());
+            Page<QueryHistory> expectedPage = new PageImpl<>(historyList, pageable, 1);
+            
+            when(queryHistoryRepository.findByUserAndIsSuccessfulAndExecutedAtBetween(testUser, false, fromDate, toDate, pageable))
+                    .thenReturn(expectedPage);
+
+            // When
+            Page<QueryHistory> result = queryManagementService.getFailedQueriesWithDateRange(testUser, fromDate, toDate, pageable);
+
+            // Then
+            assertThat(result.getContent()).hasSize(1);
+            assertThat(result.getTotalElements()).isEqualTo(1);
+            verify(queryHistoryRepository).findByUserAndIsSuccessfulAndExecutedAtBetween(testUser, false, fromDate, toDate, pageable);
+        }
+
+        @Test
+        @DisplayName("失敗したクエリ履歴を日時範囲指定で取得する（FROMのみ指定）")
+        void shouldGetFailedQueriesWithDateRangeFromOnly() {
+            // Given
+            LocalDateTime fromDate = LocalDateTime.now().minusDays(7);
+            Pageable pageable = PageRequest.of(0, 10);
+            List<QueryHistory> historyList = List.of(new QueryHistory());
+            Page<QueryHistory> expectedPage = new PageImpl<>(historyList, pageable, 1);
+            
+            when(queryHistoryRepository.findByUserAndIsSuccessfulAndExecutedAtAfter(testUser, false, fromDate, pageable))
+                    .thenReturn(expectedPage);
+
+            // When
+            Page<QueryHistory> result = queryManagementService.getFailedQueriesWithDateRange(testUser, fromDate, null, pageable);
+
+            // Then
+            assertThat(result.getContent()).hasSize(1);
+            assertThat(result.getTotalElements()).isEqualTo(1);
+            verify(queryHistoryRepository).findByUserAndIsSuccessfulAndExecutedAtAfter(testUser, false, fromDate, pageable);
+        }
+
+        @Test
         @DisplayName("クエリ履歴を検索する")
         void shouldSearchQueryHistory() {
             // Given
