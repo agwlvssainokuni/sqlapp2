@@ -15,7 +15,9 @@
  */
 package cherry.sqlapp2.security;
 
+import cherry.sqlapp2.entity.Role;
 import cherry.sqlapp2.entity.User;
+import cherry.sqlapp2.entity.UserStatus;
 import cherry.sqlapp2.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -63,6 +65,8 @@ class CustomUserDetailsServiceTest {
         void shouldLoadUserDetailsSuccessfully() {
             // Given
             User user = new User(testUsername, testPassword, testEmail);
+            user.setRole(Role.USER);
+            user.setStatus(UserStatus.APPROVED);
             when(userRepository.findByUsername(testUsername)).thenReturn(Optional.of(user));
 
             // When
@@ -186,6 +190,8 @@ class CustomUserDetailsServiceTest {
         void shouldGrantRoleUserToAllUsers() {
             // Given
             User user = new User(testUsername, testPassword, testEmail);
+            user.setRole(Role.USER);
+            user.setStatus(UserStatus.APPROVED);
             when(userRepository.findByUsername(testUsername)).thenReturn(Optional.of(user));
 
             // When
@@ -297,6 +303,8 @@ class CustomUserDetailsServiceTest {
         void shouldReturnEnabledAccount() {
             // Given
             User user = new User(testUsername, testPassword, testEmail);
+            user.setRole(Role.USER);
+            user.setStatus(UserStatus.APPROVED);
             when(userRepository.findByUsername(testUsername)).thenReturn(Optional.of(user));
 
             // When
@@ -311,6 +319,8 @@ class CustomUserDetailsServiceTest {
         void shouldReturnNonExpiredAccount() {
             // Given
             User user = new User(testUsername, testPassword, testEmail);
+            user.setRole(Role.USER);
+            user.setStatus(UserStatus.APPROVED);
             when(userRepository.findByUsername(testUsername)).thenReturn(Optional.of(user));
 
             // When
@@ -325,6 +335,8 @@ class CustomUserDetailsServiceTest {
         void shouldReturnNonLockedAccount() {
             // Given
             User user = new User(testUsername, testPassword, testEmail);
+            user.setRole(Role.USER);
+            user.setStatus(UserStatus.APPROVED);
             when(userRepository.findByUsername(testUsername)).thenReturn(Optional.of(user));
 
             // When
@@ -339,6 +351,8 @@ class CustomUserDetailsServiceTest {
         void shouldReturnNonExpiredCredentials() {
             // Given
             User user = new User(testUsername, testPassword, testEmail);
+            user.setRole(Role.USER);
+            user.setStatus(UserStatus.APPROVED);
             when(userRepository.findByUsername(testUsername)).thenReturn(Optional.of(user));
 
             // When
@@ -392,6 +406,8 @@ class CustomUserDetailsServiceTest {
         void shouldReturnConsistentResultsForMultipleCalls() {
             // Given
             User user = new User(testUsername, testPassword, testEmail);
+            user.setRole(Role.USER);
+            user.setStatus(UserStatus.APPROVED);
             when(userRepository.findByUsername(testUsername)).thenReturn(Optional.of(user));
 
             // When
@@ -411,6 +427,8 @@ class CustomUserDetailsServiceTest {
         void shouldHandleConcurrentCallsSafely() {
             // Given
             User user = new User(testUsername, testPassword, testEmail);
+            user.setRole(Role.USER);
+            user.setStatus(UserStatus.APPROVED);
             when(userRepository.findByUsername(testUsername)).thenReturn(Optional.of(user));
 
             // When & Then - 複数回の呼び出しが例外をスローしないことを確認

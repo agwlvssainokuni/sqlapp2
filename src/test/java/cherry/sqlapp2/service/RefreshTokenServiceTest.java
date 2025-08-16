@@ -17,7 +17,9 @@
 package cherry.sqlapp2.service;
 
 import cherry.sqlapp2.entity.RefreshToken;
+import cherry.sqlapp2.entity.Role;
 import cherry.sqlapp2.entity.User;
+import cherry.sqlapp2.entity.UserStatus;
 import cherry.sqlapp2.repository.RefreshTokenRepository;
 import cherry.sqlapp2.util.JwtUtil;
 import org.junit.jupiter.api.BeforeEach;
@@ -59,6 +61,8 @@ class RefreshTokenServiceTest {
         
         testUser = new User(testUsername, "hashedPassword", "test@example.com");
         testUser.setId(1L);
+        testUser.setRole(Role.USER);
+        testUser.setStatus(UserStatus.APPROVED);
     }
 
     @Nested
@@ -69,7 +73,7 @@ class RefreshTokenServiceTest {
         @DisplayName("ユーザーに対して新しいリフレッシュトークンを作成する")
         void shouldCreateNewRefreshTokenForUser() {
             // Given
-            when(jwtUtil.generateRefreshToken(testUsername)).thenReturn(testRefreshToken);
+            when(jwtUtil.generateRefreshToken(testUsername, Role.USER)).thenReturn(testRefreshToken);
             when(jwtUtil.getRefreshTokenExpiration()).thenReturn(refreshTokenExpiration);
             
             RefreshToken mockSavedToken = new RefreshToken(testRefreshToken, testUser, 
@@ -81,7 +85,7 @@ class RefreshTokenServiceTest {
 
             // Then
             assertThat(result).isNotNull();
-            verify(jwtUtil).generateRefreshToken(testUsername);
+            verify(jwtUtil).generateRefreshToken(testUsername, Role.USER);
             verify(jwtUtil).getRefreshTokenExpiration();
             verify(refreshTokenRepository).save(any(RefreshToken.class));
         }
@@ -90,7 +94,7 @@ class RefreshTokenServiceTest {
         @DisplayName("作成されたトークンが正しい有効期限を持つ")
         void shouldCreateTokenWithCorrectExpiration() {
             // Given
-            when(jwtUtil.generateRefreshToken(testUsername)).thenReturn(testRefreshToken);
+            when(jwtUtil.generateRefreshToken(testUsername, Role.USER)).thenReturn(testRefreshToken);
             when(jwtUtil.getRefreshTokenExpiration()).thenReturn(refreshTokenExpiration);
             
             RefreshToken savedToken = new RefreshToken(testRefreshToken, testUser, 
