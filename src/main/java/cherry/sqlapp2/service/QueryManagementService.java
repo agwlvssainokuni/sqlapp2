@@ -48,9 +48,7 @@ import java.util.Optional;
 public class QueryManagementService {
 
     private final SavedQueryRepository savedQueryRepository;
-
     private final QueryHistoryRepository queryHistoryRepository;
-
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Autowired
@@ -66,14 +64,14 @@ public class QueryManagementService {
 
     /**
      * 新しいクエリを保存します。
-     * 
-     * @param name クエリ名
-     * @param sqlContent SQL内容
-     * @param description 説明
+     *
+     * @param name                 クエリ名
+     * @param sqlContent           SQL内容
+     * @param description          説明
      * @param parameterDefinitions パラメータ定義
-     * @param sharingScope 共有範囲
-     * @param user ユーザ
-     * @param defaultConnection デフォルト接続
+     * @param sharingScope         共有範囲
+     * @param user                 ユーザ
+     * @param defaultConnection    デフォルト接続
      * @return 保存されたクエリ
      */
     public SavedQuery saveQuery(String name, String sqlContent, String description,
@@ -106,15 +104,15 @@ public class QueryManagementService {
 
     /**
      * 保存されたクエリを更新します。
-     * 
-     * @param queryId クエリID
-     * @param name クエリ名
-     * @param sqlContent SQL内容
-     * @param description 説明
+     *
+     * @param queryId              クエリID
+     * @param name                 クエリ名
+     * @param sqlContent           SQL内容
+     * @param description          説明
      * @param parameterDefinitions パラメータ定義
-     * @param sharingScope 共有範囲
-     * @param defaultConnection デフォルト接続
-     * @param user ユーザ
+     * @param sharingScope         共有範囲
+     * @param defaultConnection    デフォルト接続
+     * @param user                 ユーザ
      * @return 更新されたクエリ
      */
     public SavedQuery updateSavedQuery(Long queryId, String name, String sqlContent,

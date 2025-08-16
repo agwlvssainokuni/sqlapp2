@@ -44,7 +44,10 @@ public class MetricsService {
     private final AtomicLong totalResultRows = new AtomicLong(0);
     private final AtomicInteger currentActiveUsers = new AtomicInteger(0);
 
-    public MetricsService(MeterRegistry meterRegistry) {
+    public MetricsService(
+            MeterRegistry meterRegistry
+    ) {
+
         // SQL実行関連メトリクス
         this.sqlExecutionCounter = Counter.builder("sql_executions_total")
                 .description("Total number of SQL executions")
@@ -102,7 +105,7 @@ public class MetricsService {
         sqlExecutionCounter.increment();
         sqlExecutionTimer.record(durationMs, java.util.concurrent.TimeUnit.MILLISECONDS);
         totalResultRows.addAndGet(resultRows);
-        
+
         if (isError) {
             sqlExecutionErrorCounter.increment();
         }
@@ -122,7 +125,7 @@ public class MetricsService {
         sample.stop(sqlExecutionTimer);
         sqlExecutionCounter.increment();
         totalResultRows.addAndGet(resultRows);
-        
+
         if (isError) {
             sqlExecutionErrorCounter.increment();
         }
@@ -155,7 +158,7 @@ public class MetricsService {
      */
     public void recordDatabaseConnectionAttempt(String dbType, boolean isError) {
         databaseConnectionCounter.increment();
-        
+
         if (isError) {
             databaseConnectionErrorCounter.increment();
         } else {

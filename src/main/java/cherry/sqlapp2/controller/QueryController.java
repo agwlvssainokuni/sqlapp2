@@ -54,11 +54,8 @@ import java.util.stream.Collectors;
 public class QueryController {
 
     private final QueryManagementService queryManagementService;
-
     private final UserRepository userRepository;
-
     private final DatabaseConnectionRepository connectionRepository;
-
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Autowired
@@ -77,8 +74,8 @@ public class QueryController {
     /**
      * SQLクエリを保存します。
      * ユーザが作成したクエリを名前付きで保存し、後で再利用できるようにします。
-     * 
-     * @param request 保存するクエリの情報（名前、SQL内容、説明など）
+     *
+     * @param request        保存するクエリの情報（名前、SQL内容、説明など）
      * @param authentication 認証情報
      * @return 保存されたクエリ情報を含むAPIレスポンス
      */
@@ -113,8 +110,8 @@ public class QueryController {
 
     /**
      * 保存されたクエリの詳細情報を取得します。
-     * 
-     * @param queryId 取得するクエリのID
+     *
+     * @param queryId        取得するクエリのID
      * @param authentication 認証情報
      * @return 保存されたクエリの詳細情報を含むAPIレスポンス
      */
@@ -206,9 +203,9 @@ public class QueryController {
     /**
      * ユーザのクエリ実行履歴を取得します。
      * ページネーション機能付きで履歴を取得できます。
-     * 
-     * @param page ページ番号（0から開始）
-     * @param size 1ページあたりの件数
+     *
+     * @param page           ページ番号（0から開始）
+     * @param size           1ページあたりの件数
      * @param authentication 認証情報
      * @return ページネーションされたクエリ履歴を含むAPIレスポンス
      */
@@ -292,7 +289,7 @@ public class QueryController {
     /**
      * ユーザのクエリ使用統計情報を取得します。
      * 保存クエリ数、実行回数、平均実行時間、失敗回数などの統計を提供します。
-     * 
+     *
      * @param authentication 認証情報
      * @return ユーザの統計情報を含むAPIレスポンス
      */

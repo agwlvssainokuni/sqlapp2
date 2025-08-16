@@ -74,8 +74,8 @@ public class SqlExecutionController {
     /**
      * SQLクエリを実行します。
      * パラメータ付きクエリの実行、ページネーション、結果の履歴記録を行います。
-     * 
-     * @param request SQL実行リクエスト（SQL文、接続ID、パラメータなど）
+     *
+     * @param request        SQL実行リクエスト（SQL文、接続ID、パラメータなど）
      * @param authentication 認証情報
      * @return SQL実行結果を含むAPIレスポンス
      */

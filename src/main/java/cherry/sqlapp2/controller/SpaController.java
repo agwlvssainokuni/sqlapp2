@@ -30,7 +30,7 @@ public class SpaController {
     /**
      * SPA関連の全パスをindex.htmlにフォワードします。
      * React Routerがクライアントサイドでルーティングを処理できるようにします。
-     * 
+     *
      * @return index.htmlへのフォワード指示
      */
     @RequestMapping(value = {

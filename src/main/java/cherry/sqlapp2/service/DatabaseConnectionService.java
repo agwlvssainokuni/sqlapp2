@@ -44,15 +44,17 @@ public class DatabaseConnectionService {
     private final EncryptionService encryptionService;
 
     @Autowired
-    public DatabaseConnectionService(DatabaseConnectionRepository connectionRepository,
-                                     EncryptionService encryptionService) {
+    public DatabaseConnectionService(
+            DatabaseConnectionRepository connectionRepository,
+            EncryptionService encryptionService
+    ) {
         this.connectionRepository = connectionRepository;
         this.encryptionService = encryptionService;
     }
 
     /**
      * ユーザのすべてのデータベース接続を取得します。
-     * 
+     *
      * @param user ユーザ
      * @return データベース接続のリスト
      */
@@ -66,7 +68,7 @@ public class DatabaseConnectionService {
 
     /**
      * ユーザのアクティブなデータベース接続を取得します。
-     * 
+     *
      * @param user ユーザ
      * @return アクティブなデータベース接続のリスト
      */
@@ -90,8 +92,8 @@ public class DatabaseConnectionService {
 
     /**
      * 新しいデータベース接続を作成します。
-     * 
-     * @param user ユーザ
+     *
+     * @param user    ユーザ
      * @param request データベース接続リクエスト
      * @return 作成されたデータベース接続
      */

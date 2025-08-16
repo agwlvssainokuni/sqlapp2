@@ -43,16 +43,18 @@ public class DynamicDataSourceService {
     private final Map<String, DataSource> dataSourceCache = new ConcurrentHashMap<>();
 
     @Autowired
-    public DynamicDataSourceService(DatabaseConnectionService connectionService,
-                                    EncryptionService encryptionService) {
+    public DynamicDataSourceService(
+            DatabaseConnectionService connectionService,
+            EncryptionService encryptionService
+    ) {
         this.connectionService = connectionService;
         this.encryptionService = encryptionService;
     }
 
     /**
      * 指定されたユーザと接続IDに対応するJDBC接続を取得します。
-     * 
-     * @param user ユーザ情報
+     *
+     * @param user         ユーザ情報
      * @param connectionId データベース接続ID
      * @return JDBC接続オブジェクト
      * @throws SQLException データベース接続に失敗した場合

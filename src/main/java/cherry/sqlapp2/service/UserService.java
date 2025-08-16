@@ -39,7 +39,11 @@ public class UserService {
     private final MetricsService metricsService;
 
     @Autowired
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, MetricsService metricsService) {
+    public UserService(
+            UserRepository userRepository,
+            PasswordEncoder passwordEncoder,
+            MetricsService metricsService
+    ) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.metricsService = metricsService;
@@ -48,10 +52,10 @@ public class UserService {
     /**
      * 新しいユーザを作成します。
      * ユーザ名とメールアドレスの重複チェックを行い、パスワードをハッシュ化して保存します。
-     * 
+     *
      * @param username ユーザ名
      * @param password パスワード（平文）
-     * @param email メールアドレス
+     * @param email    メールアドレス
      * @return 作成されたユーザ
      */
     public User createUser(String username, String password, String email) {
@@ -65,16 +69,16 @@ public class UserService {
         String encodedPassword = passwordEncoder.encode(password);
         User user = new User(username, encodedPassword, email);
         User savedUser = userRepository.save(user);
-        
+
         // Record user registration metric
         metricsService.recordUserRegistration();
-        
+
         return savedUser;
     }
 
     /**
      * ユーザ名でユーザを検索します。
-     * 
+     *
      * @param username 検索するユーザ名
      * @return ユーザ（存在する場合）
      */
@@ -85,8 +89,8 @@ public class UserService {
 
     /**
      * ユーザのパスワードを検証します。
-     * 
-     * @param user ユーザ
+     *
+     * @param user        ユーザ
      * @param rawPassword 検証する平文パスワード
      * @return パスワードが正しい場合true
      */

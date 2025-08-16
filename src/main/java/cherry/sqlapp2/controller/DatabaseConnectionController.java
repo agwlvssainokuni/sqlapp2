@@ -59,7 +59,7 @@ public class DatabaseConnectionController {
 
     /**
      * 認証情報から現在のユーザを取得します。
-     * 
+     *
      * @param authentication 認証情報
      * @return 認証されたユーザオブジェクト
      */
@@ -72,8 +72,8 @@ public class DatabaseConnectionController {
 
     /**
      * ユーザに関連付けられたデータベース接続一覧を取得します。
-     * 
-     * @param activeOnly アクティブな接続のみを取得するかどうかのフラグ
+     *
+     * @param activeOnly     アクティブな接続のみを取得するかどうかのフラグ
      * @param authentication 認証情報
      * @return データベース接続のリストを含むAPIレスポンス
      */
@@ -93,8 +93,8 @@ public class DatabaseConnectionController {
     /**
      * 新しいデータベース接続を作成します。
      * パスワードが必須で、接続情報は暗号化されて保存されます。
-     * 
-     * @param request データベース接続の作成リクエスト
+     *
+     * @param request        データベース接続の作成リクエスト
      * @param authentication 認証情報
      * @return 作成されたデータベース接続を含むAPIレスポンス
      */
@@ -120,9 +120,9 @@ public class DatabaseConnectionController {
     /**
      * 既存のデータベース接続を更新します。
      * ユーザは自分が作成した接続のみ更新可能です。
-     * 
-     * @param id 更新対象のデータベース接続ID
-     * @param request 更新内容を含むリクエスト
+     *
+     * @param id             更新対象のデータベース接続ID
+     * @param request        更新内容を含むリクエスト
      * @param authentication 認証情報
      * @return 更新されたデータベース接続を含むAPIレスポンス
      */
@@ -140,8 +140,8 @@ public class DatabaseConnectionController {
     /**
      * データベース接続を削除します。
      * ユーザは自分が作成した接続のみ削除可能です。
-     * 
-     * @param id 削除対象のデータベース接続ID
+     *
+     * @param id             削除対象のデータベース接続ID
      * @param authentication 認証情報
      * @return 削除完了を示すAPIレスポンス
      */
@@ -158,8 +158,8 @@ public class DatabaseConnectionController {
     /**
      * データベース接続のテストを実行します。
      * 実際に指定されたデータベースに接続し、接続可能性を確認します。
-     * 
-     * @param id テスト対象のデータベース接続ID
+     *
+     * @param id             テスト対象のデータベース接続ID
      * @param authentication 認証情報
      * @return 接続テスト結果を含むAPIレスポンス
      */

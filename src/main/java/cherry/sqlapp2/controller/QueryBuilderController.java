@@ -46,16 +46,22 @@ import org.springframework.web.bind.annotation.RestController;
 @SecurityRequirement(name = "bearerAuth")
 public class QueryBuilderController {
 
-    @Autowired
-    private QueryBuilderService queryBuilderService;
+    private final QueryBuilderService queryBuilderService;
+    private final SqlReverseEngineeringService sqlReverseEngineeringService;
 
     @Autowired
-    private SqlReverseEngineeringService sqlReverseEngineeringService;
+    public QueryBuilderController(
+            QueryBuilderService queryBuilderService,
+            SqlReverseEngineeringService sqlReverseEngineeringService
+    ) {
+        this.queryBuilderService = queryBuilderService;
+        this.sqlReverseEngineeringService = sqlReverseEngineeringService;
+    }
 
     /**
      * クエリ構造からSQLクエリを生成します。
      * SELECT、FROM、WHERE句などの構造化されたクエリ情報から実行可能なSQLを作成します。
-     * 
+     *
      * @param request クエリ構造を含むリクエスト
      * @return 生成されたSQLクエリを含むAPIレスポンス
      */
@@ -107,7 +113,7 @@ public class QueryBuilderController {
     /**
      * SQLクエリを解析してクエリ構造に変換します。
      * 既存のSELECT文を解析し、ビジュアルクエリビルダーで編集可能な構造に変換します。
-     * 
+     *
      * @param request 解析対象のSQLクエリを含むリクエスト
      * @return 解析結果（成功時はクエリ構造、失敗時はエラー詳細）を含むAPIレスポンス
      */
@@ -154,6 +160,7 @@ public class QueryBuilderController {
     /**
      * Request DTO for SQL parsing endpoint.
      */
-    public record SqlParseRequest(String sql) {}
+    public record SqlParseRequest(String sql) {
+    }
 
 }

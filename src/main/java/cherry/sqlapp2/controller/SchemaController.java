@@ -66,8 +66,8 @@ public class SchemaController {
     /**
      * データベース情報を取得します。
      * 指定されたデータベース接続のカタログやスキーマ情報を取得します。
-     * 
-     * @param connectionId データベース接続ID
+     *
+     * @param connectionId   データベース接続ID
      * @param authentication 認証情報
      * @return データベース情報を含むAPIレスポンス
      */

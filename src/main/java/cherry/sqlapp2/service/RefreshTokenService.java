@@ -47,7 +47,7 @@ public class RefreshTokenService {
 
     /**
      * 指定されたユーザに対して新しいリフレッシュトークンを作成します。
-     * 
+     *
      * @param user トークンを作成するユーザ
      * @return 作成されたリフレッシュトークン
      */
@@ -64,7 +64,7 @@ public class RefreshTokenService {
 
     /**
      * トークン値でリフレッシュトークンを検索します。
-     * 
+     *
      * @param token トークン値
      * @return リフレッシュトークン（存在する場合）
      */
@@ -74,7 +74,7 @@ public class RefreshTokenService {
 
     /**
      * リフレッシュトークンを検証し、有効な場合に返します。
-     * 
+     *
      * @param token 検証するトークン値
      * @return 有効なリフレッシュトークン（存在し有効な場合）
      */
@@ -86,7 +86,7 @@ public class RefreshTokenService {
     /**
      * リフレッシュトークンを使用して新しいアクセストークンを生成します。
      * 最終使用日時を更新し、必要に応じて有効期限を延長します。
-     * 
+     *
      * @param token 使用するリフレッシュトークン値
      * @return 更新されたリフレッシュトークン（有効な場合）
      */

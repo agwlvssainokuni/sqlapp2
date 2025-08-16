@@ -47,8 +47,8 @@ public class SchemaService {
 
     /**
      * データベースのスキーマ情報（テーブルとビューを含む）を取得します。
-     * 
-     * @param user ユーザ情報
+     *
+     * @param user         ユーザ情報
      * @param connectionId データベース接続ID
      * @return データベース情報オブジェクト
      */

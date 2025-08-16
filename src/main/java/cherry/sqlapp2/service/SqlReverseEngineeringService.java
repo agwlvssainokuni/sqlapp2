@@ -16,25 +16,27 @@
 
 package cherry.sqlapp2.service;
 
-import cherry.sqlapp2.dto.*;
+import cherry.sqlapp2.dto.QueryStructure;
 import cherry.sqlapp2.dto.QueryStructure.*;
+import cherry.sqlapp2.dto.SqlParseResult;
 import net.sf.jsqlparser.JSQLParserException;
+import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
+import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.statement.select.*;
-import net.sf.jsqlparser.schema.Table;
-import net.sf.jsqlparser.expression.Expression;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * SQLクエリのリバースエンジニアリング機能を提供するサービスクラス。
  * 既存のSQLクエリを解析してQueryStructureオブジェクトに変換し、
  * ビジュアルクエリビルダーで編集可能な形式に変換します。
- * 
+ * <p>
  * 現在の制限事項:
  * - 基本的なSELECT、FROM、WHERE句のみサポート
  * - JOIN、サブクエリ、UNIONなどの複雑なSQL機能は一部制限あり
@@ -47,7 +49,7 @@ public class SqlReverseEngineeringService {
 
     /**
      * SQLクエリを解析してQueryStructureに変換します。
-     * 
+     *
      * @param sql 解析対象のSQLクエリ
      * @return 解析結果（成功時はクエリ構造、失敗時はエラー情報）
      */
@@ -58,7 +60,7 @@ public class SqlReverseEngineeringService {
 
         try {
             Statement statement = CCJSqlParserUtil.parse(sql.trim());
-            
+
             if (!(statement instanceof Select)) {
                 return SqlParseResult.error("Only SELECT statements are supported for reverse engineering");
             }
@@ -116,7 +118,7 @@ public class SqlReverseEngineeringService {
      */
     private QueryStructure parseSelectStatement(Select selectStatement) {
         QueryStructure.Builder builder = QueryStructure.builder();
-        
+
         PlainSelect plainSelect = selectStatement.getPlainSelect();
         if (plainSelect == null) {
             return createBasicQueryStructure("");
@@ -164,7 +166,7 @@ public class SqlReverseEngineeringService {
                 builder.offset(Integer.parseInt(limit.getOffset().toString()));
             }
         }
-        
+
         // Also check for OFFSET in a different way if not found above
         if (plainSelect.getOffset() != null) {
             builder.offset(Integer.parseInt(plainSelect.getOffset().getOffset().toString()));
@@ -175,18 +177,18 @@ public class SqlReverseEngineeringService {
 
     private List<SelectColumn> parseSelectItems(List<SelectItem<?>> selectItems) {
         List<SelectColumn> selectColumns = new ArrayList<>();
-        
+
         if (selectItems != null) {
             for (SelectItem<?> item : selectItems) {
                 SelectColumn selectColumn = new SelectColumn();
-                
+
                 // Use toString() to parse the item (improved approach with alias handling)
                 String itemString = item.toString();
-                
+
                 // Handle alias first (AS keyword)
                 String expression = itemString;
                 String alias = null;
-                
+
                 if (itemString.toUpperCase().contains(" AS ")) {
                     String[] aliasParts = itemString.split("(?i)\\s+AS\\s+", 2);
                     if (aliasParts.length == 2) {
@@ -194,7 +196,7 @@ public class SqlReverseEngineeringService {
                         alias = aliasParts[1].trim();
                     }
                 }
-                
+
                 // Parse the expression part (without alias) - Enhanced for aggregate functions
                 if (expression.equals("*")) {
                     // SELECT *
@@ -209,40 +211,40 @@ public class SqlReverseEngineeringService {
                     // Check for aggregate functions
                     parseSelectExpression(expression, selectColumn);
                 }
-                
+
                 // Set alias if present
                 if (alias != null) {
                     selectColumn.setAlias(alias);
                 }
-                
+
                 selectColumns.add(selectColumn);
             }
         }
-        
+
         return selectColumns;
     }
-    
+
     /**
      * Parse SELECT expression to extract aggregate function, table name, and column name.
      */
     private void parseSelectExpression(String expression, SelectColumn selectColumn) {
         // Common aggregate functions
         String[] aggregateFunctions = {"COUNT", "SUM", "AVG", "MAX", "MIN", "DISTINCT"};
-        
+
         String upperExpression = expression.toUpperCase();
         boolean foundAggregate = false;
-        
+
         for (String func : aggregateFunctions) {
             if (upperExpression.startsWith(func + "(")) {
                 // Found aggregate function
                 selectColumn.setAggregateFunction(func);
-                
+
                 // Extract the content inside parentheses
                 int openParen = expression.indexOf("(");
                 int closeParen = expression.lastIndexOf(")");
                 if (openParen != -1 && closeParen != -1 && closeParen > openParen) {
                     String innerExpression = expression.substring(openParen + 1, closeParen).trim();
-                    
+
                     if ("*".equals(innerExpression)) {
                         // COUNT(*), etc.
                         selectColumn.setTableName("");
@@ -266,7 +268,7 @@ public class SqlReverseEngineeringService {
                 break;
             }
         }
-        
+
         if (!foundAggregate) {
             // Regular column without aggregate function
             if (expression.contains(".")) {
@@ -284,29 +286,29 @@ public class SqlReverseEngineeringService {
 
     private List<FromTable> parseFromItem(FromItem fromItem) {
         List<FromTable> fromTables = new ArrayList<>();
-        
+
         if (fromItem instanceof Table) {
             Table table = (Table) fromItem;
             FromTable fromTable = new FromTable();
             fromTable.setTableName(table.getName());
-            
+
             if (table.getAlias() != null) {
                 fromTable.setAlias(table.getAlias().getName());
             }
-            
+
             fromTables.add(fromTable);
         }
-        
+
         return fromTables;
     }
 
     private List<JoinClause> parseJoins(List<Join> joins) {
         List<JoinClause> joinClauses = new ArrayList<>();
-        
+
         if (joins != null) {
             for (Join join : joins) {
                 JoinClause joinClause = new JoinClause();
-                
+
                 // Determine join type
                 if (join.isInner()) {
                     joinClause.setJoinType("INNER");
@@ -319,7 +321,7 @@ public class SqlReverseEngineeringService {
                 } else {
                     joinClause.setJoinType("INNER"); // Default
                 }
-                
+
                 // Parse joined table
                 if (join.getFromItem() instanceof Table) {
                     Table table = (Table) join.getFromItem();
@@ -328,15 +330,15 @@ public class SqlReverseEngineeringService {
                         joinClause.setAlias(table.getAlias().getName());
                     }
                 }
-                
+
                 // Parse join conditions (ON clause)
                 List<JoinCondition> joinConditions = parseJoinConditions(join);
                 joinClause.setConditions(joinConditions);
-                
+
                 joinClauses.add(joinClause);
             }
         }
-        
+
         return joinClauses;
     }
 
@@ -345,10 +347,10 @@ public class SqlReverseEngineeringService {
      */
     private List<JoinCondition> parseJoinConditions(Join join) {
         List<JoinCondition> conditions = new ArrayList<>();
-        
+
         // Try to get ON conditions using different methods for JSqlParser 5.3
         String onExpressionString = null;
-        
+
         // Method 1: Try getOnExpressions() (newer API)
         if (join.getOnExpressions() != null && !join.getOnExpressions().isEmpty()) {
             onExpressionString = join.getOnExpressions().iterator().next().toString();
@@ -363,7 +365,7 @@ public class SqlReverseEngineeringService {
                 }
             }
         }
-        
+
         if (onExpressionString != null) {
             // Parse multiple conditions separated by AND
             String[] andParts = onExpressionString.split("(?i)\\s+AND\\s+");
@@ -374,7 +376,7 @@ public class SqlReverseEngineeringService {
                 }
             }
         }
-        
+
         return conditions;
     }
 
@@ -385,17 +387,17 @@ public class SqlReverseEngineeringService {
         if (conditionString == null || conditionString.trim().isEmpty()) {
             return null;
         }
-        
+
         // Handle common operators
         String[] operators = {"=", "<>", "!=", "<", ">", "<=", ">="};
-        
+
         for (String operator : operators) {
             if (conditionString.contains(" " + operator + " ")) {
                 String[] parts = conditionString.split("\\s+" + operator.replace("=", "\\=").replace("<", "\\<").replace(">", "\\>") + "\\s+", 2);
                 if (parts.length == 2) {
                     String leftSide = parts[0].trim();
                     String rightSide = parts[1].trim();
-                    
+
                     // Parse left side (e.g., "v.field_id")
                     String leftTable = "";
                     String leftColumn = leftSide;
@@ -404,7 +406,7 @@ public class SqlReverseEngineeringService {
                         leftTable = leftParts[0];
                         leftColumn = leftParts[1];
                     }
-                    
+
                     // Parse right side (e.g., "m.id")
                     String rightTable = "";
                     String rightColumn = rightSide;
@@ -413,7 +415,7 @@ public class SqlReverseEngineeringService {
                         rightTable = rightParts[0];
                         rightColumn = rightParts[1];
                     }
-                    
+
                     // Create JOIN condition
                     JoinCondition condition = new JoinCondition();
                     condition.setLeftTable(leftTable);
@@ -421,12 +423,12 @@ public class SqlReverseEngineeringService {
                     condition.setOperator(operator);
                     condition.setRightTable(rightTable);
                     condition.setRightColumn(rightColumn);
-                    
+
                     return condition;
                 }
             }
         }
-        
+
         return null;
     }
 
@@ -435,15 +437,15 @@ public class SqlReverseEngineeringService {
      */
     private List<WhereCondition> parseWhereConditions(Expression whereExpression) {
         List<WhereCondition> conditions = new ArrayList<>();
-        
+
         if (whereExpression != null) {
             // Try to parse complex expressions with AND/OR
             parseComplexWhereExpression(whereExpression, conditions, null);
         }
-        
+
         return conditions;
     }
-    
+
     /**
      * Parse complex WHERE expressions with AND/OR support.
      * Handles BETWEEN clauses correctly by protecting them from being split.
@@ -452,9 +454,9 @@ public class SqlReverseEngineeringService {
         if (expression == null) {
             return;
         }
-        
+
         String expressionString = expression.toString();
-        
+
         // Handle OR expressions first (since they have lower precedence)
         if (expressionString.toUpperCase().contains(" OR ")) {
             List<String> orParts = splitRespectingBetween(expressionString, "OR");
@@ -491,7 +493,7 @@ public class SqlReverseEngineeringService {
             }
         }
     }
-    
+
     /**
      * Helper method to parse a part of WHERE expression that might contain AND.
      */
@@ -520,7 +522,7 @@ public class SqlReverseEngineeringService {
             }
         }
     }
-    
+
     /**
      * Split a string by AND/OR while respecting BETWEEN clauses.
      * BETWEEN clauses contain AND keywords that should not be used for splitting.
@@ -529,10 +531,10 @@ public class SqlReverseEngineeringService {
         List<String> parts = new ArrayList<>();
         String upperExpression = expression.toUpperCase();
         String upperOperator = " " + operator.toUpperCase() + " ";
-        
+
         int start = 0;
         int pos = 0;
-        
+
         while (pos < expression.length()) {
             int operatorPos = upperExpression.indexOf(upperOperator, pos);
             if (operatorPos == -1) {
@@ -540,10 +542,10 @@ public class SqlReverseEngineeringService {
                 parts.add(expression.substring(start));
                 break;
             }
-            
+
             // Check if this operator is inside a BETWEEN clause
             String beforeOperator = upperExpression.substring(start, operatorPos);
-            
+
             // Count BETWEEN keywords that don't have matching AND
             int betweenCount = 0;
             int betweenPos = 0;
@@ -551,7 +553,7 @@ public class SqlReverseEngineeringService {
                 betweenCount++;
                 betweenPos += 9; // length of " BETWEEN "
             }
-            
+
             // Count AND keywords (only for AND operator splitting)
             int andCount = 0;
             if ("AND".equals(operator)) {
@@ -561,22 +563,22 @@ public class SqlReverseEngineeringService {
                     andPos += 5; // length of " AND "
                 }
             }
-            
+
             // If we're splitting by AND and there are unmatched BETWEEN clauses, skip this AND
             if ("AND".equals(operator) && betweenCount > andCount) {
                 pos = operatorPos + upperOperator.length();
                 continue;
             }
-            
+
             // This is a valid split point
             parts.add(expression.substring(start, operatorPos));
             start = operatorPos + upperOperator.length();
             pos = start;
         }
-        
+
         return parts;
     }
-    
+
     /**
      * Parse a simple WHERE condition string like "m.id = 'job_id'" or "COUNT(v1.id) >= '1'".
      */
@@ -584,25 +586,25 @@ public class SqlReverseEngineeringService {
         if (conditionString == null || conditionString.trim().isEmpty()) {
             return null;
         }
-        
+
         // Handle NULL operators first (they have no right-hand value)
         if (conditionString.toUpperCase().contains(" IS NULL")) {
             String leftSide = conditionString.replaceAll("(?i)\\s+IS\\s+NULL", "").trim();
             return createWhereCondition(leftSide, "IS NULL", null);
         }
-        
+
         if (conditionString.toUpperCase().contains(" IS NOT NULL")) {
             String leftSide = conditionString.replaceAll("(?i)\\s+IS\\s+NOT\\s+NULL", "").trim();
             return createWhereCondition(leftSide, "IS NOT NULL", null);
         }
-        
+
         // Handle BETWEEN operator first (special case with two values)
         if (conditionString.toUpperCase().contains(" BETWEEN ")) {
             String[] betweenParts = conditionString.split("(?i)\\s+BETWEEN\\s+", 2);
             if (betweenParts.length == 2) {
                 String leftSide = betweenParts[0].trim();
                 String rightSide = betweenParts[1].trim();
-                
+
                 // Parse the "value1 AND value2" part, being careful about AND keyword
                 if (rightSide.toUpperCase().contains(" AND ")) {
                     // Find the last " AND " which should be the BETWEEN AND
@@ -610,7 +612,7 @@ public class SqlReverseEngineeringService {
                     if (lastAndIndex > 0) {
                         String minValue = rightSide.substring(0, lastAndIndex).trim();
                         String maxValue = rightSide.substring(lastAndIndex + 5).trim(); // +5 for " AND "
-                        
+
                         // Remove quotes if present
                         if (minValue.startsWith("'") && minValue.endsWith("'")) {
                             minValue = minValue.substring(1, minValue.length() - 1);
@@ -618,16 +620,16 @@ public class SqlReverseEngineeringService {
                         if (maxValue.startsWith("'") && maxValue.endsWith("'")) {
                             maxValue = maxValue.substring(1, maxValue.length() - 1);
                         }
-                        
+
                         return createBetweenWhereConditionWithAggregateSupport(leftSide, minValue, maxValue);
                     }
                 }
             }
         }
-        
+
         // Handle common operators with values
         String[] operators = {"=", "<>", "!=", "<=", ">=", "<", ">", "LIKE", "IN"};
-        
+
         for (String operator : operators) {
             if (conditionString.contains(" " + operator + " ")) {
                 String regex;
@@ -642,26 +644,26 @@ public class SqlReverseEngineeringService {
                 } else {
                     regex = "\\s+" + operator + "\\s+";
                 }
-                
+
                 String[] parts = conditionString.split(regex, 2);
                 if (parts.length == 2) {
                     String leftSide = parts[0].trim();
                     String rightSide = parts[1].trim();
-                    
+
                     // Parse right side (remove quotes if present)
                     String value = rightSide;
                     if (value.startsWith("'") && value.endsWith("'")) {
                         value = value.substring(1, value.length() - 1);
                     }
-                    
+
                     return createWhereConditionWithAggregateSupport(leftSide, operator, value);
                 }
             }
         }
-        
+
         return null;
     }
-    
+
     /**
      * Helper method to create WhereCondition from left side, operator, and value.
      */
@@ -674,17 +676,17 @@ public class SqlReverseEngineeringService {
             tableName = leftParts[0];
             columnName = leftParts[1];
         }
-        
+
         // Create WHERE condition
         WhereCondition condition = new WhereCondition();
         condition.setTableName(tableName);
         condition.setColumnName(columnName);
         condition.setOperator(operator);
         condition.setValue(value);
-        
+
         return condition;
     }
-    
+
     /**
      * Enhanced helper method to create WhereCondition with aggregate function support.
      */
@@ -692,23 +694,23 @@ public class SqlReverseEngineeringService {
         // Check for aggregate functions in left side
         String[] aggregateFunctions = {"COUNT", "SUM", "AVG", "MAX", "MIN"};
         String upperLeftSide = leftSide.toUpperCase();
-        
+
         WhereCondition condition = new WhereCondition();
         condition.setOperator(operator);
         condition.setValue(value);
-        
+
         boolean foundAggregate = false;
         for (String func : aggregateFunctions) {
             if (upperLeftSide.startsWith(func + "(")) {
                 // Found aggregate function
                 condition.setAggregateFunction(func);
-                
+
                 // Extract the content inside parentheses
                 int openParen = leftSide.indexOf("(");
                 int closeParen = leftSide.lastIndexOf(")");
                 if (openParen != -1 && closeParen != -1 && closeParen > openParen) {
                     String innerExpression = leftSide.substring(openParen + 1, closeParen).trim();
-                    
+
                     if ("*".equals(innerExpression)) {
                         // COUNT(*), etc.
                         condition.setTableName("");
@@ -732,7 +734,7 @@ public class SqlReverseEngineeringService {
                 break;
             }
         }
-        
+
         if (!foundAggregate) {
             // Regular column without aggregate function
             if (leftSide.contains(".")) {
@@ -744,10 +746,10 @@ public class SqlReverseEngineeringService {
                 condition.setColumnName(leftSide);
             }
         }
-        
+
         return condition;
     }
-    
+
     /**
      * Helper method to create WhereCondition for BETWEEN operator with min and max values.
      */
@@ -760,7 +762,7 @@ public class SqlReverseEngineeringService {
             tableName = leftParts[0];
             columnName = leftParts[1];
         }
-        
+
         // Create WHERE condition for BETWEEN
         WhereCondition condition = new WhereCondition();
         condition.setTableName(tableName);
@@ -768,10 +770,10 @@ public class SqlReverseEngineeringService {
         condition.setOperator("BETWEEN");
         condition.setMinValue(minValue);
         condition.setMaxValue(maxValue);
-        
+
         return condition;
     }
-    
+
     /**
      * Enhanced helper method to create WhereCondition for BETWEEN operator with aggregate function support.
      */
@@ -779,24 +781,24 @@ public class SqlReverseEngineeringService {
         // Check for aggregate functions in left side
         String[] aggregateFunctions = {"COUNT", "SUM", "AVG", "MAX", "MIN"};
         String upperLeftSide = leftSide.toUpperCase();
-        
+
         WhereCondition condition = new WhereCondition();
         condition.setOperator("BETWEEN");
         condition.setMinValue(minValue);
         condition.setMaxValue(maxValue);
-        
+
         boolean foundAggregate = false;
         for (String func : aggregateFunctions) {
             if (upperLeftSide.startsWith(func + "(")) {
                 // Found aggregate function
                 condition.setAggregateFunction(func);
-                
+
                 // Extract the content inside parentheses
                 int openParen = leftSide.indexOf("(");
                 int closeParen = leftSide.lastIndexOf(")");
                 if (openParen != -1 && closeParen != -1 && closeParen > openParen) {
                     String innerExpression = leftSide.substring(openParen + 1, closeParen).trim();
-                    
+
                     if ("*".equals(innerExpression)) {
                         // COUNT(*), etc.
                         condition.setTableName("");
@@ -820,7 +822,7 @@ public class SqlReverseEngineeringService {
                 break;
             }
         }
-        
+
         if (!foundAggregate) {
             // Regular column without aggregate function
             if (leftSide.contains(".")) {
@@ -832,51 +834,51 @@ public class SqlReverseEngineeringService {
                 condition.setColumnName(leftSide);
             }
         }
-        
+
         return condition;
     }
 
     private List<OrderByColumn> parseOrderBy(List<OrderByElement> orderByElements) {
         List<OrderByColumn> orderByColumns = new ArrayList<>();
-        
+
         if (orderByElements != null) {
             for (OrderByElement element : orderByElements) {
                 OrderByColumn orderByColumn = new OrderByColumn();
-                
+
                 String expression = element.getExpression().toString();
-                
+
                 // Parse expression with aggregate function support
                 parseOrderByExpression(expression, orderByColumn);
-                
+
                 orderByColumn.setDirection(element.isAsc() ? "ASC" : "DESC");
                 orderByColumns.add(orderByColumn);
             }
         }
-        
+
         return orderByColumns;
     }
-    
+
     /**
      * Parse ORDER BY expression to extract aggregate function, table name, and column name.
      */
     private void parseOrderByExpression(String expression, OrderByColumn orderByColumn) {
         // Common aggregate functions
         String[] aggregateFunctions = {"COUNT", "SUM", "AVG", "MAX", "MIN"};
-        
+
         String upperExpression = expression.toUpperCase();
         boolean foundAggregate = false;
-        
+
         for (String func : aggregateFunctions) {
             if (upperExpression.startsWith(func + "(")) {
                 // Found aggregate function
                 orderByColumn.setAggregateFunction(func);
-                
+
                 // Extract the content inside parentheses
                 int openParen = expression.indexOf("(");
                 int closeParen = expression.lastIndexOf(")");
                 if (openParen != -1 && closeParen != -1 && closeParen > openParen) {
                     String innerExpression = expression.substring(openParen + 1, closeParen).trim();
-                    
+
                     if ("*".equals(innerExpression)) {
                         // COUNT(*), etc.
                         orderByColumn.setTableName("");
@@ -900,7 +902,7 @@ public class SqlReverseEngineeringService {
                 break;
             }
         }
-        
+
         if (!foundAggregate) {
             // Regular column without aggregate function
             if (expression.contains(".")) {
@@ -919,13 +921,13 @@ public class SqlReverseEngineeringService {
      */
     private List<GroupByColumn> parseGroupBy(GroupByElement groupByElement) {
         List<GroupByColumn> groupByColumns = new ArrayList<>();
-        
+
         if (groupByElement != null && groupByElement.getGroupByExpressionList() != null) {
             for (Object expressionObj : groupByElement.getGroupByExpressionList()) {
                 if (expressionObj instanceof Expression) {
                     Expression expression = (Expression) expressionObj;
                     GroupByColumn groupByColumn = new GroupByColumn();
-                    
+
                     String expressionString = expression.toString();
                     if (expressionString.contains(".")) {
                         String[] parts = expressionString.split("\\.", 2);
@@ -935,12 +937,12 @@ public class SqlReverseEngineeringService {
                         groupByColumn.setTableName("");
                         groupByColumn.setColumnName(expressionString);
                     }
-                    
+
                     groupByColumns.add(groupByColumn);
                 }
             }
         }
-        
+
         return groupByColumns;
     }
 }

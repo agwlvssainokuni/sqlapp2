@@ -42,7 +42,7 @@ public class HealthController {
     /**
      * アプリケーションのヘルスチェックを実行します。
      * システムの稼働状態と現在時刻を返します。
-     * 
+     *
      * @return アプリケーションの健康状態を含むAPIレスポンス
      */
     @Operation(

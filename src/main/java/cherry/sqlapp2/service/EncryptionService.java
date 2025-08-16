@@ -66,7 +66,7 @@ public class EncryptionService {
     /**
      * 平文を暗号化します。
      * AES-256-GCM暗号化を使用してデータを安全に暗号化します。
-     * 
+     *
      * @param plaintext 暗号化する平文
      * @return Base64エンコードされた暗号化データ
      */
@@ -103,7 +103,7 @@ public class EncryptionService {
     /**
      * 暗号化されたデータを復号化します。
      * AES-256-GCM復号化を使用してデータを元の平文に戻します。
-     * 
+     *
      * @param encryptedText Base64エンコードされた暗号化データ
      * @return 復号化された平文
      */
