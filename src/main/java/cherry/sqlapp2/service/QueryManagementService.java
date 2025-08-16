@@ -27,6 +27,7 @@ import cherry.sqlapp2.repository.SavedQueryRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -50,17 +51,20 @@ public class QueryManagementService {
     private final SavedQueryRepository savedQueryRepository;
     private final QueryHistoryRepository queryHistoryRepository;
     private final MetricsService metricsService;
+    private final int defaultPeriodDays;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Autowired
     public QueryManagementService(
             SavedQueryRepository savedQueryRepository,
             QueryHistoryRepository queryHistoryRepository,
-            MetricsService metricsService
+            MetricsService metricsService,
+            @Value("${app.query-history.default-period-days:30}") int defaultPeriodDays
     ) {
         this.savedQueryRepository = savedQueryRepository;
         this.queryHistoryRepository = queryHistoryRepository;
         this.metricsService = metricsService;
+        this.defaultPeriodDays = defaultPeriodDays;
     }
 
     // ==================== Saved Queries Management ====================
@@ -243,9 +247,27 @@ public class QueryManagementService {
         return queryHistoryRepository.save(history);
     }
 
+    /**
+     * ユーザのクエリ履歴を取得します（デフォルト期間）。
+     * 設定で指定された期間内の履歴を返します。
+     */
     @Transactional(readOnly = true)
     public Page<QueryHistory> getUserQueryHistory(User user, Pageable pageable) {
-        return queryHistoryRepository.findByUserOrderByExecutedAtDesc(user, pageable);
+        LocalDateTime fromDate = LocalDateTime.now().minusDays(defaultPeriodDays);
+        return queryHistoryRepository.findByUserAndExecutedAtAfter(user, fromDate, pageable);
+    }
+
+    /**
+     * ユーザのクエリ履歴を指定された期間で取得します。
+     * FROM日付は必須、TO日付は任意です。
+     */
+    @Transactional(readOnly = true)
+    public Page<QueryHistory> getUserQueryHistoryWithDateRange(User user, LocalDateTime fromDate, LocalDateTime toDate, Pageable pageable) {
+        if (toDate != null) {
+            return queryHistoryRepository.findByUserAndExecutedAtBetween(user, fromDate, toDate, pageable);
+        } else {
+            return queryHistoryRepository.findByUserAndExecutedAtAfter(user, fromDate, pageable);
+        }
     }
 
     @Transactional(readOnly = true)

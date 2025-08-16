@@ -72,7 +72,7 @@ class QueryManagementServiceTest {
 
     @BeforeEach
     void setUp() {
-        queryManagementService = new QueryManagementService(savedQueryRepository, queryHistoryRepository, metricsService);
+        queryManagementService = new QueryManagementService(savedQueryRepository, queryHistoryRepository, metricsService, 30);
         
         testUser = new User(testUsername, testPassword, testEmail);
         ReflectionTestUtils.setField(testUser, "id", 1L);
@@ -494,14 +494,14 @@ class QueryManagementServiceTest {
         }
 
         @Test
-        @DisplayName("ユーザーのクエリ履歴をページングで取得する")
+        @DisplayName("ユーザーのクエリ履歴をページングで取得する（旧メソッド）")
         void shouldGetUserQueryHistoryWithPaging() {
             // Given
             Pageable pageable = PageRequest.of(0, 10);
             List<QueryHistory> historyList = List.of(new QueryHistory(), new QueryHistory());
             Page<QueryHistory> expectedPage = new PageImpl<>(historyList, pageable, 2);
             
-            when(queryHistoryRepository.findByUserOrderByExecutedAtDesc(testUser, pageable))
+            when(queryHistoryRepository.findByUserAndExecutedAtAfter(eq(testUser), any(LocalDateTime.class), eq(pageable)))
                     .thenReturn(expectedPage);
 
             // When
@@ -510,7 +510,7 @@ class QueryManagementServiceTest {
             // Then
             assertThat(result.getContent()).hasSize(2);
             assertThat(result.getTotalElements()).isEqualTo(2);
-            verify(queryHistoryRepository).findByUserOrderByExecutedAtDesc(testUser, pageable);
+            verify(queryHistoryRepository).findByUserAndExecutedAtAfter(eq(testUser), any(LocalDateTime.class), eq(pageable));
         }
 
         @Test
@@ -530,6 +530,69 @@ class QueryManagementServiceTest {
 
             // Then
             assertThat(result.getContent()).hasSize(1);
+            verify(queryHistoryRepository).findByUserAndExecutedAtAfter(testUser, fromDate, pageable);
+        }
+
+        @Test
+        @DisplayName("デフォルト期間でクエリ履歴を取得する")
+        void shouldGetUserQueryHistoryWithDefaultPeriod() {
+            // Given
+            Pageable pageable = PageRequest.of(0, 10);
+            List<QueryHistory> historyList = List.of(new QueryHistory(), new QueryHistory());
+            Page<QueryHistory> expectedPage = new PageImpl<>(historyList, pageable, 2);
+            
+            when(queryHistoryRepository.findByUserAndExecutedAtAfter(eq(testUser), any(LocalDateTime.class), eq(pageable)))
+                    .thenReturn(expectedPage);
+
+            // When
+            Page<QueryHistory> result = queryManagementService.getUserQueryHistory(testUser, pageable);
+
+            // Then
+            assertThat(result.getContent()).hasSize(2);
+            assertThat(result.getTotalElements()).isEqualTo(2);
+            verify(queryHistoryRepository).findByUserAndExecutedAtAfter(eq(testUser), any(LocalDateTime.class), eq(pageable));
+        }
+
+        @Test
+        @DisplayName("日時範囲指定でクエリ履歴を取得する（FROM・TO両方指定）")
+        void shouldGetUserQueryHistoryWithDateRangeBoth() {
+            // Given
+            LocalDateTime fromDate = LocalDateTime.now().minusDays(7);
+            LocalDateTime toDate = LocalDateTime.now().minusDays(1);
+            Pageable pageable = PageRequest.of(0, 10);
+            List<QueryHistory> historyList = List.of(new QueryHistory());
+            Page<QueryHistory> expectedPage = new PageImpl<>(historyList, pageable, 1);
+            
+            when(queryHistoryRepository.findByUserAndExecutedAtBetween(testUser, fromDate, toDate, pageable))
+                    .thenReturn(expectedPage);
+
+            // When
+            Page<QueryHistory> result = queryManagementService.getUserQueryHistoryWithDateRange(testUser, fromDate, toDate, pageable);
+
+            // Then
+            assertThat(result.getContent()).hasSize(1);
+            assertThat(result.getTotalElements()).isEqualTo(1);
+            verify(queryHistoryRepository).findByUserAndExecutedAtBetween(testUser, fromDate, toDate, pageable);
+        }
+
+        @Test
+        @DisplayName("日時範囲指定でクエリ履歴を取得する（FROMのみ指定）")
+        void shouldGetUserQueryHistoryWithDateRangeFromOnly() {
+            // Given
+            LocalDateTime fromDate = LocalDateTime.now().minusDays(7);
+            Pageable pageable = PageRequest.of(0, 10);
+            List<QueryHistory> historyList = List.of(new QueryHistory());
+            Page<QueryHistory> expectedPage = new PageImpl<>(historyList, pageable, 1);
+            
+            when(queryHistoryRepository.findByUserAndExecutedAtAfter(testUser, fromDate, pageable))
+                    .thenReturn(expectedPage);
+
+            // When
+            Page<QueryHistory> result = queryManagementService.getUserQueryHistoryWithDateRange(testUser, fromDate, null, pageable);
+
+            // Then
+            assertThat(result.getContent()).hasSize(1);
+            assertThat(result.getTotalElements()).isEqualTo(1);
             verify(queryHistoryRepository).findByUserAndExecutedAtAfter(testUser, fromDate, pageable);
         }
 
@@ -732,7 +795,7 @@ class QueryManagementServiceTest {
         @DisplayName("JSONシリアライゼーション例外を適切に処理する")
         void shouldHandleJsonSerializationException() {
             // Given - ObjectMapperをモックして例外をスローさせる
-            QueryManagementService serviceWithMockMapper = new QueryManagementService(savedQueryRepository, queryHistoryRepository, metricsService);
+            QueryManagementService serviceWithMockMapper = new QueryManagementService(savedQueryRepository, queryHistoryRepository, metricsService, 30);
             ObjectMapper mockMapper = mock(ObjectMapper.class);
             ReflectionTestUtils.setField(serviceWithMockMapper, "objectMapper", mockMapper);
 

@@ -37,6 +37,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -203,9 +204,12 @@ public class QueryController {
     /**
      * ユーザのクエリ実行履歴を取得します。
      * ページネーション機能付きで履歴を取得できます。
+     * 日時範囲を指定できます。FROM日付は必須、TO日付は任意です。
      *
      * @param page           ページ番号（0から開始）
      * @param size           1ページあたりの件数
+     * @param fromDate       開始日時（ISO 8601形式、任意）
+     * @param toDate         終了日時（ISO 8601形式、任意）
      * @param authentication 認証情報
      * @return ページネーションされたクエリ履歴を含むAPIレスポンス
      */
@@ -213,12 +217,22 @@ public class QueryController {
     public ApiResponse<Page<QueryHistory>> getQueryHistory(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
+            @RequestParam(required = false) String fromDate,
+            @RequestParam(required = false) String toDate,
             Authentication authentication
     ) {
 
         User user = getCurrentUser(authentication);
         Pageable pageable = PageRequest.of(page, size);
-        var history = queryManagementService.getUserQueryHistory(user, pageable);
+
+        Page<cherry.sqlapp2.entity.QueryHistory> history;
+        if (fromDate != null) {
+            LocalDateTime from = LocalDateTime.parse(fromDate);
+            LocalDateTime to = toDate != null ? LocalDateTime.parse(toDate) : null;
+            history = queryManagementService.getUserQueryHistoryWithDateRange(user, from, to, pageable);
+        } else {
+            history = queryManagementService.getUserQueryHistory(user, pageable);
+        }
 
         var response = history.map(this::createQueryHistoryDto);
         return ApiResponse.success(response);

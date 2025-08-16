@@ -39,6 +39,8 @@ const QueryHistoryPage: React.FC = () => {
   // Filter state
   const [filterType, setFilterType] = useState<'all' | 'successful' | 'failed'>('all')
   const [searchTerm, setSearchTerm] = useState('')
+  const [fromDate, setFromDate] = useState('')
+  const [toDate, setToDate] = useState('')
   const [currentPage, setCurrentPage] = useState(0)
   const [pageSize] = useState(20)
 
@@ -60,6 +62,13 @@ const QueryHistoryPage: React.FC = () => {
         size: pageSize.toString()
       })
 
+      if (fromDate) {
+        params.append('fromDate', fromDate)
+      }
+      if (toDate) {
+        params.append('toDate', toDate)
+      }
+
       const [historyResp, statsResp] = await Promise.all([
         apiRequest(`${endpoint}?${params}`),
         apiRequest('/api/queries/stats')
@@ -76,7 +85,7 @@ const QueryHistoryPage: React.FC = () => {
     } finally {
       setLoading(false)
     }
-  }, [apiRequest, currentPage, filterType, pageSize, t])
+  }, [apiRequest, currentPage, filterType, pageSize, fromDate, toDate, t])
 
   useEffect(() => {
     loadData()
@@ -198,6 +207,43 @@ const QueryHistoryPage: React.FC = () => {
               <option value="successful">{t('queryHistory.successfulOnly')}</option>
               <option value="failed">{t('queryHistory.failedOnly')}</option>
             </select>
+          </div>
+
+          <div className="date-range-group">
+            <label>{t('queryHistory.dateRange')}:</label>
+            <input
+              type="datetime-local"
+              placeholder={t('queryHistory.fromDate')}
+              value={fromDate}
+              onChange={(e) => setFromDate(e.target.value)}
+              className="date-input"
+            />
+            <input
+              type="datetime-local"
+              placeholder={t('queryHistory.toDate')}
+              value={toDate}
+              onChange={(e) => setToDate(e.target.value)}
+              className="date-input"
+            />
+            <button 
+              className="btn-filter" 
+              onClick={() => {
+                setCurrentPage(0)
+                loadData()
+              }}
+            >
+              {t('queryHistory.applyFilter')}
+            </button>
+            <button 
+              className="btn-clear" 
+              onClick={() => {
+                setFromDate('')
+                setToDate('')
+                setCurrentPage(0)
+              }}
+            >
+              {t('queryHistory.clearFilter')}
+            </button>
           </div>
 
           <div className="search-group">
