@@ -21,7 +21,7 @@ import {useAuth} from '../context/AuthContext'
 import LanguageSwitcher from './LanguageSwitcher'
 
 const Register: React.FC = () => {
-  const {t} = useTranslation()
+  const {t, i18n} = useTranslation()
   const {apiRequest} = useAuth()
   const [username, setUsername] = useState('')
   const [email, setEmail] = useState('')
@@ -45,7 +45,7 @@ const Register: React.FC = () => {
     try {
       const response = await apiRequest('/api/auth/register', {
         method: 'POST',
-        body: JSON.stringify({username, email, password}),
+        body: JSON.stringify({username, email, password, language: i18n.language}),
       })
 
       if (!response.ok) {

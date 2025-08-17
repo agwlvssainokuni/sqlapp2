@@ -82,6 +82,7 @@ class AuthControllerIntegrationTest extends BaseIntegrationTest {
             assertThat(savedUser.getUsername()).isEqualTo("newuser");
             assertThat(savedUser.getEmail()).isEqualTo("newuser@example.com");
             assertThat(passwordEncoder.matches("newpassword123", savedUser.getPassword())).isTrue();
+            assertThat(savedUser.getLanguage()).isEqualTo("en"); // デフォルト言語確認
         }
 
         @Test
@@ -135,6 +136,56 @@ class AuthControllerIntegrationTest extends BaseIntegrationTest {
                             "username: Username is required",
                             "username: Username must be between 3 and 50 characters"
                     )));
+        }
+
+        @Test
+        @DisplayName("日本語設定でユーザー登録ができる")
+        void shouldRegisterUserWithJapaneseLanguage() throws Exception {
+            // Given
+            var registerRequest = new UserRegistrationRequest(
+                    "japaneseuser",
+                    "password123",
+                    "japanese@example.com",
+                    "ja"
+            );
+
+            // When & Then
+            mockMvc.perform(post("/api/auth/register")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(toJson(registerRequest)))
+                    .andExpect(status().isCreated())
+                    .andExpect(jsonPath("$.ok").value(true))
+                    .andExpect(jsonPath("$.data.username").value("japaneseuser"));
+
+            // データベース確認
+            User savedUser = userRepository.findByUsername("japaneseuser").orElse(null);
+            assertThat(savedUser).isNotNull();
+            assertThat(savedUser.getLanguage()).isEqualTo("ja");
+        }
+
+        @Test
+        @DisplayName("英語設定でユーザー登録ができる")
+        void shouldRegisterUserWithEnglishLanguage() throws Exception {
+            // Given
+            var registerRequest = new UserRegistrationRequest(
+                    "englishuser",
+                    "password123",
+                    "english@example.com",
+                    "en"
+            );
+
+            // When & Then
+            mockMvc.perform(post("/api/auth/register")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(toJson(registerRequest)))
+                    .andExpect(status().isCreated())
+                    .andExpect(jsonPath("$.ok").value(true))
+                    .andExpect(jsonPath("$.data.username").value("englishuser"));
+
+            // データベース確認
+            User savedUser = userRepository.findByUsername("englishuser").orElse(null);
+            assertThat(savedUser).isNotNull();
+            assertThat(savedUser.getLanguage()).isEqualTo("en");
         }
     }
 

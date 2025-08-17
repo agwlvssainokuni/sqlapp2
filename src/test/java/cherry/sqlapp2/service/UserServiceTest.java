@@ -149,6 +149,57 @@ class UserServiceTest {
         }
 
         @Test
+        @DisplayName("言語設定付きユーザーを正常に作成する")
+        void shouldCreateUserWithLanguageSuccessfully() {
+            // Given
+            String language = "ja";
+            when(userRepository.existsByUsername(testUsername)).thenReturn(false);
+            when(userRepository.existsByEmail(testEmail)).thenReturn(false);
+            when(passwordEncoder.encode(testPassword)).thenReturn(encodedPassword);
+
+            User expectedUser = new User(testUsername, encodedPassword, testEmail, language);
+            when(userRepository.save(any(User.class))).thenReturn(expectedUser);
+
+            // When
+            User result = userService.createUser(testUsername, testPassword, testEmail, language);
+
+            // Then
+            assertThat(result).isNotNull();
+            assertThat(result.getUsername()).isEqualTo(testUsername);
+            assertThat(result.getPassword()).isEqualTo(encodedPassword);
+            assertThat(result.getEmail()).isEqualTo(testEmail);
+            assertThat(result.getLanguage()).isEqualTo(language);
+
+            verify(userRepository).existsByUsername(testUsername);
+            verify(userRepository).existsByEmail(testEmail);
+            verify(passwordEncoder).encode(testPassword);
+            verify(userRepository).save(any(User.class));
+            verify(emailNotificationService).sendRegistrationNotification(any(User.class), eq(language));
+        }
+
+        @Test
+        @DisplayName("null言語設定でデフォルト言語を使用する")
+        void shouldUseDefaultLanguageForNullLanguage() {
+            // Given
+            String language = null;
+            when(userRepository.existsByUsername(testUsername)).thenReturn(false);
+            when(userRepository.existsByEmail(testEmail)).thenReturn(false);
+            when(passwordEncoder.encode(testPassword)).thenReturn(encodedPassword);
+
+            User expectedUser = new User(testUsername, encodedPassword, testEmail, "en");
+            when(userRepository.save(any(User.class))).thenReturn(expectedUser);
+
+            // When
+            User result = userService.createUser(testUsername, testPassword, testEmail, language);
+
+            // Then
+            assertThat(result).isNotNull();
+            assertThat(result.getLanguage()).isEqualTo("en");
+
+            verify(emailNotificationService).sendRegistrationNotification(any(User.class), eq("en"));
+        }
+
+        @Test
         @DisplayName("空のユーザー名を処理する")
         void shouldHandleEmptyUsername() {
             // Given
@@ -510,6 +561,91 @@ class UserServiceTest {
             assertThatThrownBy(() -> userService.createUser(testUsername, testPassword, testEmail))
                     .isInstanceOf(RuntimeException.class)
                     .hasMessage("Database error");
+        }
+    }
+
+    @Nested
+    @DisplayName("ユーザー承認・拒絶機能と言語連動")
+    class UserApprovalAndLanguage {
+
+        @Test
+        @DisplayName("ユーザー承認時にユーザーの言語でメール送信する")
+        void shouldSendApprovalEmailInUserLanguage() {
+            // Given
+            String userLanguage = "ja";
+            User pendingUser = new User(testUsername, encodedPassword, testEmail, userLanguage);
+            pendingUser.setId(1L);
+            
+            when(userRepository.findById(1L)).thenReturn(Optional.of(pendingUser));
+            when(userRepository.save(any(User.class))).thenReturn(pendingUser);
+
+            // When
+            User result = userService.approveUser(1L);
+
+            // Then
+            assertThat(result).isNotNull();
+            verify(emailNotificationService).sendApprovalNotification(any(User.class), eq(userLanguage));
+        }
+
+        @Test
+        @DisplayName("ユーザー拒絶時にユーザーの言語でメール送信する")
+        void shouldSendRejectionEmailInUserLanguage() {
+            // Given
+            String userLanguage = "en";
+            String rejectionReason = "Documentation incomplete";
+            User pendingUser = new User(testUsername, encodedPassword, testEmail, userLanguage);
+            pendingUser.setId(1L);
+            
+            when(userRepository.findById(1L)).thenReturn(Optional.of(pendingUser));
+            when(userRepository.save(any(User.class))).thenReturn(pendingUser);
+
+            // When
+            User result = userService.rejectUser(1L, rejectionReason);
+
+            // Then
+            assertThat(result).isNotNull();
+            verify(emailNotificationService).sendRejectionNotification(any(User.class), eq(rejectionReason), eq(userLanguage));
+        }
+
+        @Test
+        @DisplayName("日本語ユーザーの承認時に日本語メール送信する")
+        void shouldSendJapaneseApprovalEmailForJapaneseUser() {
+            // Given
+            String userLanguage = "ja";
+            User japaneseUser = new User("日本ユーザー", encodedPassword, "japanese@example.com", userLanguage);
+            japaneseUser.setId(2L);
+            
+            when(userRepository.findById(2L)).thenReturn(Optional.of(japaneseUser));
+            when(userRepository.save(any(User.class))).thenReturn(japaneseUser);
+
+            // When
+            User result = userService.approveUser(2L);
+
+            // Then
+            assertThat(result).isNotNull();
+            assertThat(result.getLanguage()).isEqualTo("ja");
+            verify(emailNotificationService).sendApprovalNotification(any(User.class), eq("ja"));
+        }
+
+        @Test
+        @DisplayName("英語ユーザーの拒絶時に英語メール送信する")
+        void shouldSendEnglishRejectionEmailForEnglishUser() {
+            // Given
+            String userLanguage = "en";
+            String rejectionReason = "Invalid email domain";
+            User englishUser = new User("englishUser", encodedPassword, "english@example.com", userLanguage);
+            englishUser.setId(3L);
+            
+            when(userRepository.findById(3L)).thenReturn(Optional.of(englishUser));
+            when(userRepository.save(any(User.class))).thenReturn(englishUser);
+
+            // When
+            User result = userService.rejectUser(3L, rejectionReason);
+
+            // Then
+            assertThat(result).isNotNull();
+            assertThat(result.getLanguage()).isEqualTo("en");
+            verify(emailNotificationService).sendRejectionNotification(any(User.class), eq(rejectionReason), eq("en"));
         }
     }
 }

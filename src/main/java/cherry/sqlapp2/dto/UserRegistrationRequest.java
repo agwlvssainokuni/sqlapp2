@@ -35,6 +35,9 @@ public class UserRegistrationRequest {
     @Size(max = 100, message = "Email must not exceed 100 characters")
     private String email;
 
+    @Size(max = 5, message = "Language code must not exceed 5 characters")
+    private String language = "en";
+
     // Constructors
     public UserRegistrationRequest() {}
 
@@ -42,6 +45,14 @@ public class UserRegistrationRequest {
         this.username = username;
         this.password = password;
         this.email = email;
+        this.language = "en";
+    }
+
+    public UserRegistrationRequest(String username, String password, String email, String language) {
+        this.username = username;
+        this.password = password;
+        this.email = email;
+        this.language = language != null ? language : "en";
     }
 
     // Getters and Setters
@@ -67,5 +78,13 @@ public class UserRegistrationRequest {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public String getLanguage() {
+        return language;
+    }
+
+    public void setLanguage(String language) {
+        this.language = language;
     }
 }

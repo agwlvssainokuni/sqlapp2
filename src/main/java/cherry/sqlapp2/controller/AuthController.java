@@ -287,8 +287,9 @@ public class AuthController {
     /**
      * 新規ユーザの登録を行います。
      * ユーザ名の重複チェック、パスワードのハッシュ化を行い、新しいユーザアカウントを作成します。
+     * ユーザの言語設定も保存され、承認・拒絶メール送信時の言語選択に使用されます。
      *
-     * @param request ユーザ登録情報（ユーザ名、パスワード、メールアドレス）
+     * @param request ユーザ登録情報（ユーザ名、パスワード、メールアドレス、言語設定）
      * @return 登録されたユーザ情報を含むAPIレスポンス
      */
     @Operation(
@@ -329,7 +330,8 @@ public class AuthController {
         User user = userService.createUser(
                 request.getUsername(),
                 request.getPassword(),
-                request.getEmail()
+                request.getEmail(),
+                request.getLanguage()
         );
         LoginUser loginUser = new LoginUser(user);
         return ResponseEntity.status(HttpStatus.CREATED).body(

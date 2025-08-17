@@ -72,6 +72,22 @@ public class UserService {
      * @return 作成されたユーザ
      */
     public User createUser(String username, String password, String email) {
+        return createUser(username, password, email, "en");
+    }
+
+    /**
+     * 新しいユーザを作成します（言語設定付き）。
+     * ユーザ名とメールアドレスの重複チェックを行い、パスワードをハッシュ化して保存します。
+     * 作成されたユーザーは承認待ち状態となり、登録通知メールが送信されます。
+     * 言語設定は承認・拒絶メール送信時の言語選択に使用されます。
+     *
+     * @param username ユーザ名
+     * @param password パスワード（平文）
+     * @param email    メールアドレス
+     * @param language 言語設定（en/ja）
+     * @return 作成されたユーザ
+     */
+    public User createUser(String username, String password, String email, String language) {
         if (userRepository.existsByUsername(username)) {
             throw new IllegalArgumentException("Username already exists");
         }
@@ -80,7 +96,7 @@ public class UserService {
         }
 
         String encodedPassword = passwordEncoder.encode(password);
-        User user = new User(username, encodedPassword, email); // デフォルトでPENDING状態
+        User user = new User(username, encodedPassword, email, language); // デフォルトでPENDING状態
         
         // 統合テスト環境では自動承認
         if (autoApproveInTests) {
@@ -92,8 +108,8 @@ public class UserService {
         // Record user registration metric
         metricsService.recordUserRegistration();
 
-        // Send registration notification email
-        emailNotificationService.sendRegistrationNotification(savedUser, null);
+        // Send registration notification email with user's language
+        emailNotificationService.sendRegistrationNotification(savedUser, savedUser.getLanguage());
 
         return savedUser;
     }
@@ -159,8 +175,8 @@ public class UserService {
         user.setStatus(UserStatus.APPROVED);
         User savedUser = userRepository.save(user);
 
-        // Send approval notification email
-        emailNotificationService.sendApprovalNotification(savedUser, null);
+        // Send approval notification email with user's language
+        emailNotificationService.sendApprovalNotification(savedUser, savedUser.getLanguage());
 
         return savedUser;
     }
@@ -183,8 +199,8 @@ public class UserService {
         user.setStatus(UserStatus.REJECTED);
         User savedUser = userRepository.save(user);
 
-        // Send rejection notification email
-        emailNotificationService.sendRejectionNotification(savedUser, reason, null);
+        // Send rejection notification email with user's language
+        emailNotificationService.sendRejectionNotification(savedUser, reason, savedUser.getLanguage());
 
         return savedUser;
     }

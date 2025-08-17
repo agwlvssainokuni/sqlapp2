@@ -216,7 +216,7 @@ class AuthControllerTest {
             );
             User createdUser = new User(testUsername, "hashedPassword", testEmail);
 
-            when(userService.createUser(testUsername, testPassword, testEmail))
+            when(userService.createUser(testUsername, testPassword, testEmail, "en"))
                     .thenReturn(createdUser);
 
             // When
@@ -229,7 +229,7 @@ class AuthControllerTest {
             assertThat(response.getBody().data().username()).isEqualTo(testUsername);
             assertThat(response.getBody().data().email()).isEqualTo(testEmail);
 
-            verify(userService).createUser(testUsername, testPassword, testEmail);
+            verify(userService).createUser(testUsername, testPassword, testEmail, "en");
         }
 
         @Test
@@ -240,7 +240,7 @@ class AuthControllerTest {
                     testUsername, testPassword, testEmail
             );
 
-            when(userService.createUser(testUsername, testPassword, testEmail))
+            when(userService.createUser(testUsername, testPassword, testEmail, "en"))
                     .thenThrow(new IllegalArgumentException("Username already exists"));
 
             // When & Then
@@ -248,7 +248,7 @@ class AuthControllerTest {
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessage("Username already exists");
 
-            verify(userService).createUser(testUsername, testPassword, testEmail);
+            verify(userService).createUser(testUsername, testPassword, testEmail, "en");
         }
 
         @Test
@@ -259,7 +259,7 @@ class AuthControllerTest {
                     testUsername, testPassword, testEmail
             );
 
-            when(userService.createUser(testUsername, testPassword, testEmail))
+            when(userService.createUser(testUsername, testPassword, testEmail, "en"))
                     .thenThrow(new IllegalArgumentException("Email already exists"));
 
             // When & Then
@@ -267,7 +267,7 @@ class AuthControllerTest {
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessage("Email already exists");
 
-            verify(userService).createUser(testUsername, testPassword, testEmail);
+            verify(userService).createUser(testUsername, testPassword, testEmail, "en");
         }
 
         @Test
@@ -280,7 +280,7 @@ class AuthControllerTest {
             );
             User createdUser = new User(longUsername, "hashedPassword", testEmail);
 
-            when(userService.createUser(longUsername, testPassword, testEmail))
+            when(userService.createUser(longUsername, testPassword, testEmail, "en"))
                     .thenReturn(createdUser);
 
             // When
@@ -302,7 +302,7 @@ class AuthControllerTest {
             );
             User createdUser = new User(unicodeUsername, "hashedPassword", unicodeEmail);
 
-            when(userService.createUser(unicodeUsername, testPassword, unicodeEmail))
+            when(userService.createUser(unicodeUsername, testPassword, unicodeEmail, "en"))
                     .thenReturn(createdUser);
 
             // When

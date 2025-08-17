@@ -21,9 +21,10 @@ import java.time.LocalDateTime;
 
 /**
  * ユーザ情報を表すエンティティクラス。
- * システムにログインするユーザの基本情報（ユーザ名、パスワード、メール）を管理します。
+ * システムにログインするユーザの基本情報（ユーザ名、パスワード、メール、言語設定）を管理します。
  * パスワードはBCryptでハッシュ化されて保存されます。
  * ユーザーロール（一般ユーザー/管理者）と承認状態（承認待ち/承認済み/拒否）を管理します。
+ * 言語設定は承認・拒絶メール送信時の言語選択に使用されます。
  */
 @Entity
 @Table(name = "users")
@@ -49,6 +50,9 @@ public class User {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private UserStatus status = UserStatus.PENDING;
+
+    @Column(nullable = false, length = 5)
+    private String language = "en";
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
@@ -76,6 +80,16 @@ public class User {
         this.email = email;
         this.role = Role.USER;
         this.status = UserStatus.PENDING;
+        this.language = "en";
+    }
+
+    public User(String username, String password, String email, String language) {
+        this.username = username;
+        this.password = password;
+        this.email = email;
+        this.role = Role.USER;
+        this.status = UserStatus.PENDING;
+        this.language = language != null ? language : "en";
     }
 
     public User(String username, String password, String email, Role role, UserStatus status) {
@@ -84,6 +98,7 @@ public class User {
         this.email = email;
         this.role = role;
         this.status = status;
+        this.language = "en";
     }
 
     // Getters and Setters
@@ -149,6 +164,14 @@ public class User {
 
     public void setStatus(UserStatus status) {
         this.status = status;
+    }
+
+    public String getLanguage() {
+        return language;
+    }
+
+    public void setLanguage(String language) {
+        this.language = language;
     }
 
     /**

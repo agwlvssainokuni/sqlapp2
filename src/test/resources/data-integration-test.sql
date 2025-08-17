@@ -3,10 +3,10 @@
 
 -- Test Users (password is 'password123' hashed with BCrypt strength 10)
 -- Using IDs 10-12 to avoid conflict with initial admin user (ID=1)
-INSERT INTO users (id, username, password, email, role, status, created_at, updated_at) VALUES
-(10, 'testuser1', '$2a$10$kC3jOpKyffh082s69PFsg.d964pH13k8BUUsPLi0za9VD1/XFdAVa', 'testuser1@example.com', 'USER', 'APPROVED', '2024-01-01 10:00:00', '2024-01-01 10:00:00'),
-(11, 'testuser2', '$2a$10$kC3jOpKyffh082s69PFsg.d964pH13k8BUUsPLi0za9VD1/XFdAVa', 'testuser2@example.com', 'USER', 'APPROVED', '2024-01-01 11:00:00', '2024-01-01 11:00:00'),
-(12, 'testuser3', '$2a$10$kC3jOpKyffh082s69PFsg.d964pH13k8BUUsPLi0za9VD1/XFdAVa', 'testuser3@example.com', 'USER', 'APPROVED', '2024-01-01 12:00:00', '2024-01-01 12:00:00');
+INSERT INTO users (id, username, password, email, role, status, language, created_at, updated_at) VALUES
+(10, 'testuser1', '$2a$10$kC3jOpKyffh082s69PFsg.d964pH13k8BUUsPLi0za9VD1/XFdAVa', 'testuser1@example.com', 'USER', 'APPROVED', 'en', '2024-01-01 10:00:00', '2024-01-01 10:00:00'),
+(11, 'testuser2', '$2a$10$kC3jOpKyffh082s69PFsg.d964pH13k8BUUsPLi0za9VD1/XFdAVa', 'testuser2@example.com', 'USER', 'APPROVED', 'ja', '2024-01-01 11:00:00', '2024-01-01 11:00:00'),
+(12, 'testuser3', '$2a$10$kC3jOpKyffh082s69PFsg.d964pH13k8BUUsPLi0za9VD1/XFdAVa', 'testuser3@example.com', 'USER', 'APPROVED', 'en', '2024-01-01 12:00:00', '2024-01-01 12:00:00');
 
 -- Test Database Connections (encrypted passwords using test key)
 INSERT INTO database_connections (id, user_id, connection_name, database_type, host, port, database_name, username, encrypted_password, created_at, updated_at, is_active) VALUES
