@@ -16,7 +16,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
-import { getValidAccessToken } from '../utils/api'
+import { useAuth } from '../context/AuthContext'
 import Layout from './Layout'
 
 interface User {
@@ -38,11 +38,6 @@ interface EmailTemplate {
   bcc?: string
 }
 
-interface ApiResponse<T> {
-  ok: boolean
-  data?: T
-  error?: string[]
-}
 
 interface PageResponse<T> {
   content: T[]
@@ -56,6 +51,7 @@ type TabType = 'users' | 'email-templates'
 
 const AdminPage: React.FC = () => {
   const { t } = useTranslation()
+  const { apiRequest } = useAuth()
   
   // Tab管理
   const [activeTab, setActiveTab] = useState<TabType>('users')
@@ -90,27 +86,12 @@ const AdminPage: React.FC = () => {
     setError('')
 
     try {
-      const token = await getValidAccessToken()
       const params = new URLSearchParams({
         page: currentPage.toString(),
         size: pageSize.toString()
       })
 
-      const response = await fetch(`/api/admin/users/pending?${params}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      })
-
-      if (!response.ok) {
-        if (response.status === 403) {
-          throw new Error(t('admin.accessDenied'))
-        }
-        throw new Error(`HTTP ${response.status}`)
-      }
-
-      const result: ApiResponse<PageResponse<User>> = await response.json()
+      const result = await apiRequest<PageResponse<User>>(`/api/admin/users/pending?${params}`)
 
       if (result.ok && result.data) {
         setPendingUsers(result.data.content)
@@ -120,29 +101,22 @@ const AdminPage: React.FC = () => {
         setError(result.error?.join(', ') || t('admin.loadError'))
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : t('admin.loadError'))
+      if (err instanceof Error && err.message.includes('403')) {
+        setError(t('admin.accessDenied'))
+      } else {
+        setError(err instanceof Error ? err.message : t('admin.loadError'))
+      }
     } finally {
       setLoading(false)
     }
-  }, [currentPage, pageSize, t])
+  }, [currentPage, pageSize, apiRequest, t])
 
   const handleApprove = async (userId: number) => {
     setProcessingUser(userId)
     try {
-      const token = await getValidAccessToken()
-      const response = await fetch(`/api/admin/users/${userId}/approve`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
+      const result = await apiRequest<User>(`/api/admin/users/${userId}/approve`, {
+        method: 'POST'
       })
-
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`)
-      }
-
-      const result: ApiResponse<User> = await response.json()
 
       if (result.ok) {
         // Remove user from pending list
@@ -167,21 +141,10 @@ const AdminPage: React.FC = () => {
 
     setProcessingUser(userId)
     try {
-      const token = await getValidAccessToken()
-      const response = await fetch(`/api/admin/users/${userId}/reject`, {
+      const result = await apiRequest<User>(`/api/admin/users/${userId}/reject`, {
         method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
         body: JSON.stringify({ reason: reason.trim() })
       })
-
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`)
-      }
-
-      const result: ApiResponse<User> = await response.json()
 
       if (result.ok) {
         // Remove user from pending list
@@ -212,19 +175,7 @@ const AdminPage: React.FC = () => {
     setTemplateError('')
 
     try {
-      const token = await getValidAccessToken()
-      const response = await fetch('/api/admin/email-templates', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      })
-
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`)
-      }
-
-      const result: ApiResponse<EmailTemplate[]> = await response.json()
+      const result = await apiRequest<EmailTemplate[]>('/api/admin/email-templates')
 
       if (result.ok && result.data) {
         setEmailTemplates(result.data)
@@ -236,25 +187,14 @@ const AdminPage: React.FC = () => {
     } finally {
       setTemplateLoading(false)
     }
-  }, [t])
+  }, [apiRequest, t])
 
   const handleCreateTemplate = async () => {
     try {
-      const token = await getValidAccessToken()
-      const response = await fetch('/api/admin/email-templates', {
+      const result = await apiRequest<EmailTemplate>('/api/admin/email-templates', {
         method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
         body: JSON.stringify(templateForm)
       })
-
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`)
-      }
-
-      const result: ApiResponse<EmailTemplate> = await response.json()
 
       if (result.ok && result.data) {
         setEmailTemplates(prev => [...prev, result.data!])
@@ -272,25 +212,14 @@ const AdminPage: React.FC = () => {
     if (!editingTemplate) return
 
     try {
-      const token = await getValidAccessToken()
-      const response = await fetch(`/api/admin/email-templates/${editingTemplate.id}`, {
+      const result = await apiRequest<EmailTemplate>(`/api/admin/email-templates/${editingTemplate.id}`, {
         method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
         body: JSON.stringify({
           subject: templateForm.subject,
           body: templateForm.body,
           bcc: templateForm.bcc
         })
       })
-
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`)
-      }
-
-      const result: ApiResponse<EmailTemplate> = await response.json()
 
       if (result.ok && result.data) {
         setEmailTemplates(prev => prev.map(t => t.id === editingTemplate.id ? result.data! : t))
@@ -308,20 +237,9 @@ const AdminPage: React.FC = () => {
     if (!confirm(t('admin.templateDeleteConfirm'))) return
 
     try {
-      const token = await getValidAccessToken()
-      const response = await fetch(`/api/admin/email-templates/${templateId}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
+      const result = await apiRequest<void>(`/api/admin/email-templates/${templateId}`, {
+        method: 'DELETE'
       })
-
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`)
-      }
-
-      const result: ApiResponse<void> = await response.json()
 
       if (result.ok) {
         setEmailTemplates(prev => prev.filter(t => t.id !== templateId))

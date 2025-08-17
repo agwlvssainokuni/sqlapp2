@@ -27,7 +27,7 @@ interface AuthContextType {
   logout: () => void
   isLoading: boolean
   checkAuthStatus: () => Promise<boolean>
-  apiRequest: (url: string, options?: RequestInit) => Promise<ApiResponse<unknown>>
+  apiRequest: <T>(url: string, options?: RequestInit) => Promise<ApiResponse<T>>
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
