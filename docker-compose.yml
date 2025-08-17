@@ -20,23 +20,6 @@ services:
       timeout: 10s
       retries: 3
       start_period: 60s
-    depends_on:
-      - sqlapp2-init
-
-  # Init container for setting up directories and permissions
-  sqlapp2-init:
-    image: alpine:latest
-    container_name: sqlapp2-init
-    command: |
-      sh -c "
-        mkdir -p /app/data /app/logs &&
-        chmod 755 /app/data /app/logs &&
-        chown 100:101 /app/data /app/logs &&
-        echo 'Initialization completed'
-      "
-    volumes:
-      - sqlapp2_data:/app/data
-      - sqlapp2_logs:/app/logs
 
 volumes:
   sqlapp2_data:
