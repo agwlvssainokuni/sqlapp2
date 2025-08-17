@@ -15,9 +15,9 @@
  */
 package cherry.sqlapp2.security;
 
-import cherry.sqlapp2.entity.Role;
+import cherry.sqlapp2.enums.Role;
 import cherry.sqlapp2.entity.User;
-import cherry.sqlapp2.entity.UserStatus;
+import cherry.sqlapp2.enums.UserStatus;
 import cherry.sqlapp2.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -64,9 +64,7 @@ class CustomUserDetailsServiceTest {
         @DisplayName("存在するユーザーの詳細を正常に読み込む")
         void shouldLoadUserDetailsSuccessfully() {
             // Given
-            User user = new User(testUsername, testPassword, testEmail);
-            user.setRole(Role.USER);
-            user.setStatus(UserStatus.APPROVED);
+            User user = new User(testUsername, testPassword, testEmail, Role.USER, UserStatus.APPROVED, "en");
             when(userRepository.findByUsername(testUsername)).thenReturn(Optional.of(user));
 
             // When
@@ -189,9 +187,7 @@ class CustomUserDetailsServiceTest {
         @DisplayName("全てのユーザーにROLE_USER権限を付与する")
         void shouldGrantRoleUserToAllUsers() {
             // Given
-            User user = new User(testUsername, testPassword, testEmail);
-            user.setRole(Role.USER);
-            user.setStatus(UserStatus.APPROVED);
+            User user = new User(testUsername, testPassword, testEmail, Role.USER, UserStatus.APPROVED, "en");
             when(userRepository.findByUsername(testUsername)).thenReturn(Optional.of(user));
 
             // When
@@ -302,9 +298,7 @@ class CustomUserDetailsServiceTest {
         @DisplayName("アカウントが有効であることを確認")
         void shouldReturnEnabledAccount() {
             // Given
-            User user = new User(testUsername, testPassword, testEmail);
-            user.setRole(Role.USER);
-            user.setStatus(UserStatus.APPROVED);
+            User user = new User(testUsername, testPassword, testEmail, Role.USER, UserStatus.APPROVED, "en");
             when(userRepository.findByUsername(testUsername)).thenReturn(Optional.of(user));
 
             // When
@@ -318,9 +312,7 @@ class CustomUserDetailsServiceTest {
         @DisplayName("アカウントが期限切れでないことを確認")
         void shouldReturnNonExpiredAccount() {
             // Given
-            User user = new User(testUsername, testPassword, testEmail);
-            user.setRole(Role.USER);
-            user.setStatus(UserStatus.APPROVED);
+            User user = new User(testUsername, testPassword, testEmail, Role.USER, UserStatus.APPROVED, "en");
             when(userRepository.findByUsername(testUsername)).thenReturn(Optional.of(user));
 
             // When
@@ -334,9 +326,7 @@ class CustomUserDetailsServiceTest {
         @DisplayName("アカウントがロックされていないことを確認")
         void shouldReturnNonLockedAccount() {
             // Given
-            User user = new User(testUsername, testPassword, testEmail);
-            user.setRole(Role.USER);
-            user.setStatus(UserStatus.APPROVED);
+            User user = new User(testUsername, testPassword, testEmail, Role.USER, UserStatus.APPROVED, "en");
             when(userRepository.findByUsername(testUsername)).thenReturn(Optional.of(user));
 
             // When
@@ -350,9 +340,7 @@ class CustomUserDetailsServiceTest {
         @DisplayName("認証情報が期限切れでないことを確認")
         void shouldReturnNonExpiredCredentials() {
             // Given
-            User user = new User(testUsername, testPassword, testEmail);
-            user.setRole(Role.USER);
-            user.setStatus(UserStatus.APPROVED);
+            User user = new User(testUsername, testPassword, testEmail, Role.USER, UserStatus.APPROVED, "en");
             when(userRepository.findByUsername(testUsername)).thenReturn(Optional.of(user));
 
             // When
@@ -405,9 +393,7 @@ class CustomUserDetailsServiceTest {
         @DisplayName("連続する呼び出しで一貫した結果を返す")
         void shouldReturnConsistentResultsForMultipleCalls() {
             // Given
-            User user = new User(testUsername, testPassword, testEmail);
-            user.setRole(Role.USER);
-            user.setStatus(UserStatus.APPROVED);
+            User user = new User(testUsername, testPassword, testEmail, Role.USER, UserStatus.APPROVED, "en");
             when(userRepository.findByUsername(testUsername)).thenReturn(Optional.of(user));
 
             // When
@@ -426,9 +412,7 @@ class CustomUserDetailsServiceTest {
         @DisplayName("並行呼び出しを安全に処理する")
         void shouldHandleConcurrentCallsSafely() {
             // Given
-            User user = new User(testUsername, testPassword, testEmail);
-            user.setRole(Role.USER);
-            user.setStatus(UserStatus.APPROVED);
+            User user = new User(testUsername, testPassword, testEmail, Role.USER, UserStatus.APPROVED, "en");
             when(userRepository.findByUsername(testUsername)).thenReturn(Optional.of(user));
 
             // When & Then - 複数回の呼び出しが例外をスローしないことを確認

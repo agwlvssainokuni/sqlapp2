@@ -15,7 +15,7 @@
  */
 package cherry.sqlapp2.util;
 
-import cherry.sqlapp2.entity.Role;
+import cherry.sqlapp2.enums.Role;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;

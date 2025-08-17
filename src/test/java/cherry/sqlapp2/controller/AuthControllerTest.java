@@ -16,9 +16,9 @@
 package cherry.sqlapp2.controller;
 
 import cherry.sqlapp2.dto.*;
-import cherry.sqlapp2.entity.Role;
+import cherry.sqlapp2.enums.Role;
 import cherry.sqlapp2.entity.User;
-import cherry.sqlapp2.entity.UserStatus;
+import cherry.sqlapp2.enums.UserStatus;
 import cherry.sqlapp2.service.MetricsService;
 import cherry.sqlapp2.service.RefreshTokenService;
 import cherry.sqlapp2.service.UserService;
@@ -94,10 +94,7 @@ class AuthControllerTest {
         void shouldLoginSuccessfullyWithValidCredentials() {
             // Given
             LoginRequest loginRequest = new LoginRequest(testUsername, testPassword);
-            User user = new User(testUsername, "hashedPassword", testEmail);
-            user.setId(1L);
-            user.setRole(Role.USER);
-            user.setStatus(UserStatus.APPROVED);
+            User user = new User(1L, testUsername, "hashedPassword", testEmail, Role.USER, UserStatus.APPROVED, "en");
             Authentication mockAuth = mock(Authentication.class);
             cherry.sqlapp2.entity.RefreshToken refreshToken = new cherry.sqlapp2.entity.RefreshToken(
                     testRefreshToken, user, java.time.LocalDateTime.now().plusDays(1)
@@ -177,10 +174,7 @@ class AuthControllerTest {
             // Given
             String specialUsername = "user@domain.com+test!#$%";
             LoginRequest loginRequest = new LoginRequest(specialUsername, testPassword);
-            User user = new User(specialUsername, "hashedPassword", testEmail);
-            user.setId(2L);
-            user.setRole(Role.USER);
-            user.setStatus(UserStatus.APPROVED);
+            User user = new User(2L, specialUsername, "hashedPassword", testEmail, Role.USER, UserStatus.APPROVED, "en");
             Authentication mockAuth = mock(Authentication.class);
             cherry.sqlapp2.entity.RefreshToken refreshToken = new cherry.sqlapp2.entity.RefreshToken(
                     testRefreshToken, user, java.time.LocalDateTime.now().plusDays(1)
@@ -323,10 +317,7 @@ class AuthControllerTest {
         @DisplayName("有効なリフレッシュトークンで新しいアクセストークンを取得する")
         void shouldRefreshAccessTokenWithValidRefreshToken() {
             // Given
-            User user = new User(testUsername, "hashedPassword", testEmail);
-            user.setId(1L);
-            user.setRole(Role.USER);
-            user.setStatus(UserStatus.APPROVED);
+            User user = new User(1L, testUsername, "hashedPassword", testEmail, Role.USER, UserStatus.APPROVED, "en");
 
             cherry.sqlapp2.dto.RefreshTokenRequest refreshRequest =
                     new cherry.sqlapp2.dto.RefreshTokenRequest(testRefreshToken);
@@ -397,10 +388,7 @@ class AuthControllerTest {
         @DisplayName("リフレッシュが許可されていないユーザーでエラーを返す")
         void shouldReturnErrorWhenRefreshNotAllowedForUser() {
             // Given
-            User user = new User(testUsername, "hashedPassword", testEmail);
-            user.setId(1L);
-            user.setRole(Role.USER);
-            user.setStatus(UserStatus.PENDING);
+            User user = new User(1L, testUsername, "hashedPassword", testEmail, Role.USER, UserStatus.PENDING, "en");
 
             cherry.sqlapp2.dto.RefreshTokenRequest refreshRequest =
                     new cherry.sqlapp2.dto.RefreshTokenRequest(testRefreshToken);
@@ -503,9 +491,7 @@ class AuthControllerTest {
         void shouldHandleJwtGenerationFailure() {
             // Given
             LoginRequest loginRequest = new LoginRequest(testUsername, testPassword);
-            User user = new User(testUsername, "hashedPassword", testEmail);
-            user.setRole(Role.USER);
-            user.setStatus(UserStatus.APPROVED);
+            User user = new User(testUsername, "hashedPassword", testEmail, Role.USER, UserStatus.APPROVED, "en");
             Authentication mockAuth = mock(Authentication.class);
 
             when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))

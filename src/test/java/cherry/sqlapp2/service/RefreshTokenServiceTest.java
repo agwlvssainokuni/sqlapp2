@@ -17,9 +17,9 @@
 package cherry.sqlapp2.service;
 
 import cherry.sqlapp2.entity.RefreshToken;
-import cherry.sqlapp2.entity.Role;
+import cherry.sqlapp2.enums.Role;
 import cherry.sqlapp2.entity.User;
-import cherry.sqlapp2.entity.UserStatus;
+import cherry.sqlapp2.enums.UserStatus;
 import cherry.sqlapp2.repository.RefreshTokenRepository;
 import cherry.sqlapp2.util.JwtUtil;
 import org.junit.jupiter.api.BeforeEach;
@@ -59,10 +59,7 @@ class RefreshTokenServiceTest {
     void setUp() {
         refreshTokenService = new RefreshTokenService(refreshTokenRepository, jwtUtil);
         
-        testUser = new User(testUsername, "hashedPassword", "test@example.com");
-        testUser.setId(1L);
-        testUser.setRole(Role.USER);
-        testUser.setStatus(UserStatus.APPROVED);
+        testUser = new User(1L, testUsername, "hashedPassword", "test@example.com", Role.USER, UserStatus.APPROVED, "en");
     }
 
     @Nested
@@ -333,8 +330,7 @@ class RefreshTokenServiceTest {
         @DisplayName("トークン所有者でない場合はfalseを返す")
         void shouldReturnFalseForNonOwner() {
             // Given
-            User otherUser = new User("otherUser", "password", "other@example.com");
-            otherUser.setId(2L);
+            User otherUser = new User(2L, "otherUser", "password", "other@example.com", Role.USER, UserStatus.APPROVED, "en");
             RefreshToken token = new RefreshToken(testRefreshToken, testUser, 
                 LocalDateTime.now().plusDays(1));
 

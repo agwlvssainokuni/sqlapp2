@@ -16,6 +16,8 @@
 
 package cherry.sqlapp2.entity;
 
+import cherry.sqlapp2.enums.Role;
+import cherry.sqlapp2.enums.UserStatus;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
@@ -99,6 +101,25 @@ public class User {
         this.role = role;
         this.status = status;
         this.language = "en";
+    }
+
+    public User(String username, String password, String email, Role role, UserStatus status, String language) {
+        this.username = username;
+        this.password = password;
+        this.email = email;
+        this.role = role;
+        this.status = status;
+        this.language = language != null ? language : "en";
+    }
+
+    public User(Long id, String username, String password, String email, Role role, UserStatus status, String language) {
+        this.id = id;
+        this.username = username;
+        this.password = password;
+        this.email = email;
+        this.role = role;
+        this.status = status;
+        this.language = language != null ? language : "en";
     }
 
     // Getters and Setters

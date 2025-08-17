@@ -15,7 +15,9 @@
  */
 package cherry.sqlapp2.service;
 
+import cherry.sqlapp2.enums.Role;
 import cherry.sqlapp2.entity.User;
+import cherry.sqlapp2.enums.UserStatus;
 import cherry.sqlapp2.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -573,8 +575,7 @@ class UserServiceTest {
         void shouldSendApprovalEmailInUserLanguage() {
             // Given
             String userLanguage = "ja";
-            User pendingUser = new User(testUsername, encodedPassword, testEmail, userLanguage);
-            pendingUser.setId(1L);
+            User pendingUser = new User(1L, testUsername, encodedPassword, testEmail, Role.USER, UserStatus.PENDING, userLanguage);
             
             when(userRepository.findById(1L)).thenReturn(Optional.of(pendingUser));
             when(userRepository.save(any(User.class))).thenReturn(pendingUser);
@@ -593,8 +594,7 @@ class UserServiceTest {
             // Given
             String userLanguage = "en";
             String rejectionReason = "Documentation incomplete";
-            User pendingUser = new User(testUsername, encodedPassword, testEmail, userLanguage);
-            pendingUser.setId(1L);
+            User pendingUser = new User(1L, testUsername, encodedPassword, testEmail, Role.USER, UserStatus.PENDING, userLanguage);
             
             when(userRepository.findById(1L)).thenReturn(Optional.of(pendingUser));
             when(userRepository.save(any(User.class))).thenReturn(pendingUser);
@@ -612,8 +612,7 @@ class UserServiceTest {
         void shouldSendJapaneseApprovalEmailForJapaneseUser() {
             // Given
             String userLanguage = "ja";
-            User japaneseUser = new User("日本ユーザー", encodedPassword, "japanese@example.com", userLanguage);
-            japaneseUser.setId(2L);
+            User japaneseUser = new User(2L, "日本ユーザー", encodedPassword, "japanese@example.com", Role.USER, UserStatus.PENDING, userLanguage);
             
             when(userRepository.findById(2L)).thenReturn(Optional.of(japaneseUser));
             when(userRepository.save(any(User.class))).thenReturn(japaneseUser);
@@ -633,8 +632,7 @@ class UserServiceTest {
             // Given
             String userLanguage = "en";
             String rejectionReason = "Invalid email domain";
-            User englishUser = new User("englishUser", encodedPassword, "english@example.com", userLanguage);
-            englishUser.setId(3L);
+            User englishUser = new User(3L, "englishUser", encodedPassword, "english@example.com", Role.USER, UserStatus.PENDING, userLanguage);
             
             when(userRepository.findById(3L)).thenReturn(Optional.of(englishUser));
             when(userRepository.save(any(User.class))).thenReturn(englishUser);

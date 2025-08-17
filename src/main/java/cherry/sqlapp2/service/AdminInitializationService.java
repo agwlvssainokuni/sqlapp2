@@ -16,9 +16,9 @@
 
 package cherry.sqlapp2.service;
 
-import cherry.sqlapp2.entity.Role;
+import cherry.sqlapp2.enums.Role;
 import cherry.sqlapp2.entity.User;
-import cherry.sqlapp2.entity.UserStatus;
+import cherry.sqlapp2.enums.UserStatus;
 import cherry.sqlapp2.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

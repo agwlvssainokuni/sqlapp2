@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package cherry.sqlapp2.entity;
+package cherry.sqlapp2.enums;
 
 /**
  * ユーザー承認状態を表す列挙型。
