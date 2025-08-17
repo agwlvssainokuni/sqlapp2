@@ -85,6 +85,7 @@ frontend/src/
    - **Email Template Management**: Admin interface for managing multi-language email templates
 10. **Modular Architecture**: 8-file CSS structure for improved maintainability and component isolation
 11. **Development Support**: MailPit integration for email testing without external delivery
+12. **Comprehensive Development Environment**: Docker-based unified development environment with multiple database servers (MySQL, PostgreSQL, MariaDB, H2) and email server (MailPit)
 
 ## Development Guidelines
 
@@ -203,12 +204,28 @@ frontend/src/
 
 ### Docker Deployment
 ```bash
-# Development
+# Development environment (multiple databases + MailPit)
+cd docker
+docker-compose -f docker-compose.dev.yml up -d
+
+# Production deployment
 docker-compose up -d
 
 # Production with monitoring
 docker-compose -f docker-compose.yml -f docker-compose.monitoring.yml up -d
 ```
+
+### Development Database Environment
+The project includes a comprehensive Docker-based development environment:
+- **MySQL 8.0**: `localhost:13306`
+- **PostgreSQL 15**: `localhost:15432`
+- **MariaDB 10.11**: `localhost:13307`
+- **H2 Database**: `localhost:19092` (Server), `localhost:18082` (Console)
+- **MailPit**: `localhost:1025` (SMTP), `http://localhost:8025` (Web UI)
+- **phpMyAdmin**: `http://localhost:10080` (MySQL/MariaDB management)
+- **pgAdmin**: `http://localhost:10081` (PostgreSQL management)
+
+All databases include sample data (users, products, orders tables) for testing purposes.
 
 ## Common Development Tasks
 
@@ -271,12 +288,14 @@ docker-compose -f docker-compose.yml -f docker-compose.monitoring.yml up -d
 - **Email Template Issues**: Use fallback language (configured in application.properties) when template not found for user's language
 - **Admin Access Issues**: Ensure user has ADMIN role and check @PreAuthorize annotations on admin endpoints
 - **MailPit Connection**: Verify MailPit is running on port 1025 (SMTP) and 8025 (Web UI) for email testing
+- **Docker Volume Permission Issues**: Fixed with UID/GID standardization (1001:1001) in Dockerfile for consistent volume access across environments
 
 ### Development Tools
 - **H2 Console**: Available at `/h2-console` (dev environment only)
 - **Swagger UI**: Available at `/api/swagger-ui.html`
 - **Admin Interface**: Available at `/admin` for user management and email templates
 - **MailPit Web UI**: Available at `http://localhost:8025` for email testing
+- **Development Environment**: Complete Docker stack available at `docker/docker-compose.dev.yml` with multiple databases and management tools
 - **Actuator Endpoints**: Health, metrics, info at `/actuator/*`
 - **Log Files**: Structured JSON output to stdout/files based on profile
 
@@ -304,11 +323,19 @@ docker-compose -f docker-compose.yml -f docker-compose.monitoring.yml up -d
 
 ---
 
-**Status**: Enterprise-Grade Visual SQL Query Builder - Complete Language-Integrated Admin Approval System
+**Status**: Enterprise-Grade Visual SQL Query Builder - Complete Development Environment & Volume Permission Resolution
 **Last Updated**: 2025-08-17
 **Total Tests**: 381+ (310+ unit + 70+ integration) - 100% success rate
-**Development Phases**: 50+ phases complete - Language-Integrated Admin Approval System + Database-Managed Email Templates + Query History Date Range Filtering + Complete Metrics Integration + Aggregate Function Support + Advanced SQL Reverse Engineering + Production Ready
+**Development Phases**: 50+ phases complete - Comprehensive Docker Development Environment + Volume Permission Resolution + Language-Integrated Admin Approval System + Database-Managed Email Templates + Query History Date Range Filtering + Complete Metrics Integration + Aggregate Function Support + Advanced SQL Reverse Engineering + Production Ready
 **Recent Enhancements**: 
+- **Phase 32: Comprehensive Docker Development Environment** - Complete unified development infrastructure
+  - Multi-database Docker environment with MySQL 8.0, PostgreSQL 15, MariaDB 10.11, H2 Database Server
+  - MailPit integration for email testing with Web UI and SMTP server
+  - Database management tools: phpMyAdmin for MySQL/MariaDB, pgAdmin for PostgreSQL, H2 Console
+  - Sample data initialization across all database servers for testing
+  - Port standardization (base + 10000) to avoid conflicts with main application
+  - Docker volume permission resolution using fixed UID/GID (1001:1001) for consistent access
+  - Elimination of special initialization containers while maintaining security (non-root execution)
 - **Phase 31: Language Integration for Email Notifications** - Complete UI language linking with email system
   - User registration emails now linked with UI language selection via API parameter integration
   - Language preferences stored in User entity for consistent approval/rejection email delivery

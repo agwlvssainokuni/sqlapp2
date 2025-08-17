@@ -509,9 +509,14 @@ npm install
 ./gradlew clean build
 ```
 
-#### Docker Permission Issues
+#### Docker Volume Permission Issues
+Fixed with standardized UID/GID (1001:1001) in Dockerfile for consistent volume access:
 ```bash
+# Check if you're experiencing permission issues (legacy only)
 sudo docker-compose up
+
+# Current implementation: No special permissions needed
+docker-compose up -d
 ```
 
 ### Log Analysis
