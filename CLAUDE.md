@@ -10,7 +10,7 @@ SqlApp2 is a production-ready web-based SQL execution tool with enterprise-grade
 - **Backend**: Java 21 + Spring Boot 3.5.4, Spring Security, JPA/Hibernate, H2 Database
 - **Frontend**: React 19.1.1 + TypeScript 5.9.2, Vite 7.1.2, React Router 7.8.0, react-i18next v15.6.1
 - **Database Support**: MySQL, PostgreSQL, MariaDB, H2 (via JDBC)
-- **Deployment**: Docker + Docker Compose, GitHub Actions CI/CD, Prometheus/Grafana monitoring
+- **Deployment**: Docker + Docker Compose, GitHub Actions CI/CD
 
 ### Architecture
 - **Pattern**: Client-Server with REST APIs, integrated SPA deployment
@@ -197,10 +197,8 @@ frontend/src/
 - **Logging**: Structured JSON logging with environment-specific levels
 
 ### Monitoring & Observability
-- **Metrics**: Spring Boot Actuator + Prometheus + custom metrics
+- **Metrics**: Spring Boot Actuator + custom metrics
 - **Health Checks**: Database connectivity, application health, system resources
-- **Dashboards**: Grafana dashboards for performance monitoring
-- **Alerting**: AlertManager for critical issue notifications
 
 ### Docker Deployment
 ```bash
@@ -210,9 +208,6 @@ docker-compose -f docker-compose.dev.yml up -d
 
 # Production deployment
 docker-compose up -d
-
-# Production with monitoring
-docker-compose -f docker-compose.yml -f docker-compose.monitoring.yml up -d
 ```
 
 ### Development Database Environment
@@ -323,11 +318,16 @@ All databases include sample data (users, products, orders tables) for testing p
 
 ---
 
-**Status**: Enterprise-Grade Visual SQL Query Builder - Complete Development Environment & Volume Permission Resolution
+**Status**: Enterprise-Grade Visual SQL Query Builder - Backend Dead Code Cleanup Complete
 **Last Updated**: 2025-08-17
 **Total Tests**: 361 (306 unit + 55 integration) - 100% success rate
-**Development Phases**: 51+ phases complete - Complete Backend Dead Code Cleanup + Comprehensive Docker Development Environment + Volume Permission Resolution + Language-Integrated Admin Approval System + Database-Managed Email Templates + Query History Date Range Filtering + Complete Metrics Integration + Aggregate Function Support + Advanced SQL Reverse Engineering + Production Ready
+**Development Phases**: 34 phases complete - Backend Dead Code Cleanup + Monitoring System Removal + Comprehensive Docker Development Environment + Language-Integrated Admin Approval System + Database-Managed Email Templates + Query History Date Range Filtering + Complete Metrics Integration + Aggregate Function Support + Advanced SQL Reverse Engineering + Production Ready
 **Recent Enhancements**: 
+- **Phase 34: Monitoring System Removal** - Cleanup of unused monitoring infrastructure
+  - Removed docker-compose.monitoring.yml and complete monitoring/ directory
+  - Eliminated Prometheus, Grafana, and AlertManager configuration files
+  - Simplified deployment process without monitoring stack
+  - Updated documentation to reflect monitoring system removal
 - **Phase 33: Complete Backend Dead Code Cleanup** - Comprehensive removal of unused @Deprecated methods
   - Eliminated 27 unused methods across repository, service, and DTO layers
   - Removed 27 corresponding test methods testing deprecated functionality

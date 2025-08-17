@@ -8,7 +8,7 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-blue.svg)](https://www.typescriptlang.org/)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 
-SqlApp2 is a production-ready, secure web application that provides an intuitive interface for executing SQL queries against multiple database systems. Built with enterprise-grade security, comprehensive testing (356 tests with 100% success rate), and modern technology stack.
+SqlApp2 is a production-ready, secure web application that provides an intuitive interface for executing SQL queries against multiple database systems. Built with enterprise-grade security, comprehensive testing (361 tests with 100% success rate), and modern technology stack.
 
 ## ✨ Key Features
 
@@ -83,7 +83,7 @@ cd frontend && npm install && npm run dev
 - **Spring Boot 3.5.4** - Production-ready application framework
 - **Spring Security + JWT** - Enterprise authentication and authorization
 - **JPA/Hibernate** - Database abstraction with H2 internal database
-- **Comprehensive Testing** - 356 tests (303 unit + 53 integration) with 100% success rate
+- **Comprehensive Testing** - 361 tests (306 unit + 55 integration) with 100% success rate
 
 ### Frontend
 - **React 19** - Modern component-based UI library
@@ -93,9 +93,8 @@ cd frontend && npm install && npm run dev
 - **Responsive CSS3** - Mobile-first design with Grid/Flexbox
 
 ### Operations & Monitoring
-- **Docker + Docker Compose** - Containerized deployment with monitoring stack
+- **Docker + Docker Compose** - Containerized deployment
 - **GitHub Actions CI/CD** - Automated testing, security scanning, and deployment
-- **Prometheus + Grafana** - Metrics collection, monitoring, and alerting
 - **OpenAPI/Swagger** - Interactive API documentation
 
 ## 📖 User Guide
@@ -149,13 +148,12 @@ DB_PATH=/app/data/sqlapp2       # for file mode
 
 # Monitoring (optional)
 METRICS_ENABLED=true
-PROMETHEUS_ENABLED=true
 ```
 
 ### Production Deployment
 ```bash
-# With monitoring stack
-docker-compose -f docker-compose.yml -f docker-compose.monitoring.yml up -d
+# Production deployment
+docker-compose up -d
 
 # Environment-specific configuration
 export SPRING_PROFILES_ACTIVE=prod
@@ -164,9 +162,9 @@ java -jar sqlapp2-1.0.0.war
 
 ## 🧪 Quality Assurance
 
-**Test Coverage**: 356 tests with 100% success rate
-- **Unit Tests (303)**: Service layer, security components, utilities
-- **Integration Tests (53)**: REST API endpoints, database integration
+**Test Coverage**: 361 tests with 100% success rate
+- **Unit Tests (306)**: Service layer, security components, utilities
+- **Integration Tests (55)**: REST API endpoints, database integration
 - **Security Testing**: JWT validation, encryption, SQL injection prevention
 - **Performance Testing**: Query execution timing and optimization
 
@@ -209,11 +207,11 @@ This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENS
 **Status**: ✅ **Production Ready** - Enterprise-grade SQL execution tool
 
 **Key Achievements**:
-- 🎯 Complete feature implementation with 33 development phases
-- 🧪 356 tests with 100% success rate ensuring reliability
+- 🎯 Complete feature implementation with 33+ development phases
+- 🧪 361 tests with 100% success rate ensuring reliability
 - 🔒 Enterprise security with OWASP compliance and comprehensive encryption
 - 🌐 Full internationalization support (English/Japanese)
-- 📊 Advanced monitoring and observability with Prometheus/Grafana
+- 📊 Advanced metrics collection and observability
 - 🚀 Complete CI/CD automation with GitHub Actions
 
 ---
