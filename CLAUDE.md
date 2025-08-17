@@ -52,7 +52,8 @@ frontend/src/
 ### Core Features
 1. **Enhanced User Management**: 
    - **Admin Approval System**: User registration requires administrator approval for security
-   - **Email Notifications**: Multi-language email templates for registration, approval, and rejection
+   - **Multi-Language Email Notifications**: Comprehensive email system with language-aware notifications
+   - **Language Integration**: User registration emails linked with UI language selection, stored language preferences for future notifications
    - **Database-Managed Email Templates**: Configurable email templates with variable substitution
    - JWT authentication with proactive token refresh (30s buffer)
    - Smart 401 handling with double-refresh prevention
@@ -131,10 +132,11 @@ frontend/src/
 ## Database Schema
 
 ### Internal H2 Database Entities
-- **User**: Authentication data with BCrypt password hashing
+- **User**: Authentication data with BCrypt password hashing and language preference storage
 - **DatabaseConnection**: Encrypted external database connection configurations
 - **SavedQuery**: User queries with sharing scope (private/public)
 - **QueryHistory**: Execution metadata (timestamp, duration, record count)
+- **EmailTemplate**: Multi-language email templates with variable substitution support
 
 ### Key Relationships
 - User 1:N DatabaseConnection (user isolation)
@@ -302,11 +304,17 @@ docker-compose -f docker-compose.yml -f docker-compose.monitoring.yml up -d
 
 ---
 
-**Status**: Enterprise-Grade Visual SQL Query Builder - Complete Admin Approval System with Email Notifications
+**Status**: Enterprise-Grade Visual SQL Query Builder - Complete Language-Integrated Admin Approval System
 **Last Updated**: 2025-08-17
 **Total Tests**: 381+ (310+ unit + 70+ integration) - 100% success rate
-**Development Phases**: 50+ phases complete - Complete Admin Approval System + Database-Managed Email Templates + Query History Date Range Filtering + Complete Metrics Integration + Aggregate Function Support + Advanced SQL Reverse Engineering + Production Ready
+**Development Phases**: 50+ phases complete - Language-Integrated Admin Approval System + Database-Managed Email Templates + Query History Date Range Filtering + Complete Metrics Integration + Aggregate Function Support + Advanced SQL Reverse Engineering + Production Ready
 **Recent Enhancements**: 
+- **Phase 31: Language Integration for Email Notifications** - Complete UI language linking with email system
+  - User registration emails now linked with UI language selection via API parameter integration
+  - Language preferences stored in User entity for consistent approval/rejection email delivery
+  - Approval and rejection emails sent in the language selected during user registration
+  - Frontend integration sending current i18n language to registration API
+  - Comprehensive test coverage for language integration across all email notification scenarios
 - **Phase 30: Complete Admin Approval System with Email Notifications** - Enterprise-grade user management with multi-language email support
   - Admin approval required for all new user registrations for enhanced security
   - Multi-language email notification system (English/Japanese) with database-managed templates
