@@ -111,72 +111,6 @@ class RefreshTokenServiceTest {
     @DisplayName("リフレッシュトークン検証")
     class RefreshTokenValidation {
 
-        @Test
-        @DisplayName("有効なリフレッシュトークンを検証する")
-        void shouldValidateValidRefreshToken() {
-            // Given
-            String tokenValue = "valid.refresh.token";
-            RefreshToken validToken = new RefreshToken(tokenValue, testUser, 
-                LocalDateTime.now().plusDays(1));
-            
-            when(refreshTokenRepository.findByToken(tokenValue)).thenReturn(Optional.of(validToken));
-
-            // When
-            Optional<RefreshToken> result = refreshTokenService.validateRefreshToken(tokenValue);
-
-            // Then
-            assertThat(result).isPresent();
-            assertThat(result.get()).isEqualTo(validToken);
-        }
-
-        @Test
-        @DisplayName("期限切れのリフレッシュトークンを拒否する")
-        void shouldRejectExpiredRefreshToken() {
-            // Given
-            String tokenValue = "expired.refresh.token";
-            RefreshToken expiredToken = new RefreshToken(tokenValue, testUser, 
-                LocalDateTime.now().minusDays(1)); // Already expired
-            
-            when(refreshTokenRepository.findByToken(tokenValue)).thenReturn(Optional.of(expiredToken));
-
-            // When
-            Optional<RefreshToken> result = refreshTokenService.validateRefreshToken(tokenValue);
-
-            // Then
-            assertThat(result).isEmpty();
-        }
-
-        @Test
-        @DisplayName("無効化されたリフレッシュトークンを拒否する")
-        void shouldRejectRevokedRefreshToken() {
-            // Given
-            String tokenValue = "revoked.refresh.token";
-            RefreshToken revokedToken = new RefreshToken(tokenValue, testUser, 
-                LocalDateTime.now().plusDays(1));
-            revokedToken.revoke(); // Mark as revoked
-            
-            when(refreshTokenRepository.findByToken(tokenValue)).thenReturn(Optional.of(revokedToken));
-
-            // When
-            Optional<RefreshToken> result = refreshTokenService.validateRefreshToken(tokenValue);
-
-            // Then
-            assertThat(result).isEmpty();
-        }
-
-        @Test
-        @DisplayName("存在しないリフレッシュトークンを拒否する")
-        void shouldRejectNonExistentRefreshToken() {
-            // Given
-            String tokenValue = "non.existent.token";
-            when(refreshTokenRepository.findByToken(tokenValue)).thenReturn(Optional.empty());
-
-            // When
-            Optional<RefreshToken> result = refreshTokenService.validateRefreshToken(tokenValue);
-
-            // Then
-            assertThat(result).isEmpty();
-        }
     }
 
     @Nested
@@ -312,34 +246,6 @@ class RefreshTokenServiceTest {
     @DisplayName("ユーザー権限チェック")
     class UserPermissionChecks {
 
-        @Test
-        @DisplayName("トークン所有者を正しく検証する")
-        void shouldValidateTokenOwnership() {
-            // Given
-            RefreshToken token = new RefreshToken(testRefreshToken, testUser, 
-                LocalDateTime.now().plusDays(1));
-
-            // When
-            boolean isOwner = refreshTokenService.isTokenOwner(token, testUser);
-
-            // Then
-            assertThat(isOwner).isTrue();
-        }
-
-        @Test
-        @DisplayName("トークン所有者でない場合はfalseを返す")
-        void shouldReturnFalseForNonOwner() {
-            // Given
-            User otherUser = new User(2L, "otherUser", "password", "other@example.com", Role.USER, UserStatus.APPROVED, "en");
-            RefreshToken token = new RefreshToken(testRefreshToken, testUser, 
-                LocalDateTime.now().plusDays(1));
-
-            // When
-            boolean isOwner = refreshTokenService.isTokenOwner(token, otherUser);
-
-            // Then
-            assertThat(isOwner).isFalse();
-        }
 
         @Test
         @DisplayName("ユーザーがトークンをリフレッシュできることを確認する")
@@ -356,24 +262,5 @@ class RefreshTokenServiceTest {
     @DisplayName("クリーンアップ処理")
     class CleanupOperations {
 
-        @Test
-        @DisplayName("期限切れトークンをクリーンアップする")
-        void shouldCleanupExpiredTokens() {
-            // When
-            refreshTokenService.cleanupExpiredTokens();
-
-            // Then
-            verify(refreshTokenRepository).deleteExpiredTokens(any(LocalDateTime.class));
-        }
-
-        @Test
-        @DisplayName("無効化されたトークンをクリーンアップする")
-        void shouldCleanupRevokedTokens() {
-            // When
-            refreshTokenService.cleanupRevokedTokens();
-
-            // Then
-            verify(refreshTokenRepository).deleteRevokedTokens();
-        }
     }
 }

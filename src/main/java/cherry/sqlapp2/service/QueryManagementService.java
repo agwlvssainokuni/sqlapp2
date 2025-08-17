@@ -270,10 +270,6 @@ public class QueryManagementService {
         }
     }
 
-    @Transactional(readOnly = true)
-    public Page<QueryHistory> getQueryHistoryAfter(User user, LocalDateTime fromDate, Pageable pageable) {
-        return queryHistoryRepository.findByUserAndExecutedAtAfter(user, fromDate, pageable);
-    }
 
     @Transactional(readOnly = true)
     public Page<QueryHistory> searchQueryHistory(User user, String searchTerm, Pageable pageable) {
@@ -328,10 +324,6 @@ public class QueryManagementService {
         return savedQueryRepository.countByUser(user);
     }
 
-    @Transactional(readOnly = true)
-    public long getPublicQueryCount() {
-        return savedQueryRepository.countPublicQueries();
-    }
 
     @Transactional(readOnly = true)
     public long getUserExecutionCount(User user) {
@@ -350,9 +342,4 @@ public class QueryManagementService {
 
     // ==================== Cleanup ====================
 
-    @Transactional
-    public void cleanupOldHistory(User user, int daysToKeep) {
-        LocalDateTime cutoffDate = LocalDateTime.now().minusDays(daysToKeep);
-        queryHistoryRepository.deleteByUserAndExecutedAtBefore(user, cutoffDate);
-    }
 }

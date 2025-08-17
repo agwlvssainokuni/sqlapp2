@@ -513,25 +513,6 @@ class QueryManagementServiceTest {
             verify(queryHistoryRepository).findByUserAndExecutedAtAfter(eq(testUser), any(LocalDateTime.class), eq(pageable));
         }
 
-        @Test
-        @DisplayName("特定日付以降のクエリ履歴を取得する")
-        void shouldGetQueryHistoryAfterDate() {
-            // Given
-            LocalDateTime fromDate = LocalDateTime.now().minusDays(7);
-            Pageable pageable = PageRequest.of(0, 10);
-            List<QueryHistory> historyList = List.of(new QueryHistory());
-            Page<QueryHistory> expectedPage = new PageImpl<>(historyList, pageable, 1);
-            
-            when(queryHistoryRepository.findByUserAndExecutedAtAfter(testUser, fromDate, pageable))
-                    .thenReturn(expectedPage);
-
-            // When
-            Page<QueryHistory> result = queryManagementService.getQueryHistoryAfter(testUser, fromDate, pageable);
-
-            // Then
-            assertThat(result.getContent()).hasSize(1);
-            verify(queryHistoryRepository).findByUserAndExecutedAtAfter(testUser, fromDate, pageable);
-        }
 
         @Test
         @DisplayName("デフォルト期間でクエリ履歴を取得する")
@@ -778,20 +759,6 @@ class QueryManagementServiceTest {
             verify(savedQueryRepository).countByUser(testUser);
         }
 
-        @Test
-        @DisplayName("パブリッククエリ数を取得する")
-        void shouldGetPublicQueryCount() {
-            // Given
-            long expectedCount = 25L;
-            when(savedQueryRepository.countPublicQueries()).thenReturn(expectedCount);
-
-            // When
-            long result = queryManagementService.getPublicQueryCount();
-
-            // Then
-            assertThat(result).isEqualTo(expectedCount);
-            verify(savedQueryRepository).countPublicQueries();
-        }
 
         @Test
         @DisplayName("ユーザーの実行回数を取得する")
@@ -843,34 +810,6 @@ class QueryManagementServiceTest {
     @DisplayName("データクリーンアップ")
     class DataCleanup {
 
-        @Test
-        @DisplayName("古い履歴を正常にクリーンアップする")
-        void shouldCleanupOldHistorySuccessfully() {
-            // Given
-            int daysToKeep = 30;
-            LocalDateTime expectedCutoffDate = LocalDateTime.now().minusDays(daysToKeep);
-
-            // When
-            queryManagementService.cleanupOldHistory(testUser, daysToKeep);
-
-            // Then
-            verify(queryHistoryRepository).deleteByUserAndExecutedAtBefore(eq(testUser), any(LocalDateTime.class));
-        }
-
-        @Test
-        @DisplayName("異なる保持期間でクリーンアップする")
-        void shouldCleanupWithDifferentRetentionPeriods() {
-            // Given
-            int shortRetention = 7;
-            int longRetention = 90;
-
-            // When
-            queryManagementService.cleanupOldHistory(testUser, shortRetention);
-            queryManagementService.cleanupOldHistory(testUser, longRetention);
-
-            // Then
-            verify(queryHistoryRepository, times(2)).deleteByUserAndExecutedAtBefore(eq(testUser), any(LocalDateTime.class));
-        }
     }
 
     @Nested

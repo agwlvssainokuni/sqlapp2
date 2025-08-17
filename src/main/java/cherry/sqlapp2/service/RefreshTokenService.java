@@ -62,26 +62,7 @@ public class RefreshTokenService {
         return refreshTokenRepository.save(refreshToken);
     }
 
-    /**
-     * トークン値でリフレッシュトークンを検索します。
-     *
-     * @param token トークン値
-     * @return リフレッシュトークン（存在する場合）
-     */
-    public Optional<RefreshToken> findByToken(String token) {
-        return refreshTokenRepository.findByToken(token);
-    }
 
-    /**
-     * リフレッシュトークンを検証し、有効な場合に返します。
-     *
-     * @param token 検証するトークン値
-     * @return 有効なリフレッシュトークン（存在し有効な場合）
-     */
-    public Optional<RefreshToken> validateRefreshToken(String token) {
-        return findByToken(token)
-                .filter(RefreshToken::isActive);
-    }
 
     /**
      * リフレッシュトークンを使用して新しいアクセストークンを生成します。
@@ -91,7 +72,8 @@ public class RefreshTokenService {
      * @return 更新されたリフレッシュトークン（有効な場合）
      */
     public Optional<RefreshToken> useRefreshToken(String token) {
-        Optional<RefreshToken> refreshTokenOpt = validateRefreshToken(token);
+        Optional<RefreshToken> refreshTokenOpt = refreshTokenRepository.findByToken(token)
+                .filter(RefreshToken::isActive);
 
         if (refreshTokenOpt.isPresent()) {
             RefreshToken refreshToken = refreshTokenOpt.get();
@@ -121,7 +103,7 @@ public class RefreshTokenService {
      * Revoke a specific refresh token by token value
      */
     public boolean revokeToken(String token) {
-        Optional<RefreshToken> refreshTokenOpt = findByToken(token);
+        Optional<RefreshToken> refreshTokenOpt = refreshTokenRepository.findByToken(token);
         if (refreshTokenOpt.isPresent()) {
             revokeToken(refreshTokenOpt.get());
             return true;
@@ -136,26 +118,8 @@ public class RefreshTokenService {
         refreshTokenRepository.revokeAllTokensByUser(user);
     }
 
-    /**
-     * Clean up expired tokens (should be called periodically)
-     */
-    public void cleanupExpiredTokens() {
-        refreshTokenRepository.deleteExpiredTokens(LocalDateTime.now());
-    }
 
-    /**
-     * Clean up revoked tokens (should be called periodically)
-     */
-    public void cleanupRevokedTokens() {
-        refreshTokenRepository.deleteRevokedTokens();
-    }
 
-    /**
-     * Validate that a refresh token belongs to the specified user
-     */
-    public boolean isTokenOwner(RefreshToken refreshToken, User user) {
-        return refreshToken.getUser().getId().equals(user.getId());
-    }
 
     /**
      * Check if a user can refresh their token (used for account deactivation control)

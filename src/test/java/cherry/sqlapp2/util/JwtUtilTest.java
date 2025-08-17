@@ -124,18 +124,6 @@ class JwtUtilTest {
             assertThat(extractedUsername).isEqualTo(testUsername);
         }
 
-        @Test
-        @DisplayName("トークンから有効な有効期限を抽出する")
-        void shouldExtractValidExpirationDate() {
-            Date expiration = jwtUtil.extractExpiration(validToken);
-            Date now = new Date();
-
-            assertThat(expiration).isAfter(now);
-            // 期待される時間枠内で期限切れになるべき（若干の許容範囲付き）
-            long expectedExpirationTime = now.getTime() + testExpiration * 1000;
-            assertThat(expiration.getTime())
-                    .isBetween(expectedExpirationTime - 1000, expectedExpirationTime + 1000);
-        }
 
         @Test
         @DisplayName("関数を使用してカスタムクレームを抽出する")
@@ -287,7 +275,7 @@ class JwtUtilTest {
         @DisplayName("期限切れでないトークンを正しく検出する")
         void shouldDetectNonExpiredTokenCorrectly() {
             String token = jwtUtil.generateAccessToken(testUsername, Role.USER);
-            Date expiration = jwtUtil.extractExpiration(token);
+            Date expiration = jwtUtil.extractClaim(token, Claims::getExpiration);
             Date now = new Date();
 
             assertThat(expiration).isAfter(now);

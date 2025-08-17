@@ -102,13 +102,4 @@ public class DynamicDataSourceService {
         }
     }
 
-    /**
-     * Close and cleanup connections for a user
-     */
-    public void closeUserConnections(User user) {
-        // In a more sophisticated implementation, we would maintain
-        // connection pools per user and clean them up here
-        // For now, we rely on the try-with-resources pattern
-        // for individual connection management
-    }
 }

@@ -37,17 +37,6 @@ public interface RefreshTokenRepository extends JpaRepository<RefreshToken, Long
     Optional<RefreshToken> findByToken(String token);
 
     /**
-     * Find all active (non-revoked and non-expired) refresh tokens for a user
-     */
-    @Query("SELECT rt FROM RefreshToken rt WHERE rt.user = :user AND rt.isRevoked = false AND rt.expiresAt > :now")
-    List<RefreshToken> findActiveTokensByUser(@Param("user") User user, @Param("now") LocalDateTime now);
-
-    /**
-     * Find all refresh tokens for a user
-     */
-    List<RefreshToken> findByUser(User user);
-
-    /**
      * Revoke all refresh tokens for a user
      */
     @Modifying

@@ -29,12 +29,4 @@ public record LoginResult(
         this(accessToken, refreshToken, "Bearer", expiresIn, refreshExpiresIn, user);
     }
 
-    /**
-     * Legacy constructor for backward compatibility
-     * @deprecated Use constructor with refresh token
-     */
-    @Deprecated
-    public LoginResult(String accessToken, Long expiresIn, LoginUser user) {
-        this(accessToken, null, "Bearer", expiresIn, null, user);
-    }
 }

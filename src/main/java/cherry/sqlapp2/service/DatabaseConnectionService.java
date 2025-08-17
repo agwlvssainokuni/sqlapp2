@@ -88,10 +88,6 @@ public class DatabaseConnectionService {
         return connectionRepository.findByUserAndId(user, connectionId);
     }
 
-    @Transactional(readOnly = true)
-    public boolean existsByConnectionName(User user, String connectionName) {
-        return connectionRepository.existsByUserAndConnectionName(user, connectionName);
-    }
 
     /**
      * 新しいデータベース接続を作成します。
@@ -179,12 +175,6 @@ public class DatabaseConnectionService {
         connectionRepository.delete(connection);
     }
 
-    public String getDecryptedPassword(User user, Long connectionId) {
-        var connection = connectionRepository.findByUserAndId(user, connectionId)
-                .orElseThrow(() -> new IllegalArgumentException("Connection not found: " + connectionId));
-
-        return encryptionService.decrypt(connection.getEncryptedPassword());
-    }
 
     public ConnectionTestResult testConnection(User user, Long connectionId) {
         try {

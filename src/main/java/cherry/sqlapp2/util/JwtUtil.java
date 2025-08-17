@@ -70,26 +70,6 @@ public class JwtUtil {
         return extractClaim(token, Claims::getSubject);
     }
 
-    /**
-     * JWTトークンからロール情報を抽出します。
-     * 
-     * @param token JWTトークン
-     * @return ロール
-     */
-    public String extractRole(String token) {
-        return extractClaim(token, claims -> claims.get(ROLE_CLAIM, String.class));
-    }
-
-    /**
-     * JWTトークンから有効期限を抽出します。
-     * 
-     * @param token JWTトークン
-     * @return 有効期限
-     */
-    public Date extractExpiration(String token) {
-        return extractClaim(token, Claims::getExpiration);
-    }
-
     public String extractTokenType(String token) {
         return extractClaim(token, claims -> claims.get(TOKEN_TYPE_CLAIM, String.class));
     }
@@ -108,7 +88,8 @@ public class JwtUtil {
     }
 
     private Boolean isTokenExpired(String token) {
-        return extractExpiration(token).before(new Date());
+        Date expiration = extractClaim(token, Claims::getExpiration);
+        return expiration.before(new Date());
     }
 
     /**
@@ -127,17 +108,6 @@ public class JwtUtil {
         return createToken(claims, username, accessTokenExpiration);
     }
 
-    /**
-     * アクセストークンを生成します（ロール情報なしの後方互換メソッド）。
-     * 
-     * @param username ユーザ名
-     * @return 生成されたアクセストークン
-     * @deprecated Use generateAccessToken(String, Role) instead
-     */
-    @Deprecated
-    public String generateAccessToken(String username) {
-        return generateAccessToken(username, Role.USER);
-    }
 
     /**
      * リフレッシュトークンを生成します。
@@ -155,26 +125,7 @@ public class JwtUtil {
         return createToken(claims, username, refreshTokenExpiration);
     }
 
-    /**
-     * リフレッシュトークンを生成します（ロール情報なしの後方互換メソッド）。
-     * 
-     * @param username ユーザ名
-     * @return 生成されたリフレッシュトークン
-     * @deprecated Use generateRefreshToken(String, Role) instead
-     */
-    @Deprecated
-    public String generateRefreshToken(String username) {
-        return generateRefreshToken(username, Role.USER);
-    }
 
-    /**
-     * Legacy method for backward compatibility
-     * @deprecated Use generateAccessToken instead
-     */
-    @Deprecated
-    public String generateToken(String username) {
-        return generateAccessToken(username);
-    }
 
     private String createToken(Map<String, Object> claims, String subject, Long expiration) {
         Date now = new Date();
@@ -213,14 +164,6 @@ public class JwtUtil {
         }
     }
 
-    /**
-     * Legacy method for backward compatibility
-     * @deprecated Use validateAccessToken instead
-     */
-    @Deprecated
-    public Boolean validateToken(String token, String username) {
-        return validateAccessToken(token, username);
-    }
 
     public Long getAccessTokenExpiration() {
         return accessTokenExpiration;
@@ -230,32 +173,10 @@ public class JwtUtil {
         return refreshTokenExpiration;
     }
 
-    /**
-     * Legacy method for backward compatibility
-     * @deprecated Use getAccessTokenExpiration instead
-     */
-    @Deprecated
-    public Long getExpirationTime() {
-        return accessTokenExpiration;
-    }
 
     public Boolean isSlidingRefreshExpiration() {
         return slidingRefreshExpiration;
     }
 
-    public boolean isAccessToken(String token) {
-        try {
-            return ACCESS_TOKEN_TYPE.equals(extractTokenType(token));
-        } catch (Exception e) {
-            return false;
-        }
-    }
 
-    public boolean isRefreshToken(String token) {
-        try {
-            return REFRESH_TOKEN_TYPE.equals(extractTokenType(token));
-        } catch (Exception e) {
-            return false;
-        }
-    }
 }

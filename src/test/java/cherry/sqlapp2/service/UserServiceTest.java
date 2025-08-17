@@ -313,167 +313,16 @@ class UserServiceTest {
             testUser = new User(testUsername, encodedPassword, testEmail);
         }
 
-        @Test
-        @DisplayName("正しいパスワードで検証が成功する")
-        void shouldValidateCorrectPassword() {
-            // Given
-            when(passwordEncoder.matches(testPassword, encodedPassword)).thenReturn(true);
 
-            // When
-            boolean result = userService.validatePassword(testUser, testPassword);
 
-            // Then
-            assertThat(result).isTrue();
-            verify(passwordEncoder).matches(testPassword, encodedPassword);
-        }
 
-        @Test
-        @DisplayName("間違ったパスワードで検証が失敗する")
-        void shouldFailValidationForIncorrectPassword() {
-            // Given
-            String wrongPassword = "wrongPassword";
-            when(passwordEncoder.matches(wrongPassword, encodedPassword)).thenReturn(false);
 
-            // When
-            boolean result = userService.validatePassword(testUser, wrongPassword);
-
-            // Then
-            assertThat(result).isFalse();
-            verify(passwordEncoder).matches(wrongPassword, encodedPassword);
-        }
-
-        @Test
-        @DisplayName("nullパスワードで検証が失敗する")
-        void shouldFailValidationForNullPassword() {
-            // Given
-            when(passwordEncoder.matches(null, encodedPassword)).thenReturn(false);
-
-            // When
-            boolean result = userService.validatePassword(testUser, null);
-
-            // Then
-            assertThat(result).isFalse();
-            verify(passwordEncoder).matches(null, encodedPassword);
-        }
-
-        @Test
-        @DisplayName("空のパスワードで検証が失敗する")
-        void shouldFailValidationForEmptyPassword() {
-            // Given
-            String emptyPassword = "";
-            when(passwordEncoder.matches(emptyPassword, encodedPassword)).thenReturn(false);
-
-            // When
-            boolean result = userService.validatePassword(testUser, emptyPassword);
-
-            // Then
-            assertThat(result).isFalse();
-            verify(passwordEncoder).matches(emptyPassword, encodedPassword);
-        }
-
-        @Test
-        @DisplayName("パスワードエンコーダーが例外をスローした場合を処理する")
-        void shouldHandlePasswordEncoderException() {
-            // Given
-            when(passwordEncoder.matches(testPassword, encodedPassword))
-                    .thenThrow(new RuntimeException("Encoding error"));
-
-            // When & Then
-            assertThatThrownBy(() -> userService.validatePassword(testUser, testPassword))
-                    .isInstanceOf(RuntimeException.class)
-                    .hasMessage("Encoding error");
-
-            verify(passwordEncoder).matches(testPassword, encodedPassword);
-        }
     }
 
     @Nested
     @DisplayName("重複チェック")
     class DuplicationCheck {
 
-        @Test
-        @DisplayName("存在するユーザー名の重複チェックでtrueを返す")
-        void shouldReturnTrueForExistingUsername() {
-            // Given
-            when(userRepository.existsByUsername(testUsername)).thenReturn(true);
-
-            // When
-            boolean result = userService.existsByUsername(testUsername);
-
-            // Then
-            assertThat(result).isTrue();
-            verify(userRepository).existsByUsername(testUsername);
-        }
-
-        @Test
-        @DisplayName("存在しないユーザー名の重複チェックでfalseを返す")
-        void shouldReturnFalseForNonExistentUsername() {
-            // Given
-            when(userRepository.existsByUsername(testUsername)).thenReturn(false);
-
-            // When
-            boolean result = userService.existsByUsername(testUsername);
-
-            // Then
-            assertThat(result).isFalse();
-            verify(userRepository).existsByUsername(testUsername);
-        }
-
-        @Test
-        @DisplayName("存在するメールアドレスの重複チェックでtrueを返す")
-        void shouldReturnTrueForExistingEmail() {
-            // Given
-            when(userRepository.existsByEmail(testEmail)).thenReturn(true);
-
-            // When
-            boolean result = userService.existsByEmail(testEmail);
-
-            // Then
-            assertThat(result).isTrue();
-            verify(userRepository).existsByEmail(testEmail);
-        }
-
-        @Test
-        @DisplayName("存在しないメールアドレスの重複チェックでfalseを返す")
-        void shouldReturnFalseForNonExistentEmail() {
-            // Given
-            when(userRepository.existsByEmail(testEmail)).thenReturn(false);
-
-            // When
-            boolean result = userService.existsByEmail(testEmail);
-
-            // Then
-            assertThat(result).isFalse();
-            verify(userRepository).existsByEmail(testEmail);
-        }
-
-        @Test
-        @DisplayName("nullユーザー名の重複チェックを処理する")
-        void shouldHandleNullUsernameInDuplicationCheck() {
-            // Given
-            when(userRepository.existsByUsername(null)).thenReturn(false);
-
-            // When
-            boolean result = userService.existsByUsername(null);
-
-            // Then
-            assertThat(result).isFalse();
-            verify(userRepository).existsByUsername(null);
-        }
-
-        @Test
-        @DisplayName("nullメールアドレスの重複チェックを処理する")
-        void shouldHandleNullEmailInDuplicationCheck() {
-            // Given
-            when(userRepository.existsByEmail(null)).thenReturn(false);
-
-            // When
-            boolean result = userService.existsByEmail(null);
-
-            // Then
-            assertThat(result).isFalse();
-            verify(userRepository).existsByEmail(null);
-        }
     }
 
     @Nested

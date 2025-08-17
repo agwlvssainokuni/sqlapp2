@@ -175,9 +175,9 @@ frontend/src/
 
 ## Testing Strategy
 
-### Test Coverage (381 tests, 100% success rate)
-- **Unit Tests (310+)**: Service layer, utilities, security components including advanced SQL parsing and date range filtering tests
-- **Integration Tests (70+)**: REST API endpoints, database integration, complete workflow validation including date range parameters
+### Test Coverage (361 tests, 100% success rate)
+- **Unit Tests (306)**: Service layer, utilities, security components including advanced SQL parsing and date range filtering tests
+- **Integration Tests (55)**: REST API endpoints, database integration, complete workflow validation including date range parameters
 - **Test Structure**: @Nested classes with Japanese @DisplayName for clear documentation
 - **Mock Strategy**: Mockito for external dependencies, @SpringBootTest for complex integration scenarios
 - **Database**: H2 in-memory for integration tests with comprehensive SQL dialect support
@@ -325,9 +325,16 @@ All databases include sample data (users, products, orders tables) for testing p
 
 **Status**: Enterprise-Grade Visual SQL Query Builder - Complete Development Environment & Volume Permission Resolution
 **Last Updated**: 2025-08-17
-**Total Tests**: 381+ (310+ unit + 70+ integration) - 100% success rate
-**Development Phases**: 50+ phases complete - Comprehensive Docker Development Environment + Volume Permission Resolution + Language-Integrated Admin Approval System + Database-Managed Email Templates + Query History Date Range Filtering + Complete Metrics Integration + Aggregate Function Support + Advanced SQL Reverse Engineering + Production Ready
+**Total Tests**: 361 (306 unit + 55 integration) - 100% success rate
+**Development Phases**: 51+ phases complete - Complete Backend Dead Code Cleanup + Comprehensive Docker Development Environment + Volume Permission Resolution + Language-Integrated Admin Approval System + Database-Managed Email Templates + Query History Date Range Filtering + Complete Metrics Integration + Aggregate Function Support + Advanced SQL Reverse Engineering + Production Ready
 **Recent Enhancements**: 
+- **Phase 33: Complete Backend Dead Code Cleanup** - Comprehensive removal of unused @Deprecated methods
+  - Eliminated 27 unused methods across repository, service, and DTO layers
+  - Removed 27 corresponding test methods testing deprecated functionality
+  - Reduced codebase by 598 lines while maintaining 100% functionality
+  - RefreshTokenService and JwtUtil internal dependency refactoring
+  - Zero @Deprecated annotations remaining in codebase
+  - Updated test count: 361 tests (306 unit + 55 integration) with 100% success rate
 - **Phase 32: Comprehensive Docker Development Environment** - Complete unified development infrastructure
   - Multi-database Docker environment with MySQL 8.0, PostgreSQL 15, MariaDB 10.11, H2 Database Server
   - MailPit integration for email testing with Web UI and SMTP server

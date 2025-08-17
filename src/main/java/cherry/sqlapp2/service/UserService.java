@@ -125,27 +125,8 @@ public class UserService {
         return userRepository.findByUsername(username);
     }
 
-    /**
-     * ユーザのパスワードを検証します。
-     *
-     * @param user        ユーザ
-     * @param rawPassword 検証する平文パスワード
-     * @return パスワードが正しい場合true
-     */
-    @Transactional(readOnly = true)
-    public boolean validatePassword(User user, String rawPassword) {
-        return passwordEncoder.matches(rawPassword, user.getPassword());
-    }
 
-    @Transactional(readOnly = true)
-    public boolean existsByUsername(String username) {
-        return userRepository.existsByUsername(username);
-    }
 
-    @Transactional(readOnly = true)
-    public boolean existsByEmail(String email) {
-        return userRepository.existsByEmail(email);
-    }
 
     /**
      * 承認待ちユーザーの一覧を取得します。
@@ -205,14 +186,4 @@ public class UserService {
         return savedUser;
     }
 
-    /**
-     * 指定されたIDのユーザーを取得します。
-     *
-     * @param userId ユーザーID
-     * @return ユーザー
-     */
-    @Transactional(readOnly = true)
-    public Optional<User> findById(Long userId) {
-        return userRepository.findById(userId);
-    }
 }

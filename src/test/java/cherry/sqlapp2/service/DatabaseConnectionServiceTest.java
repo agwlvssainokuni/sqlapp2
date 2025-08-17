@@ -178,34 +178,6 @@ class DatabaseConnectionServiceTest {
     @DisplayName("接続名重複チェック")
     class ConnectionNameDuplicateCheck {
 
-        @Test
-        @DisplayName("接続名が既に存在する場合はtrueを返す")
-        void shouldReturnTrueWhenConnectionNameExists() {
-            // Given
-            when(connectionRepository.existsByUserAndConnectionName(testUser, testConnectionName)).thenReturn(true);
-
-            // When
-            boolean result = databaseConnectionService.existsByConnectionName(testUser, testConnectionName);
-
-            // Then
-            assertThat(result).isTrue();
-            verify(connectionRepository).existsByUserAndConnectionName(testUser, testConnectionName);
-        }
-
-        @Test
-        @DisplayName("接続名が存在しない場合はfalseを返す")
-        void shouldReturnFalseWhenConnectionNameDoesNotExist() {
-            // Given
-            String newConnectionName = "New Connection";
-            when(connectionRepository.existsByUserAndConnectionName(testUser, newConnectionName)).thenReturn(false);
-
-            // When
-            boolean result = databaseConnectionService.existsByConnectionName(testUser, newConnectionName);
-
-            // Then
-            assertThat(result).isFalse();
-            verify(connectionRepository).existsByUserAndConnectionName(testUser, newConnectionName);
-        }
     }
 
     @Nested
@@ -479,38 +451,6 @@ class DatabaseConnectionServiceTest {
     @DisplayName("パスワード復号化")
     class PasswordDecryption {
 
-        @Test
-        @DisplayName("接続のパスワードを正常に復号化する")
-        void shouldDecryptPasswordSuccessfully() {
-            // Given
-            Long connectionId = 1L;
-            when(connectionRepository.findByUserAndId(testUser, connectionId)).thenReturn(Optional.of(testConnectionEntity));
-            when(encryptionService.decrypt(testEncryptedPassword)).thenReturn(testDbPassword);
-
-            // When
-            String result = databaseConnectionService.getDecryptedPassword(testUser, connectionId);
-
-            // Then
-            assertThat(result).isEqualTo(testDbPassword);
-            verify(connectionRepository).findByUserAndId(testUser, connectionId);
-            verify(encryptionService).decrypt(testEncryptedPassword);
-        }
-
-        @Test
-        @DisplayName("存在しない接続のパスワード復号化で例外をスローする")
-        void shouldThrowExceptionWhenDecryptingPasswordOfNonExistentConnection() {
-            // Given
-            Long connectionId = 999L;
-            when(connectionRepository.findByUserAndId(testUser, connectionId)).thenReturn(Optional.empty());
-
-            // When & Then
-            assertThatThrownBy(() -> databaseConnectionService.getDecryptedPassword(testUser, connectionId))
-                    .isInstanceOf(IllegalArgumentException.class)
-                    .hasMessage("Connection not found: " + connectionId);
-
-            verify(connectionRepository).findByUserAndId(testUser, connectionId);
-            verify(encryptionService, never()).decrypt(anyString());
-        }
     }
 
     @Nested
