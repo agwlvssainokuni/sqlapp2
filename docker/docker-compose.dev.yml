@@ -1,0 +1,150 @@
+version: '3.8'
+
+services:
+  # MailPit - 開発用メールサーバ
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: sqlapp2-mailpit
+    ports:
+      - "1025:1025"  # SMTP port
+      - "8025:8025"  # Web UI port
+    environment:
+      - MP_SMTP_AUTH_DISABLE=true
+      - MP_SMTP_AUTH_ACCEPT_ANY=true
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8025"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # MySQL 8.0
+  mysql:
+    image: mysql:8.0
+    container_name: sqlapp2-mysql
+    ports:
+      - "13306:3306"  # 3306 + 10000
+    environment:
+      - MYSQL_ROOT_PASSWORD=sqlapp2_root
+      - MYSQL_DATABASE=sqlapp2_dev
+      - MYSQL_USER=sqlapp2_user
+      - MYSQL_PASSWORD=sqlapp2_pass
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./mysql/init:/docker-entrypoint-initdb.d
+    restart: unless-stopped
+    command: --default-authentication-plugin=mysql_native_password --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p$$MYSQL_ROOT_PASSWORD"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # PostgreSQL 15
+  postgres:
+    image: postgres:15
+    container_name: sqlapp2-postgres
+    ports:
+      - "15432:5432"  # 5432 + 10000
+    environment:
+      - POSTGRES_DB=sqlapp2_dev
+      - POSTGRES_USER=sqlapp2_user
+      - POSTGRES_PASSWORD=sqlapp2_pass
+      - POSTGRES_INITDB_ARGS=--encoding=UTF-8 --lc-collate=C --lc-ctype=C
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./postgres/init:/docker-entrypoint-initdb.d
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sqlapp2_user -d sqlapp2_dev"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # MariaDB 10.11
+  mariadb:
+    image: mariadb:10.11
+    container_name: sqlapp2-mariadb
+    ports:
+      - "13307:3306"  # 3306 + 10000 + 1 (MySQL重複回避)
+    environment:
+      - MARIADB_ROOT_PASSWORD=sqlapp2_root
+      - MARIADB_DATABASE=sqlapp2_dev
+      - MARIADB_USER=sqlapp2_user
+      - MARIADB_PASSWORD=sqlapp2_pass
+    volumes:
+      - mariadb_data:/var/lib/mysql
+      - ./mariadb/init:/docker-entrypoint-initdb.d
+    restart: unless-stopped
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p$$MARIADB_ROOT_PASSWORD"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # H2 Database Server Mode
+  h2:
+    image: buildo/h2database:latest
+    container_name: sqlapp2-h2
+    ports:
+      - "19092:9092"  # 9092 + 10000
+      - "18082:8082"  # 8082 + 10000
+    environment:
+      - H2_OPTIONS=-tcp -tcpAllowOthers -tcpPort 9092 -web -webAllowOthers -webPort 8082
+    volumes:
+      - h2_data:/opt/h2-data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "nc", "-z", "localhost", "9092"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # phpMyAdmin for MySQL管理
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    container_name: sqlapp2-phpmyadmin
+    ports:
+      - "10080:80"  # 80 + 10000
+    environment:
+      - PMA_HOSTS=mysql,mariadb
+      - PMA_PORTS=3306,3306
+      - PMA_USER=root
+      - PMA_PASSWORD=sqlapp2_root
+    restart: unless-stopped
+    depends_on:
+      - mysql
+      - mariadb
+
+  # pgAdmin for PostgreSQL管理
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: sqlapp2-pgadmin
+    ports:
+      - "10081:80"  # 80 + 10000 + 1 (phpMyAdmin重複回避)
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=admin@sqlapp2.dev
+      - PGADMIN_DEFAULT_PASSWORD=sqlapp2_admin
+      - PGADMIN_CONFIG_SERVER_MODE=False
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    restart: unless-stopped
+    depends_on:
+      - postgres
+
+volumes:
+  mysql_data:
+    name: sqlapp2_mysql_data
+  postgres_data:
+    name: sqlapp2_postgres_data
+  mariadb_data:
+    name: sqlapp2_mariadb_data
+  h2_data:
+    name: sqlapp2_h2_data
+  pgadmin_data:
+    name: sqlapp2_pgadmin_data
+
+networks:
+  default:
+    name: sqlapp2_dev_network

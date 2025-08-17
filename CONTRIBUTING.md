@@ -69,28 +69,57 @@ npm run dev
 ```
 Frontend runs at `http://localhost:5173` with automatic API proxy to `http://localhost:8080`
 
-#### 4. Development Email Server (MailPit)
-For development and testing of email features (user registration, approval notifications):
+#### 4. Development Database & Email Servers
+
+##### Complete Development Environment (Recommended)
+Use the integrated Docker environment for all development databases and email server:
 
 ```bash
-# Start MailPit using Docker
-docker run -d \
-  --name mailpit \
-  -p 1025:1025 \
-  -p 8025:8025 \
-  axllent/mailpit
+# Navigate to docker directory
+cd docker
 
-# Or using podman
-podman run -d \
+# Start all development services (MySQL, PostgreSQL, MariaDB, H2, MailPit)
+docker-compose -f docker-compose.dev.yml up -d
+
+# View service logs
+docker-compose -f docker-compose.dev.yml logs -f
+
+# Stop all services
+docker-compose -f docker-compose.dev.yml down
+```
+
+**Available Services:**
+- **MySQL 8.0**: `localhost:13306`
+- **PostgreSQL 15**: `localhost:15432`
+- **MariaDB 10.11**: `localhost:13307`
+- **H2 Database**: `localhost:19092` (Server), `localhost:18082` (Console)
+- **MailPit**: `localhost:1025` (SMTP), `http://localhost:8025` (Web UI)
+- **phpMyAdmin**: `http://localhost:10080` (MySQL/MariaDB management)
+- **pgAdmin**: `http://localhost:10081` (PostgreSQL management)
+
+##### Individual Services
+If you only need specific services:
+
+```bash
+# Email server only
+docker-compose -f docker-compose.dev.yml up -d mailpit
+
+# Specific databases
+docker-compose -f docker-compose.dev.yml up -d mysql postgres
+
+# Start MailPit individually (legacy method)
+docker run -d \
   --name mailpit \
   -p 1025:1025 \
   -p 8025:8025 \
   axllent/mailpit
 ```
 
-- **SMTP Server**: `localhost:1025` (used by application)
-- **Web Interface**: `http://localhost:8025` (view sent emails)
-- **Configuration**: Already configured in `application.properties` for development
+**Database Connection Settings:**
+- All databases include sample data (users, products, orders tables)
+- Default credentials: `sqlapp2_user` / `sqlapp2_pass`
+- Root credentials: `sqlapp2_root` (MySQL/MariaDB)
+- See `docker/README.md` for complete connection details
 
 **Note**: MailPit prevents accidental email delivery to real addresses during development.
 
@@ -98,6 +127,31 @@ podman run -d \
 
 ### Standard Development Flow
 
+#### Option A: Complete Development Environment (Recommended)
+1. **Start all development services**:
+   ```bash
+   cd docker
+   docker-compose -f docker-compose.dev.yml up -d
+   ```
+
+2. **Backend Development**:
+   ```bash
+   ./gradlew bootRun
+   ```
+
+3. **Frontend Development** (in separate terminal):
+   ```bash
+   cd frontend && npm run dev
+   ```
+
+4. **Access Application**: Navigate to `http://localhost:5173`
+   - **Email UI**: `http://localhost:8025` (view sent emails)
+   - **Database Management**: 
+     - phpMyAdmin: `http://localhost:10080`
+     - pgAdmin: `http://localhost:10081`
+     - H2 Console: `http://localhost:18082`
+
+#### Option B: Minimal Setup (Application Only)
 1. **Backend Development**:
    ```bash
    ./gradlew bootRun
