@@ -160,6 +160,7 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/", "/index.html", "/assets/**",
                                 "/*.png", "/*.ico", "/*.svg",
+                                "/site.webmanifest",
                                 "/login", "/register",
                                 "/dashboard",
                                 "/sql", "/connections", "/schema",
